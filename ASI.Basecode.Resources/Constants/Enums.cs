@@ -23,5 +23,11 @@
             Success = 0,
             Failed = 1,
         }
+
+        public enum RoleType
+        {
+            Admin = 0,
+            Reviewer = 1,
+        }
     }
 }
