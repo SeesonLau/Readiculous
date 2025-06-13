@@ -18,6 +18,7 @@ namespace ASI.Basecode.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Account> Accounts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(entity =>
@@ -54,6 +55,52 @@ namespace ASI.Basecode.Data
                     .HasMaxLength(50)
                     .IsUnicode(false);
             });
+
+            /*
+            //For future migrations
+            modelBuilder.Entity<Account>(entity =>
+            {
+                entity.HasKey(e => e.AccountId);
+
+                entity.Property(e => e.AccountId)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+                entity.Property(e => e.AccountUsername)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+                entity.Property(e => e.AccountEmail)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+                entity.Property(e => e.AccountPassword)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+                entity.Property(e => e.AccountProfilePicture)
+                    .HasColumnType("varbinary(max)");
+                entity.Property(e => e.AccountRoleType)
+                    .IsRequired()
+                    .HasConversion<int>(); 
+                entity.Property(e => e.AccountCreatedBy)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+                entity.Property(e => e.AccountCreatedAt)
+                    .IsRequired()
+                    .HasColumnType("datetime");
+                entity.Property(e => e.AccountIsEdited)
+                    .IsRequired();
+                entity.Property(e => e.AccountEditedBy)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+                entity.Property(e => e.AccountEditedAt)
+                    .HasColumnType("datetime");
+                entity.Property(e => e.AccountIsDeleted)
+                    .IsRequired();
+            });
+            */
 
             OnModelCreatingPartial(modelBuilder);
         }
