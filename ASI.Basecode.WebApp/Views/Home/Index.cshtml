@@ -1,8 +1,46 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    Layout = null;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Readiculous - Landing Page</title>
+
+    <!-- Link to style.css in wwwroot/css -->
+    <link rel="stylesheet" href="@Url.Content("~/css/style.css")" />
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo-group">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
+            <h1 class="brand-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="#"><span>📖</span> New Books</a>
+            <a href="#"><span>🏆</span> Top Books</a>
+            <a href="#"><span>🏷️</span> Genre</a>
+            <a href="@Url.Action("Login", "Account")"><span>👤</span></a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-text">
+            <h2>Where Book Reviews are Seriously Readiculous!</h2>
+            <p>
+                Discover new books worth reading, share your honest thoughts, and explore what others are saying.
+                Whether you're a casual reader or a dedicated bookworm, join a community that takes book reviewing
+                to the next level with a touch of fun, flair, and readiculous passion.
+            </p>
+            <a href="@Url.Action("Login", "Account")" class="cta-btn">Get Started</a>
+        </div>
+        <div class="hero-image">
+            <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
+        </div>
+    </section>
+</body>
+</html>
