@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.WebApp.Controllers
@@ -74,13 +75,13 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(UserViewModel model)
+        public async Task<IActionResult> CreateAsync(UserViewModel model)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _userService.AddUser(model);
+                    await _userService.AddUserAsync(model);
                     return RedirectToAction("Index");
                 }
                 catch (InvalidDataException ex)
@@ -107,13 +108,13 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(UserViewModel model)
+        public async Task<IActionResult> EditAsync(UserViewModel model)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _userService.UpdateUser(model);
+                    await _userService.UpdateUserAsync(model);
                     return RedirectToAction("Index");
                 }
                 catch (InvalidDataException ex)
@@ -138,11 +139,11 @@ namespace ASI.Basecode.WebApp.Controllers
             }
         }
 
-        public IActionResult Delete(string userId)
+        public async Task<IActionResult> Delete(string userId)
         {
             try
             {
-                _userService.DeleteUser(userId);
+                await _userService.DeleteUserAsync(userId);
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)

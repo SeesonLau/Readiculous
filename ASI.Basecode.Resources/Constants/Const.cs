@@ -34,5 +34,10 @@
         /// authentication Issuer
         /// </summary>
         public const string Issuer = "asi.basecode";
+
+        public const string BucketName = "readiculous-bucket";
+        public const string UserDirectory = "users";
+        public const string BookDirectory = "books";
+        public const string StoragePath = $"/storage/v1/object/public/{BucketName}/";
     }
 }

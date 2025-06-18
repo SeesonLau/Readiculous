@@ -1,15 +1,16 @@
 ﻿using ASI.Basecode.Data.Interfaces;
 using ASI.Basecode.Data.Models;
+using ASI.Basecode.Resources.Constants;
 using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.Services.Manager;
 using ASI.Basecode.Services.ServiceModels;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Microsoft.IdentityModel.Tokens;
+using Supabase;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
 namespace ASI.Basecode.Services.Services
@@ -18,11 +19,13 @@ namespace ASI.Basecode.Services.Services
     {
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
+        private readonly Client _client;
 
-        public UserService(IUserRepository repository, IMapper mapper)
+        public UserService(IUserRepository repository, IMapper mapper, Client client)
         {
             _mapper = mapper;
             _repository = repository;
+            _client = client;
         }
 
         public LoginResult AuthenticateUser(string userId, string password, RoleType roleType, ref User user)
@@ -42,7 +45,7 @@ namespace ASI.Basecode.Services.Services
             return LoginResult.Success;
         }
 
-        public void AddUser(UserViewModel model)
+        public async Task AddUserAsync(UserViewModel model)
         {
             var user = new User();
             model.UserId = Guid.NewGuid().ToString();
@@ -50,16 +53,44 @@ namespace ASI.Basecode.Services.Services
             if (!_repository.UserExists(model.UserId))
             {
                 _mapper.Map(model, user);
+                user.UserId = model.UserId;
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.Role = RoleType.Reviewer;
-                user.CreatedBy = System.Environment.UserName;
+                user.CreatedBy = Environment.UserName;
                 user.CreatedTime = DateTime.Now;
                 user.IsUpdated = false;
                 user.UpdatedBy = string.Empty;
                 user.UpdatedTime = DateTime.Now;
                 user.IsDeleted = false;
 
-                _repository.AddUser(user);
+                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+                {
+                    var extension = Path.GetExtension(model.ProfilePicture.FileName);
+                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}{extension}");
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.ProfilePicture.CopyToAsync(memoryStream);
+                        var fileBytes = memoryStream.ToArray();
+
+                        var uploadResult = await _client.Storage
+                            .From(Const.BucketName)
+                            .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                            {
+                                ContentType = model.ProfilePicture.ContentType,
+                                Upsert = true
+                            });
+
+                        if (!string.IsNullOrEmpty(uploadResult))
+                        {
+                            user.ProfilePictureUrl = _client.Storage
+                                .From(Const.BucketName)
+                                .GetPublicUrl(fileName);
+                        }
+                    }
+
+                    _repository.AddUser(user);
+                }
             }
             else
             {
@@ -67,16 +98,47 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public void UpdateUser(UserViewModel model)
+        public async Task UpdateUserAsync(UserViewModel model)
         {
-            var user = new User();
-
             if (_repository.UserExists(model.UserId))
             {
+                var user = _repository.GetUserById(model.UserId);
+                if(string.IsNullOrEmpty(model.ProfilePictureUrl))
+                {
+                    model.ProfilePictureUrl = user.ProfilePictureUrl;
+                }
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.UpdatedBy = System.Environment.UserName;
                 user.UpdatedTime = DateTime.UtcNow;
+
+                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+                {
+                    var extension = Path.GetExtension(model.ProfilePicture.FileName);
+                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}{extension}");
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.ProfilePicture.CopyToAsync(memoryStream);
+                        var fileBytes = memoryStream.ToArray();
+
+                        var uploadResult = await _client.Storage
+                            .From(Const.BucketName)
+                            .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                            {
+                                ContentType = model.ProfilePicture.ContentType,
+                                Upsert = true
+                            });
+
+                        if (!string.IsNullOrEmpty(uploadResult))
+                        {
+                            user.ProfilePictureUrl = _client.Storage
+                                .From(Const.BucketName)
+                                .GetPublicUrl(fileName);
+                        }
+                    }
+                }
+
                 _repository.UpdateUser(user);
             }
             else
@@ -85,10 +147,34 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public void DeleteUser(string userId)
+        public async Task DeleteUserAsync(string userId)
         {
             if (_repository.UserExists(userId))
             {
+                var user = _repository.GetUserById(userId);
+
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    try
+                    {
+                        var uri = new Uri(user.ProfilePictureUrl);
+                        var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+
+                        var result = await _client.Storage
+                            .From(Const.BucketName)
+                            .Remove(new List<string> { relativePath });
+
+                        if (result == null)
+                        {
+                            throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Image deletion error: {ex.Message}");
+                    }
+                }
+
                 _repository.DeleteUser(userId);
             }
             else

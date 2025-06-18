@@ -22,12 +22,10 @@ namespace ASI.Basecode.Services.ServiceModels
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "Confirmation Password is required.")]
-        [Compare("Password", ErrorMessage = "Password and Confirmation Password must match.")]
-        public string ConfirmPassword { get; set; }
-
 
         public string UserId { get; set; }
         public RoleType Role { get; set; }
+        public IFormFile ProfilePicture { get; set; }
+        public string ProfilePictureUrl { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASI.Basecode.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Init_Readiculous : Migration
+    public partial class Readiculous_Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -104,6 +104,7 @@ namespace ASI.Basecode.Data.Migrations
                     Email = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false),
                     Password = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
+                    ProfilePictureUrl = table.Column<string>(type: "varchar(200)", unicode: false, maxLength: 200, nullable: true),
                     CreatedBy = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
                     CreatedTime = table.Column<DateTime>(type: "datetime", nullable: false),
                     IsUpdated = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),

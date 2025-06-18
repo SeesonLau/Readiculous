@@ -11,6 +11,7 @@ namespace ASI.Basecode.Data.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public RoleType Role { get; set; } 
+        public string ProfilePictureUrl { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }
         public bool IsUpdated { get; set; }

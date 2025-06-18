@@ -53,6 +53,7 @@ namespace ASI.Basecode.Data.Repositories
                     Email = user.Email,
                     Password = user.Password,
                     Role = user.Role,
+                    ProfilePictureUrl = user.ProfilePictureUrl,
                     CreatedBy = currentUser.CreatedBy,
                     CreatedTime = currentUser.CreatedTime,
                     IsUpdated = false,
@@ -130,6 +131,12 @@ namespace ASI.Basecode.Data.Repositories
                 UserSearchType.IDDescending => queryReturn.OrderByDescending(u => u.UserId),
                 _ => queryReturn,
             };
+        }
+        public User GetUserById(string id)
+        {
+            return this.GetDbSet<User>().Where(u => u.UserId == id
+                                            && !u.IsUpdated)
+                .ToList().FirstOrDefault();
         }
     }
 }

@@ -13,14 +13,15 @@ namespace ASI.Basecode.Data.Interfaces
         IQueryable<User> GetUsers();
         bool UserExists(string userId);
         void AddUser(User user);
-        public void UpdateUser(User user);
-        public void DeleteUser(string userId);
+        void UpdateUser(User user);
+        void DeleteUser(string userId);
 
         //User List Queries
-        public IQueryable<User> GetUsersByUsername(string username);
-        public IQueryable<User> GetUsersByUsername(string username, UserSearchType searchType);
-        public IQueryable<User> GetUsersByRole(RoleType role);
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username);
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSearchType searchType);
+        IQueryable<User> GetUsersByUsername(string username);
+        IQueryable<User> GetUsersByUsername(string username, UserSearchType searchType);
+        IQueryable<User> GetUsersByRole(RoleType role);
+        IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username);
+        IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSearchType searchType);
+        User GetUserById(string id);
     }
 }

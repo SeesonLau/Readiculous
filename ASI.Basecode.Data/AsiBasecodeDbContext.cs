@@ -44,7 +44,12 @@ namespace ASI.Basecode.Data
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
-                entity.Property(e => e.Role); // Role
+                entity.Property(e => e.Role) // Role
+                    .IsRequired()
+                    .HasColumnType("int"); 
+                entity.Property(e => e.ProfilePictureUrl) // ProfilePictureUrl
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
                 entity.Property(e => e.CreatedBy) // CreatedBy
                     .IsRequired()
                     .HasMaxLength(50)

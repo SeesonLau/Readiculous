@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using Supabase;
 
 namespace ASI.Basecode.WebApp
 {
@@ -42,6 +44,23 @@ namespace ASI.Basecode.WebApp
 
             // Manager Class
             this._services.AddScoped<SignInManager>();
+
+            // Supabase
+            this._services.Configure<SupabaseOptions>(Configuration.GetSection("Supabase"));
+            this._services.AddScoped<Client>(sp =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                var options = sp.GetRequiredService<IOptions<SupabaseOptions>>().Value;
+
+                var client = new Client(
+                    config["Supabase:Url"],              
+                    config["Supabase:ServiceRoleKey"],   
+                    options                              
+                );
+
+                client.InitializeAsync().Wait();
+                return client;
+            });
 
             this._services.AddHttpClient();
         }

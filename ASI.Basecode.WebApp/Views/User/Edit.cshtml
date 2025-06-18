@@ -10,9 +10,10 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="Role" />
             <div class="form-group">
                 <label asp-for="Username" class="control-label"></label>
                 <input asp-for="Username" class="form-control" />
@@ -29,9 +30,19 @@
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ConfirmPassword" class="control-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <label class="control-label">Current Profile Picture</label>
+                @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ProfilePictureUrl" alt="Profile Picture" style="max-width: 200px; max-height: 200px;" />
+                    </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ProfilePicture" class="control-label">Upload New Profile Picture</label>
+                <input asp-for="ProfilePicture" type="file" class="form-control" accept=".png,.jpg,.jpeg" />
+                <span asp-validation-for="ProfilePicture" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

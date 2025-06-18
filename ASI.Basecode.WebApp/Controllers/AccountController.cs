@@ -83,6 +83,12 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             this._session.SetString("HasSession", "Exist");
 
+            if(!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            
             //User user = null;
 
             User user = new() { Id = 0, UserId = "0", Username = "Name", Password = "Password" };
@@ -107,7 +113,6 @@ namespace ASI.Basecode.WebApp.Controllers
                 TempData["ErrorMessage"] = "Incorrect UserId or Password";
                 return View();
             }
-            return View();
             */
         }
 
@@ -120,11 +125,11 @@ namespace ASI.Basecode.WebApp.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Register(UserViewModel model)
+        public async Task<IActionResult> RegisterAsync(UserViewModel model)
         {
             try
             {
-                _userService.AddUser(model);
+                await _userService.AddUserAsync(model);
                 return RedirectToAction("Login", "Account");
             }
             catch(InvalidDataException ex)
