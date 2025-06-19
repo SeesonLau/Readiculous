@@ -28,40 +28,32 @@ namespace ASI.Basecode.Services.Services
             _client = client;
         }
 
-        public LoginResult AuthenticateUser(string userId, string password, RoleType roleType, ref User user)
+        public LoginResult AuthenticateUserByEmail(string email, string password, ref User user)
         {
             user = new User();
             var passwordKey = PasswordManager.EncryptPassword(password);
-            user = _repository.GetUsers().Where(x => x.UserId == userId 
+            user = _repository.GetUsers().Where(x => x.Email == email 
                                                         && x.Password == passwordKey
-                                                        && !x.IsUpdated
-                                                        && !x.IsDeleted)
+                                                        && x.DeletedTime != null)
             .FirstOrDefault();
 
             if (user == null)
                 return LoginResult.Failed;
-            if (user.Role != roleType)
-                return LoginResult.InvalidRole;
             return LoginResult.Success;
         }
 
-        public async Task AddUserAsync(UserViewModel model)
+        public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
             var user = new User();
             model.UserId = Guid.NewGuid().ToString();
 
-            if (!_repository.UserExists(model.UserId))
+            if (!_repository.EmailExists(model.Email))
             {
                 _mapper.Map(model, user);
-                user.UserId = model.UserId;
                 user.Password = PasswordManager.EncryptPassword(model.Password);
-                user.Role = RoleType.Reviewer;
-                user.CreatedBy = Environment.UserName;
+                user.Role = model.Role;
                 user.CreatedTime = DateTime.Now;
-                user.IsUpdated = false;
-                user.UpdatedBy = string.Empty;
                 user.UpdatedTime = DateTime.Now;
-                user.IsDeleted = false;
 
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
@@ -87,10 +79,14 @@ namespace ASI.Basecode.Services.Services
                                 .From(Const.BucketName)
                                 .GetPublicUrl(fileName);
                         }
+                        else
+                        {
+                            throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
+                        }
                     }
-
-                    _repository.AddUser(user);
                 }
+
+                _repository.AddUser(user, creatorId);
             }
             else
             {
@@ -98,7 +94,7 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task UpdateUserAsync(UserViewModel model)
+        public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
             if (_repository.UserExists(model.UserId))
             {
@@ -107,10 +103,13 @@ namespace ASI.Basecode.Services.Services
                 {
                     model.ProfilePictureUrl = user.ProfilePictureUrl;
                 }
+
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
-                user.UpdatedBy = System.Environment.UserName;
                 user.UpdatedTime = DateTime.UtcNow;
+                user.UpdatedBy = editorId;
+
+                //DIfferentiate Update and Delete Date Fields
 
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
@@ -147,7 +146,7 @@ namespace ASI.Basecode.Services.Services
             }
         }
 
-        public async Task DeleteUserAsync(string userId)
+        public async Task DeleteUserAsync(string userId, string deleterId)
         {
             if (_repository.UserExists(userId))
             {
@@ -175,7 +174,7 @@ namespace ASI.Basecode.Services.Services
                     }
                 }
 
-                _repository.DeleteUser(userId);
+                _repository.DeleteUser(userId, deleterId);
             }
             else
             {
@@ -237,8 +236,7 @@ namespace ASI.Basecode.Services.Services
         {             
             User user = _repository.GetUsers()
                 .Where(u => u.UserId == userId 
-                            && !u.IsUpdated 
-                            && !u.IsDeleted)
+                            && u.DeletedTime == null)
                 .FirstOrDefault();
 
             if (user != null)
@@ -252,6 +250,15 @@ namespace ASI.Basecode.Services.Services
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
+        }
+        public User GetUserByEmail(string email)
+        {
+            var user = _repository.GetUserByEmail(email);
+
+            UserViewModel userViewModel = new();
+            _mapper.Map(user, userViewModel);
+
+            return user;
         }
     }
 }

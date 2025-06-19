@@ -17,205 +17,217 @@ namespace ASI.Basecode.Data
         {
         }
 
+        // DbSets for each entity type
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Book> Books { get; set; }
+        public virtual DbSet<Genre> BookGenres { get; set; }
+        public virtual DbSet<Review> Reviews { get; set; }
+        public virtual DbSet<FavoriteBook> FavoriteBooks { get; set; }
+        public virtual DbSet<BookGenreAssignment> BookGenreAssignments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // User Entity Configuration
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.UserId, "UQ__Users__1788CC4D5F4A160F")
-                    .HasFilter("IsUpdated = CAST(0 AS BIT) AND IsDeleted = CAST(0 AS BIT)")
-                    .IsUnique();
+                entity.HasKey(u => u.UserId); // Primary Key
 
-                entity.Property(e => e.UserId) // UserId
+                // Index Creation
+                entity.HasIndex(u => u.Email, "UQ__Email")
+                    .HasFilter("[DeletedTime] IS NULL")
+                    .IsUnique();
+                entity.HasIndex(u => u.Username, "UQ__Username")
+                    .HasFilter("[DeletedTime] IS NULL")
+                    .IsUnique();
+                entity.HasIndex(u => u.CreatedBy, "IX_CreatedBy")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(u => u.UpdatedBy, "IX_UpdatedBy")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(u => u.CreatedTime, "IX_CreatedTime")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(u => u.Role, "IX_Role")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(u => u.AccessStatus, "IX_AccessStatus")
+                    .HasFilter("[DeletedTime] IS NULL");
+
+                // Property Configuration
+                entity.Property(u => u.Username)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
-                entity.Property(e => e.Username) // Username
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.Email) // Email
+                entity.Property(u => u.Email)
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
-                entity.Property(e => e.Password) // Password
+                entity.Property(u => u.Password)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
-                entity.Property(e => e.Role) // Role
-                    .IsRequired()
-                    .HasColumnType("int"); 
-                entity.Property(e => e.ProfilePictureUrl) // ProfilePictureUrl
-                    .HasMaxLength(200)
-                    .IsUnicode(false);
-                entity.Property(e => e.CreatedBy) // CreatedBy
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.CreatedTime).HasColumnType("datetime"); // CreatedTime
-                entity.Property(e => e.IsUpdated) // IsUpdated
-                    .IsRequired()
-                    .HasDefaultValue(false);
-                entity.Property(e => e.UpdatedBy) // UpdatedBy
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.UpdatedTime).HasColumnType("datetime"); // UpdatedTime
-                entity.Property(e => e.IsDeleted) // IsDeleted
-                    .IsRequired()
-                    .HasDefaultValue(false);
-                entity.Property(e => e.IsBlocked) // IsBlocked
-                    .IsRequired()
-                    .HasDefaultValue(false);
+
+                // Enum Conversion
+                entity.Property(e => e.Role)
+                    .HasConversion<string>()
+                    .HasMaxLength(20);
+                entity.Property(e => e.AccessStatus)
+                    .HasConversion<string>()
+                    .HasMaxLength(20);
+
+                // Foreign Key Configurations
+                entity.HasOne(u => u.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(u => u.CreatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(u => u.UpdatedByUser)
+                    .WithMany()
+                    .HasForeignKey(u => u.UpdatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(u => u.DeletedByUser)
+                    .WithMany()
+                    .HasForeignKey(u => u.DeletedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+
             });
 
             modelBuilder.Entity<Book>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.BookId, "UQ__Books__1788CC4D5F4A160F")
-                    .HasFilter("IsUpdated = CAST(0 AS BIT) AND IsDeleted = CAST(0 AS BIT)")
-                    .IsUnique();
+                entity.HasKey(b => b.BookId); // Primary Key
 
-                entity.Property(e => e.BookId) // BookId
+                // Index Creation
+                entity.HasIndex(b => b.BookId, "UQ__BookID")
+                    .HasFilter("[DeletedTime] IS NULL")
+                    .IsUnique();
+                entity.HasIndex(b => b.ISBN, "UQ__ISBN")
+                    .HasFilter("[DeletedTime] IS NULL")
+                    .IsUnique();
+                entity.HasIndex(b => b.Title, "IX_Title")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(b => b.Author, "IX_Author")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(b => b.Publisher, "IX_Publisher")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(b => b.CreatedBy, "IX_CreatedBy")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(b => b.UpdatedBy, "IX_UpdatedBy")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(b => b.CreatedTime, "IX_CreatedTime")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(b => b.AverageRating, "IX_AverageRating")
+                    .HasFilter("[DeletedTime] IS NULL");
+
+                // Property Configuration
+                entity.Property(b => b.ISBN)
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.BookGenreId) // BookGenreId
+                    .HasMaxLength(17);
+                entity.Property(b => b.Title)
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.ISBN) // ISBN
+                    .HasMaxLength(200);
+                entity.Property(b => b.Author)
                     .IsRequired()
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-                entity.Property(e => e.Title) // Title
+                    .HasMaxLength(100);
+                entity.Property(b => b.Publisher)
                     .IsRequired()
-                    .HasMaxLength(200)
-                    .IsUnicode(false);
-                entity.Property(e => e.Description) // Description
-                    .HasColumnType("text");
-                entity.Property(e => e.Author) // Author
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-                entity.Property(e => e.SeriesNumber) // SeriesNumber
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false); 
-                entity.Property(e => e.Publisher) // Publisher
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-                entity.Property(e => e.PublicationDate)// PublicationDate
-                    .HasColumnType("datetime"); 
-                entity.Property(e => e.AverageRating) // AverageRating
-                    .IsRequired()
-                    .HasColumnType("decimal")
-                    .HasDefaultValue(0); 
-                entity.Property(e => e.CreatedBy) // CreatedBy
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.CreatedTime) // CreatedTime
-                    .IsRequired()
-                    .HasColumnType("datetime"); 
-                entity.Property(e => e.IsUpdated) // IsUpdated
-                    .IsRequired()
-                    .HasDefaultValue(false);
-                entity.Property(e => e.UpdatedBy) // UpdatedBy
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.UpdatedTime) // UpdatedTime
-                    .HasColumnType("datetime"); 
-                entity.Property(e => e.IsDeleted) // IsDeleted
-                    .IsRequired()
-                    .HasDefaultValue(false);
+                    .HasMaxLength(100);
+                entity.Property(b => b.AverageRating)
+                    .HasColumnType("decimal(3, 2)");
+
+                // Foreign Key Configurations
+                entity.HasOne(b => b.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(b => b.CreatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(b => b.UpdatedByUser)
+                    .WithMany()
+                    .HasForeignKey(b => b.UpdatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(b => b.DeletedByUser)
+                    .WithMany()
+                    .HasForeignKey(b => b.DeletedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            modelBuilder.Entity<BookGenre>(entity =>
+            modelBuilder.Entity<Genre>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.BookGenreId, "UQ__BookGenres__1788CC4D5F4A160F")
-                    .HasFilter("IsUpdated = CAST(0 AS BIT) AND IsDeleted = CAST(0 AS BIT)")
-                    .IsUnique();
+                entity.HasKey(g => g.GenreId); // Primary Key
 
-                entity.Property(e => e.BookGenreId) // BookGenreId
+                // Index Creation
+                entity.HasIndex(g => g.Name)
+                  .IsUnique()
+                  .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(g => g.CreatedBy, "IX_CreatedBy")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(g => g.UpdatedBy, "IX_UpdatedBy")
+                    .HasFilter("[DeletedTime] IS NULL");
+                entity.HasIndex(g => g.CreatedTime, "IX_CreatedTime")
+                    .HasFilter("[DeletedTime] IS NULL");
+
+                // Properties Configuration
+                entity.Property(g => g.Name)
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.Name) // Name
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-                entity.Property(e => e.CreatedBy) // CreatedBy
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.CreatedTime) // CreatedTime
-                    .HasColumnType("datetime"); 
-                entity.Property(e => e.IsUpdated) // IsUpdated
-                    .IsRequired()
-                    .HasDefaultValue(false);
-                entity.Property(e => e.UpdatedBy) // UpdatedBy
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.UpdatedTime) // UpdatedTime
-                    .HasColumnType("datetime"); 
-                entity.Property(e => e.IsDeleted) // IsDeleted
-                    .IsRequired()
-                    .HasDefaultValue(false);
+                    .HasMaxLength(50);
+                entity.Property(g => g.Description)
+                    .HasMaxLength(500);
+
+                // Foreign Key Configuration
+                entity.HasOne(g => g.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(g => g.CreatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(g => g.UpdatedByUser)
+                    .WithMany()
+                    .HasForeignKey(g => g.UpdatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(g => g.DeletedByUser)
+                    .WithMany()
+                    .HasForeignKey(g => g.DeletedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Review>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.BookId, "IX_Reviews_BookId"); // Index for Book Searches
-                entity.HasIndex(e => e.UserId, "IX_Reviews_UserId"); // Index for User Searches
+                entity.HasKey(r => new { r.BookId, r.UserId }); // Primary Key
 
-                entity.Property(e => e.BookId) // BookId
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.UserId) // UserId
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.Comment) // Comment
-                    .IsRequired()
-                    .HasMaxLength(1000)
-                    .IsUnicode(false);
-                entity.Property(e => e.Rating) // Rating
-                    .IsRequired();
-                entity.HasCheckConstraint( // Check constraint for Rating if it is within 1 to 5
-                    "CK_Reviews_RatingRange",
-                    "Rating >= 1 AND Rating <= 5");
-                entity.Property(e => e.CreatedTime) // CreatedTime
-                    .IsRequired()
-                    .HasColumnType("datetime");
+                // Foreign Key Configuration
+                entity.HasOne(r => r.Book)
+                  .WithMany(b => b.BookReviews)
+                  .HasForeignKey(r => r.BookId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(r => r.User)
+                      .WithMany(u => u.UserReviews)
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<FavoriteBook>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.BookId, "IX_FavoriteBooks_BookId"); // Index for Book Searches
-                entity.HasIndex(e => e.UserId, "IX_FavoriteBooks_UserId"); // Index for User Searches
-                entity.Property(e => e.BookId) // BookId
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.UserId) // UserId
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-                entity.Property(e => e.CreatedTime) // CreatedTime
-                    .IsRequired()
-                    .HasColumnType("datetime");
-                entity.Property(e => e.IsDeleted) // IsDeleted
-                    .IsRequired()
-                    .HasDefaultValue(false);
-                entity.Property(e => e.DeletedTime) // DeletedTime
-                    .HasColumnType("datetime");
+                entity.HasKey(fb => new { fb.UserId, fb.BookId }); // Primary Key
+
+                // Foreign Key Configuration
+                entity.HasOne(f => f.Book)
+                      .WithMany(b => b.FavoritedbyUsers)
+                      .HasForeignKey(f => f.BookId)
+                      .OnDelete(DeleteBehavior.Cascade); 
+                entity.HasOne(f => f.User)
+                      .WithMany(u => u.UserFavoriteBooks)
+                      .HasForeignKey(f => f.UserId)
+                      .OnDelete(DeleteBehavior.Cascade); 
             });
+
+
+             modelBuilder.Entity<BookGenreAssignment>(entity =>
+             {
+                 entity.HasKey(bga => new { bga.BookId, bga.GenreId }); // Primary Key
+
+                 // Foreign Key Configuration
+                 entity.HasOne(bga => bga.Book)
+                       .WithMany(b => b.GenreAssociations)
+                       .HasForeignKey(bga => bga.BookId)
+                       .OnDelete(DeleteBehavior.Cascade); 
+                 entity.HasOne(bga => bga.Genre)
+                       .WithMany(bg => bg.Books) 
+                       .HasForeignKey(bga => bga.GenreId)
+                       .OnDelete(DeleteBehavior.Cascade); 
+             });
 
             OnModelCreatingPartial(modelBuilder);
         }

@@ -27,5 +27,9 @@ namespace ASI.Basecode.Services.ServiceModels
         public RoleType Role { get; set; }
         public IFormFile ProfilePicture { get; set; }
         public string ProfilePictureUrl { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public string UpdatedBy { get; set; }
+        public DateTime? UpdatedTime { get; set; }
     }
 }

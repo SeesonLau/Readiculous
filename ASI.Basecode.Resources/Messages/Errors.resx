@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ImageFailedToDelete" xml:space="preserve">
-    <value>Image has failed to delete!</value>
+    <value>Image failed to delete!</value>
+  </data>
+  <data name="ImageFailedToUpload" xml:space="preserve">
+    <value>Image failed to upload!</value>
   </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error occured!</value>

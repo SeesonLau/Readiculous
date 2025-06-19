@@ -81,7 +81,7 @@ namespace ASI.Basecode.WebApp.Controllers
             {
                 try
                 {
-                    await _userService.AddUserAsync(model);
+                    await _userService.AddUserAsync(model, this.UserId);
                     return RedirectToAction("Index");
                 }
                 catch (InvalidDataException ex)
@@ -114,7 +114,7 @@ namespace ASI.Basecode.WebApp.Controllers
             {
                 try
                 {
-                    await _userService.UpdateUserAsync(model);
+                    await _userService.UpdateUserAsync(model, this.UserId);
                     return RedirectToAction("Index");
                 }
                 catch (InvalidDataException ex)
@@ -143,7 +143,7 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
-                await _userService.DeleteUserAsync(userId);
+                await _userService.DeleteUserAsync(userId, this.UserId);
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)

@@ -87,19 +87,18 @@ namespace ASI.Basecode.WebApp.Controllers
             {
                 return View(model);
             }
+            var tempModel = _userService.GetUserByEmail(model.Email);
+            User user = new() { UserId = tempModel.UserId, Username = "Name", Password = "Password" };
 
-            
-            //User user = null;
-
-            User user = new() { Id = 0, UserId = "0", Username = "Name", Password = "Password" };
-            
             await this._signInManager.SignInAsync(user);
-            this._session.SetString("UserName", model.UserId);
+            this._session.SetString("UserName", user.UserId);
 
             return RedirectToAction("Index", "Home");
-            
+
             /*
-            var loginResult = _userService.AuthenticateUser(model.UserId, model.Password, RoleType.Admin, ref user);
+            User user = null;
+            
+            var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
             if (loginResult == LoginResult.Success)
             {
                 // 認証OK
@@ -129,7 +128,8 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
-                await _userService.AddUserAsync(model);
+                model.UserId = Guid.NewGuid().ToString();
+                await _userService.AddUserAsync(model, model.UserId);
                 return RedirectToAction("Login", "Account");
             }
             catch(InvalidDataException ex)

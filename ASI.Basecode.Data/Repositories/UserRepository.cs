@@ -21,82 +21,53 @@ namespace ASI.Basecode.Data.Repositories
 
         public bool UserExists(string userId)
         {
-            return this.GetDbSet<User>().Any(u => u.UserId == userId && 
-                                                    !u.IsDeleted && 
-                                                    !u.IsUpdated);
+            return this.GetDbSet<User>().Any(u => u.UserId == userId &&
+                                                u.DeletedTime == null);
         }
 
-        public void AddUser(User user)
+        public bool EmailExists(string email)
+        {
+            return this.GetDbSet<User>().Any(u => email == u.Email &&
+                                                u.DeletedTime == null);
+        }
+
+        public void AddUser(User user, string creatorId)
         {
             this.GetDbSet<User>().Add(user);
+            UnitOfWork.SaveChanges();
+
+            user.CreatedBy = user.UpdatedBy = creatorId;
             UnitOfWork.SaveChanges();
         }
 
         public void UpdateUser(User user)
         {
-            User currentUser = this.GetDbSet<User>()
-                .Where(u => u.UserId == user.UserId &&
-                        !u.IsUpdated &&
-                        !u.IsDeleted)
-                .FirstOrDefault();
-
-            if (currentUser != null)
-            {
-                currentUser.IsUpdated = true;
-                currentUser.UpdatedBy = user.UpdatedBy;
-                currentUser.UpdatedTime = user.UpdatedTime;
-
-                User newUserVersion = new()
-                {
-                    UserId = user.UserId,
-                    Username = user.Username,
-                    Email = user.Email,
-                    Password = user.Password,
-                    Role = user.Role,
-                    ProfilePictureUrl = user.ProfilePictureUrl,
-                    CreatedBy = currentUser.CreatedBy,
-                    CreatedTime = currentUser.CreatedTime,
-                    IsUpdated = false,
-                    UpdatedBy = null,
-                    UpdatedTime = null,
-                    IsDeleted = false
-                };
-
-                this.GetDbSet<User>().Update(currentUser);
-                this.GetDbSet<User>().Add(newUserVersion);
-                UnitOfWork.SaveChanges();
-            }
+            this.GetDbSet<User>().Update(user);
+            UnitOfWork.SaveChanges();
         }
 
-        public void DeleteUser(string userId)
+        public void DeleteUser(string userId, string deleterId)
         {
             User user = this.GetDbSet<User>()
                 .Where(u => u.UserId == userId &&
-                        !u.IsUpdated &&
-                        !u.IsDeleted)
+                        u.DeletedTime == null)
                 .FirstOrDefault();
 
             if (user != null)
             {
-                user.IsDeleted = true;
-                user.UpdatedBy = System.Environment.UserName;
-                user.UpdatedTime = DateTime.UtcNow;
+                user.DeletedBy = deleterId;
+                user.DeletedTime = DateTime.UtcNow;
                 this.GetDbSet<User>().Update(user);
                 UnitOfWork.SaveChanges();
             }
         }
 
         //User List Queries
-        public IQueryable<User> GetUsersByUsername(string username)
-        {
-            return GetUsersByUsername(username, UserSearchType.UsernameAscending);
-        }
-        public IQueryable<User> GetUsersByUsername(string username, UserSearchType searchType)
+        public IQueryable<User> GetUsersByUsername(string username, UserSearchType searchType = UserSearchType.UsernameAscending)
         {
             var queryReturn = this.GetDbSet<User>()
                 .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
-                        !u.IsUpdated &&
-                        !u.IsDeleted);
+                        u.DeletedTime == null);
 
             return searchType switch
             {
@@ -107,21 +78,12 @@ namespace ASI.Basecode.Data.Repositories
                 _ => queryReturn,
             };
         }
-        public IQueryable<User> GetUsersByRole(RoleType role)
-        {
-            return GetUsersByRoleAndUsername(role, string.Empty);
-        }
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
-        {
-            return GetUsersByRoleAndUsername(role, username, UserSearchType.UsernameAscending);
-        }
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSearchType searchType)
+        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSearchType searchType = UserSearchType.UsernameAscending)
         {
             var queryReturn = this.GetDbSet<User>()
                 .Where(u => u.Role == role &&
                         u.Username.ToLower().Contains(username.ToLower()) &&
-                        !u.IsUpdated &&
-                        !u.IsDeleted);
+                        u.DeletedTime == null);
 
             return searchType switch
             {
@@ -135,8 +97,16 @@ namespace ASI.Basecode.Data.Repositories
         public User GetUserById(string id)
         {
             return this.GetDbSet<User>().Where(u => u.UserId == id
-                                            && !u.IsUpdated)
-                .ToList().FirstOrDefault();
+                                            && u.DeletedTime == null)
+                .ToList()
+                .FirstOrDefault();
+        }
+        public User GetUserByEmail(string email)
+        {
+            return this.GetDbSet<User>().Where(u => u.Email == email
+                                            && u.DeletedTime == null)
+                .ToList()
+                .FirstOrDefault();
         }
     }
 }

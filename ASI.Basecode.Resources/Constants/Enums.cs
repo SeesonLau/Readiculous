@@ -38,5 +38,12 @@
             IDAscending = 2,
             IDDescending = 3,
         }
+
+        public enum AccessStatus
+        {
+            FirstTime = 0,
+            Verified = 1,
+            Blocked = 2,
+        }
     }
 }
