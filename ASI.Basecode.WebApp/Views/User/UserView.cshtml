@@ -1,0 +1,107 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Readiculous - User View</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/style.css")" />
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.reload()">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="@Url.Action("UserView", "User")"><span>📖</span> New Books</a>
+            <a href="@Url.Action("UserView", "User")"><span>🏆</span> Top Books</a>
+            <a href="@Url.Action("GenreBooks", "User")"><span>🏷️</span> Genre</a>
+            <a href="#" onclick="toggleAuthModal()"><span>👤</span></a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content-container">
+        <input type="text" class="book-search" placeholder="🔍 Book Search..." />
+
+        <!-- NEW BOOKS Section -->
+        <section class="section-box">
+            <div class="section-header-box">
+                <h2 class="section-title">New Books</h2>
+                <a class="view-more-link" href="#">View More</a>
+            </div>
+            <div class="book-grid">
+                @foreach (var book in ViewBag.NewBooks as List<ASI.Basecode.Data.Models.Book>)
+                {
+                    <div class="book-card">
+                        <img src="@Url.Content("~/img/Book/" + book.ImagePath)" alt="@book.Title Cover" class="book-cover" />
+                        <div class="book-meta">
+                            <strong>@book.Title</strong><br />
+                            @book.Author, @book.Year<br />
+
+                            <div class="book-rating">
+                                @{
+                                    int fullStars = (int)Math.Floor(book.Rating);
+                                    int emptyStars = 5 - fullStars;
+                                }
+                                @for (int i = 0; i < fullStars; i++)
+                                {
+                                    <span style="color: gold;">&#9733;</span>
+                                }
+                                @for (int i = 0; i < emptyStars; i++)
+                                {
+                                    <span style="color: lightgray;">&#9733;</span>
+                                }
+                                <span class="rating-number">(@book.Rating.ToString("0.0"))</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- TOP BOOKS Section -->
+        <section class="section-box">
+            <div class="section-header-box">
+                <h2 class="section-title">Top Books</h2>
+                <a class="view-more-link" href="#">View More</a>
+            </div>
+            <div class="book-grid">
+                @foreach (var book in ViewBag.TopBooks as List<ASI.Basecode.Data.Models.Book>)
+                {
+                    <div class="book-card">
+                        <img src="@Url.Content("~/img/Book/" + book.ImagePath)" alt="@book.Title Cover" class="book-cover" />
+                        <div class="book-meta">
+                            <strong>@book.Title</strong><br />
+                            @book.Author, @book.Year<br />
+
+                            <div class="book-rating">
+                                @{
+                                    int fullStars = (int)Math.Floor(book.Rating);
+                                    int emptyStars = 5 - fullStars;
+                                }
+                                @for (int i = 0; i < fullStars; i++)
+                                {
+                                    <span style="color: gold;">&#9733;</span>
+                                }
+                                @for (int i = 0; i < emptyStars; i++)
+                                {
+                                    <span style="color: lightgray;">&#9733;</span>
+                                }
+                                <span class="rating-number">(@book.Rating.ToString("0.0"))</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    </main>
+
+    @Html.Partial("_AuthModal")
+    <script src="~/js/landing.js"></script>
+</body>
+</html>

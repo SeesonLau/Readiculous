@@ -1,0 +1,67 @@
+﻿<div class="modal hidden" id="authModal">
+    <div class="modal-content" style="position: relative;">
+        <button class="modal-close" onclick="closeAuthModal()">✕</button>
+        <div class="auth-columns">
+            <!-- Login -->
+            <div class="auth-box" id="loginForm">
+                <img src="@Url.Content("~/img/png-logo.png")" class="auth-icon" />
+                <h2>Welcome to Readiculous</h2>
+                <input type="email" placeholder="Email" />
+                <input type="password" placeholder="Password" />
+                <button class="auth-btn" onclick="signIn()">Sign In</button>
+                <p>
+                    <a href="#" id="showForgot" class="text-white">Forgot Password?</a><br />
+                    Don’t have an account? <a href="#" id="showRegister" class="text-white">Sign up</a>
+                </p>
+            </div>
+
+            <!-- Register -->
+            <div class="auth-box hidden" id="registerForm">
+                <img src="@Url.Content("~/img/png-logo.png")" class="auth-icon" />
+                <h2>Join Readiculous</h2>
+                <input type="text" placeholder="Username" />
+                <input type="email" placeholder="Email" />
+                <input type="password" placeholder="Password" />
+                <input type="confirm" placeholder="Confirm Password" />
+                <button class="auth-btn" onclick="register()">Sign Up</button>
+                <p>Already have an account? <a href="#" id="showLogin" class="text-white">Sign in</a></p>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="auth-box hidden" id="forgotForm">
+                <img src="@Url.Content("~/img/png-logo.png")" class="auth-icon" />
+                <h2>Reset Your Password</h2>
+                <input type="email" placeholder="Enter your email" />
+                <button class="auth-btn" onclick="showOTPForm()">Reset Password</button>
+                <a href="#" id="backToLogin" class="auth-btn back-btn">Back</a>
+            </div>
+
+            <!-- OTP Verification -->
+            <div class="auth-box hidden" id="otpForm">
+                <img src="@Url.Content("~/img/email.png")" class="auth-icon" />
+                <h2>Enter Verification Code</h2>
+                <input type="text" placeholder="Enter OTP Code" />
+                <button class="auth-btn" onclick="showNewPasswordForm()">Continue</button>
+                <a href="#" id="backToForgot" class="auth-btn back-btn">Back</a>
+            </div>
+
+            <!-- New Password -->
+            <div class="auth-box hidden" id="newPasswordForm">
+                <img src="@Url.Content("~/img/typing-icon.png")" class="auth-icon" />
+                <h2>Create New Password</h2>
+                <input type="password" placeholder="New Password" />
+                <input type="password" placeholder="Confirm Password" />
+                <button class="auth-btn" onclick="showSuccessForm()">Submit</button>
+                <a href="#" id="backToOTP" class="auth-btn back-btn">Back</a>
+            </div>
+
+            <!-- Success Modal -->
+            <div class="auth-box hidden" id="successForm">
+                <img src="@Url.Content("~/img/successfully.png")" class="auth-icon" />
+                <h2>Password Successfully Reset</h2>
+                <p class="text-white">You can now log in with your new password.</p>
+                <button class="auth-btn" onclick="showLoginForm()">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
