@@ -34,7 +34,7 @@ namespace Readiculous.Services.Services
             var passwordKey = PasswordManager.EncryptPassword(password);
             user = _repository.GetUsers().Where(x => x.Email == email 
                                                         && x.Password == passwordKey
-                                                        && x.DeletedTime != null)
+                                                        && x.DeletedTime == null)
             .FirstOrDefault();
 
             if (user == null)
@@ -45,7 +45,10 @@ namespace Readiculous.Services.Services
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
             var user = new User();
-            model.UserId = Guid.NewGuid().ToString();
+            if(string.IsNullOrEmpty(model.UserId))
+            {
+                model.UserId = Guid.NewGuid().ToString();
+            }
 
             if (!_repository.EmailExists(model.Email))
             {
