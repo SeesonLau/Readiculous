@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Readiculous.Data.Migrations
 {
     [DbContext(typeof(ReadiculousDbContext))]
-    partial class AsiBasecodeDBContextModelSnapshot : ModelSnapshot
+    partial class ReadiculousDBContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
