@@ -24,7 +24,7 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult Index(string searchString, RoleType? roleType, UserSearchType searchType = UserSearchType.IDAscending)
+        public IActionResult Index(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.CreatedTimeAscending)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
@@ -38,8 +38,8 @@ namespace Readiculous.WebApp.Controllers
                     Text = r.ToString()
                 }).ToList();
 
-            ViewBag.UserSearchTypes = Enum.GetValues(typeof(UserSearchType))
-                .Cast<UserSearchType>()
+            ViewBag.UserSearchTypes = Enum.GetValues(typeof(UserSortType))
+                .Cast<UserSortType>()
                 .Select(r => new SelectListItem
                 {
                     Value = ((int)r).ToString(),

@@ -18,8 +18,8 @@ namespace Readiculous.Data.Interfaces
         void DeleteUser(string userId, string deleterId);
 
         //User List Queries
-        IQueryable<User> GetUsersByUsername(string username, UserSearchType searchType = UserSearchType.UsernameAscending);
-        IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSearchType searchType);
+        IQueryable<User> GetUsersByUsername(string username, UserSortType searchType = UserSortType.UsernameAscending);
+        IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType);
         User GetUserById(string id);
         User GetUserByEmail(string email);
     }

@@ -27,7 +27,7 @@ namespace Readiculous.Data.Repositories
 
         public bool EmailExists(string email)
         {
-            return this.GetDbSet<User>().Any(u => email == u.Email &&
+            return this.GetDbSet<User>().Any(u => u.Email.ToLower() == email.ToLower() &&
                                                 u.DeletedTime == null);
         }
 
@@ -63,7 +63,7 @@ namespace Readiculous.Data.Repositories
         }
 
         //User List Queries
-        public IQueryable<User> GetUsersByUsername(string username, UserSearchType searchType = UserSearchType.UsernameAscending)
+        public IQueryable<User> GetUsersByUsername(string username, UserSortType searchType = UserSortType.UsernameAscending)
         {
             var queryReturn = this.GetDbSet<User>()
                 .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
@@ -71,14 +71,14 @@ namespace Readiculous.Data.Repositories
 
             return searchType switch
             {
-                UserSearchType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
-                UserSearchType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
-                UserSearchType.IDAscending => queryReturn.OrderBy(u => u.UserId),
-                UserSearchType.IDDescending => queryReturn.OrderByDescending(u => u.UserId),
+                UserSortType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
+                UserSortType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
+                UserSortType.CreatedTimeAscending => queryReturn.OrderBy(u => u.UserId),
+                UserSortType.CreatedTimeDescending => queryReturn.OrderByDescending(u => u.UserId),
                 _ => queryReturn,
             };
         }
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSearchType searchType = UserSearchType.UsernameAscending)
+        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType = UserSortType.UsernameAscending)
         {
             var queryReturn = this.GetDbSet<User>()
                 .Where(u => u.Role == role &&
@@ -87,10 +87,10 @@ namespace Readiculous.Data.Repositories
 
             return searchType switch
             {
-                UserSearchType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
-                UserSearchType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
-                UserSearchType.IDAscending => queryReturn.OrderBy(u => u.UserId),
-                UserSearchType.IDDescending => queryReturn.OrderByDescending(u => u.UserId),
+                UserSortType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
+                UserSortType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
+                UserSortType.CreatedTimeAscending => queryReturn.OrderBy(u => u.CreatedTime),
+                UserSortType.CreatedTimeDescending => queryReturn.OrderByDescending(u => u.CreatedTime),
                 _ => queryReturn,
             };
         }
@@ -103,7 +103,7 @@ namespace Readiculous.Data.Repositories
         }
         public User GetUserByEmail(string email)
         {
-            return this.GetDbSet<User>().Where(u => u.Email == email
+            return this.GetDbSet<User>().Where(u => u.Email.ToLower() == email.ToLower()
                                             && u.DeletedTime == null)
                 .ToList()
                 .FirstOrDefault();

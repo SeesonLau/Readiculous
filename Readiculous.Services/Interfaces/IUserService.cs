@@ -14,8 +14,8 @@ namespace Readiculous.Services.Interfaces
         Task UpdateUserAsync(UserViewModel model, string editorId);
         Task DeleteUserAsync(string userId, string deleterId);
         List<UserViewModel> SearchAllUsers();
-        List<UserViewModel> SearchUsersByUsername(string username, UserSearchType searchType);
-        List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSearchType searchType);
+        List<UserViewModel> SearchUsersByUsername(string username, UserSortType searchType);
+        List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSortType searchType);
         UserViewModel SearchUserById(string userId);
         User GetUserByEmail(string email);
     }

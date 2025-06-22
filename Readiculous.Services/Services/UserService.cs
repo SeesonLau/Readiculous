@@ -32,7 +32,7 @@ namespace Readiculous.Services.Services
         {
             user = new User();
             var passwordKey = PasswordManager.EncryptPassword(password);
-            user = _repository.GetUsers().Where(x => x.Email == email 
+            user = _repository.GetUsers().Where(x => x.Email == email.Trim() 
                                                         && x.Password == passwordKey
                                                         && x.DeletedTime == null)
             .FirstOrDefault();
@@ -50,13 +50,15 @@ namespace Readiculous.Services.Services
                 model.UserId = Guid.NewGuid().ToString();
             }
 
-            if (!_repository.EmailExists(model.Email))
+            if (!_repository.EmailExists(model.Email.Trim()))
             {
+                model.Username = model.Username.Trim();
+                model.Email = model.Email.Trim();
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.Role = model.Role;
-                user.CreatedTime = DateTime.Now;
-                user.UpdatedTime = DateTime.Now;
+                user.CreatedTime = DateTime.UtcNow;
+                user.UpdatedTime = DateTime.UtcNow;
 
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
@@ -107,6 +109,8 @@ namespace Readiculous.Services.Services
                     model.ProfilePictureUrl = user.ProfilePictureUrl;
                 }
 
+                model.Username = model.Username.Trim();
+                model.Email = model.Email.Trim();
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.UpdatedTime = DateTime.UtcNow;
@@ -154,7 +158,7 @@ namespace Readiculous.Services.Services
             if (_repository.UserExists(userId))
             {
                 var user = _repository.GetUserById(userId);
-
+                /*
                 if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
                 {
                     try
@@ -176,6 +180,7 @@ namespace Readiculous.Services.Services
                         Console.WriteLine($"Image deletion error: {ex.Message}");
                     }
                 }
+                */
 
                 _repository.DeleteUser(userId, deleterId);
             }
@@ -202,9 +207,9 @@ namespace Readiculous.Services.Services
             return userViewModels;
         }
 
-        public List<UserViewModel> SearchUsersByUsername(string username, UserSearchType searchType)
+        public List<UserViewModel> SearchUsersByUsername(string username, UserSortType searchType)
         {
-            List<UserViewModel> userViewModels = _repository.GetUsersByUsername(username, searchType)
+            List<UserViewModel> userViewModels = _repository.GetUsersByUsername(username.Trim(), searchType)
                 .ToList()
                 .Select(user =>
                 {
@@ -219,9 +224,9 @@ namespace Readiculous.Services.Services
             return userViewModels;
         }
 
-        public List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSearchType searchType)
+        public List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSortType searchType)
         {
-            List<UserViewModel> userViewModels = _repository.GetUsersByRoleAndUsername(role, username, searchType)
+            List<UserViewModel> userViewModels = _repository.GetUsersByRoleAndUsername(role, username.ToLower(), searchType)
                 .ToList()
                 .Select(user =>
                 {
@@ -256,7 +261,7 @@ namespace Readiculous.Services.Services
         }
         public User GetUserByEmail(string email)
         {
-            var user = _repository.GetUserByEmail(email);
+            var user = _repository.GetUserByEmail(email.Trim());
 
             UserViewModel userViewModel = new();
             _mapper.Map(user, userViewModel);

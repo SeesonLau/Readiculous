@@ -31,12 +31,12 @@
             Reviewer = 1,
         }
 
-        public enum UserSearchType
+        public enum UserSortType
         {
             UsernameAscending = 0,
             UsernameDescending = 1,
-            IDAscending = 2,
-            IDDescending = 3,
+            CreatedTimeAscending = 2,
+            CreatedTimeDescending = 3,
         }
 
         public enum AccessStatus
@@ -44,6 +44,16 @@
             FirstTime = 0,
             Verified = 1,
             Blocked = 2,
+        }
+
+        public enum GenreSortType
+        {
+            NameAscending = 0,
+            NameDescending = 1,
+            BookCountAscending = 2,
+            BookCountDescending = 3,
+            CreatedTimeAscending = 4,
+            CreatedTimeDescending = 5,
         }
     }
 }
