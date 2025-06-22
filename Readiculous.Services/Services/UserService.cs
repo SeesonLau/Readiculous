@@ -17,14 +17,14 @@ namespace Readiculous.Services.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _repository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
 
         public UserService(IUserRepository repository, IMapper mapper, Client client)
         {
             _mapper = mapper;
-            _repository = repository;
+            _userRepository = repository;
             _client = client;
         }
 
@@ -32,7 +32,7 @@ namespace Readiculous.Services.Services
         {
             user = new User();
             var passwordKey = PasswordManager.EncryptPassword(password);
-            user = _repository.GetUsers().Where(x => x.Email == email.Trim() 
+            user = _userRepository.GetUsers().Where(x => x.Email == email.Trim() 
                                                         && x.Password == passwordKey
                                                         && x.DeletedTime == null)
             .FirstOrDefault();
@@ -44,19 +44,18 @@ namespace Readiculous.Services.Services
 
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
-            var user = new User();
-            if(string.IsNullOrEmpty(model.UserId))
+            if (!_userRepository.EmailExists(model.Email.Trim()))
             {
-                model.UserId = Guid.NewGuid().ToString();
-            }
+                var user = new User();
+                if (string.IsNullOrEmpty(model.UserId))
+                {
+                    model.UserId = Guid.NewGuid().ToString();
+                }
 
-            if (!_repository.EmailExists(model.Email.Trim()))
-            {
-                model.Username = model.Username.Trim();
-                model.Email = model.Email.Trim();
                 _mapper.Map(model, user);
+                user.Username = user.Username.Trim();
+                user.Email = user.Email.Trim();
                 user.Password = PasswordManager.EncryptPassword(model.Password);
-                user.Role = model.Role;
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
 
@@ -91,7 +90,7 @@ namespace Readiculous.Services.Services
                     }
                 }
 
-                _repository.AddUser(user, creatorId);
+                _userRepository.AddUser(user, creatorId);
             }
             else
             {
@@ -101,17 +100,17 @@ namespace Readiculous.Services.Services
 
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
-            if (_repository.UserExists(model.UserId))
+            if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
             {
-                var user = _repository.GetUserById(model.UserId);
+                var user = _userRepository.GetUserById(model.UserId);
                 if(string.IsNullOrEmpty(model.ProfilePictureUrl))
                 {
                     model.ProfilePictureUrl = user.ProfilePictureUrl;
                 }
 
-                model.Username = model.Username.Trim();
-                model.Email = model.Email.Trim();
                 _mapper.Map(model, user);
+                user.Username = model.Username.Trim();
+                user.Email = model.Email.Trim();
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.UpdatedTime = DateTime.UtcNow;
                 user.UpdatedBy = editorId;
@@ -145,7 +144,7 @@ namespace Readiculous.Services.Services
                     }
                 }
 
-                _repository.UpdateUser(user);
+                _userRepository.UpdateUser(user);
             }
             else
             {
@@ -155,9 +154,9 @@ namespace Readiculous.Services.Services
 
         public async Task DeleteUserAsync(string userId, string deleterId)
         {
-            if (_repository.UserExists(userId))
+            if (_userRepository.UserExists(userId))
             {
-                var user = _repository.GetUserById(userId);
+                var user = _userRepository.GetUserById(userId);
                 /*
                 if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
                 {
@@ -182,7 +181,7 @@ namespace Readiculous.Services.Services
                 }
                 */
 
-                _repository.DeleteUser(userId, deleterId);
+                _userRepository.DeleteUser(userId, deleterId);
             }
             else
             {
@@ -190,16 +189,16 @@ namespace Readiculous.Services.Services
             }
         }
 
-        public List<UserViewModel> SearchAllUsers()
+        public List<UserViewModel> SearchAllActiveUsers()
         {
-            List<UserViewModel> userViewModels = _repository.GetUsersByUsername(string.Empty)
+            List<UserViewModel> userViewModels = _userRepository.GetUsersByUsername(string.Empty)
                 .ToList()
                 .Select(user =>
                 {
                     UserViewModel userViewModel = new();
                     _mapper.Map(user, userViewModel);
 
-                    userViewModel.Password = PasswordManager.DecryptPassword(userViewModel.Password);
+                    userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
                     return userViewModel;
                 })
                 .ToList();
@@ -209,14 +208,14 @@ namespace Readiculous.Services.Services
 
         public List<UserViewModel> SearchUsersByUsername(string username, UserSortType searchType)
         {
-            List<UserViewModel> userViewModels = _repository.GetUsersByUsername(username.Trim(), searchType)
+            List<UserViewModel> userViewModels = _userRepository.GetUsersByUsername(username.Trim(), searchType)
                 .ToList()
                 .Select(user =>
                 {
                     UserViewModel userViewModel = new();
                     _mapper.Map(user, userViewModel);
 
-                    userViewModel.Password = PasswordManager.DecryptPassword(userViewModel.Password);
+                    userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
                     return userViewModel;
                 })
                 .ToList();
@@ -226,14 +225,14 @@ namespace Readiculous.Services.Services
 
         public List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSortType searchType)
         {
-            List<UserViewModel> userViewModels = _repository.GetUsersByRoleAndUsername(role, username.ToLower(), searchType)
+            List<UserViewModel> userViewModels = _userRepository.GetUsersByRoleAndUsername(role, username.Trim(), searchType)
                 .ToList()
                 .Select(user =>
                 {
                     UserViewModel userViewModel = new();
                     _mapper.Map(user, userViewModel);
 
-                    userViewModel.Password = PasswordManager.DecryptPassword(userViewModel.Password);
+                    userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
                     return userViewModel;
                 })
                 .ToList();
@@ -242,7 +241,7 @@ namespace Readiculous.Services.Services
 
         public UserViewModel SearchUserById(string userId)
         {             
-            User user = _repository.GetUsers()
+            User user = _userRepository.GetUsers()
                 .Where(u => u.UserId == userId 
                             && u.DeletedTime == null)
                 .FirstOrDefault();
@@ -251,7 +250,7 @@ namespace Readiculous.Services.Services
             {
                 UserViewModel userViewModel = new();
                 _mapper.Map(user, userViewModel);
-                userViewModel.Password = PasswordManager.DecryptPassword(userViewModel.Password);
+                userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
                 return userViewModel;
             }
             else
@@ -261,11 +260,12 @@ namespace Readiculous.Services.Services
         }
         public User GetUserByEmail(string email)
         {
-            var user = _repository.GetUserByEmail(email.Trim());
+            var user = _userRepository.GetUserByEmail(email.Trim());
 
             UserViewModel userViewModel = new();
             _mapper.Map(user, userViewModel);
 
+            userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
             return user;
         }
     }

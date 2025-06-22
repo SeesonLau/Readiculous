@@ -78,7 +78,7 @@ namespace Readiculous.Data.Repositories
                 _ => queryReturn,
             };
         }
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType = UserSortType.UsernameAscending)
+        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType = UserSortType.CreatedTimeAscending)
         {
             var queryReturn = this.GetDbSet<User>()
                 .Where(u => u.Role == role &&
@@ -96,10 +96,8 @@ namespace Readiculous.Data.Repositories
         }
         public User GetUserById(string id)
         {
-            return this.GetDbSet<User>().Where(u => u.UserId == id
-                                            && u.DeletedTime == null)
-                .ToList()
-                .FirstOrDefault();
+            return this.GetDbSet<User>().FirstOrDefault(u => u.UserId == id
+                                            && u.DeletedTime == null);
         }
         public User GetUserByEmail(string email)
         {

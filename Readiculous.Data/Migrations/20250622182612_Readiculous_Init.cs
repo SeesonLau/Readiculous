@@ -101,7 +101,6 @@ namespace Readiculous.Data.Migrations
                     SeriesNumber = table.Column<int>(type: "int", nullable: false),
                     Publisher = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PublicationYear = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AverageRating = table.Column<decimal>(type: "decimal(3,2)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -255,12 +254,6 @@ namespace Readiculous.Data.Migrations
                 name: "IX_Author",
                 table: "Books",
                 column: "Author",
-                filter: "[DeletedTime] IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AverageRating",
-                table: "Books",
-                column: "AverageRating",
                 filter: "[DeletedTime] IS NULL");
 
             migrationBuilder.CreateIndex(

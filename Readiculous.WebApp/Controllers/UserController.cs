@@ -62,7 +62,7 @@ namespace Readiculous.WebApp.Controllers
             }
             else
             {
-                users = _userService.SearchAllUsers();
+                users = _userService.SearchAllActiveUsers();
             }
 
             return View(users);

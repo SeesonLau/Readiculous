@@ -61,6 +61,24 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Genre Name already exists!.
+        /// </summary>
+        public static string GenreExists {
+            get {
+                return ResourceManager.GetString("GenreExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Genre does not exist!.
+        /// </summary>
+        public static string GenreNotExist {
+            get {
+                return ResourceManager.GetString("GenreNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Image failed to delete!.
         /// </summary>
         public static string ImageFailedToDelete {

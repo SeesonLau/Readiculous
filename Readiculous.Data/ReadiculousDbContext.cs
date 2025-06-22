@@ -110,8 +110,6 @@ namespace Readiculous.Data
                     .HasFilter("[DeletedTime] IS NULL");
                 entity.HasIndex(b => b.CreatedTime, "IX_CreatedTime")
                     .HasFilter("[DeletedTime] IS NULL");
-                entity.HasIndex(b => b.AverageRating, "IX_AverageRating")
-                    .HasFilter("[DeletedTime] IS NULL");
 
                 // Property Configuration
                 entity.Property(b => b.ISBN)
@@ -126,8 +124,6 @@ namespace Readiculous.Data
                 entity.Property(b => b.Publisher)
                     .IsRequired()
                     .HasMaxLength(100);
-                entity.Property(b => b.AverageRating)
-                    .HasColumnType("decimal(3, 2)");
 
                 // Foreign Key Configurations
                 entity.HasOne(b => b.CreatedByUser)
