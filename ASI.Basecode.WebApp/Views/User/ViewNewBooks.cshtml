@@ -1,0 +1,108 @@
+﻿@model List<ASI.Basecode.Data.Models.Book>
+@{
+    Layout = null;
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Readiculous - New Books</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/style.css")" />
+    <style>
+        .book-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-block;
+        }
+
+            .book-card-link:hover .book-card {
+                transform: scale(1.02);
+                transition: transform 0.2s ease-in-out;
+                cursor: pointer;
+            }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "User")'">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="@Url.Action("UserView", "User")"><span>📖</span> New Books</a>
+            <a href="@Url.Action("UserView", "User")"><span>🏆</span> Top Books</a>
+            <a href="@Url.Action("GenreBooks", "User")"><span>🏷️</span> Genre</a>
+            <a href="#" onclick="toggleAuthModal()"><span>👤</span></a>
+        </nav>
+    </header>
+
+    <main class="content-container">
+        <input type="text" class="book-search" placeholder="🔍 Book Search..." />
+        <section class="section-box">
+            <h2 class="section-title">New Books</h2>
+
+            <div class="book-grid">
+                @foreach (var book in Model)
+                {
+                    <a href="@Url.Action("BookDetails", "User", new { id = book.Id })" class="book-card-link">
+                        <div class="book-card">
+                            <img src="@Url.Content("~/img/Book/" + book.ImagePath)" class="book-cover" alt="@book.Title Cover" />
+                            <div class="book-meta">
+                                <strong>@book.Title</strong><br />
+                                @book.Author, @book.Year
+                                <div class="book-rating">
+                                    @{
+                                        int fullStars = (int)Math.Floor(book.Rating);
+                                        int emptyStars = 5 - fullStars;
+                                    }
+                                    @for (int i = 0; i < fullStars; i++)
+                                    {
+                                        <span style="color: gold;">&#9733;</span>
+                                    }
+                                    @for (int i = 0; i < emptyStars; i++)
+                                    {
+                                        <span style="color: lightgray;">&#9733;</span>
+                                    }
+                                    <span class="rating-number">(@book.Rating.ToString("0.0"))</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                @if (currentPage > 1)
+                {
+                    <a href="@Url.Action("ViewNewBooks", new { page = currentPage - 1 })">&laquo;</a>
+                }
+
+                @for (int i = 1; i <= totalPages && i <= 3; i++)
+                {
+                    if (i == currentPage)
+                    {
+                        <span class="current-page">@i</span>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("ViewNewBooks", new { page = i })">@i</a>
+                    }
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <a href="@Url.Action("ViewNewBooks", new { page = currentPage + 1 })">&raquo;</a>
+                }
+            </div>
+        </section>
+    </main>
+
+    @Html.Partial("_AuthModal")
+    <script src="~/js/landing.js"></script>
+</body>
+</html>

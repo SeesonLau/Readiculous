@@ -8,6 +8,11 @@
     <meta charset="UTF-8" />
     <title>Readiculous - Landing Page</title>
     <link rel="stylesheet" href="@Url.Content("~/css/style.css")" />
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -17,9 +22,9 @@
             <h1 class="team-name">Readiculous</h1>
         </div>
         <nav class="nav-links">
-            <a href="@Url.Action("UserView", "User")"><span>📖</span> New Books</a>
-            <a href="@Url.Action("UserView", "User")"><span>🏆</span> Top Books</a>
-            <a href="#"><span>🏷️</span> Genre</a>
+            <a href="@Url.Action("UserView", "User")#new-books"><span>📖</span> New Books</a>
+            <a href="@Url.Action("UserView", "User")#top-books"><span>🏆</span> Top Books</a>
+            <a href="@Url.Action("GenreBooks", "Books")"><span>🏷️</span> Genre</a>
             <a href="#" onclick="toggleAuthModal()"><span>👤</span></a>
         </nav>
     </header>
@@ -29,9 +34,9 @@
         <div class="hero-text">
             <h2>Where Book Reviews are Seriously Readiculous!</h2>
             <p>
-                Discover new books worth reading, share your honest thoughts, and explore what others are saying.
-                Whether you're a casual reader or a dedicated bookworm, join a community that takes book reviewing
-                to the next level with a touch of fun, flair, and readiculous passion.
+                Discover new books worth reading, share your honest thoughts, and explore what others are saying. 
+                Whether you're a casual reader or a dedicated bookworm, 
+                join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
             </p>
             <div class="button-wrapper">
                 <a href="@Url.Action("UserView", "User")" class="cta-btn">Get Started</a>
@@ -41,6 +46,7 @@
             <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
         </div>
     </section>
+
     @Html.Partial("_AuthModal")
     <script src="@Url.Content("~/js/landing.js")"></script>
 </body>

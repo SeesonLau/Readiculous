@@ -1,0 +1,109 @@
+﻿@model ASI.Basecode.Data.Models.Book
+@{
+    Layout = null;
+    var reviews = ViewBag.Reviews as List<ASI.Basecode.Data.Models.ReviewModel>;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@Model.Title - Book Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/style.css")" />
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "User")'">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="@Url.Action("UserView", "User")#new-books">📖 New Books</a>
+            <a href="@Url.Action("UserView", "User")#top-books">🏆 Top Books</a>
+            <a href="@Url.Action("GenreBooks", "Books")">🏷️ Genre</a>
+            <a href="#" onclick="toggleAuthModal()">👤</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="book-header">Book Details</div>
+
+        <!-- Book Details Section -->
+        <div class="book-details-container">
+            <div class="book-details-left">
+                <img src="@Url.Content("~/img/Book/" + Model.ImagePath)" alt="@Model.Title Cover" class="book-details-cover" />
+                <button class="add-fav-btn">Add to Favorites</button>
+            </div>
+
+            <div class="book-info-card">
+                <h2 class="book-title">@Model.Title</h2>
+                <table class="book-info-table">
+                    <tr><th>Author</th><td>@Model.Author</td></tr>
+                    <tr><th>Genre</th><td>@Model.Genre</td></tr>
+                    <tr><th>Series</th><td>@(string.IsNullOrEmpty(Model.Series) ? "N/A" : Model.Series)</td></tr>
+                    <tr>
+                        <th>Rating</th>
+                        <td>
+                            @Model.Rating.ToString("0.0")
+                            <span style="color: gold;">&#9733;</span>
+                        </td>
+                    </tr>
+                    <tr><th>Added Date</th><td>@(Model.AddedDate?.ToString("MMMM d, yyyy") ?? "N/A")</td></tr>
+                </table>
+
+                <h3>Description</h3>
+                <p>@(string.IsNullOrEmpty(Model.Description) ? "No description provided." : Model.Description)</p>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="review-section">
+            <div class="review-header">
+                <span>Reviews (@reviews?.Count ?? 0)</span>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <button class="add-review-btn" onclick="showLoginRequiredModal()">+ Add Review</button>
+                }
+                else
+                {
+                    <button class="add-review-btn" onclick="alert('Open Add Review Form')">+ Add Review</button>
+                }
+            </div>
+
+            @if (reviews?.Count > 0)
+            {
+                foreach (var review in reviews)
+                {
+                    <div class="review-card">
+                        <div class="review-top">
+                            <strong>@review.ReviewerName</strong>
+                            <span class="review-date">@review.DatePosted.ToString("MMMM d, yyyy")</span>
+                        </div>
+                        <div class="review-stars">
+                            @for (int i = 0; i < review.Rating; i++)
+                            {
+                                <span style="color: gold;">&#9733;</span>
+                            }
+                            @for (int i = review.Rating; i < 5; i++)
+                            {
+                                <span style="color: lightgray;">&#9733;</span>
+                            }
+                        </div>
+                        <p>@review.Comment</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No reviews yet. Be the first to leave one!</p>
+            }
+        </div>
+    </main>
+
+    <!-- Modal -->
+    @Html.Partial("_AuthModal")
+
+    <script src="~/js/landing.js"></script>
+</body>
+</html>

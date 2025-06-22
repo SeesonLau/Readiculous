@@ -1,0 +1,96 @@
+﻿@model List<ASI.Basecode.WebApp.Models.BookViewModel>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Manage Books - Readiculous</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/style.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/css/admin.css")" />
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.reload()">
+            <img src="@Url.Content("~/img/png-logo.png")" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+
+        <nav class="nav-links">
+            <div class="profile-dropdown">
+                <span class="profile-icon" onclick="toggleDropdown(event)">👤</span>
+                <ul class="dropdown-menu hidden" id="profileMenu">
+                    <li><a href="#">User Master</a></li>
+                    <li><a href="@Url.Action("BookMaster", "Admin")">Genre Master</a></li>
+                    <li><a href="#">Book Master</a></li>
+                    <li><a href="#">Settings</a></li>
+                    <li><a href="@Url.Action("UserView", "User")">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!-- Admin Section -->
+    <section class="admin-container">
+        <h2>Manage Books</h2>
+        <div class="admin-controls">
+            <input type="text" class="admin-search" placeholder="🔍 Search by title, author or genre..." />
+            <select class="admin-dropdown">
+                <option>No. of Series</option>
+                <option>Has Series</option>
+                <option>No Series</option>
+            </select>
+            <select class="admin-dropdown">
+                <option>Sort By: Name</option>
+                <option>Sort By: Rating</option>
+                <option>Sort By: Genre</option>
+            </select>
+
+            <!-- 🔁 Changed to redirect to AddBook action -->
+            <a href="@Url.Action("AddBook", "Admin")" class="new-book-btn">+ New Book</a>
+        </div>
+
+        <div class="book-table-wrapper">
+            <table class="admin-book-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Genre</th>
+                        <th>No. Series</th>
+                        <th>Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var book in Model)
+                    {
+                        <tr>
+                            <td>@book.Id</td>
+                            <td>@book.Title</td>
+                            <td>@book.Author</td>
+                            <td>@book.Genre</td>
+                            <td>@(string.IsNullOrEmpty(book.Series) ? "N/A" : book.Series)</td>
+                            <td>
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="star @(i <= Math.Round(book.Rating) ? "filled" : "empty")">&#9733;</span>
+                                }
+                            </td>
+                            <td class="action-icons">
+                                <span title="View">👁</span>
+                                <span title="Edit">✏️</span>
+                                <button title="Delete" onclick="showDeleteModal(@book.Id)">🗑️</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+    @Html.Partial("_AuthModal")
+    <script src="@Url.Content("~/js/admin.js")"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+﻿@model ASI.Basecode.WebApp.Models.BookViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Add Book - Readiculous</title>
+    <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/css/admin.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.reload()">
+            <img src="@Url.Content("~/img/png-logo.png")" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+
+        <nav class="nav-links">
+            <div class="profile-dropdown">
+                <span class="profile-icon" onclick="toggleDropdown(event)">👤</span>
+                <ul class="dropdown-menu hidden" id="profileMenu">
+                    <li><a href="#">User Master</a></li>
+                    <li><a href="@Url.Action("BookMaster", "Admin")">Genre Master</a></li>
+                    <li><a href="#">Book Master</a></li>
+                    <li><a href="#">Settings</a></li>
+                    <li><a href="@Url.Action("UserView", "User")">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!-- Page Title -->
+    <div class="page-header">
+        <h1 class="page-title">Add Books</h1>
+    </div>
+
+    <!-- Add Book Form -->
+    <div class="add-book-wrapper">
+        <form asp-action="AddBook" asp-controller="Admin" method="post" enctype="multipart/form-data" class="add-book-form">
+            <div class="upload-column">
+                <img id="previewImage" src="~/img/placeholder.png" alt="Preview" class="upload-preview" />
+                <label><strong>Upload Image</strong></label>
+                <label for="Image" class="custom-file-label">
+                    Choose Image
+                    <input type="file" id="Image" name="Image" onchange="previewFile(this)" hidden />
+                </label>
+                <small>Upload a cover image for the book</small>
+            </div>
+
+            <div class="form-right">
+                <div>
+                    <input asp-for="Title" class="form-input" placeholder="Enter book title" />
+                    <input asp-for="Author" class="form-input" placeholder="Enter author name" />
+                    <select asp-for="Genre" class="form-input">
+                        <option value="">-Select Genre-</option>
+                        <option>Fiction</option>
+                        <option>Fantasy</option>
+                        <option>Romance</option>
+                        <option>Novel</option>
+                    </select>
+                    <input asp-for="Series" class="form-input" placeholder="Enter series number if applicable" />
+                    <input asp-for="ISBN" class="form-input" placeholder="Enter international book standard number" />
+                    <input asp-for="PublishDate" class="form-input" type="date" />
+                    <textarea asp-for="Description" class="form-input" placeholder="Enter book description"></textarea>
+                </div>
+
+                <div class="add-book-buttons">
+                    <a href="@Url.Action("BookMaster", "Admin")" class="auth-btn back-btn">Cancel</a>
+                    <button type="submit" class="auth-btn save-btn">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="@Url.Content("~/js/admin.js")"></script>
+</body>
+</html>
