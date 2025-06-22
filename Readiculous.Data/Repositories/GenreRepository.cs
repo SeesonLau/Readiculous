@@ -16,11 +16,6 @@ namespace Readiculous.Data.Repositories
         {
         }
 
-        public IQueryable<Genre> GetGenres()
-        {
-            return this.GetDbSet<Genre>();
-        }
-
         public bool GenreIdExists(string genreId)
         {
             return this.GetDbSet<Genre>().Any(g => g.GenreId == genreId &&

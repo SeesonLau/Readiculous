@@ -10,7 +10,6 @@ namespace Readiculous.Data.Interfaces
 {
     public interface IGenreRepository
     {
-        IQueryable<Genre> GetGenres();
         bool GenreIdExists(string genreId);
         bool GenreNameExists(string genreName);
         void AddGenre(Genre genre);

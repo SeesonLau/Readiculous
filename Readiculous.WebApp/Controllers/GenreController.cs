@@ -112,7 +112,7 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _genreService.GetActiveGenres());
+                return View("Index", _genreService.SearchGenresByName(string.Empty));
             }
         }
 

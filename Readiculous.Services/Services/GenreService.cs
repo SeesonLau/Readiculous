@@ -76,22 +76,7 @@ namespace Readiculous.Services.Services
             }
         }
 
-        public List<GenreViewModel> GetActiveGenres()
-        {
-            var genres = _genreRepository.GetGenres()
-                .Where(g => g.DeletedTime == null)
-                .ToList()
-                .Select(genre =>
-                {
-                    GenreViewModel model = new GenreViewModel();
-                    _mapper.Map(genre, model);
-                    return model;
-                })
-                .ToList();
-            return genres;
-        }
-
-        public List<GenreViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeAscending)
+        public List<GenreViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType)
         {
             var genres = _genreRepository.GetGenresByName(genreName.Trim(), genreSortType)
                 .Where(g => g.DeletedTime == null)

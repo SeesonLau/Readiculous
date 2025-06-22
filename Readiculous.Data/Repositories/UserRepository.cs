@@ -63,7 +63,7 @@ namespace Readiculous.Data.Repositories
         }
 
         //User List Queries
-        public IQueryable<User> GetUsersByUsername(string username, UserSortType searchType = UserSortType.UsernameAscending)
+        public IQueryable<User> GetUsersByUsername(string username, UserSortType searchType = UserSortType.CreatedTimeAscending)
         {
             var queryReturn = this.GetDbSet<User>()
                 .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
@@ -73,8 +73,8 @@ namespace Readiculous.Data.Repositories
             {
                 UserSortType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
                 UserSortType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
-                UserSortType.CreatedTimeAscending => queryReturn.OrderBy(u => u.UserId),
-                UserSortType.CreatedTimeDescending => queryReturn.OrderByDescending(u => u.UserId),
+                UserSortType.CreatedTimeAscending => queryReturn.OrderBy(u => u.CreatedTime),
+                UserSortType.CreatedTimeDescending => queryReturn.OrderByDescending(u => u.CreatedTime),
                 _ => queryReturn,
             };
         }
