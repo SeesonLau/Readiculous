@@ -25,10 +25,6 @@ namespace Readiculous.Services.ServiceModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "Confirm Password is required.")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
-
 
         public string UserId { get; set; }
         public RoleType Role { get; set; }
