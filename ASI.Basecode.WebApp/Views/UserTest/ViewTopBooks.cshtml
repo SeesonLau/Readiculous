@@ -1,4 +1,4 @@
-﻿@model List<ASI.Basecode.Data.Models.Book>
+﻿@model List<ASI.Basecode.Data.Models.BookTest>
 @{
     Layout = null;
     int currentPage = ViewBag.CurrentPage;
@@ -28,14 +28,14 @@
 <body>
     <!-- Navbar -->
     <header class="navbar">
-        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "User")'">
+        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "UserTest")'">
             <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
             <h1 class="team-name">Readiculous</h1>
         </div>
         <nav class="nav-links">
-            <a href="@Url.Action("UserView", "User")"><span>📖</span> New Books</a>
-            <a href="@Url.Action("UserView", "User")"><span>🏆</span> Top Books</a>
-            <a href="@Url.Action("GenreBooks", "User")"><span>🏷️</span> Genre</a>
+            <a href="@Url.Action("UserView", "UserTest")"><span>📖</span> New Books</a>
+            <a href="@Url.Action("UserView", "UserTest")"><span>🏆</span> Top Books</a>
+            <a href="@Url.Action("GenreBooks", "BookTest")"><span>🏷️</span> Genre</a>
             <a href="#" onclick="toggleAuthModal()"><span>👤</span></a>
         </nav>
     </header>
@@ -48,7 +48,7 @@
             <div class="book-grid">
                 @foreach (var book in Model)
                 {
-                    <a href="@Url.Action("BookDetails", "User", new { id = book.Id })" class="book-card-link">
+                    <a href="@Url.Action("BookDetails", "UserTest", new { id = book.Id })" class="book-card-link">
                         <div class="book-card">
                             <img src="@Url.Content("~/img/Book/" + book.ImagePath)" class="book-cover" alt="@book.Title Cover" />
                             <div class="book-meta">
@@ -74,8 +74,7 @@
                     </a>
                 }
             </div>
-
-            <!-- Manual Pagination -->
+            <!--Pagination -->
             <div class="pagination">
                 @if (currentPage > 1)
                 {
@@ -101,7 +100,6 @@
             </div>
         </section>
     </main>
-
     @Html.Partial("_AuthModal")
     <script src="~/js/landing.js"></script>
 </body>

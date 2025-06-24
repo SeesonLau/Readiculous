@@ -1,0 +1,62 @@
+[
+  {
+    "Title": "sdsd",
+    "Author": "Author Name",
+    "Id": 1,
+    "ImagePath": null,
+    "Year": 0,
+    "Genre": "Fiction",
+    "Rating": 0,
+    "Series": "N/A",
+    "ISBN": null,
+    "PublishDate": null,
+    "Description": null,
+    "ImageUrl": null,
+    "AddedDate": null
+  },
+  {
+    "Title": "asasssss",
+    "Author": "asass",
+    "Id": 2,
+    "ImagePath": null,
+    "Year": 0,
+    "Genre": "Fantasy",
+    "Rating": 0,
+    "Series": "aaaaaaas",
+    "ISBN": "sassas",
+    "PublishDate": "2000-04-05T00:00:00",
+    "Description": "aaaaaaaaaaa",
+    "ImageUrl": null,
+    "AddedDate": null
+  },
+  {
+    "Title": "dddddddddd",
+    "Author": "ddddddddddd",
+    "Id": 3,
+    "ImagePath": null,
+    "Year": 0,
+    "Genre": null,
+    "Rating": 0,
+    "Series": "ssssssssssss",
+    "ISBN": "ddddddddd",
+    "PublishDate": "0255-05-06T00:00:00",
+    "Description": "zzzzzzzzzzzz",
+    "ImageUrl": null,
+    "AddedDate": null
+  },
+  {
+    "Title": "sdsds",
+    "Author": "sadadsadsa",
+    "Id": 4,
+    "ImagePath": null,
+    "Year": 0,
+    "Genre": null,
+    "Rating": 0,
+    "Series": "asdsadas",
+    "ISBN": "dsadsadasd",
+    "PublishDate": "0200-04-06T00:00:00",
+    "Description": "asdadsad",
+    "ImageUrl": null,
+    "AddedDate": null
+  }
+]

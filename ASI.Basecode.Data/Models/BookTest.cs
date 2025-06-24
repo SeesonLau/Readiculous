@@ -2,7 +2,7 @@
 
 namespace ASI.Basecode.Data.Models
 {
-    public class Book
+    public class BookTest
     {
         public int Id { get; set; }
         public string Title { get; set; }

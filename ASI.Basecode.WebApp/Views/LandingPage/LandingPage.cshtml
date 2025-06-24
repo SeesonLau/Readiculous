@@ -22,13 +22,12 @@
             <h1 class="team-name">Readiculous</h1>
         </div>
         <nav class="nav-links">
-            <a href="@Url.Action("UserView", "User")#new-books"><span>📖</span> New Books</a>
-            <a href="@Url.Action("UserView", "User")#top-books"><span>🏆</span> Top Books</a>
-            <a href="@Url.Action("GenreBooks", "Books")"><span>🏷️</span> Genre</a>
+            <a href="@Url.Action("UserView", "UserTest")#new-books"><span>📖</span> New Books</a>
+            <a href="@Url.Action("UserView", "UserTest")#top-books"><span>🏆</span> Top Books</a>
+            <a href="@Url.Action("GenreBooks", "BookTest")"><span>🏷️</span> Genre</a>
             <a href="#" onclick="toggleAuthModal()"><span>👤</span></a>
         </nav>
     </header>
-
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-text">
@@ -39,14 +38,13 @@
                 join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
             </p>
             <div class="button-wrapper">
-                <a href="@Url.Action("UserView", "User")" class="cta-btn">Get Started</a>
+                <a href="@Url.Action("UserView", "UserTest")" class="cta-btn">Get Started</a>
             </div>
         </div>
         <div class="hero-image">
             <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
         </div>
     </section>
-
     @Html.Partial("_AuthModal")
     <script src="@Url.Content("~/js/landing.js")"></script>
 </body>

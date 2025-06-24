@@ -1,7 +1,7 @@
-﻿@model ASI.Basecode.Data.Models.Book
+﻿@model ASI.Basecode.Data.Models.BookTest
 @{
     Layout = null;
-    var reviews = ViewBag.Reviews as List<ASI.Basecode.Data.Models.ReviewModel>;
+    var reviews = ViewBag.Reviews as List<ASI.Basecode.Data.Models.ReviewTestModel>;
 }
 
 <!DOCTYPE html>
@@ -14,21 +14,19 @@
 <body>
     <!-- Navigation Bar -->
     <header class="navbar">
-        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "User")'">
+        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "UserTest")'">
             <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
             <h1 class="team-name">Readiculous</h1>
         </div>
         <nav class="nav-links">
-            <a href="@Url.Action("UserView", "User")#new-books">📖 New Books</a>
-            <a href="@Url.Action("UserView", "User")#top-books">🏆 Top Books</a>
-            <a href="@Url.Action("GenreBooks", "Books")">🏷️ Genre</a>
+            <a href="@Url.Action("UserView", "UserTest")#new-books">📖 New Books</a>
+            <a href="@Url.Action("UserView", "UserTest")#top-books">🏆 Top Books</a>
+            <a href="@Url.Action("GenreBooks", "BookTest")">🏷️ Genre</a>
             <a href="#" onclick="toggleAuthModal()">👤</a>
         </nav>
     </header>
-
     <main class="container">
         <div class="book-header">Book Details</div>
-
         <!-- Book Details Section -->
         <div class="book-details-container">
             <div class="book-details-left">
@@ -56,7 +54,6 @@
                 <p>@(string.IsNullOrEmpty(Model.Description) ? "No description provided." : Model.Description)</p>
             </div>
         </div>
-
         <!-- Reviews Section -->
         <div class="review-section">
             <div class="review-header">
@@ -100,10 +97,7 @@
             }
         </div>
     </main>
-
-    <!-- Modal -->
     @Html.Partial("_AuthModal")
-
     <script src="~/js/landing.js"></script>
 </body>
 </html>

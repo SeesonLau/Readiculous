@@ -3,6 +3,7 @@ using ASI.Basecode.Services.Interfaces;
 using ASI.Basecode.Services.Manager;
 using ASI.Basecode.Services.ServiceModels;
 using ASI.Basecode.WebApp.Authentication;
+using ASI.Basecode.WebApp.Models;
 using ASI.Basecode.WebApp.Mvc;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -15,13 +16,8 @@ using System.IO;
 using System.Threading.Tasks;
 using static ASI.Basecode.Resources.Constants.Enums;
 
-using WebAppUserViewModel = ASI.Basecode.WebApp.Models.UserViewModel;
-using ServiceUserViewModel = ASI.Basecode.Services.ServiceModels.UserViewModel;
-using ASI.Basecode.WebApp.Models;
-
 namespace ASI.Basecode.WebApp.Controllers
 {
-    [AllowAnonymous]
     public class AccountController : ControllerBase<AccountController>
     {
         private readonly SessionManager _sessionManager;
@@ -30,106 +26,125 @@ namespace ASI.Basecode.WebApp.Controllers
         private readonly TokenProviderOptionsFactory _tokenProviderOptionsFactory;
         private readonly IConfiguration _appConfiguration;
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccountController"/> class.
+        /// </summary>
+        /// <param name="signInManager">The sign in manager.</param>
+        /// <param name="localizer">The localizer.</param>
+        /// <param name="userService">The user service.</param>
+        /// <param name="httpContextAccessor">The HTTP context accessor.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <param name="mapper">The mapper.</param>
+        /// <param name="tokenValidationParametersFactory">The token validation parameters factory.</param>
+        /// <param name="tokenProviderOptionsFactory">The token provider options factory.</param>
         public AccountController(
-            SignInManager signInManager,
-            IHttpContextAccessor httpContextAccessor,
-            ILoggerFactory loggerFactory,
-            IConfiguration configuration,
-            IMapper mapper,
-            IUserService userService,
-            TokenValidationParametersFactory tokenValidationParametersFactory,
-            TokenProviderOptionsFactory tokenProviderOptionsFactory)
-            : base(httpContextAccessor, loggerFactory, configuration, mapper)
+                            SignInManager signInManager,
+                            IHttpContextAccessor httpContextAccessor,
+                            ILoggerFactory loggerFactory,
+                            IConfiguration configuration,
+                            IMapper mapper,
+                            IUserService userService,
+                            TokenValidationParametersFactory tokenValidationParametersFactory,
+                            TokenProviderOptionsFactory tokenProviderOptionsFactory) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
-            _sessionManager = new SessionManager(_session);
-            _signInManager = signInManager;
-            _tokenProviderOptionsFactory = tokenProviderOptionsFactory;
-            _tokenValidationParametersFactory = tokenValidationParametersFactory;
-            _appConfiguration = configuration;
-            _userService = userService;
-            _mapper = mapper;
+            this._sessionManager = new SessionManager(this._session);
+            this._signInManager = signInManager;
+            this._tokenProviderOptionsFactory = tokenProviderOptionsFactory;
+            this._tokenValidationParametersFactory = tokenValidationParametersFactory;
+            this._appConfiguration = configuration;
+            this._userService = userService;
         }
 
+        /// <summary>
+        /// Login Method
+        /// </summary>
+        /// <returns>Created response view</returns>
         [HttpGet]
-        public IActionResult Login()
+        [AllowAnonymous]
+        public ActionResult Login()
         {
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
-            _sessionManager.Clear();
-            _session.SetString("SessionId", Guid.NewGuid().ToString());
-            return View();
+            this._sessionManager.Clear();
+            this._session.SetString("SessionId", System.Guid.NewGuid().ToString());
+            return this.View();
         }
 
+        /// <summary>
+        /// Authenticate user and signs the user in when successful.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <param name="returnUrl">The return URL.</param>
+        /// <returns> Created response view </returns>
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Invalid input.";
-                return View(model);
-            }
+            this._session.SetString("HasSession", "Exist");
 
-            _session.SetString("HasSession", "Exist");
+            //User user = null;
 
-            var user = new User();
-            var loginResult = _userService.AuthenticateUser(model.UserId, model.Password, ref user);
+            UserTest user = new() { Id = 0, UserId = "0", Name = "Name", Password = "Password" };
 
+            await this._signInManager.SignInAsync(user);
+            this._session.SetString("UserName", model.UserId);
+
+            return RedirectToAction("Index", "Home");
+
+            /*var loginResult = _userService.AuthenticateUser(model.UserId, model.Password, ref user);
             if (loginResult == LoginResult.Success)
             {
-                await _signInManager.SignInAsync(user);
-                _session.SetString("UserName", user.Name);
-
-                if (!string.IsNullOrEmpty(returnUrl))
-                    return Redirect(returnUrl);
-
+                // 認証OK
+                await this._signInManager.SignInAsync(user);
+                this._session.SetString("UserName", user.Name);
                 return RedirectToAction("Index", "Home");
             }
-
-            TempData["ErrorMessage"] = "Incorrect username or password.";
-            return View(model);
+            else
+            {
+                // 認証NG
+                TempData["ErrorMessage"] = "Incorrect UserId or Password";
+                return View();
+            }
+            return View();*/
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult Register(WebAppUserViewModel model)
+        [AllowAnonymous]
+        public IActionResult Register(UserViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Please complete all required fields.";
-                return View(model);
-            }
-
             try
             {
-                // Map WebApp model to Service model
-                var mappedModel = _mapper.Map<ServiceUserViewModel>(model);
-                _userService.AddUser(mappedModel);
-
-                TempData["SuccessMessage"] = "Registration successful. You may now log in.";
-                return RedirectToAction("Login");
+                _userService.AddUser(model);
+                return RedirectToAction("Login", "Account");
             }
             catch (InvalidDataException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
             }
-
-            return View(model);
+            return View();
         }
 
+        /// <summary>
+        /// Sign Out current account and return login view.
+        /// </summary>
+        /// <returns>Created response view</returns>
+        [AllowAnonymous]
         public async Task<IActionResult> SignOutUser()
         {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Login");
+            await this._signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account");
         }
     }
 }

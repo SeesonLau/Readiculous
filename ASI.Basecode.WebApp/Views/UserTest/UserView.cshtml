@@ -22,28 +22,27 @@
             <h1 class="team-name">Readiculous</h1>
         </div>
         <nav class="nav-links">
-            <a href="@Url.Action("UserView", "User")#new-books">📖 New Books</a>
-            <a href="@Url.Action("UserView", "User")#top-books">🏆 Top Books</a>
-            <a href="@Url.Action("GenreBooks", "Books")"><span>🏷️</span> Genre</a>
+            <a href="@Url.Action("UserView", "UserTest")#new-books">📖 New Books</a>
+            <a href="@Url.Action("UserView", "UserTest")#top-books">🏆 Top Books</a>
+            <a href="@Url.Action("GenreBooks", "BookTest")"><span>🏷️</span> Genre</a>
             <a href="#" onclick="toggleAuthModal()">👤</a>
         </nav>
     </header>
 
     <main class="content-container">
         <input type="text" class="book-search" placeholder="🔍 Book Search..." />
-
         <!-- NEW BOOKS Section -->
         <section id="new-books" class="section-box">
             <div class="section-header-box">
                 <h2 class="section-title">New Books</h2>
-                <a class="view-more-link" href="@Url.Action("ViewNewBooks", "User")">View More</a>
+                <a class="view-more-link" href="@Url.Action("ViewNewBooks", "Usertest")">View More</a>
             </div>
             <div class="book-grid">
                 @if (ViewBag.NewBooks != null)
                 {
-                    foreach (var book in ViewBag.NewBooks as List<ASI.Basecode.Data.Models.Book>)
+                    foreach (var book in ViewBag.NewBooks as List<ASI.Basecode.Data.Models.BookTest>)
                     {
-                        <div class="book-card" onclick="location.href='@Url.Action("BookDetails", "User", new { id = book.Id })'">
+                        <div class="book-card" onclick="location.href='@Url.Action("BookDetails", "UserTest", new { id = book.Id })'">
                             <img src="@Url.Content("~/img/Book/" + book.ImagePath)" alt="@book.Title Cover" class="book-cover" />
                             <div class="book-meta">
                                 <strong>@book.Title</strong><br />
@@ -73,19 +72,18 @@
                 }
             </div>
         </section>
-
         <!-- TOP BOOKS Section -->
         <section id="top-books" class="section-box">
             <div class="section-header-box">
                 <h2 class="section-title">Top Books</h2>
-                <a class="view-more-link" href="@Url.Action("ViewTopBooks", "User")">View More</a>
+                <a class="view-more-link" href="@Url.Action("ViewTopBooks", "UserTest")">View More</a>
             </div>
             <div class="book-grid">
                 @if (ViewBag.TopBooks != null)
                 {
-                    foreach (var book in ViewBag.TopBooks as List<ASI.Basecode.Data.Models.Book>)
+                    foreach (var book in ViewBag.TopBooks as List<ASI.Basecode.Data.Models.BookTest>)
                     {
-                        <div class="book-card" onclick="location.href='@Url.Action("BookDetails", "User", new { id = book.Id })'">
+                        <div class="book-card" onclick="location.href='@Url.Action("BookDetails", "UserTest", new { id = book.Id })'">
                             <img src="@Url.Content("~/img/Book/" + book.ImagePath)" alt="@book.Title Cover" class="book-cover" />
                             <div class="book-meta">
                                 <strong>@book.Title</strong><br />
@@ -116,7 +114,6 @@
             </div>
         </section>
     </main>
-
     @Html.Partial("_AuthModal")
     <script src="@Url.Content("~/js/landing.js")"></script>
 </body>

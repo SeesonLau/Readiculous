@@ -8,7 +8,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Add Book - Readiculous</title>
+    <title>Edit Book - Readiculous</title>
     <link rel="stylesheet" href="~/css/style.css" />
     <link rel="stylesheet" href="~/css/admin.css" />
 </head>
@@ -19,30 +19,30 @@
             <img src="@Url.Content("~/img/png-logo.png")" class="logo-icon" />
             <h1 class="team-name">Readiculous</h1>
         </div>
-
         <nav class="nav-links">
-            <div class="profile-dropdown">
-                <span class="profile-icon" onclick="toggleDropdown(event)">👤</span>
-                <ul class="dropdown-menu hidden" id="profileMenu">
+            <div class="profile-dropdown" id="profileDropdown">
+                <span class="profile-icon" id="profileIcon">👤</span>
+                <ul class="dropdown-menu" id="profileMenu">
                     <li><a href="#">User Master</a></li>
-                    <li><a href="@Url.Action("BookMaster", "Admin")">Genre Master</a></li>
+                    <li><a href="@Url.Action("ListBooks", "BookMaster")">Genre Master</a></li>
                     <li><a href="#">Book Master</a></li>
                     <li><a href="#">Settings</a></li>
-                    <li><a href="@Url.Action("UserView", "User")">Logout</a></li>
+                    <li><a href="@Url.Action("UserView", "UserTest")">Logout</a></li>
                 </ul>
             </div>
         </nav>
     </header>
     <!-- Page Title -->
     <div class="page-header">
-        <h1 class="page-title">Add Books</h1>
+        <h1 class="page-title">Edit Books</h1>
     </div>
-
-    <!-- Add Book Form -->
+    <!-- Edit Book Form -->
     <div class="add-book-wrapper">
-        <form asp-action="AddBook" asp-controller="Admin" method="post" enctype="multipart/form-data" class="add-book-form">
+        <form asp-action="EditBook" asp-controller="Admin" method="post" enctype="multipart/form-data" class="add-book-form">
+            @Html.HiddenFor(model => model.Id)
+
             <div class="upload-column">
-                <img id="previewImage" src="~/img/placeholder.png" alt="Preview" class="upload-preview" />
+                <img id="previewImage" src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Url.Content(Model.ImageUrl) : Url.Content("~/img/placeholder.png"))" alt="Preview" class="upload-preview" />
                 <label><strong>Upload Image</strong></label>
                 <label for="Image" class="custom-file-label">
                     Choose Image
@@ -67,14 +67,29 @@
                     <input asp-for="PublishDate" class="form-input" type="date" />
                     <textarea asp-for="Description" class="form-input" placeholder="Enter book description"></textarea>
                 </div>
-
                 <div class="add-book-buttons">
-                    <a href="@Url.Action("BookMaster", "Admin")" class="auth-btn back-btn">Cancel</a>
+                    <a href="@Url.Action("ListBooks", "BookMaster")" class="auth-btn back-btn">Cancel</a>
                     <button type="submit" class="auth-btn save-btn">Save</button>
                 </div>
             </div>
         </form>
     </div>
-    <script src="@Url.Content("~/js/admin.js")"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileIcon = document.getElementById("profileIcon");
+            const dropdownMenu = document.getElementById("profileMenu");
+
+            profileIcon.addEventListener("click", function (e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle("show");
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.closest("#profileDropdown")) {
+                    dropdownMenu.classList.remove("show");
+                }
+            });
+        });
+    </script>
 </body>
 </html>

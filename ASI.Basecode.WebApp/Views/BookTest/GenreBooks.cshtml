@@ -10,7 +10,10 @@
     var filterOption = ViewBag.FilterOption as string ?? "High Rating";
     var currentPage = ViewBag.Page ?? 1;
     var totalPages = ViewBag.TotalPages ?? 1;
-    var displayTitle = selectedGenres.Any() ? $"{filterType.ToUpper()} - {string.Join(", ", selectedGenres).ToUpper()}" : "";
+    var totalEntries = ViewBag.TotalEntries ?? 0;
+    var displayTitle = selectedGenres.Any()
+        ? $"{filterType.ToUpper()} - {string.Join(", ", selectedGenres).ToUpper()}"
+        : "ALL BOOKS";
 }
 
 <!DOCTYPE html>
@@ -40,25 +43,24 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <header class="navbar">
-        <div class="logo-group" onclick="location.reload()">
+        <div class="logo-group" onclick="location.href='@Url.Action("UserView", "UserTest")'">
             <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
             <h1 class="team-name">Readiculous</h1>
         </div>
         <nav class="nav-links">
-            <a href="@Url.Action("UserView", "User")#new-books">📖 New Books</a>
-            <a href="@Url.Action("UserView", "User")#top-books">🏆 Top Books</a>
+            <a href="@Url.Action("UserView", "UserTest")#new-books">📖 New Books</a>
+            <a href="@Url.Action("UserView", "UserTest")#top-books">🏆 Top Books</a>
         </nav>
     </header>
 
     <div class="container mt-4">
         <main class="content-container">
-            <form method="get" action="@Url.Action("GenreBooks", "Books")">
+            <form method="get" action="@Url.Action("GenreBooks", "BookTest")">
                 <div class="border rounded p-3 bg-light shadow-sm mb-4">
                     <div class="row align-items-center">
                         <div class="col-md-6 position-relative">
-                            <label class="fw-bold">Genres (max 5)</label>
+                            <label class="fw-bold">Genres</label>
                             <button type="button" class="form-select text-start" id="genreToggle">Select genres…</button>
                             <ul class="dropdown-menu w-100 p-3" id="genreMenu">
                                 @foreach (var g in new[] { "Fiction", "Sci‑Fi", "Romance", "Mystery", "Drama", "Fantasy", "Psychological", "Thriller" })
@@ -97,9 +99,7 @@
                             </div>
 
                             <div class="dropdown">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    @filterOption
-                                </button>
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">@filterOption</button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="#" onclick="this.closest('form').elements.filterOption.value='High Rating';this.closest('form').submit();">High Rating</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="this.closest('form').elements.filterOption.value='Latest Book';this.closest('form').submit();">Latest Book</a></li>
@@ -110,73 +110,75 @@
                 </div>
             </form>
 
-            @if (!string.IsNullOrEmpty(displayTitle))
-            {
-                <div id="genre-book-list" class="text-center">
-                    <h4 class="display-title-highlight">@displayTitle</h4>
-                </div>
+            <div id="genre-book-list" class="text-center">
+                <h4 class="display-title-highlight">@displayTitle</h4>
+            </div>
 
-                <div class="row row-cols-2 row-cols-md-5 g-4 mt-3">
-                    @if (Model?.Any() == true)
+            <div class="row row-cols-2 row-cols-md-5 g-4 mt-3">
+                @if (Model?.Any() == true)
+                {
+                    foreach (var b in Model)
                     {
-                        foreach (var b in Model)
-                        {
-                            <div class="col">
-                                <div class="card h-100 shadow-sm book-card-hover"
-                                     onclick="window.location.href='@Url.Action("BookDetails", "User", new { id = b.Id })'">
-                                    <img src="~/img/Book/@b.ImagePath" class="card-img-top" alt="@b.Title Cover" />
-                                    <div class="card-body">
-                                        <h6 class="card-title">@b.Title</h6>
-                                        <p class="card-text small">@b.Author, @b.Year</p>
-                                        <div class="text-warning small">
-                                            @{
-                                                int stars = (int)Math.Floor(b.Rating), empty = 5 - stars;
-                                            }
-                                            @for (int i = 0; i < stars; i++)
-                                            {
-                                                <span>&#9733;</span>
-                                            }
-                                            @for (int i = 0; i < empty; i++)
-                                            {
-                                                <span class="text-muted">&#9733;</span>
-                                            }
-                                            <span class="text-dark">(@b.Rating.ToString("0.0"))</span>
-                                        </div>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm book-card-hover" onclick="window.location.href='@Url.Action("BookDetails", "UserTest", new { id = b.Id })'">
+                                <img src="~/img/Book/@b.ImagePath" class="card-img-top" alt="@b.Title Cover" />
+                                <div class="card-body">
+                                    <h6 class="card-title">@b.Title</h6>
+                                    <p class="card-text small">@b.Author, @b.Year</p>
+                                    <div class="text-warning small">
+                                        @{
+                                            int stars = (int)Math.Floor(b.Rating), empty = 5 - stars;
+                                        }
+                                        @for (int i = 0; i < stars; i++)
+                                        {
+                                            <span>&#9733;</span>
+                                        }
+                                        @for (int i = 0; i < empty; i++)
+                                        {
+                                            <span class="text-muted">&#9733;</span>
+                                        }
+                                        <span class="text-dark">(@b.Rating.ToString("0.0"))</span>
                                     </div>
                                 </div>
                             </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="col-12 text-center"><p class="text-muted">No books available.</p></div>
-                    }
-                </div>
-
-                @if (selectedGenres.Any() && totalPages > 1)
-                {
-                    <div class="text-center mt-4">
-                        <div class="d-inline-block">
-                            <a href="@Url.Action("GenreBooks", "Books", new { page = currentPage - 1, genres = string.Join(",", selectedGenres), filterType, filterOption })"
-                               class="btn btn-sm mx-1 @(currentPage == 1 ? "disabled btn-custom-pg" : "btn-custom-pg")">«</a>
-
-                            @for (int i = 1; i <= totalPages; i++)
-                            {
-                                <a href="@Url.Action("GenreBooks", "Books", new { page = i, genres = string.Join(",", selectedGenres), filterType, filterOption })"
-                                   class="btn btn-sm mx-1 @(i == currentPage ? "btn-custom-pg active" : "btn-custom-pg")">@i</a>
-                            }
-
-                            <a href="@Url.Action("GenreBooks", "Books", new { page = currentPage + 1, genres = string.Join(",", selectedGenres), filterType, filterOption })"
-                               class="btn btn-sm mx-1 @(currentPage == totalPages ? "disabled btn-custom-pg" : "btn-custom-pg")">»</a>
                         </div>
-                    </div>
+                    }
                 }
+                else
+                {
+                    <div class="col-12 text-center"><p class="text-muted">No books available.</p></div>
+                }
+            </div>
+
+            @if (totalPages > 1)
+            {
+                <div class="d-flex justify-content-between align-items-center mt-4 px-2">
+                    <div><span class="text-muted">Page @currentPage of @totalPages, of @totalEntries entries</span></div>
+                    <div class="d-inline-block text-center">
+                        <a href="@Url.Action("GenreBooks", "BookTest", new { page = 1, genres = string.Join(",", selectedGenres), filterType, filterOption })" class="btn btn-sm mx-1 @(currentPage == 1 ? "disabled btn-custom-pg" : "btn-custom-pg")">&laquo;</a>
+                        <a href="@Url.Action("GenreBooks", "BookTest", new { page = currentPage - 1, genres = string.Join(",", selectedGenres), filterType, filterOption })" class="btn btn-sm mx-1 @(currentPage == 1 ? "disabled btn-custom-pg" : "btn-custom-pg")">&lt;</a>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <a href="@Url.Action("GenreBooks", "BookTest", new { page = i, genres = string.Join(",", selectedGenres), filterType, filterOption })" class="btn btn-sm mx-1 @(i == currentPage ? "btn-custom-pg active" : "btn-custom-pg")">@i</a>
+                        }
+                        <a href="@Url.Action("GenreBooks", "BookTest", new { page = currentPage + 1, genres = string.Join(",", selectedGenres), filterType, filterOption })" class="btn btn-sm mx-1 @(currentPage == totalPages ? "disabled btn-custom-pg" : "btn-custom-pg")">&gt;</a>
+                        <a href="@Url.Action("GenreBooks", "BookTest", new { page = totalPages, genres = string.Join(",", selectedGenres), filterType, filterOption })" class="btn btn-sm mx-1 @(currentPage == totalPages ? "disabled btn-custom-pg" : "btn-custom-pg")">&raquo;</a>
+                    </div>
+                    <div>
+                        <form method="get" class="d-flex align-items-center" style="gap: 5px;" action="@Url.Action("GenreBooks", "BookTest")">
+                            <input type="hidden" name="genres" value="@string.Join(",", selectedGenres)" />
+                            <input type="hidden" name="filterType" value="@filterType" />
+                            <input type="hidden" name="filterOption" value="@filterOption" />
+                            <label class="form-label mb-0">Page</label>
+                            <input type="number" name="page" class="form-control form-control-sm" value="@currentPage" min="1" max="@totalPages" style="width: 60px;" />
+                        </form>
+                    </div>
+                </div>
             }
         </main>
     </div>
 
     @Html.Partial("_AuthModal")
-
     <script>
         const toggle = document.getElementById("genreToggle"),
               menu = document.getElementById("genreMenu"),
@@ -184,30 +186,20 @@
               hiddenInput = document.getElementById("selectedGenresInput"),
               display = document.getElementById("selectedGenresDisplay"),
               form = document.querySelector("form");
-
         toggle.addEventListener("click", e => {
             e.stopPropagation();
             menu.classList.toggle("show");
         });
-
         document.addEventListener("click", e => {
             if (!toggle.contains(e.target)) menu.classList.remove("show");
         });
-
         checkboxes.forEach(cb => cb.addEventListener("change", () => {
-            let selected = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
-            if (selected.length > 5) {
-                cb.checked = false;
-                alert("You can only select up to 5 genres.");
-                selected = selected.filter(v => v !== cb.value);
-            }
-
+            const selected = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
             hiddenInput.value = selected.join(",");
             display.innerHTML = selected.map(g => `<span class="genre-badge">${g}</span>`).join("");
             form.submit();
         }));
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

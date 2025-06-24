@@ -1,13 +1,13 @@
 ﻿// Run once DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-    // Profile Dropdown Toggle
+    // === Profile Dropdown ===
     const profileIcon = document.querySelector(".profile-icon");
     const dropdownMenu = document.getElementById("profileMenu");
 
     if (profileIcon && dropdownMenu) {
         profileIcon.addEventListener("click", toggleDropdown);
 
-        // Hide dropdown when clicking outside
+        // Close dropdown when clicking outside
         document.addEventListener("click", function (e) {
             if (!e.target.closest(".profile-dropdown")) {
                 dropdownMenu.classList.add("hidden");
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Search Filter Logic
+    // === Live Search Filter ===
     const searchInput = document.querySelector(".admin-search");
     const rows = document.querySelectorAll(".admin-book-table tbody tr");
 
@@ -29,9 +29,16 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
+
+    // === Auto-close modal when escape is pressed
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeDeleteModal();
+        }
+    });
 });
 
-// File preview function (image upload)
+// === File Preview for Cover Image Upload
 function previewFile(input) {
     const preview = document.getElementById('previewImage');
     const file = input.files[0];
@@ -46,7 +53,7 @@ function previewFile(input) {
     }
 }
 
-// Toggle Profile Dropdown
+// === Toggle Profile Dropdown
 function toggleDropdown(event) {
     event.stopPropagation();
     const menu = document.getElementById("profileMenu");
@@ -54,22 +61,50 @@ function toggleDropdown(event) {
     menu.classList.toggle("show");
 }
 
-let selectedDeleteId = null;
+// === Delete Modal Logic
+let bookIdToDelete = null;
 
-function showDeleteModal(id) {
-    selectedDeleteId = id;
-    document.getElementById("authModal").classList.remove("hidden");
+function showDeleteModal(bookId) {
+    bookIdToDelete = bookId;
+    const authModal = document.getElementById("authModal");
+    const deleteModal = document.getElementById("deleteModal");
+
+    if (authModal && deleteModal) {
+        authModal.classList.remove("hidden");
+        setTimeout(() => authModal.classList.add("show"), 10);
+
+        document.querySelectorAll(".auth-box").forEach(box => box.classList.add("hidden"));
+        deleteModal.classList.remove("hidden");
+    }
 }
 
 function closeDeleteModal() {
-    selectedDeleteId = null;
-    document.getElementById("authModal").classList.add("hidden");
+    const authModal = document.getElementById("authModal");
+    if (authModal) {
+        authModal.classList.remove("show");
+        setTimeout(() => authModal.classList.add("hidden"), 200);
+    }
+    bookIdToDelete = null;
 }
 
 function confirmDelete() {
-    if (selectedDeleteId !== null) {
-        const form = document.getElementById("deleteForm");
-        document.getElementById("deleteBookId").value = selectedDeleteId;
-        form.submit();
+    if (bookIdToDelete !== null) {
+        fetch(`/Admin/DeleteBook`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: `id=${bookIdToDelete}`
+        })
+            .then(response => {
+                if (response.ok) {
+                    const row = document.getElementById("book-row-" + bookIdToDelete);
+                    if (row) row.remove();
+                    closeDeleteModal();
+                }
+            });
+
+        bookIdToDelete = null;
     }
 }

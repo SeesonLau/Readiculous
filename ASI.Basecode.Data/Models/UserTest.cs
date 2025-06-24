@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ASI.Basecode.Data.Models
 {
-    public partial class User
+    public partial class UserTest
     {
         public int Id { get; set; }
         public string UserId { get; set; }

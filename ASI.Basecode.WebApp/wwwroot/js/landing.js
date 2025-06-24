@@ -7,13 +7,16 @@
     const forgotForm = document.getElementById("forgotForm");
     const otpForm = document.getElementById("otpForm");
     const newPasswordForm = document.getElementById("newPasswordForm");
-    const successForm = document.getElementById("successForm");
+    const resetSuccessForm = document.getElementById("successForm");
+    const registrationSuccessForm = document.getElementById("registrationSuccessForm");
     const loginRequiredBox = document.getElementById("loginRequiredBox");
 
     // Navigation buttons
     const showRegister = document.getElementById("showRegister");
     const showLogin = document.getElementById("showLogin");
     const showForgot = document.getElementById("showForgot");
+    const showotpForm = document.getElementById("showotpForm");
+    const shownewPass = document.getElementById("newPasswordForm");
     const backToLogin = document.getElementById("backToLogin");
     const backToForgot = document.getElementById("backToForgot");
     const backToOTP = document.getElementById("backToOTP");
@@ -33,7 +36,7 @@
         setTimeout(() => authModal.classList.add("hidden"), 200);
     };
 
-    // Show only a specific form
+    // Show only one section
     window.showOnlyById = function (id) {
         const formIds = [
             "loginForm",
@@ -42,6 +45,7 @@
             "otpForm",
             "newPasswordForm",
             "successForm",
+            "registrationSuccessForm",
             "loginRequiredBox"
         ];
         formIds.forEach(formId => {
@@ -50,9 +54,9 @@
         });
         const targetForm = document.getElementById(id);
         if (targetForm) targetForm.classList.remove("hidden");
-    };
+    };  
 
-    // Show login required popup
+    // Login required
     window.showLoginRequiredModal = () => {
         if (!authModal) return;
         authModal.classList.remove("hidden");
@@ -60,7 +64,7 @@
         showOnlyById("loginRequiredBox");
     };
 
-    // Navigation events
+    // Navigation
     showRegister?.addEventListener("click", e => {
         e.preventDefault();
         showOnlyById("registerForm");
@@ -76,6 +80,7 @@
         showOnlyById("forgotForm");
     });
 
+  
     backToLogin?.addEventListener("click", e => {
         e.preventDefault();
         showOnlyById("loginForm");
@@ -91,14 +96,14 @@
         showOnlyById("otpForm");
     });
 
-    // Auth logic
+    // Admin Sign-In
     window.signIn = () => {
         const username = document.getElementById("login-username")?.value.trim();
         const password = document.getElementById("login-password")?.value.trim();
         const errorBox = document.getElementById("loginError");
 
         if (username === "admin" && password === "admin123") {
-            window.location.href = "/Admin/BookMaster";
+            window.location.href = "/BookMaster/ListBooks";
         } else {
             if (errorBox) {
                 errorBox.innerText = "Invalid credentials.";
@@ -107,15 +112,37 @@
                 alert("Invalid credentials.");
             }
         }
-
         return false;
     };
 
+    // Sign-Up Logic
     window.register = () => {
-        alert("Registration logic goes here");
+        const username = document.getElementById("register-username")?.value.trim() || "[YourUsername]";
+        const email = document.getElementById("register-email")?.value.trim() || "[YourEmail]";
+
+        // Fill placeholders
+        const uname = document.getElementById("success-username");
+        const uemail = document.getElementById("success-email");
+
+        if (uname) uname.innerText = username;
+        if (uemail) uemail.innerText = email;
+
+        showOnlyById("registrationSuccessForm");
     };
 
-    // Genre dropdown logic
+    window.showOTPForm = function () {
+        showOnlyById("otpForm");
+    };
+
+    window.showNewPasswordForm = function () {
+        showOnlyById("newPasswordForm");
+    };
+
+    window.showSuccessForm = function () {
+        showOnlyById("successForm");
+    };
+
+    // Genre dropdown logic (if used)
     const genreDropdown = document.getElementById("genreDropdown");
     const genreList = document.getElementById("genreList");
     const selectedGenresDisplay = document.getElementById("selectedGenres");
@@ -165,7 +192,6 @@
         });
     }
 
-    // Close genre dropdown when clicking outside
     document.addEventListener("click", e => {
         if (!genreDropdown?.contains(e.target)) {
             genreList?.classList.remove("show");

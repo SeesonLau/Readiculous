@@ -1,4 +1,5 @@
 ﻿@model List<ASI.Basecode.WebApp.Models.BookViewModel>
+
 @{
     Layout = null;
 }
@@ -17,16 +18,15 @@
             <img src="@Url.Content("~/img/png-logo.png")" class="logo-icon" />
             <h1 class="team-name">Readiculous</h1>
         </div>
-
         <nav class="nav-links">
-            <div class="profile-dropdown">
-                <span class="profile-icon" onclick="toggleDropdown(event)">👤</span>
-                <ul class="dropdown-menu hidden" id="profileMenu">
+            <div class="profile-dropdown" id="profileDropdown">
+                <span class="profile-icon" id="profileIcon">👤</span>
+                <ul class="dropdown-menu" id="profileMenu">
                     <li><a href="#">User Master</a></li>
-                    <li><a href="@Url.Action("BookMaster", "Admin")">Genre Master</a></li>
+                    <li><a href="@Url.Action("ListBooks", "BookMaster")">Genre Master</a></li>
                     <li><a href="#">Book Master</a></li>
                     <li><a href="#">Settings</a></li>
-                    <li><a href="@Url.Action("UserView", "User")">Logout</a></li>
+                    <li><a href="@Url.Action("UserView", "UserTest")">Logout</a></li>
                 </ul>
             </div>
         </nav>
@@ -35,22 +35,19 @@
     <section class="admin-container">
         <h2>Manage Books</h2>
         <div class="admin-controls">
-            <input type="text" class="admin-search" placeholder="🔍 Search by title, author or genre..." />
-            <select class="admin-dropdown">
+            <input type="text" class="admin-search" placeholder="🔍 Search by title, author or genre..." id="searchInput" />
+            <select class="admin-dropdown" id="seriesFilter">
                 <option>No. of Series</option>
                 <option>Has Series</option>
                 <option>No Series</option>
             </select>
-            <select class="admin-dropdown">
+            <select class="admin-dropdown" id="sortOptions">
                 <option>Sort By: Name</option>
                 <option>Sort By: Rating</option>
                 <option>Sort By: Genre</option>
             </select>
-
-            <!-- 🔁 Changed to redirect to AddBook action -->
-            <a href="@Url.Action("AddBook", "Admin")" class="new-book-btn">+ New Book</a>
+            <a href="@Url.Action("AddBook", "BookMaster")" class="new-book-btn">+ New Book</a>
         </div>
-
         <div class="book-table-wrapper">
             <table class="admin-book-table">
                 <thead>
@@ -67,7 +64,7 @@
                 <tbody>
                     @foreach (var book in Model)
                     {
-                        <tr>
+                        <tr id="book-row-@book.Id">
                             <td>@book.Id</td>
                             <td>@book.Title</td>
                             <td>@book.Author</td>
@@ -80,8 +77,8 @@
                                 }
                             </td>
                             <td class="action-icons">
-                                <span title="View">👁</span>
-                                <span title="Edit">✏️</span>
+                                <a href="@Url.Action("ViewBook", "BookMaster", new { id = book.Id })" title="View">👁</a>
+                                <a href="@Url.Action("EditBook", "BookMaster", new { id = book.Id })" title="Edit">✏️</a>
                                 <button title="Delete" onclick="showDeleteModal(@book.Id)">🗑️</button>
                             </td>
                         </tr>
@@ -91,6 +88,52 @@
         </div>
     </section>
     @Html.Partial("_AuthModal")
-    <script src="@Url.Content("~/js/admin.js")"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileIcon = document.getElementById("profileIcon");
+            const dropdownMenu = document.getElementById("profileMenu");
+
+            profileIcon.addEventListener("click", function (e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle("show");
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!e.target.closest("#profileDropdown")) {
+                    dropdownMenu.classList.remove("show");
+                }
+            });
+        });
+
+        let bookIdToDelete = null;
+
+        function showDeleteModal(bookId) {
+            bookIdToDelete = bookId;
+            const authModal = document.getElementById("authModal");
+            const deleteModal = document.getElementById("deleteModal");
+
+            if (authModal && deleteModal) {
+                authModal.classList.remove("hidden");
+                setTimeout(() => authModal.classList.add("show"), 10);
+                document.querySelectorAll(".auth-box").forEach(box => box.classList.add("hidden"));
+                deleteModal.classList.remove("hidden");
+            }
+        }
+
+        function closeDeleteModal() {
+            const authModal = document.getElementById("authModal");
+            if (authModal) {
+                authModal.classList.remove("show");
+                setTimeout(() => authModal.classList.add("hidden"), 200);
+            }
+            bookIdToDelete = null;
+        }
+
+        function confirmDelete() {
+            if (bookIdToDelete !== null) {
+                window.location.href = `/Admin/DeleteBook/${bookIdToDelete}`;
+            }
+        }
+    </script>
 </body>
 </html>

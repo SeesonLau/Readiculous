@@ -17,8 +17,8 @@ namespace ASI.Basecode.WebApp.Models
         public string ISBN { get; set; }
         public DateTime? PublishDate { get; set; }
         public string Description { get; set; }
-        public IFormFile Image { get; set; }
-
+        public string ImageUrl { get; set; }
+        public DateTime? AddedDate { get; set; }
 
     }
 }
