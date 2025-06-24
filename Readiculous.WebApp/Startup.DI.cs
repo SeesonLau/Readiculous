@@ -38,10 +38,12 @@ namespace Readiculous.WebApp
             this._services.TryAddSingleton<TokenValidationParametersFactory>();
             this._services.AddScoped<IUserService, UserService>();
             this._services.AddScoped<IGenreService, GenreService>();
+            this._services.AddScoped<IBookService, BookService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
             this._services.AddScoped<IGenreRepository, GenreRepository>();
+            this._services.AddScoped<IBookRepository, BookRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();

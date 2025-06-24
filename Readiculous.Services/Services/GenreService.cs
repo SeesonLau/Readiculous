@@ -76,9 +76,24 @@ namespace Readiculous.Services.Services
             }
         }
 
+        public List<GenreViewModel> GetAllActiveGenres()
+        {
+            var genreViewModels = _genreRepository.GetAllActiveGenres()
+                .ToList()
+                .Select(genre =>
+                {
+                    GenreViewModel model = new GenreViewModel();
+                    _mapper.Map(genre, model);
+                    return model;
+                })
+                .ToList();
+
+            return genreViewModels;
+        }
+
         public List<GenreViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType)
         {
-            var genres = _genreRepository.GetGenresByName(genreName.Trim(), genreSortType)
+            var genreViewModels = _genreRepository.GetGenresByName(genreName.Trim(), genreSortType)
                 .Where(g => g.DeletedTime == null)
                 .ToList()
                 .Select(genre =>
@@ -88,28 +103,29 @@ namespace Readiculous.Services.Services
                     return model;
                 })
                 .ToList();
-            return genres;
+
+            return genreViewModels;
         }
 
         public GenreViewModel GetGenreById(string id)
         {
-            var genre = _genreRepository.GetGenreById(id);
-            if (genre == null || genre.DeletedTime != null)
+            var genreViewModel = _genreRepository.GetGenreById(id);
+            if (genreViewModel == null || genreViewModel.DeletedTime != null)
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var model = new GenreViewModel();
-            _mapper.Map(genre, model);
+            _mapper.Map(genreViewModel, model);
             return model;
         }
 
         public GenreViewModel GetGenreByName(string name)
         {
-            var genre = _genreRepository.GetGenreByName(name.Trim());
+            var genreViewModel = _genreRepository.GetGenreByName(name.Trim());
             
             var model = new GenreViewModel();
-            _mapper.Map(genre, model);
+            _mapper.Map(genreViewModel, model);
             return model;
         }
     }

@@ -55,5 +55,27 @@
             CreatedTimeAscending = 4,
             CreatedTimeDescending = 5,
         }
+
+        public enum BookSortType
+        {
+            GenreAscending = 0,
+            GenreDescending = 1,
+            TitleAscending = 2,
+            TitleDescending = 3,
+            AuthorAscending = 4,
+            AuthorDescending = 5,
+            RatingAscending = 6,
+            RatingDescending = 7,
+            SeriesAscending = 8,
+            SeriesDescending = 9,
+            CreatedTimeAscending = 10,
+            CreatedTimeDescending = 11,
+        }
+
+        public enum GetSource
+        {
+            Details = 0,
+            Edit = 1,
+        }
     }
 }

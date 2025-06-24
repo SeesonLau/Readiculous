@@ -29,6 +29,7 @@ namespace Readiculous.Data
             // User Entity Configuration
             modelBuilder.Entity<User>(entity =>
             {
+                entity.ToTable("Users"); // Table Name
                 entity.HasKey(u => u.UserId); // Primary Key
 
                 // Index Creation
@@ -89,6 +90,7 @@ namespace Readiculous.Data
 
             modelBuilder.Entity<Book>(entity =>
             {
+                entity.ToTable("Books"); // Table Name
                 entity.HasKey(b => b.BookId); // Primary Key
 
                 // Index Creation
@@ -142,6 +144,7 @@ namespace Readiculous.Data
 
             modelBuilder.Entity<Genre>(entity =>
             {
+                entity.ToTable("Genres"); // Table Name
                 entity.HasKey(g => g.GenreId); // Primary Key
 
                 // Index Creation
@@ -181,6 +184,7 @@ namespace Readiculous.Data
 
             modelBuilder.Entity<Review>(entity =>
             {
+                entity.ToTable("Reviews"); // Table Name
                 entity.HasKey(r => new { r.BookId, r.UserId }); // Primary Key
 
                 // Foreign Key Configuration
@@ -196,6 +200,7 @@ namespace Readiculous.Data
 
             modelBuilder.Entity<FavoriteBook>(entity =>
             {
+                entity.ToTable("FavoriteBooks"); // Table Name
                 entity.HasKey(fb => new { fb.UserId, fb.BookId }); // Primary Key
 
                 // Foreign Key Configuration
@@ -212,6 +217,7 @@ namespace Readiculous.Data
 
              modelBuilder.Entity<BookGenreAssignment>(entity =>
              {
+                 entity.ToTable("BookGenreAssignments"); // Table Name
                  entity.HasKey(bga => new { bga.BookId, bga.GenreId }); // Primary Key
 
                  // Foreign Key Configuration

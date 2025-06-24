@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,12 +30,20 @@ namespace Readiculous.Services.ServiceModels
         public string Publisher { get; set; }
 
         [Required(ErrorMessage = "Publication year is required!")]
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "Publication year must be a valid year!")]
         public string PublicationYear { get; set; }
 
+        [Required(ErrorMessage = "Genre is required!")]
+        [MinLength(1, ErrorMessage = "At least one genre must be selected!")]
+        public List<string> SelectedGenres { get; set; } = [];
+
+        public List<GenreViewModel> AllAvailableGenres { get; set; } = [];
         public string BookId { get; set; }
+        public string CoverImageUrl { get; set; }
+        public IFormFile CoverImage { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }
         public string UpdatedBy { get; set; }
-        public string UpdatedTime { get; set; }
+        public DateTime UpdatedTime { get; set; }
     }
 }

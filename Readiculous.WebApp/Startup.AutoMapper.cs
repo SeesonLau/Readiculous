@@ -2,6 +2,7 @@
 using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace Readiculous.WebApp
 {
@@ -25,10 +26,37 @@ namespace Readiculous.WebApp
         {
             public AutoMapperProfileConfiguration()
             {
+
                 CreateMap<UserViewModel, User>();
                 CreateMap<User, UserViewModel>();
                 CreateMap<GenreViewModel, Genre>();
                 CreateMap<Genre, GenreViewModel>();
+                CreateMap<BookViewModel, Book>();
+                CreateMap<Book, BookViewModel>();
+
+                //User Mappings
+                CreateMap<User, UserListItemViewModel>()
+                    .ForMember(dest => dest.Role,
+                               opt => opt.MapFrom(
+                                  src => src.Role.ToString()));
+
+                // Book Mappings
+                CreateMap<Book, BookDetailsViewModel>()
+                    .ForMember(dest => dest.Genres,
+                               opt => opt.MapFrom(src => src.GenreAssociations
+                                   .Where(ga => ga.Genre.DeletedTime == null)
+                                   .Select(ga => ga.Genre.Name).ToList()))
+                    .ForMember(dest => dest.CreatedByUserName,
+                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
+                    .ForMember(dest => dest.UpdatedByUserName,
+                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
+
+                // Average rating still requires mapping: mapping applied after review is implemented
+                CreateMap<Book, BookListItemViewModel>()
+                    .ForMember(dest => dest.Genres,
+                               opt => opt.MapFrom(src => src.GenreAssociations
+                                   .Where(ga => ga.Genre.DeletedTime == null)
+                                   .Select(ga => ga.Genre.Name).ToList()));
             }
         }
     }

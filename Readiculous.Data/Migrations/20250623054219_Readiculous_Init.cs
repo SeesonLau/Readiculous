@@ -53,7 +53,7 @@ namespace Readiculous.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BookGenres",
+                name: "Genres",
                 columns: table => new
                 {
                     GenreId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -68,21 +68,21 @@ namespace Readiculous.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookGenres", x => x.GenreId);
+                    table.PrimaryKey("PK_Genres", x => x.GenreId);
                     table.ForeignKey(
-                        name: "FK_BookGenres_Users_CreatedBy",
+                        name: "FK_Genres_Users_CreatedBy",
                         column: x => x.CreatedBy,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_BookGenres_Users_DeletedBy",
+                        name: "FK_Genres_Users_DeletedBy",
                         column: x => x.DeletedBy,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_BookGenres_Users_UpdatedBy",
+                        name: "FK_Genres_Users_UpdatedBy",
                         column: x => x.UpdatedBy,
                         principalTable: "Users",
                         principalColumn: "UserId",
@@ -101,6 +101,7 @@ namespace Readiculous.Data.Migrations
                     SeriesNumber = table.Column<int>(type: "int", nullable: false),
                     Publisher = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PublicationYear = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CoverImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -113,9 +114,9 @@ namespace Readiculous.Data.Migrations
                 {
                     table.PrimaryKey("PK_Books", x => x.BookId);
                     table.ForeignKey(
-                        name: "FK_Books_BookGenres_BookGenreGenreId",
+                        name: "FK_Books_Genres_BookGenreGenreId",
                         column: x => x.BookGenreGenreId,
-                        principalTable: "BookGenres",
+                        principalTable: "Genres",
                         principalColumn: "GenreId");
                     table.ForeignKey(
                         name: "FK_Books_Users_CreatedBy",
@@ -148,16 +149,16 @@ namespace Readiculous.Data.Migrations
                 {
                     table.PrimaryKey("PK_BookGenreAssignments", x => new { x.BookId, x.GenreId });
                     table.ForeignKey(
-                        name: "FK_BookGenreAssignments_BookGenres_GenreId",
-                        column: x => x.GenreId,
-                        principalTable: "BookGenres",
-                        principalColumn: "GenreId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_BookGenreAssignments_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "BookId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BookGenreAssignments_Genres_GenreId",
+                        column: x => x.GenreId,
+                        principalTable: "Genres",
+                        principalColumn: "GenreId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -219,36 +220,6 @@ namespace Readiculous.Data.Migrations
                 name: "IX_BookGenreAssignments_GenreId",
                 table: "BookGenreAssignments",
                 column: "GenreId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BookGenres_DeletedBy",
-                table: "BookGenres",
-                column: "DeletedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BookGenres_Name",
-                table: "BookGenres",
-                column: "Name",
-                unique: true,
-                filter: "[DeletedTime] IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CreatedBy",
-                table: "BookGenres",
-                column: "CreatedBy",
-                filter: "[DeletedTime] IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CreatedTime",
-                table: "BookGenres",
-                column: "CreatedTime",
-                filter: "[DeletedTime] IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UpdatedBy",
-                table: "BookGenres",
-                column: "UpdatedBy",
-                filter: "[DeletedTime] IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Author",
@@ -314,6 +285,36 @@ namespace Readiculous.Data.Migrations
                 name: "IX_FavoriteBooks_BookId",
                 table: "FavoriteBooks",
                 column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CreatedBy",
+                table: "Genres",
+                column: "CreatedBy",
+                filter: "[DeletedTime] IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CreatedTime",
+                table: "Genres",
+                column: "CreatedTime",
+                filter: "[DeletedTime] IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Genres_DeletedBy",
+                table: "Genres",
+                column: "DeletedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Genres_Name",
+                table: "Genres",
+                column: "Name",
+                unique: true,
+                filter: "[DeletedTime] IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UpdatedBy",
+                table: "Genres",
+                column: "UpdatedBy",
+                filter: "[DeletedTime] IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_UserId",
@@ -386,7 +387,7 @@ namespace Readiculous.Data.Migrations
                 name: "Books");
 
             migrationBuilder.DropTable(
-                name: "BookGenres");
+                name: "Genres");
 
             migrationBuilder.DropTable(
                 name: "Users");

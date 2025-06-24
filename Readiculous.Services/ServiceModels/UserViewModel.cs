@@ -25,7 +25,6 @@ namespace Readiculous.Services.ServiceModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-
         public string UserId { get; set; }
         public RoleType Role { get; set; }
         public IFormFile ProfilePicture { get; set; }

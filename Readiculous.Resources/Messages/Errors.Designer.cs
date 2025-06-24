@@ -61,6 +61,33 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Book already exists!.
+        /// </summary>
+        public static string BookExists {
+            get {
+                return ResourceManager.GetString("BookExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Book does not exist!.
+        /// </summary>
+        public static string BookNotExists {
+            get {
+                return ResourceManager.GetString("BookNotExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A book with the same title and author already exists!.
+        /// </summary>
+        public static string BookTitleAndAuthorExists {
+            get {
+                return ResourceManager.GetString("BookTitleAndAuthorExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Genre Name already exists!.
         /// </summary>
         public static string GenreExists {

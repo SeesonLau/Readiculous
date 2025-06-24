@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.BookListItemViewModel>
+
+@{
+    ViewData["Title"] = "Book Management";
+}
+
+<h1>Book Management</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New Book</a>
+</p>
+
+<!-- Search and Sort Form -->
+<form asp-action="Index" method="get" class="mb-4">
+    <div class="row align-items-end">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="searchString" class="form-label">Search Book Title:</label>
+                <input type="text" name="searchString" class="form-control" placeholder="Enter book title"
+                       value="@ViewData["CurrentFilter"]" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sortOrder" class="form-label">Sort By:</label>
+                <select name="sortOrder" class="form-control" asp-items="@ViewBag.BookSortTypes"></select>
+            </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">Search</button>
+            <a asp-action="Index" class="btn btn-secondary">Clear</a>
+        </div>
+    </div>
+</form>
+
+<!-- Books Table -->
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Cover</th>
+            <th>@Html.DisplayNameFor(model => model.First().Title)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Author)</th>
+            <th>Genres</th>
+            <th>@Html.DisplayNameFor(model => model.First().PublicationYear)</th>
+            <th>@Html.DisplayNameFor(model => model.First().AverageRating)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.CoverImageUrl))
+                    {
+                        <img src="@item.CoverImageUrl" alt="Cover" width="50" height="75" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">No Image</span>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                <td>
+                    @if (item.Genres.Any())
+                    {
+                        @string.Join(", ", item.Genres)
+                    }
+                    else
+                    {
+                        <span class="text-muted">No genres</span>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.PublicationYear)</td>
+                <td>@item.AverageRating.ToString("0.0")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-info">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.BookId" class="btn btn-sm btn-secondary">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">No books found matching your criteria.</td>
+            </tr>
+        }
+    </tbody>
+</table>

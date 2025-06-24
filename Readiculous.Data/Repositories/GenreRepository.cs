@@ -54,12 +54,16 @@ namespace Readiculous.Data.Repositories
             }
         }
 
+        public IQueryable<Genre> GetAllActiveGenres()
+        {
+            return this.GetDbSet<Genre>()
+                .Where(g => g.DeletedTime == null);
+        }
         public IQueryable<Genre> GetGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeAscending)
         {
             var queryReturn = this.GetDbSet<Genre>()
                 .Where(g => g.Name.ToLower().Contains(genreName.ToLower()) &&
-                            g.DeletedTime == null)
-                .OrderBy(g => g.Name);
+                            g.DeletedTime == null);
 
             return (genreSortType) switch
             {
@@ -67,8 +71,8 @@ namespace Readiculous.Data.Repositories
                 GenreSortType.NameDescending => queryReturn.OrderByDescending(g => g.Name),
                 GenreSortType.BookCountAscending => queryReturn.OrderBy(g => g.Books.Count),
                 GenreSortType.BookCountDescending => queryReturn.OrderByDescending(g => g.Books.Count),
-                GenreSortType.CreatedTimeAscending => queryReturn.OrderBy(g => g.CreatedTime),
-                GenreSortType.CreatedTimeDescending => queryReturn.OrderByDescending(g => g.CreatedTime),
+                GenreSortType.CreatedTimeAscending => queryReturn,
+                GenreSortType.CreatedTimeDescending => queryReturn.Reverse(),
                 _ => queryReturn, // Default case
             };
         }

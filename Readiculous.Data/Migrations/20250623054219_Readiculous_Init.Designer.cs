@@ -12,7 +12,7 @@ using Readiculous.Data;
 namespace Readiculous.Data.Migrations
 {
     [DbContext(typeof(ReadiculousDbContext))]
-    [Migration("20250622182612_Readiculous_Init")]
+    [Migration("20250623054219_Readiculous_Init")]
     partial class Readiculous_Init
     {
         /// <inheritdoc />
@@ -37,6 +37,9 @@ namespace Readiculous.Data.Migrations
 
                     b.Property<string>("BookGenreGenreId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(450)");
@@ -112,7 +115,7 @@ namespace Readiculous.Data.Migrations
                         .IsUnique()
                         .HasFilter("[DeletedTime] IS NULL");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("Readiculous.Data.Models.BookGenreAssignment", b =>
@@ -127,7 +130,7 @@ namespace Readiculous.Data.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("BookGenreAssignments");
+                    b.ToTable("BookGenreAssignments", (string)null);
                 });
 
             modelBuilder.Entity("Readiculous.Data.Models.FavoriteBook", b =>
@@ -151,7 +154,7 @@ namespace Readiculous.Data.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("FavoriteBooks");
+                    b.ToTable("FavoriteBooks", (string)null);
                 });
 
             modelBuilder.Entity("Readiculous.Data.Models.Genre", b =>
@@ -203,7 +206,7 @@ namespace Readiculous.Data.Migrations
                     b.HasIndex(new[] { "UpdatedBy" }, "IX_UpdatedBy")
                         .HasFilter("[DeletedTime] IS NULL");
 
-                    b.ToTable("BookGenres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("Readiculous.Data.Models.Review", b =>
@@ -227,7 +230,7 @@ namespace Readiculous.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Readiculous.Data.Models.User", b =>
@@ -311,7 +314,7 @@ namespace Readiculous.Data.Migrations
                         .IsUnique()
                         .HasFilter("[DeletedTime] IS NULL");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Readiculous.Data.Models.Book", b =>

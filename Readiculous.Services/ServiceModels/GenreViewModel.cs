@@ -16,7 +16,7 @@ namespace Readiculous.Services.ServiceModels
         public string Description { get; set; }
 
         public string GenreId { get; set; }
-        public List<BookViewModel> Books { get; set; } = new List<BookViewModel>();
+        //public List<BookViewModel> Books { get; set; } = new List<BookViewModel>();
         public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }
         public string UpdatedBy { get; set; }
