@@ -17,8 +17,8 @@ namespace Readiculous.Services.Interfaces
 
         void DeleteGenre(string genreId, string deleterId);
 
-        List<GenreListItemViewModel> GetAllActiveGenres();
-        List<GenreListItemViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending);
+        List<GenreListItemViewModel> ListAllActiveGenres();
+        List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending);
 
         GenreViewModel GetGenreEditById(string id);
         GenreDetailsViewModel GetGenreDetailsById(string id);

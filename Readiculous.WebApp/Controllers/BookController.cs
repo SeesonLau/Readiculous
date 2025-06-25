@@ -8,6 +8,7 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using Readiculous.WebApp.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -24,11 +25,21 @@ namespace Readiculous.WebApp.Controllers
             _genreService = genreService;
         }
 
-        public IActionResult Index(string searchString, BookSortType sortOrder = BookSortType.CreatedTimeAscending)
+        public IActionResult Index(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;
 
+            ViewBag.AllGenres = _genreService.ListAllActiveGenres();
+            ViewBag.SelectedGenreIds = genres?.Select(g => g.GenreId).ToList() ?? new List<string>();
+            ViewBag.BookSearchTypes = Enum.GetValues(typeof(BookSearchType))
+                .Cast<BookSearchType>()
+                .Select(t => new SelectListItem
+                {
+                    Value = ((int)t).ToString(),
+                    Text = t.ToString(),
+                    Selected = t == searchType
+                }).ToList();
             ViewBag.BookSortTypes = Enum.GetValues(typeof(BookSortType))
                 .Cast<BookSortType>()
                 .Select(v => new SelectListItem
@@ -38,13 +49,22 @@ namespace Readiculous.WebApp.Controllers
                     Selected = v == sortOrder
                 }).ToList();
 
-            if(string.IsNullOrEmpty(searchString))
+            if(string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && searchType == BookSearchType.AllBooks && sortOrder == BookSortType.CreatedTimeDescending)
             {
-                searchString = string.Empty; 
+                return View(_bookService.ListAllActiveBooks());
             }
-            var books = _bookService.ListBooksByTitle(searchString, sortOrder);
-
-            return View(books);
+            else if(string.IsNullOrEmpty(searchString))
+            {
+                return View(_bookService.ListBooksByGenreList(genres, searchType, sortOrder));
+            }
+            else if (genres == null || !genres.Any())
+            {
+                return View(_bookService.ListBooksByTitle(searchString, searchType, sortOrder));
+            }
+            else
+            {
+                return View(_bookService.ListBooksByTitleAndGenres(searchString, genres, searchType, sortOrder));
+            }
         }
 
         [HttpGet]
@@ -52,7 +72,7 @@ namespace Readiculous.WebApp.Controllers
         {
             var model = new BookViewModel();
 
-            var allGenres = _genreService.GetAllActiveGenres(); 
+            var allGenres = _genreService.ListAllActiveGenres(); 
 
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
@@ -72,7 +92,7 @@ namespace Readiculous.WebApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            var allGenres = _genreService.GetAllActiveGenres();
+            var allGenres = _genreService.ListAllActiveGenres();
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
                 GenreId = g.GenreId,
@@ -87,7 +107,7 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 var model = _bookService.GetBookEditById(id);
-                model.AllAvailableGenres = _genreService.GetAllActiveGenres()
+                model.AllAvailableGenres = _genreService.ListAllActiveGenres()
                     .Select(g => new GenreViewModel
                     {
                         GenreId = g.GenreId,
@@ -120,7 +140,7 @@ namespace Readiculous.WebApp.Controllers
                 }
             }
 
-            var allGenres = _genreService.GetAllActiveGenres();
+            var allGenres = _genreService.ListAllActiveGenres();
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
                 GenreId = g.GenreId,

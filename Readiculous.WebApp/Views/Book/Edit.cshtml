@@ -8,6 +8,8 @@
 <hr />
 <form asp-action="Edit" enctype="multipart/form-data">
     <input type="hidden" asp-for="BookId" />
+    <input type="hidden" asp-for="CreatedBy" />
+    <input type="hidden" asp-for="UpdatedBy" />
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 

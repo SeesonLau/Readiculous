@@ -40,11 +40,11 @@ namespace Readiculous.WebApp.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                genres = _genreService.SearchGenresByName(searchString, searchType);
+                genres = _genreService.ListGenresByName(searchString, searchType);
             }
             else
             {
-                genres = _genreService.GetAllActiveGenres();
+                genres = _genreService.ListAllActiveGenres();
             }
 
             return View(genres);
@@ -115,7 +115,7 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _genreService.SearchGenresByName(string.Empty));
+                return View("Index", _genreService.ListGenresByName(string.Empty));
             }
         }
 

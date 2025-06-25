@@ -34,7 +34,7 @@ namespace Readiculous.Services.Services
         public async Task AddBook(BookViewModel model, string creatorId)
         {
             // Books can only be added if the title and author combination does not already exist.
-            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
@@ -107,7 +107,7 @@ namespace Readiculous.Services.Services
 
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author))
+            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
@@ -214,22 +214,80 @@ namespace Readiculous.Services.Services
                 .Select(book =>
                 {
                     var model = new BookListItemViewModel();
+
+                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
                     _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
                     return model;
                 })
                 .ToList();
             return books;
         }
 
-        public List<BookListItemViewModel> ListBooksByTitle(string bookTitle, BookSortType bookSortType = BookSortType.CreatedTimeAscending)
+        public List<BookListItemViewModel> ListBooksByTitle(string bookTitle, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
         {
-            var books = _bookRepository.GetBooksByTitle(bookTitle.Trim(), bookSortType)
+            if(string.IsNullOrWhiteSpace(bookTitle) && searchType == BookSearchType.AllBooks && sortType == BookSortType.CreatedTimeDescending)
+            {
+                return ListAllActiveBooks();
+            }
+
+            var books = _bookRepository.GetBooksByTitle(bookTitle.Trim(), searchType, sortType)
+                .Where(b => b.DeletedTime == null)
+                .ToList()
+                .Select(book =>
+                {
+                    var model = new BookListItemViewModel();
+
+                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
+                    _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    return model;
+                })
+                .ToList();
+
+            return books;
+        }
+
+        public List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
+        {
+            if (genreViewModels == null || !genreViewModels.Any() && searchType == BookSearchType.AllBooks && sortType == BookSortType.CreatedTimeDescending)
+            {
+                return ListAllActiveBooks();
+            }
+
+            var bookGenres = genreViewModels.Select(g =>
+                {
+                var genre = _genreRepository.GetGenreById(g.GenreId);
+                return genre;
+                })
+                .ToList();
+
+            var books = _bookRepository.GetBooksByGenreList(bookGenres, searchType, sortType)
                 .Where(b => b.DeletedTime == null)
                 .ToList()
                 .Select(book =>
                 {
                     var model = new BookListItemViewModel();
                     _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                        ? book.BookReviews.Average(r => r.Rating) 
+                        : 0);
                     return model;
                 })
                 .ToList();
@@ -237,9 +295,43 @@ namespace Readiculous.Services.Services
             return books;
         }
 
-        //BookEditViewModel or BookDetailsViewModel, depending on the source
-        //Create a mapping for EditViewModel in AutoMapper configuration
-        
+        public List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeAscending)
+        {
+            if ((genreViewModels == null || genreViewModels.Any()) && searchType == BookSearchType.AllBooks && string.IsNullOrEmpty(bookTitle) && sortType == BookSortType.CreatedTimeAscending)
+            {
+                return ListAllActiveBooks();
+            }
+
+            var bookGenres = genreViewModels.Select(g =>
+                {
+                var genre = _genreRepository.GetGenreById(g.GenreId);
+                return genre;
+                })
+                .ToList();
+
+            var books = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres, searchType, sortType)
+                .Where(b => b.DeletedTime == null)
+                .ToList()
+                .Select(book =>
+                {
+                    var model = new BookListItemViewModel();
+                    _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                        ? book.BookReviews.Average(r => r.Rating)
+                        : 0);
+                    return model;
+                })
+                .ToList();
+
+            return books;
+        }
+
         public BookDetailsViewModel GetBookDetailsById(string id)
         {
             var book = _bookRepository.GetBookById(id);
@@ -249,12 +341,24 @@ namespace Readiculous.Services.Services
             }
 
             var model = new BookDetailsViewModel();
+
+
+            //TO ADD: REVIEW COUNT AND RATING AVERAGE
             _mapper.Map(book, model);
             model.Genres = book.GenreAssociations
                 .Where(ga => ga.Genre.DeletedTime == null)
                 .Select(ga => ga.Genre.Name)
                 .ToList();
-
+            model.Reviews = book.BookReviews
+                .Select(br =>
+                {
+                    ReviewViewModel reviewModel = new ReviewViewModel();
+                    _mapper.Map(br, reviewModel);
+                    return reviewModel;
+                })
+                .ToList();
+            model.CreatedByUserName = book.CreatedByUser.Username;
+            model.UpdatedByUserName = book.UpdatedByUser.Username;
             return model;
         }
 

@@ -18,7 +18,9 @@ namespace Readiculous.Services.Interfaces
         void DeleteBook(string bookId, string deleterId);
 
         List<BookListItemViewModel> ListAllActiveBooks();
-        List<BookListItemViewModel> ListBooksByTitle(string bookTitle, BookSortType bookSortType);
+        List<BookListItemViewModel> ListBooksByTitle(string bookTitle, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending);
+        List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeAscending);
+        List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeAscending);
         BookDetailsViewModel GetBookDetailsById(string id);
         BookViewModel GetBookEditById(string id);
     }

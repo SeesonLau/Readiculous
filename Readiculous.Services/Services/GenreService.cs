@@ -30,58 +30,54 @@ namespace Readiculous.Services.Services
 
         public void AddGenre(GenreViewModel model, string creatorId)
         {
-            if(!_genreRepository.GenreNameExists(model.Name))
-            {
-                var genre = new Genre();
-                model.GenreId = Guid.NewGuid().ToString();
-
-                _mapper.Map(model, genre);
-                genre.Name = genre.Name.Trim();
-                genre.Description = genre.Description.Trim();
-                genre.CreatedBy = creatorId;
-                genre.CreatedTime = DateTime.UtcNow;
-                genre.UpdatedBy = creatorId;
-                genre.UpdatedTime = DateTime.UtcNow;
-
-                _genreRepository.AddGenre(genre);
-            }
-            else
+            if(_genreRepository.GenreNameExists(model.Name))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreExists);
             }
+
+            var genre = new Genre();
+            model.GenreId = Guid.NewGuid().ToString();
+
+            _mapper.Map(model, genre);
+            genre.Name = genre.Name.Trim();
+            genre.Description = genre.Description.Trim();
+            genre.CreatedBy = creatorId;
+            genre.CreatedTime = DateTime.UtcNow;
+            genre.UpdatedBy = creatorId;
+            genre.UpdatedTime = DateTime.UtcNow;
+
+            _genreRepository.AddGenre(genre);
         }
 
         public void UpdateGenre(GenreViewModel model, string updaterId)
         {
-            if (_genreRepository.GenreNameExists(model.Name))
-            {
-                var genre = new Genre();
-                _mapper.Map(model, genre);
-                genre.Name = genre.Name.Trim();
-                genre.Description = genre.Description.Trim();
-                genre.UpdatedBy = updaterId;
-                genre.UpdatedTime = DateTime.UtcNow;
-                _genreRepository.UpdateGenre(genre);
-            }
-            else
+            if (!_genreRepository.GenreNameExists(model.Name))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
             }
+
+            var genre = new Genre();
+
+            _mapper.Map(model, genre);
+            genre.Name = genre.Name.Trim();
+            genre.Description = genre.Description.Trim();
+            genre.UpdatedBy = updaterId;
+            genre.UpdatedTime = DateTime.UtcNow;
+
+            _genreRepository.UpdateGenre(genre);
         }
 
         public void DeleteGenre(string genreId, string deleterId)
         {
-            if (_genreRepository.GenreIdExists(genreId))
-            {
-                _genreRepository.DeleteGenre(genreId, deleterId);
-            }
-            else
+            if (!_genreRepository.GenreIdExists(genreId))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
             }
+
+            _genreRepository.DeleteGenre(genreId, deleterId);
         }
 
-        public List<GenreListItemViewModel> GetAllActiveGenres()
+        public List<GenreListItemViewModel> ListAllActiveGenres()
         {
             var genres = _genreRepository.GetAllActiveGenres()
                 .ToList()
@@ -99,7 +95,7 @@ namespace Readiculous.Services.Services
 
             return genres;
         }
-        public List<GenreListItemViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
+        public List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
         {
             var genre = _genreRepository.GetGenresByName(genreName, genreSortType)
                 .Where(g => g.DeletedTime == null)

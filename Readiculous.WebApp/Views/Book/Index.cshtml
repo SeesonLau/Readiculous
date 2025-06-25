@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Book Management";
+    var selectedGenres = ViewBag.Genres as List<Readiculous.Services.ServiceModels.GenreViewModel>;
 }
 
 <h1>Book Management</h1>
@@ -10,27 +11,56 @@
     <a asp-action="Create" class="btn btn-success">Create New Book</a>
 </p>
 
-<!-- Search and Sort Form -->
+<!-- Search and Filter Form -->
 <form asp-action="Index" method="get" class="mb-4">
-    <div class="row align-items-end">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="searchString" class="form-label">Search Book Title:</label>
-                <input type="text" name="searchString" class="form-control" placeholder="Enter book title"
-                       value="@ViewData["CurrentFilter"]" />
-            </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="searchString" class="form-label">Search Book Title:</label>
+            <input type="text" name="searchString" class="form-control" placeholder="Enter book title"
+                   value="@ViewData["CurrentFilter"]" />
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label for="sortOrder" class="form-label">Sort By:</label>
-                <select name="sortOrder" class="form-control" asp-items="@ViewBag.BookSortTypes"></select>
-            </div>
+
+        <div class="col-md-3 mb-3">
+            <label for="searchType" class="form-label">Search Type:</label>
+            <select name="searchType" class="form-control" asp-items="@ViewBag.BookSearchTypes"></select>
         </div>
-        <div class="col-md-2 d-flex align-items-end">
+
+        <div class="col-md-3 mb-3">
+            <label for="sortOrder" class="form-label">Sort By:</label>
+            <select name="sortOrder" class="form-control" asp-items="@ViewBag.BookSortTypes"></select>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end mb-3">
             <button type="submit" class="btn btn-primary me-2">Search</button>
             <a asp-action="Index" class="btn btn-secondary">Clear</a>
         </div>
     </div>
+
+    <!-- Genre checkboxes -->
+    @if (ViewBag.AllGenres is List<Readiculous.Services.ServiceModels.GenreViewModel> allGenres && allGenres.Any())
+    {
+        var selectedGenreIds = ViewBag.SelectedGenreIds as List<string> ?? new List<string>();
+
+        <div class="mb-3">
+            <label class="form-label">Filter by Genre:</label>
+            <div class="row">
+                @for (int i = 0; i < allGenres.Count; i++)
+                {
+                    var genre = allGenres[i];
+                    var isChecked = selectedGenreIds.Contains(genre.GenreId);
+
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="selectedGenreIds" value="@genre.GenreId"
+                                   class="form-check-input" @(isChecked ? "checked" : "") />
+                            <label class="form-check-label">@genre.Name</label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
 </form>
 
 <!-- Books Table -->
@@ -78,6 +108,7 @@
                     <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-info">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.BookId" class="btn btn-sm btn-secondary">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger">Delete</a>
+                    <a asp-action="AddToFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add to Favorites</a>
                 </td>
             </tr>
         }

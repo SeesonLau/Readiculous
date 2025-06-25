@@ -29,10 +29,6 @@ namespace Readiculous.WebApp
 
                 CreateMap<UserViewModel, User>();
                 CreateMap<User, UserViewModel>();
-                CreateMap<GenreViewModel, Genre>();
-                CreateMap<Genre, GenreViewModel>();
-                CreateMap<BookViewModel, Book>();
-                CreateMap<Book, BookViewModel>();
 
                 //User Mappings
                 CreateMap<User, UserListItemViewModel>()
@@ -46,33 +42,15 @@ namespace Readiculous.WebApp
 
                 // Genre Mappings
                 CreateMap<Genre, GenreListItemViewModel>();
-
-                CreateMap<Genre, GenreDetailsViewModel>()
-                    .ForMember(dest => dest.BookCount,
-                               opt => opt.MapFrom(src =>
-                                    src.Books.Count(bga => bga.Book.DeletedTime == null)))
-                    .ForMember(dest => dest.CreatedByUsername,
-                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
-                    .ForMember(dest => dest.UpdatedByUsername,
-                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
+                CreateMap<Genre, GenreDetailsViewModel>();
+                CreateMap<GenreViewModel, Genre>();
+                CreateMap<Genre, GenreViewModel>();
 
                 // Book Mappings
-                CreateMap<Book, BookDetailsViewModel>()
-                    .ForMember(dest => dest.Genres,
-                               opt => opt.MapFrom(src => src.GenreAssociations
-                                   .Where(ga => ga.Genre.DeletedTime == null)
-                                   .Select(ga => ga.Genre.Name).ToList()))
-                    .ForMember(dest => dest.CreatedByUserName,
-                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
-                    .ForMember(dest => dest.UpdatedByUserName,
-                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
-
-                // Average rating still requires mapping: mapping applied after review is implemented
-                CreateMap<Book, BookListItemViewModel>()
-                    .ForMember(dest => dest.Genres,
-                               opt => opt.MapFrom(src => src.GenreAssociations
-                                   .Where(ga => ga.Genre.DeletedTime == null)
-                                   .Select(ga => ga.Genre.Name).ToList()));
+                CreateMap<Book, BookDetailsViewModel>();
+                CreateMap<Book, BookListItemViewModel>();
+                CreateMap<BookViewModel, Book>();
+                CreateMap<Book, BookViewModel>();
             }
         }
     }
