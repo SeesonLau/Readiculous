@@ -115,12 +115,22 @@ namespace Readiculous.Services.Services
                 user.UpdatedTime = DateTime.UtcNow;
                 user.UpdatedBy = editorId;
 
-                //DIfferentiate Update and Delete Date Fields
-
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
+                    var uri = new Uri(user.ProfilePictureUrl);
+                    var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+
+                    var result = await _client.Storage
+                        .From(Const.BucketName)
+                        .Remove(new List<string> { relativePath });
+
+                    if (result == null)
+                    {
+                        throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+                    }
+
                     var extension = Path.GetExtension(model.ProfilePicture.FileName);
-                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}{extension}");
+                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}-{Guid.NewGuid():N}{extension}");
 
                     using (var memoryStream = new MemoryStream())
                     {

@@ -1,4 +1,5 @@
 ﻿using Basecode.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using System;
@@ -23,8 +24,8 @@ namespace Readiculous.Data.Repositories
         }
         public bool GenreNameExists(string genreName)
         {
-            return this.GetDbSet<Genre>().Any(g => g.Name == genreName &&
-                                                g.DeletedTime == null);
+            return this.GetDbSet<Genre>()
+                .Any(g => g.Name == genreName && g.DeletedTime == null);
         }
 
         public void AddGenre(Genre genre)
@@ -57,11 +58,18 @@ namespace Readiculous.Data.Repositories
         public IQueryable<Genre> GetAllActiveGenres()
         {
             return this.GetDbSet<Genre>()
+                .Include(g => g.Books)
+                    .ThenInclude(bga => bga.Book)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
                 .Where(g => g.DeletedTime == null);
         }
-        public IQueryable<Genre> GetGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeAscending)
+        public IQueryable<Genre> GetGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
         {
             var queryReturn = this.GetDbSet<Genre>()
+                .Include(g => g.Books)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
                 .Where(g => g.Name.ToLower().Contains(genreName.ToLower()) &&
                             g.DeletedTime == null);
 
@@ -80,6 +88,9 @@ namespace Readiculous.Data.Repositories
         public Genre GetGenreById(string id)
         {
             return this.GetDbSet<Genre>()
+                .Include(g => g.Books)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
                 .FirstOrDefault(g => g.GenreId == id &&
                                     g.DeletedTime == null);
         }
@@ -87,6 +98,9 @@ namespace Readiculous.Data.Repositories
         public Genre GetGenreByName(string name)
         {
             return this.GetDbSet<Genre>()
+                .Include(g => g.Books)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
                 .FirstOrDefault(g => g.Name == name &&
                                     g.DeletedTime == null);
         }

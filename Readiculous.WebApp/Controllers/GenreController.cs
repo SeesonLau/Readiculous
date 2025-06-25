@@ -22,6 +22,7 @@ namespace Readiculous.WebApp.Controllers
             _genreService = genreService;
         }
 
+        //GenreListItemViewModel
         public IActionResult Index(string searchString, GenreSortType searchType = GenreSortType.CreatedTimeAscending)
         {
             ViewData["CurrentFilter"] = searchString;
@@ -35,7 +36,7 @@ namespace Readiculous.WebApp.Controllers
                     Text = t.ToString()
                 }).ToList();
 
-            List<GenreViewModel> genres;
+            List<GenreListItemViewModel> genres;
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -43,13 +44,14 @@ namespace Readiculous.WebApp.Controllers
             }
             else
             {
-                genres = _genreService.SearchGenresByName(string.Empty, searchType);
+                genres = _genreService.GetAllActiveGenres();
             }
 
             return View(genres);
         }
 
 
+        // GenreViewModel
         [HttpGet]
         public IActionResult Create()
         {
@@ -74,10 +76,11 @@ namespace Readiculous.WebApp.Controllers
             return View(model);
         }
 
+        // GenreViewModel
         [HttpGet]
         public IActionResult Edit(string id)
         {
-            var genre = _genreService.GetGenreById(id);
+            var genre = _genreService.GetGenreEditById(id);
             if (genre == null)
             {
                 return NotFound();
@@ -116,9 +119,10 @@ namespace Readiculous.WebApp.Controllers
             }
         }
 
+        //GenreDetailsViewModel
         public IActionResult Details(string id)
         {
-            var genre = _genreService.GetGenreById(id);
+            var genre = _genreService.GetGenreEditById(id);
             if (genre == null)
             {
                 return NotFound();

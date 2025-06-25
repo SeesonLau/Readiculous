@@ -5,7 +5,9 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -15,13 +17,16 @@ namespace Readiculous.Services.Services
     public class GenreService : IGenreService
     {
         private readonly IGenreRepository _genreRepository;
+        private readonly IBookRepository _bookRepository;
         private readonly IMapper _mapper;
 
-        public GenreService(IGenreRepository genreRepository, IMapper mapper)
+        public GenreService(IGenreRepository genreRepository, IBookRepository bookRepository, IMapper mapper)
         {
             _genreRepository = genreRepository;
+            _bookRepository = bookRepository;
             _mapper = mapper;
         }
+
 
         public void AddGenre(GenreViewModel model, string creatorId)
         {
@@ -76,56 +81,70 @@ namespace Readiculous.Services.Services
             }
         }
 
-        public List<GenreViewModel> GetAllActiveGenres()
+        public List<GenreListItemViewModel> GetAllActiveGenres()
         {
-            var genreViewModels = _genreRepository.GetAllActiveGenres()
+            var genres = _genreRepository.GetAllActiveGenres()
                 .ToList()
                 .Select(genre =>
                 {
-                    GenreViewModel model = new GenreViewModel();
+                    GenreListItemViewModel model = new GenreListItemViewModel();
+
                     _mapper.Map(genre, model);
+                    model.CreatedByUsername = genre.CreatedByUser.Username;
+                    model.UpdatedByUsername = genre.UpdatedByUser.Username;
+                    model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
                     return model;
                 })
                 .ToList();
 
-            return genreViewModels;
+            return genres;
         }
-
-        public List<GenreViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType)
+        public List<GenreListItemViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
         {
-            var genreViewModels = _genreRepository.GetGenresByName(genreName.Trim(), genreSortType)
+            var genre = _genreRepository.GetGenresByName(genreName, genreSortType)
                 .Where(g => g.DeletedTime == null)
                 .ToList()
                 .Select(genre =>
                 {
-                    GenreViewModel model = new GenreViewModel();
+                    GenreListItemViewModel model = new GenreListItemViewModel();
                     _mapper.Map(genre, model);
+                    model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+                    model.CreatedByUsername = genre.CreatedByUser.Username;
+                    model.UpdatedByUsername = genre.UpdatedByUser.Username;
                     return model;
                 })
                 .ToList();
 
-            return genreViewModels;
+            return genre;
         }
 
-        public GenreViewModel GetGenreById(string id)
+        public GenreViewModel GetGenreEditById(string id)
         {
-            var genreViewModel = _genreRepository.GetGenreById(id);
-            if (genreViewModel == null || genreViewModel.DeletedTime != null)
+            var genre = _genreRepository.GetGenreById(id);
+            if (genre == null || genre.DeletedTime != null)
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var model = new GenreViewModel();
-            _mapper.Map(genreViewModel, model);
+            _mapper.Map(genre, model);
             return model;
         }
 
-        public GenreViewModel GetGenreByName(string name)
+        public GenreDetailsViewModel GetGenreDetailsById(string id)
         {
-            var genreViewModel = _genreRepository.GetGenreByName(name.Trim());
-            
-            var model = new GenreViewModel();
-            _mapper.Map(genreViewModel, model);
+            var genre = _genreRepository.GetGenreById(id);
+            if (genre == null || genre.DeletedTime != null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+            }
+
+            var model = new GenreDetailsViewModel();
+            _mapper.Map(genre, model);
+            model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+            model.CreatedByUsername = genre.CreatedByUser.Username;
+            model.UpdatedByUsername = genre.UpdatedByUser.Username;
+
             return model;
         }
     }

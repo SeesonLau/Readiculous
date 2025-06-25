@@ -11,16 +11,16 @@ namespace Readiculous.Services.Interfaces
 {
     public interface IGenreService
     {
-        public void AddGenre(GenreViewModel model, string creatorId);
+        void AddGenre(GenreViewModel model, string creatorId);
 
-        public void UpdateGenre(GenreViewModel model, string updaterId);
+        void UpdateGenre(GenreViewModel model, string updaterId);
 
-        public void DeleteGenre(string genreId, string deleterId);
+        void DeleteGenre(string genreId, string deleterId);
 
-        public List<GenreViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeAscending);
+        List<GenreListItemViewModel> GetAllActiveGenres();
+        List<GenreListItemViewModel> SearchGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending);
 
-        public GenreViewModel GetGenreById(string id);
-
-        public GenreViewModel GetGenreByName(string name);
+        GenreViewModel GetGenreEditById(string id);
+        GenreDetailsViewModel GetGenreDetailsById(string id);
     }
 }

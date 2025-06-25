@@ -44,7 +44,10 @@ namespace Readiculous.Data.Repositories
 
         public void DeleteBook(string bookId, string deleterId)
         {
-            var book = this.GetDbSet<Book>().FirstOrDefault(b => b.BookId == bookId && b.DeletedTime == null);
+            var book = this.GetDbSet<Book>()
+                .FirstOrDefault(b => b.BookId == bookId && 
+                                    b.DeletedTime == null);
+
             if (book != null)
             {
                 book.DeletedTime = DateTime.UtcNow;
@@ -67,7 +70,8 @@ namespace Readiculous.Data.Repositories
             var books = this.GetDbSet<Book>()
                 .Include(book => book.GenreAssociations)
                     .ThenInclude(genre => genre.Genre)
-                .AsNoTracking()
+                .Include(book => book.CreatedByUser)
+                .Include(book => book.UpdatedByUser)
                 .Where(b => b.Title.ToLower().Contains(bookTitle.ToLower()) && //Book title search is case-insensitive
                             b.DeletedTime == null);
 

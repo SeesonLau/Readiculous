@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreViewModel>
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Genre Management";
@@ -25,7 +25,7 @@
                 <select name="searchType" class="form-control">
                     @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
                     {
-                        <option value="@type.Value" selected=@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")>
+                        <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")">
                             @type.Text
                         </option>
                     }
@@ -45,10 +45,11 @@
             <th>@Html.DisplayNameFor(model => model.First().GenreId)</th>
             <th>@Html.DisplayNameFor(model => model.First().Name)</th>
             <th>@Html.DisplayNameFor(model => model.First().Description)</th>
+            <th>@Html.DisplayNameFor(model => model.First().BookCount)</th>
             <th>@Html.DisplayNameFor(model => model.First().CreatedTime)</th>
-            <th>@Html.DisplayNameFor(model => model.First().CreatedBy)</th>
+            <th>@Html.DisplayNameFor(model => model.First().CreatedByUsername)</th>
             <th>@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
-            <th>@Html.DisplayNameFor(model => model.First().UpdatedBy)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UpdatedByUsername)</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -59,10 +60,11 @@
                 <td>@Html.DisplayFor(modelItem => item.GenreId)</td>
                 <td>@Html.DisplayFor(modelItem => item.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@Html.DisplayFor(modelItem => item.BookCount)</td>
                 <td>@Html.DisplayFor(modelItem => item.CreatedTime)</td>
-                <td>@Html.DisplayFor(modelItem => item.CreatedBy)</td>
+                <td>@Html.DisplayFor(modelItem => item.CreatedByUsername)</td>
                 <td>@Html.DisplayFor(modelItem => item.UpdatedTime)</td>
-                <td>@Html.DisplayFor(modelItem => item.UpdatedBy)</td>
+                <td>@Html.DisplayFor(modelItem => item.UpdatedByUsername)</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.GenreId" class="btn btn-sm btn-info">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.GenreId" class="btn btn-sm btn-secondary">Details</a> |
@@ -74,7 +76,7 @@
         @if (!Model.Any())
         {
             <tr>
-                <td colspan="8" class="text-center text-muted">No genres found matching your criteria.</td>
+                <td colspan="9" class="text-center text-muted">No genres found matching your criteria.</td>
             </tr>
         }
     </tbody>

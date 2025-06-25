@@ -52,7 +52,7 @@ namespace Readiculous.WebApp.Controllers
         {
             var model = new BookViewModel();
 
-            var allGenres = _genreService.SearchGenresByName(string.Empty); 
+            var allGenres = _genreService.GetAllActiveGenres(); 
 
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
@@ -72,7 +72,7 @@ namespace Readiculous.WebApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            var allGenres = _genreService.SearchGenresByName(string.Empty);
+            var allGenres = _genreService.GetAllActiveGenres();
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
                 GenreId = g.GenreId,
@@ -87,7 +87,7 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 var model = _bookService.GetBookEditById(id);
-                model.AllAvailableGenres = _genreService.SearchGenresByName(string.Empty)
+                model.AllAvailableGenres = _genreService.GetAllActiveGenres()
                     .Select(g => new GenreViewModel
                     {
                         GenreId = g.GenreId,
@@ -120,7 +120,7 @@ namespace Readiculous.WebApp.Controllers
                 }
             }
 
-            var allGenres = _genreService.SearchGenresByName(string.Empty);
+            var allGenres = _genreService.GetAllActiveGenres();
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
                 GenreId = g.GenreId,

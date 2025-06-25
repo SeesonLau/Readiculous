@@ -56,6 +56,12 @@
             CreatedTimeDescending = 5,
         }
 
+        public enum BookSearchType
+        {
+            AllBooks = 0,
+            TopBooks = 1,
+            NewBooks = 2,
+        }
         public enum BookSortType
         {
             GenreAscending = 0,
@@ -70,12 +76,6 @@
             SeriesDescending = 9,
             CreatedTimeAscending = 10,
             CreatedTimeDescending = 11,
-        }
-
-        public enum GetSource
-        {
-            Details = 0,
-            Edit = 1,
         }
     }
 }

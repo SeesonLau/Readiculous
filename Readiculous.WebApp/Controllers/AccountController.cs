@@ -130,6 +130,7 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 model.UserId = Guid.NewGuid().ToString();
+                model.Role = RoleType.Reviewer;
                 await _userService.AddUserAsync(model, model.UserId);
                 return RedirectToAction("Login", "Account");
             }

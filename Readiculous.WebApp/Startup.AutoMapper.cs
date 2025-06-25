@@ -38,7 +38,23 @@ namespace Readiculous.WebApp
                 CreateMap<User, UserListItemViewModel>()
                     .ForMember(dest => dest.Role,
                                opt => opt.MapFrom(
-                                  src => src.Role.ToString()));
+                                  src => src.Role.ToString()))
+                    .ForMember(dest => dest.CreatedByUsername,
+                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
+                    .ForMember(dest => dest.UpdatedByUsername,
+                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
+
+                // Genre Mappings
+                CreateMap<Genre, GenreListItemViewModel>();
+
+                CreateMap<Genre, GenreDetailsViewModel>()
+                    .ForMember(dest => dest.BookCount,
+                               opt => opt.MapFrom(src =>
+                                    src.Books.Count(bga => bga.Book.DeletedTime == null)))
+                    .ForMember(dest => dest.CreatedByUsername,
+                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
+                    .ForMember(dest => dest.UpdatedByUsername,
+                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
 
                 // Book Mappings
                 CreateMap<Book, BookDetailsViewModel>()

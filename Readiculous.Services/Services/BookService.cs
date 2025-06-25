@@ -4,14 +4,12 @@ using Readiculous.Data.Models;
 using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
-using SQLitePCL;
 using Supabase;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
