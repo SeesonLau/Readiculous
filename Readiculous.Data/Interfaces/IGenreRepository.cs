@@ -17,7 +17,7 @@ namespace Readiculous.Data.Interfaces
         void DeleteGenre(string genreId, string deleterId);
 
         IQueryable<Genre> GetAllActiveGenres();
-        IQueryable<Genre> GetGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeAscending);
+        IQueryable<Genre> GetGenresByName(string genreName);
         Genre GetGenreById(string id);
         Genre GetGenreByName(string name);
     }

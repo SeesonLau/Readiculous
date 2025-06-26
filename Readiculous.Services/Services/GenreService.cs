@@ -5,11 +5,8 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web.Mvc;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -27,10 +24,10 @@ namespace Readiculous.Services.Services
             _mapper = mapper;
         }
 
-
+        // CRUD operations for Genre
         public void AddGenre(GenreViewModel model, string creatorId)
         {
-            if(_genreRepository.GenreNameExists(model.Name))
+            if (_genreRepository.GenreNameExists(model.Name))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreExists);
             }
@@ -48,7 +45,6 @@ namespace Readiculous.Services.Services
 
             _genreRepository.AddGenre(genre);
         }
-
         public void UpdateGenre(GenreViewModel model, string updaterId)
         {
             if (!_genreRepository.GenreNameExists(model.Name))
@@ -66,7 +62,6 @@ namespace Readiculous.Services.Services
 
             _genreRepository.UpdateGenre(genre);
         }
-
         public void DeleteGenre(string genreId, string deleterId)
         {
             if (!_genreRepository.GenreIdExists(genreId))
@@ -77,27 +72,40 @@ namespace Readiculous.Services.Services
             _genreRepository.DeleteGenre(genreId, deleterId);
         }
 
+        public List<GenreListItemViewModel> GetGenreList(string genreName, GenreSortType sortType = GenreSortType.CreatedTimeDescending)
+        {
+            if (string.IsNullOrEmpty(genreName))
+            {
+                return ListAllActiveGenres();
+            }
+            else
+            {
+                return ListGenresByName(genreName, sortType);
+            }
+        }
         public List<GenreListItemViewModel> ListAllActiveGenres()
         {
             var genres = _genreRepository.GetAllActiveGenres()
                 .ToList()
                 .Select(genre =>
                 {
-                    GenreListItemViewModel model = new GenreListItemViewModel();
+                    GenreListItemViewModel model = new();
 
                     _mapper.Map(genre, model);
                     model.CreatedByUsername = genre.CreatedByUser.Username;
                     model.UpdatedByUsername = genre.UpdatedByUser.Username;
                     model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+
                     return model;
                 })
+                .OrderByDescending(g => g.CreatedTime)
                 .ToList();
 
             return genres;
         }
         public List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
         {
-            var genre = _genreRepository.GetGenresByName(genreName, genreSortType)
+            var genres = _genreRepository.GetGenresByName(genreName)
                 .Where(g => g.DeletedTime == null)
                 .ToList()
                 .Select(genre =>
@@ -111,7 +119,16 @@ namespace Readiculous.Services.Services
                 })
                 .ToList();
 
-            return genre;
+            return (genreSortType) switch
+            {
+                GenreSortType.NameAscending => genres.OrderBy(g => g.Name).ToList(),
+                GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name).ToList(),
+                GenreSortType.BookCountAscending => genres.OrderBy(g => g.BookCount).ToList(),
+                GenreSortType.BookCountDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
+                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.BookCount).ToList(),
+                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
+                _ => genres, // Default case
+            };
         }
 
         public GenreViewModel GetGenreEditById(string id)
@@ -142,6 +159,26 @@ namespace Readiculous.Services.Services
             model.UpdatedByUsername = genre.UpdatedByUser.Username;
 
             return model;
+        }
+
+        public List<string> GetSelectedGenreIds(List<GenreViewModel> genreViewModels)
+        {
+            if (genreViewModels == null || !genreViewModels.Any())
+            {
+                return new List<string>();
+            }
+
+            return genreViewModels.Select(g => g.GenreId).ToList();
+        }
+        public List<SelectListItem> GetGenreSortTypes()
+        {
+            return Enum.GetValues(typeof(GenreSortType))
+                .Cast<GenreSortType>()
+                .Select(t => new SelectListItem
+                {
+                    Value = ((int)t).ToString(),
+                    Text = t.ToString(),
+                }).ToList();
         }
     }
 }

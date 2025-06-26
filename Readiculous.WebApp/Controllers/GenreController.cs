@@ -28,25 +28,9 @@ namespace Readiculous.WebApp.Controllers
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentGenreSearchType"] = searchType.ToString();
 
-            ViewBag.GenreSearchTypes = Enum.GetValues(typeof(GenreSortType))
-                .Cast<GenreSortType>()
-                .Select(t => new SelectListItem
-                {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString()
-                }).ToList();
+            ViewBag.GenreSearchTypes = _genreService.GetGenreSortTypes();
 
-            List<GenreListItemViewModel> genres;
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                genres = _genreService.ListGenresByName(searchString, searchType);
-            }
-            else
-            {
-                genres = _genreService.ListAllActiveGenres();
-            }
-
+            List<GenreListItemViewModel> genres = _genreService.GetGenreList(searchString, searchType);
             return View(genres);
         }
 
@@ -115,7 +99,7 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _genreService.ListGenresByName(string.Empty));
+                return View("Index", _genreService.GetGenreList(string.Empty));
             }
         }
 

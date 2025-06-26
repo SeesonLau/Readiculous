@@ -30,8 +30,8 @@ namespace Readiculous.WebApp.Controllers
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;
 
-            ViewBag.AllGenres = _genreService.ListAllActiveGenres();
-            ViewBag.SelectedGenreIds = genres?.Select(g => g.GenreId).ToList() ?? new List<string>();
+            ViewBag.AllGenres = _genreService.GetGenreList(genreName: string.Empty);
+            ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
             ViewBag.BookSearchTypes = Enum.GetValues(typeof(BookSearchType))
                 .Cast<BookSearchType>()
                 .Select(t => new SelectListItem
@@ -72,7 +72,7 @@ namespace Readiculous.WebApp.Controllers
         {
             var model = new BookViewModel();
 
-            var allGenres = _genreService.ListAllActiveGenres(); 
+            var allGenres = _genreService.GetGenreList(genreName: string.Empty); 
 
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
@@ -92,7 +92,7 @@ namespace Readiculous.WebApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            var allGenres = _genreService.ListAllActiveGenres();
+            var allGenres = _genreService.GetGenreList(genreName: string.Empty);
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
                 GenreId = g.GenreId,
@@ -107,7 +107,7 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 var model = _bookService.GetBookEditById(id);
-                model.AllAvailableGenres = _genreService.ListAllActiveGenres()
+                model.AllAvailableGenres = _genreService.GetGenreList(genreName: string.Empty)
                     .Select(g => new GenreViewModel
                     {
                         GenreId = g.GenreId,
@@ -140,7 +140,7 @@ namespace Readiculous.WebApp.Controllers
                 }
             }
 
-            var allGenres = _genreService.ListAllActiveGenres();
+            var allGenres = _genreService.GetGenreList(genreName: string.Empty);
             model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
             {
                 GenreId = g.GenreId,

@@ -64,31 +64,24 @@ namespace Readiculous.Data.Repositories
                 .Include(g => g.UpdatedByUser)
                 .Where(g => g.DeletedTime == null);
         }
-        public IQueryable<Genre> GetGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
+        public IQueryable<Genre> GetGenresByName(string genreName)
         {
             var queryReturn = this.GetDbSet<Genre>()
                 .Include(g => g.Books)
+                    .ThenInclude(bga => bga.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .Where(g => g.Name.ToLower().Contains(genreName.ToLower()) &&
                             g.DeletedTime == null);
 
-            return (genreSortType) switch
-            {
-                GenreSortType.NameAscending => queryReturn.OrderBy(g => g.Name),
-                GenreSortType.NameDescending => queryReturn.OrderByDescending(g => g.Name),
-                GenreSortType.BookCountAscending => queryReturn.OrderBy(g => g.Books.Count),
-                GenreSortType.BookCountDescending => queryReturn.OrderByDescending(g => g.Books.Count),
-                GenreSortType.CreatedTimeAscending => queryReturn,
-                GenreSortType.CreatedTimeDescending => queryReturn.Reverse(),
-                _ => queryReturn, // Default case
-            };
+            return queryReturn;
         }
 
         public Genre GetGenreById(string id)
         {
             return this.GetDbSet<Genre>()
                 .Include(g => g.Books)
+                    .ThenInclude(bga => bga.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .FirstOrDefault(g => g.GenreId == id &&

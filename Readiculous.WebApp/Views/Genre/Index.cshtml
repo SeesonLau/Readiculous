@@ -23,7 +23,7 @@
             <div class="form-group">
                 <label for="searchType" class="form-label">Sort By:</label>
                 <select name="searchType" class="form-control">
-                    @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
+                    @foreach (var type in (List<System.Web.Mvc.SelectListItem>)ViewBag.GenreSearchTypes)
                     {
                         <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")">
                             @type.Text
