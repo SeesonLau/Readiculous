@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Resources.Constants;
@@ -30,7 +31,7 @@ namespace Readiculous.Services.Services
             _client = client;
         }
 
-        // BookEditViewModel: Could use create a create model, depends on the requirements
+        // CRUD Operations for Books
         public async Task AddBook(BookViewModel model, string creatorId)
         {
             // Books can only be added if the title and author combination does not already exist.
@@ -38,7 +39,7 @@ namespace Readiculous.Services.Services
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
-            if(string.IsNullOrEmpty(model.CoverImageUrl))
+            if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
                 model.CoverImageUrl = string.Empty;
             }
@@ -104,7 +105,6 @@ namespace Readiculous.Services.Services
 
             _bookRepository.AddBook(book);
         }
-
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
             if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
@@ -117,7 +117,7 @@ namespace Readiculous.Services.Services
             {
                 throw new InvalidOperationException("Book does not exist.");
             }
-            if(string.IsNullOrEmpty(model.CoverImageUrl))
+            if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
                 model.CoverImageUrl = book.CoverImageUrl;
             }
@@ -195,7 +195,6 @@ namespace Readiculous.Services.Services
 
             _bookRepository.UpdateBook(book);
         }
-
         public void DeleteBook(string bookId, string deleterId)
         {
             if (!_bookRepository.BookIdExists(bookId))
@@ -203,135 +202,34 @@ namespace Readiculous.Services.Services
                 throw new InvalidOperationException("Book does not exist.");
             }
 
-            _bookRepository.DeleteBook(bookId, deleterId);
+            var book = _bookRepository.GetBookById(bookId);
+            book.DeletedBy = deleterId;
+            book.DeletedTime = DateTime.UtcNow;
+            _bookRepository.UpdateBook(book);
         }
 
-        //List All Active Books
-        public List<BookListItemViewModel> ListAllActiveBooks()
+        // Multiple Book Listing Methods
+        public List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
         {
-            var books = _bookRepository.GetAllActiveBooks()
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    return model;
-                })
-                .ToList();
-            return books;
-        }
-
-        public List<BookListItemViewModel> ListBooksByTitle(string bookTitle, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
-        {
-            if(string.IsNullOrWhiteSpace(bookTitle) && searchType == BookSearchType.AllBooks && sortType == BookSortType.CreatedTimeDescending)
+            if (string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && searchType == BookSearchType.AllBooks && sortType == BookSortType.CreatedTimeDescending)
             {
                 return ListAllActiveBooks();
             }
-
-            var books = _bookRepository.GetBooksByTitle(bookTitle.Trim(), searchType, sortType)
-                .Where(b => b.DeletedTime == null)
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    return model;
-                })
-                .ToList();
-
-            return books;
-        }
-
-        public List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
-        {
-            if (genreViewModels == null || !genreViewModels.Any() && searchType == BookSearchType.AllBooks && sortType == BookSortType.CreatedTimeDescending)
+            else if (string.IsNullOrEmpty(searchString))
             {
-                return ListAllActiveBooks();
+                return ListBooksByGenreList(genres: genres, searchType: searchType, sortType: sortType);
             }
-
-            var bookGenres = genreViewModels.Select(g =>
-                {
-                var genre = _genreRepository.GetGenreById(g.GenreId);
-                return genre;
-                })
-                .ToList();
-
-            var books = _bookRepository.GetBooksByGenreList(bookGenres, searchType, sortType)
-                .Where(b => b.DeletedTime == null)
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
-                        ? book.BookReviews.Average(r => r.Rating) 
-                        : 0);
-                    return model;
-                })
-                .ToList();
-
-            return books;
-        }
-
-        public List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeAscending)
-        {
-            if ((genreViewModels == null || genreViewModels.Any()) && searchType == BookSearchType.AllBooks && string.IsNullOrEmpty(bookTitle) && sortType == BookSortType.CreatedTimeAscending)
+            else if (genres == null || !genres.Any())
             {
-                return ListAllActiveBooks();
+                return ListBooksByTitle(bookTitle: searchString, searchType: searchType, sortType: sortType);
             }
-
-            var bookGenres = genreViewModels.Select(g =>
-                {
-                var genre = _genreRepository.GetGenreById(g.GenreId);
-                return genre;
-                })
-                .ToList();
-
-            var books = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres, searchType, sortType)
-                .Where(b => b.DeletedTime == null)
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
-                    return model;
-                })
-                .ToList();
-
-            return books;
+            else
+            {
+                return ListBooksByTitleAndGenres(bookTitle: searchString, genres: genres, searchType: searchType, sortType: sortType);
+            }
         }
 
+        // Single Book Retrival Methods
         public BookDetailsViewModel GetBookDetailsById(string id)
         {
             var book = _bookRepository.GetBookById(id);
@@ -361,7 +259,6 @@ namespace Readiculous.Services.Services
             model.UpdatedByUserName = book.UpdatedByUser.Username;
             return model;
         }
-
         public BookViewModel GetBookEditById(string id)
         {
             var book = _bookRepository.GetBookById(id);
@@ -376,28 +273,193 @@ namespace Readiculous.Services.Services
             return model;
         }
 
-        /*
-        public BookEditViewModel GetBookEditById(string id)
+        // Book Dropdown Fillup Methods
+        public List<SelectListItem> GetBookSearchTypes(BookSearchType searchType)
         {
-            var book = _bookRepository.GetBookById(id);
-            if (book == null)
+            return Enum.GetValues(typeof(BookSearchType))
+                .Cast<BookSearchType>()
+                .Select(t => new SelectListItem
+                {
+                    Value = ((int)t).ToString(),
+                    Text = t.ToString(),
+                    Selected = t == searchType
+                }).ToList();
+        }
+        public List<SelectListItem> GetBookSortTypes(BookSortType sortType)
+        {
+            return Enum.GetValues(typeof(BookSortType))
+                .Cast<BookSortType>()
+                .Select(t => new SelectListItem
+                {
+                    Value = ((int)t).ToString(),
+                    Text = t.ToString(),
+                    Selected = t == sortType
+                }).ToList();
+        }
+
+        // Private Helper Methods for Book Listing
+        private List<BookListItemViewModel> ListAllActiveBooks()
+        {
+            var books = _bookRepository.GetAllActiveBooks()
+                .ToList()
+                .Select(book =>
+                {
+                    var model = new BookListItemViewModel();
+
+                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
+                    _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    return model;
+                })
+                .OrderByDescending(b => b.CreatedTime)
+                .ToList();
+            return books;
+        }
+        private List<BookListItemViewModel> ListBooksByTitle(string bookTitle, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
+        {
+            var books = _bookRepository.GetBooksByTitle(bookTitle.Trim())
+                .Where(b => b.DeletedTime == null)
+                .ToList()
+                .Select(book =>
+                {
+                    var model = new BookListItemViewModel();
+
+                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
+                    _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                        ? book.BookReviews.Average(r => r.Rating)
+                        : 0);
+                    return model;
+                });
+
+            return SearchAndSortBook(books, searchType, sortType)
+                .ToList();
+        }
+        private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genres, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
+        {
+            var bookGenres = genres.Select(g =>
             {
-                return null;
+                var genre = _genreRepository.GetGenreById(g.GenreId);
+                return genre;
+            })
+                .ToList();
+
+            var books = _bookRepository.GetBooksByGenreList(bookGenres)
+                .Where(b => b.DeletedTime == null)
+                .ToList()
+                .Select(book =>
+                {
+                    var model = new BookListItemViewModel();
+                    _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                        ? book.BookReviews.Average(r => r.Rating)
+                        : 0);
+                    return model;
+                });
+
+            return SearchAndSortBook(books, searchType, sortType)
+                .ToList();
+        }
+        private List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genres, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeAscending)
+        {
+            var bookGenres = genres.Select(g =>
+            {
+                var genre = _genreRepository.GetGenreById(g.GenreId);
+                return genre;
+            })
+                .ToList();
+
+            var books = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres)
+                .Where(b => b.DeletedTime == null)
+                .ToList()
+                .Select(book =>
+                {
+                    var model = new BookListItemViewModel();
+                    _mapper.Map(book, model);
+                    model.Genres = book.GenreAssociations
+                        .Where(ga => ga.Genre.DeletedTime == null)
+                        .Select(ga => ga.Genre.Name)
+                        .ToList();
+                    model.CreatedByUserName = book.CreatedByUser.Username;
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                        ? book.BookReviews.Average(r => r.Rating)
+                        : 0);
+                    return model;
+                });
+
+            return SearchAndSortBook(books, searchType, sortType)
+                .ToList();
+        }
+        
+        private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> books, BookSearchType searchType, BookSortType sortType)
+        {
+            switch (searchType)
+            {
+                case BookSearchType.AllBooks:
+                    break;
+
+                case BookSearchType.TopBooks:
+                    books = books.OrderByDescending(b => b.AverageRating);
+
+                    switch (sortType)
+                    {
+                        case BookSortType.RatingAscending:
+                            return books.Reverse();
+                        case BookSortType.RatingDescending:
+                            return books;
+                        default:
+                            break;
+                    }
+                    break;
+
+                case BookSearchType.NewBooks:
+                    DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
+                    books = books.Where(b => b.CreatedTime >= twoWeeksAgo);
+                    break;
+                default:
+                    break;
             }
 
-            var model = new BookEditViewModel();
-            _mapper.Map(book, model);
-            model.SelectedGenres = book.GenreAssociations.Select(ga => ga.GenreId).ToList();
-            model.AvailableGenres = _genreRepository.GetAllActiveGenres()
-                .Where(g => g.DeletedTime == null)
-                .Select(g => new GenreViewModel
-                {
-                    GenreId = g.GenreId,
-                    Name = g.Name
-                }).ToList();
-
-            return model;
+            return sortType switch
+            {
+                BookSortType.GenreAscending => books.OrderBy(b => b.Genres
+                    .Select(name => name)
+                    .OrderBy(name => name)
+                    .FirstOrDefault()),
+                BookSortType.GenreDescending => books.OrderBy(b => b.Genres
+                    .Select(name => name)
+                    .OrderByDescending(name => name)
+                    .FirstOrDefault()),
+                BookSortType.TitleAscending => books.OrderBy(b => b.Title),
+                BookSortType.TitleDescending => books.OrderByDescending(b => b.Title),
+                BookSortType.AuthorAscending => books.OrderBy(b => b.Author),
+                BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
+                BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
+                BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
+                BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
+                BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
+                BookSortType.CreatedTimeAscending => books.OrderBy(b => b.CreatedTime),
+                BookSortType.CreatedTimeDescending => books.OrderByDescending(b => b.CreatedTime),
+                _ => books, // Default case
+            };
         }
-        */
     }
 }

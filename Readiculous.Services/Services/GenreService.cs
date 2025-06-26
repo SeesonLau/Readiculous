@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
@@ -6,7 +7,6 @@ using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -69,9 +69,13 @@ namespace Readiculous.Services.Services
                 throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
             }
 
-            _genreRepository.DeleteGenre(genreId, deleterId);
+            var genre = _genreRepository.GetGenreById(genreId);
+            genre.DeletedBy = deleterId;
+            genre.DeletedTime = DateTime.UtcNow;
+            _genreRepository.UpdateGenre(genre);
         }
 
+        // Multiple Genre Listing methods
         public List<GenreListItemViewModel> GetGenreList(string genreName, GenreSortType sortType = GenreSortType.CreatedTimeDescending)
         {
             if (string.IsNullOrEmpty(genreName))
@@ -83,7 +87,60 @@ namespace Readiculous.Services.Services
                 return ListGenresByName(genreName, sortType);
             }
         }
-        public List<GenreListItemViewModel> ListAllActiveGenres()
+
+        // Single Genre Retrieval methods
+        public GenreViewModel GetGenreEditById(string id)
+        {
+            var genre = _genreRepository.GetGenreById(id);
+            if (genre == null || genre.DeletedTime != null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+            }
+
+            var model = new GenreViewModel();
+            _mapper.Map(genre, model);
+            return model;
+        }
+        public GenreDetailsViewModel GetGenreDetailsById(string id)
+        {
+            var genre = _genreRepository.GetGenreById(id);
+            if (genre == null || genre.DeletedTime != null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+            }
+
+            var model = new GenreDetailsViewModel();
+            _mapper.Map(genre, model);
+            model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+            model.CreatedByUsername = genre.CreatedByUser.Username;
+            model.UpdatedByUsername = genre.UpdatedByUser.Username;
+
+            return model;
+        }
+
+        // Genre Dropdown Fillup methods
+        public List<string> GetSelectedGenreIds(List<GenreViewModel> genreViewModels)
+        {
+            if (genreViewModels == null || !genreViewModels.Any())
+            {
+                return new List<string>();
+            }
+
+            return genreViewModels.Select(g => g.GenreId).ToList();
+        }
+        public List<SelectListItem> GetGenreSortTypes()
+        {
+            return Enum.GetValues(typeof(GenreSortType))
+                .Cast<GenreSortType>()
+                .Select(t => new SelectListItem
+                {
+                    Value = ((int)t).ToString(),
+                    Text = t.ToString(),
+                }).ToList();
+        }
+
+        // Helper methods for Searching genres
+        private List<GenreListItemViewModel> ListAllActiveGenres()
         {
             var genres = _genreRepository.GetAllActiveGenres()
                 .ToList()
@@ -103,7 +160,7 @@ namespace Readiculous.Services.Services
 
             return genres;
         }
-        public List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
+        private List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
         {
             var genres = _genreRepository.GetGenresByName(genreName)
                 .Where(g => g.DeletedTime == null)
@@ -131,54 +188,17 @@ namespace Readiculous.Services.Services
             };
         }
 
-        public GenreViewModel GetGenreEditById(string id)
+        public List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels)
         {
-            var genre = _genreRepository.GetGenreById(id);
-            if (genre == null || genre.DeletedTime != null)
+                       if (genreListItemViewModels == null || !genreListItemViewModels.Any())
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                return new List<GenreViewModel>();
             }
-
-            var model = new GenreViewModel();
-            _mapper.Map(genre, model);
-            return model;
-        }
-
-        public GenreDetailsViewModel GetGenreDetailsById(string id)
-        {
-            var genre = _genreRepository.GetGenreById(id);
-            if (genre == null || genre.DeletedTime != null)
+            return genreListItemViewModels.Select(g => new GenreViewModel
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
-            }
-
-            var model = new GenreDetailsViewModel();
-            _mapper.Map(genre, model);
-            model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
-            model.CreatedByUsername = genre.CreatedByUser.Username;
-            model.UpdatedByUsername = genre.UpdatedByUser.Username;
-
-            return model;
-        }
-
-        public List<string> GetSelectedGenreIds(List<GenreViewModel> genreViewModels)
-        {
-            if (genreViewModels == null || !genreViewModels.Any())
-            {
-                return new List<string>();
-            }
-
-            return genreViewModels.Select(g => g.GenreId).ToList();
-        }
-        public List<SelectListItem> GetGenreSortTypes()
-        {
-            return Enum.GetValues(typeof(GenreSortType))
-                .Cast<GenreSortType>()
-                .Select(t => new SelectListItem
-                {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString(),
-                }).ToList();
+                GenreId = g.GenreId,
+                Name = g.Name,
+            }).ToList();
         }
     }
 }

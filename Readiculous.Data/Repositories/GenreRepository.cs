@@ -40,21 +40,6 @@ namespace Readiculous.Data.Repositories
             UnitOfWork.SaveChanges();
         }
 
-        public void DeleteGenre(string genreId, string deleterId)
-        {
-            Genre genre = this.GetDbSet<Genre>()
-                .FirstOrDefault(g => g.GenreId == genreId &&
-                                    g.DeletedTime == null);
-
-            if (genre != null)
-            {
-                genre.DeletedBy = deleterId;
-                genre.DeletedTime = DateTime.UtcNow;
-                this.GetDbSet<Genre>().Update(genre);
-                UnitOfWork.SaveChanges();
-            }
-        }
-
         public IQueryable<Genre> GetAllActiveGenres()
         {
             return this.GetDbSet<Genre>()

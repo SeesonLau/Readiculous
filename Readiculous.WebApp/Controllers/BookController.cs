@@ -32,53 +32,20 @@ namespace Readiculous.WebApp.Controllers
 
             ViewBag.AllGenres = _genreService.GetGenreList(genreName: string.Empty);
             ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
-            ViewBag.BookSearchTypes = Enum.GetValues(typeof(BookSearchType))
-                .Cast<BookSearchType>()
-                .Select(t => new SelectListItem
-                {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString(),
-                    Selected = t == searchType
-                }).ToList();
-            ViewBag.BookSortTypes = Enum.GetValues(typeof(BookSortType))
-                .Cast<BookSortType>()
-                .Select(v => new SelectListItem
-                {
-                    Text = v.ToString(), 
-                    Value = ((int)v).ToString(),
-                    Selected = v == sortOrder
-                }).ToList();
+            ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
+            ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
-            if(string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && searchType == BookSearchType.AllBooks && sortOrder == BookSortType.CreatedTimeDescending)
-            {
-                return View(_bookService.ListAllActiveBooks());
-            }
-            else if(string.IsNullOrEmpty(searchString))
-            {
-                return View(_bookService.ListBooksByGenreList(genres, searchType, sortOrder));
-            }
-            else if (genres == null || !genres.Any())
-            {
-                return View(_bookService.ListBooksByTitle(searchString, searchType, sortOrder));
-            }
-            else
-            {
-                return View(_bookService.ListBooksByTitleAndGenres(searchString, genres, searchType, sortOrder));
-            }
+            var model = _bookService.GetBookList(searchString: searchString, genres: genres, searchType: searchType, sortType: sortOrder);
+
+            return View(model);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
             var model = new BookViewModel();
-
             var allGenres = _genreService.GetGenreList(genreName: string.Empty); 
-
-            model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
-            {
-                GenreId = g.GenreId,
-                Name = g.Name
-            }).ToList();
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
 
             return View(model);
         }
@@ -93,11 +60,8 @@ namespace Readiculous.WebApp.Controllers
             }
 
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
-            {
-                GenreId = g.GenreId,
-                Name = g.Name
-            }).ToList();
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+
             return View(model);
         }
 
@@ -107,21 +71,15 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 var model = _bookService.GetBookEditById(id);
-                model.AllAvailableGenres = _genreService.GetGenreList(genreName: string.Empty)
-                    .Select(g => new GenreViewModel
-                    {
-                        GenreId = g.GenreId,
-                            Name = g.Name
-                        })
-                    .ToList();
-
+                var allGenres = _genreService.GetGenreList(genreName: string.Empty);
+                model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
                 model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
 
                 return View(model);
             }
             catch (Exception ex) {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _bookService.ListAllActiveBooks());
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null));
             }
         }
         [HttpPost]
@@ -141,11 +99,8 @@ namespace Readiculous.WebApp.Controllers
             }
 
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = allGenres.Select(g => new GenreViewModel
-            {
-                GenreId = g.GenreId,
-                Name = g.Name
-            }).ToList();
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+
             return View(model);
         }
 
@@ -169,7 +124,7 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _bookService.ListAllActiveBooks());
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null));
             }
         }
     }

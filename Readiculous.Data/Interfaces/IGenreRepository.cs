@@ -14,7 +14,6 @@ namespace Readiculous.Data.Interfaces
         bool GenreNameExists(string genreName);
         void AddGenre(Genre genre);
         void UpdateGenre(Genre genre);
-        void DeleteGenre(string genreId, string deleterId);
 
         IQueryable<Genre> GetAllActiveGenres();
         IQueryable<Genre> GetGenresByName(string genreName);

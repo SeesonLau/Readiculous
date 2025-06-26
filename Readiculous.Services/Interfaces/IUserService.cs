@@ -1,8 +1,8 @@
-﻿using Readiculous.Data.Models;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Web.Mvc;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Interfaces

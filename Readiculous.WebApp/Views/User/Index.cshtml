@@ -21,7 +21,7 @@
             <label class="form-label">Role:</label>
             <select name="roleType" class="form-control">
                 <option value="">-- Select Role --</option>
-                @foreach (var role in (List<System.Web.Mvc.SelectListItem>)ViewBag.RoleTypes)
+                @foreach (var role in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.RoleTypes)
                 {
                     <option value="@role.Value" selected="@(role.Value == (ViewData["CurrentRoleType"]?.ToString() ?? "") ? "selected" : "")">
                         @role.Text
@@ -32,7 +32,7 @@
         <div class="col-md-3">
             <label class="form-label">Search Type:</label>
             <select name="searchType" class="form-control">
-                @foreach (var type in (List<System.Web.Mvc.SelectListItem>)ViewBag.UserSearchTypes)
+                @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
                 {
                     <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentUserSearchType"]?.ToString() ?? "") ? "selected" : "")">
                         @type.Text

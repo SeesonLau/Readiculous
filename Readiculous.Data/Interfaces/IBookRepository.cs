@@ -15,12 +15,12 @@ namespace Readiculous.Data.Interfaces
         bool ISBNExists(string id, string isbn);
         void AddBook(Book book);
         void UpdateBook(Book book);
-        void DeleteBook(string bookId, string deleterId);
+
 
         IQueryable<Book> GetAllActiveBooks();
-        IQueryable<Book> GetBooksByTitle(string bookTitle, BookSearchType searchType, BookSortType bookSortType);
-        IQueryable<Book> GetBooksByGenreList(List<Genre> genres, BookSearchType searchType, BookSortType sortType);
-        IQueryable<Book> GetBooksByTitleAndGenres(string bookTitle, List<Genre> genres, BookSearchType searchType, BookSortType sortType);
+        IQueryable<Book> GetBooksByTitle(string bookTitle);
+        IQueryable<Book> GetBooksByGenreList(List<Genre> genres);
+        IQueryable<Book> GetBooksByTitleAndGenres(string bookTitle, List<Genre> genres);
         Book GetBookById(string id);
 
         // Book GetBookByTitle(string title); //NOT USED AT THE MOMENT
