@@ -4,6 +4,7 @@ using Basecode.Data.Repositories;
 using System;
 using System.Linq;
 using static Readiculous.Resources.Constants.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Readiculous.Data.Repositories
 {
@@ -46,65 +47,55 @@ namespace Readiculous.Data.Repositories
             UnitOfWork.SaveChanges();
         }
 
-        public void DeleteUser(string userId, string deleterId)
-        {
-            User user = this.GetDbSet<User>()
-                .Where(u => u.UserId == userId &&
-                        u.DeletedTime == null)
-                .FirstOrDefault();
-
-            if (user != null)
-            {
-                user.DeletedBy = deleterId;
-                user.DeletedTime = DateTime.UtcNow;
-                this.GetDbSet<User>().Update(user);
-                UnitOfWork.SaveChanges();
-            }
-        }
-
         //User List Queries
-        public IQueryable<User> GetUsersByUsername(string username, UserSortType searchType = UserSortType.CreatedTimeAscending)
+        public IQueryable<User> GetUsersByUsername(string username)
         {
-            var queryReturn = this.GetDbSet<User>()
+            // CAN BE OPTIMIZED TO REMOVE USER FAVORITE BOOKS AND USER REVIEWS IF NOT NEEDED
+            var users = this.GetDbSet<User>()
+                .Include(u => u.CreatedByUser)
+                .Include(u => u.UpdatedByUser)
+                .Include(u => u.UserFavoriteBooks)
+                    .ThenInclude(fb => fb.Book)
+                .Include(u => u.UserReviews)
+                    .ThenInclude(r => r.Book)
                 .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
                         u.DeletedTime == null);
 
-            return searchType switch
-            {
-                UserSortType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
-                UserSortType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
-                UserSortType.CreatedTimeAscending => queryReturn.OrderBy(u => u.CreatedTime),
-                UserSortType.CreatedTimeDescending => queryReturn.OrderByDescending(u => u.CreatedTime),
-                _ => queryReturn,
-            };
+            return users;
         }
-        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType = UserSortType.CreatedTimeAscending)
+        public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
         {
-            var queryReturn = this.GetDbSet<User>()
+            // CAN BE OPTIMIZED TO REMOVE USER FAVORITE BOOKS AND USER REVIEWS IF NOT NEEDED
+            var users = this.GetDbSet<User>()
+                .Include(u => u.CreatedByUser)
+                .Include(u => u.UpdatedByUser)
+                .Include(u => u.UserFavoriteBooks)
+                    .ThenInclude(fb => fb.Book)
+                .Include(u => u.UserReviews)
+                    .ThenInclude(r => r.Book)
                 .Where(u => u.Role == role &&
                         u.Username.ToLower().Contains(username.ToLower()) &&
                         u.DeletedTime == null);
 
-            return searchType switch
-            {
-                UserSortType.UsernameAscending => queryReturn.OrderBy(u => u.Username),
-                UserSortType.UsernameDescending => queryReturn.OrderByDescending(u => u.Username),
-                UserSortType.CreatedTimeAscending => queryReturn.OrderBy(u => u.CreatedTime),
-                UserSortType.CreatedTimeDescending => queryReturn.OrderByDescending(u => u.CreatedTime),
-                _ => queryReturn,
-            };
+            return users;
         }
         public User GetUserById(string id)
         {
-            return this.GetDbSet<User>().FirstOrDefault(u => u.UserId == id
-                                            && u.DeletedTime == null);
+            return this.GetDbSet<User>()
+                .Include(u => u.CreatedByUser)
+                .Include(u => u.UpdatedByUser)
+                .Include(u => u.UserFavoriteBooks)
+                    .ThenInclude(fb => fb.Book)
+                .Include(u => u.UserReviews)
+                    .ThenInclude(r => r.Book)
+                .FirstOrDefault(u => u.UserId == id
+                                    && u.DeletedTime == null);
         }
-        public User GetUserByEmail(string email)
+        public User GetUserByEmailAndPassword(string email, string password)
         {
-            return this.GetDbSet<User>().Where(u => u.Email.ToLower() == email.ToLower()
-                                            && u.DeletedTime == null)
-                .ToList()
-                .FirstOrDefault();
+            return this.GetDbSet<User>().FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
+                                                    && u.Password == password
+                                                    && u.DeletedTime == null);
         }
     }
 }

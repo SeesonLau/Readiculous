@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -28,20 +29,19 @@ namespace Readiculous.Services.Services
             _client = client;
         }
 
+        // Authentication Method
         public LoginResult AuthenticateUserByEmail(string email, string password, ref User user)
         {
             user = new User();
             var passwordKey = PasswordManager.EncryptPassword(password);
-            user = _userRepository.GetUsers().Where(x => x.Email == email.Trim() 
-                                                        && x.Password == passwordKey
-                                                        && x.DeletedTime == null)
-            .FirstOrDefault();
+            user = _userRepository.GetUserByEmailAndPassword(email.Trim(), passwordKey);
 
             if (user == null)
                 return LoginResult.Failed;
             return LoginResult.Success;
         }
 
+        // CRUD Operations
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
             if (!_userRepository.EmailExists(model.Email.Trim()))
@@ -62,7 +62,7 @@ namespace Readiculous.Services.Services
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
                     var extension = Path.GetExtension(model.ProfilePicture.FileName);
-                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}{extension}");
+                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}-{Guid.NewGuid():N}{extension}");
 
                     using (var memoryStream = new MemoryStream())
                     {
@@ -97,13 +97,12 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserExists);
             }
         }
-
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
             if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
             {
                 var user = _userRepository.GetUserById(model.UserId);
-                if(string.IsNullOrEmpty(model.ProfilePictureUrl))
+                if (string.IsNullOrEmpty(model.ProfilePictureUrl))
                 {
                     model.ProfilePictureUrl = user.ProfilePictureUrl;
                 }
@@ -161,37 +160,16 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-
         public async Task DeleteUserAsync(string userId, string deleterId)
         {
             if (_userRepository.UserExists(userId))
             {
                 var user = _userRepository.GetUserById(userId);
-                /*
-                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                {
-                    try
-                    {
-                        var uri = new Uri(user.ProfilePictureUrl);
-                        var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
 
-                        var result = await _client.Storage
-                            .From(Const.BucketName)
-                            .Remove(new List<string> { relativePath });
+                user.DeletedBy = deleterId;
+                user.DeletedTime = DateTime.UtcNow;
 
-                        if (result == null)
-                        {
-                            throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Image deletion error: {ex.Message}");
-                    }
-                }
-                */
-
-                _userRepository.DeleteUser(userId, deleterId);
+                _userRepository.UpdateUser(user);
             }
             else
             {
@@ -199,62 +177,35 @@ namespace Readiculous.Services.Services
             }
         }
 
-        public List<UserViewModel> SearchAllActiveUsers()
+        // Multiple User Retrieval Methods
+        public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.CreatedTimeDescending)
         {
-            List<UserViewModel> userViewModels = _userRepository.GetUsersByUsername(string.Empty)
-                .ToList()
-                .Select(user =>
-                {
-                    UserViewModel userViewModel = new();
-                    _mapper.Map(user, userViewModel);
+            List<UserListItemViewModel> userViewModels = new();
 
-                    userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
-                    return userViewModel;
-                })
-                .ToList();
+            if (role.HasValue && !string.IsNullOrEmpty(username))
+            {
+                userViewModels = GetUsersByRoleAndUsername(role.Value, username, sortType);
+            }
+            else if (role.HasValue)
+            {
+                userViewModels = GetUsersByRoleAndUsername(role.Value, string.Empty, sortType);
+            }
+            else if (!string.IsNullOrEmpty(username))
+            {
+                userViewModels = GetUsersByUsername(username, sortType);
+            }
+            else
+            {
+                userViewModels = GetAllActiveUsers();
+            }
 
             return userViewModels;
         }
 
-        public List<UserViewModel> SearchUsersByUsername(string username, UserSortType searchType)
+        // Single User Retrieval Methods
+        public UserViewModel SearchUserEditById(string userId)
         {
-            List<UserViewModel> userViewModels = _userRepository.GetUsersByUsername(username.Trim(), searchType)
-                .ToList()
-                .Select(user =>
-                {
-                    UserViewModel userViewModel = new();
-                    _mapper.Map(user, userViewModel);
-
-                    userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
-                    return userViewModel;
-                })
-                .ToList();
-
-            return userViewModels;
-        }
-
-        public List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSortType searchType)
-        {
-            List<UserViewModel> userViewModels = _userRepository.GetUsersByRoleAndUsername(role, username.Trim(), searchType)
-                .ToList()
-                .Select(user =>
-                {
-                    UserViewModel userViewModel = new();
-                    _mapper.Map(user, userViewModel);
-
-                    userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
-                    return userViewModel;
-                })
-                .ToList();
-            return userViewModels;
-        }
-
-        public UserViewModel SearchUserById(string userId)
-        {             
-            User user = _userRepository.GetUsers()
-                .Where(u => u.UserId == userId 
-                            && u.DeletedTime == null)
-                .FirstOrDefault();
+            User user = _userRepository.GetUserById(userId);
 
             if (user != null)
             {
@@ -268,15 +219,112 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        public User GetUserByEmail(string email)
+        public UserDetailsViewModel SearchUserDetailsById(string userId)
         {
-            var user = _userRepository.GetUserByEmail(email.Trim());
+            User user = _userRepository.GetUserById(userId);
 
-            UserViewModel userViewModel = new();
-            _mapper.Map(user, userViewModel);
+            if (user != null)
+            {
+                UserDetailsViewModel userViewModel = new();
 
-            userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
-            return user;
+                _mapper.Map(user, userViewModel);
+                userViewModel.Role = user.Role.ToString();
+                userViewModel.CreatedByUserName = user.CreatedByUser.Username;
+                userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
+
+                return userViewModel;
+            }
+            else
+            {
+                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+            }
+        }
+
+        //Populating Dropdown Lists
+        public List<SelectListItem> GetUserRoles()
+        {
+            return Enum.GetValues(typeof(RoleType))
+                .Cast<RoleType>()
+                .Select(r => new SelectListItem
+                {
+                    Value = ((int)r).ToString(),
+                    Text = r.ToString()
+                }).ToList();
+        }
+        public List<SelectListItem> GetUserSortTypes()
+        {
+            return Enum.GetValues(typeof(UserSortType))
+                .Cast<UserSortType>()
+                .Select(r => new SelectListItem
+                {
+                    Value = ((int)r).ToString(),
+                    Text = r.ToString()
+                }).ToList();
+        }
+
+        // Helper methods for searching users
+        private List<UserListItemViewModel> GetAllActiveUsers()
+        {
+            var userViewModels = _userRepository.GetUsersByUsername(string.Empty)
+                .ToList()
+                .Select(user =>
+                {
+                    UserListItemViewModel userViewModel = new();
+
+                    _mapper.Map(user, userViewModel);
+                    userViewModel.Role = user.Role.ToString();
+                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
+                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
+
+                    return userViewModel;
+                });
+
+            return userViewModels.OrderByDescending(u => u.CreatedTime).ToList();
+        }
+        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType searchType)
+        {
+            var userViewModels = _userRepository.GetUsersByUsername(username.Trim())
+                .ToList()
+                .Select(user =>
+                {
+                    UserListItemViewModel userViewModel = new();
+                    _mapper.Map(user, userViewModel);
+                    return userViewModel;
+                });
+
+            return searchType switch
+            {
+                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.CreatedTimeAscending => userViewModels.OrderBy(u => u.CreatedTime).ToList(),
+                UserSortType.CreatedTimeDescending => userViewModels.OrderByDescending(u => u.CreatedTime).ToList(),
+                _ => userViewModels.ToList(),
+            };
+        }
+        private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
+        {
+            var userViewModels = _userRepository.GetUsersByRoleAndUsername(role, username.Trim())
+                .ToList()
+                .Select(user =>
+                {
+                    UserListItemViewModel userViewModel = new();
+
+                    _mapper.Map(user, userViewModel);
+                    userViewModel.Role = user.Role.ToString();
+                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
+                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
+
+                    return userViewModel;
+                });
+
+            return searchType switch
+            {
+                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.CreatedTimeAscending => userViewModels.OrderBy(u => u.CreatedTime).ToList(),
+                UserSortType.CreatedTimeDescending => userViewModels.OrderByDescending(u => u.CreatedTime).ToList(),
+                _ => userViewModels.ToList(),
+            };
         }
     }
 }

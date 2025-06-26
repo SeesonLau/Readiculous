@@ -26,19 +26,11 @@ namespace Readiculous.WebApp
         {
             public AutoMapperProfileConfiguration()
             {
-
+                //User Mappings
+                CreateMap<User, UserListItemViewModel>();
+                CreateMap<User, UserDetailsViewModel>();
                 CreateMap<UserViewModel, User>();
                 CreateMap<User, UserViewModel>();
-
-                //User Mappings
-                CreateMap<User, UserListItemViewModel>()
-                    .ForMember(dest => dest.Role,
-                               opt => opt.MapFrom(
-                                  src => src.Role.ToString()))
-                    .ForMember(dest => dest.CreatedByUsername,
-                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
-                    .ForMember(dest => dest.UpdatedByUsername,
-                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
 
                 // Genre Mappings
                 CreateMap<Genre, GenreListItemViewModel>();

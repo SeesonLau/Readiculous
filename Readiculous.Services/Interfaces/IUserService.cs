@@ -2,6 +2,7 @@
 using Readiculous.Services.ServiceModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Interfaces
@@ -13,10 +14,10 @@ namespace Readiculous.Services.Interfaces
 
         Task UpdateUserAsync(UserViewModel model, string editorId);
         Task DeleteUserAsync(string userId, string deleterId);
-        List<UserViewModel> SearchAllActiveUsers();
-        List<UserViewModel> SearchUsersByUsername(string username, UserSortType searchType);
-        List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSortType searchType);
-        UserViewModel SearchUserById(string userId);
-        User GetUserByEmail(string email);
+        List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.CreatedTimeDescending);
+        UserViewModel SearchUserEditById(string userId);
+        UserDetailsViewModel SearchUserDetailsById(string userId);
+        List<SelectListItem> GetUserRoles();
+        List<SelectListItem> GetUserSortTypes();
     }
 }

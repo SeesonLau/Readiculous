@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -15,12 +16,11 @@ namespace Readiculous.Data.Interfaces
         bool EmailExists(string email);
         void AddUser(User user, string creatorId);
         void UpdateUser(User user);
-        void DeleteUser(string userId, string deleterId);
 
         //User List Queries
-        IQueryable<User> GetUsersByUsername(string username, UserSortType searchType = UserSortType.UsernameAscending);
-        IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType);
+        IQueryable<User> GetUsersByUsername(string username);
+        IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username);
         User GetUserById(string id);
-        User GetUserByEmail(string email);
+        User GetUserByEmailAndPassword(string email, string password);
     }
 }
