@@ -87,6 +87,8 @@ namespace Readiculous.WebApp.Controllers
             {
                 return View(model);
             }
+
+            /*
             var tempModel = _userService.GetUserByEmail(model.Email);
             User user = new() { UserId = tempModel.UserId, Username = "Name", Password = "Password" };
 
@@ -94,8 +96,8 @@ namespace Readiculous.WebApp.Controllers
             this._session.SetString("UserName", user.UserId);
 
             return RedirectToAction("Index", "Home");
-
-            /*
+            */
+            
             User user = null;
             
             var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
@@ -112,7 +114,6 @@ namespace Readiculous.WebApp.Controllers
                 TempData["ErrorMessage"] = "Incorrect UserId or Password";
                 return View();
             }
-            */
         }
 
         [HttpGet]
@@ -129,6 +130,7 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 model.UserId = Guid.NewGuid().ToString();
+                model.Role = RoleType.Reviewer;
                 await _userService.AddUserAsync(model, model.UserId);
                 return RedirectToAction("Login", "Account");
             }

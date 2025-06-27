@@ -1,4 +1,5 @@
-﻿using Readiculous.Data.Models;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +14,10 @@ namespace Readiculous.Services.Interfaces
 
         Task UpdateUserAsync(UserViewModel model, string editorId);
         Task DeleteUserAsync(string userId, string deleterId);
-        List<UserViewModel> SearchAllUsers();
-        List<UserViewModel> SearchUsersByUsername(string username, UserSearchType searchType);
-        List<UserViewModel> SearchUsersByRole(RoleType role, string username, UserSearchType searchType);
-        UserViewModel SearchUserById(string userId);
-        User GetUserByEmail(string email);
+        List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.CreatedTimeDescending);
+        UserViewModel SearchUserEditById(string userId);
+        UserDetailsViewModel SearchUserDetailsById(string userId);
+        List<SelectListItem> GetUserRoles();
+        List<SelectListItem> GetUserSortTypes();
     }
 }

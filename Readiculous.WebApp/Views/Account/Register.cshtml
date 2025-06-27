@@ -19,25 +19,33 @@
                                  style="width: 185px;" alt="logo">
                         </div>
 
-                        <form method="post" action="/Account/Register">
+                        <form method="post" enctype="multipart/form-data" asp-action="Register" asp-controller="Account">
+                            <input type="hidden" asp-for="UserId" />
+
                             <div class="form-outline mb-4">
-                                <label class="form-label" for="userId">UserId</label>
-                                <input type="text" id="userId" class="form-control"
-                                       asp-for="UserId" placeholder="Enter userid" />
-                                <span asp-validation-for="UserId" class="text-danger"></span>
-                            </div>
-                            <div class="form-outline mb-4">
-                                <label class="form-label" for="name">Name</label>
-                                <input type="text" id="name" class="form-control"
-                                       asp-for="Username" placeholder="Enter name" />
+                                <label class="form-label" asp-for="Username">Username</label>
+                                <input type="text" class="form-control" asp-for="Username" placeholder="Enter username" />
                                 <span asp-validation-for="Username" class="text-danger"></span>
                             </div>
+
                             <div class="form-outline mb-4">
-                                <label class="form-label" for="password">Password</label>
-                                <input type="password" id="password" class="form-control"
-                                       asp-for="Password" placeholder="Enter password" />
+                                <label class="form-label" asp-for="Email">Email</label>
+                                <input type="email" class="form-control" asp-for="Email" placeholder="Enter email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-outline mb-4">
+                                <label class="form-label" asp-for="Password">Password</label>
+                                <input type="password" class="form-control" asp-for="Password" placeholder="Enter password" />
                                 <span asp-validation-for="Password" class="text-danger"></span>
                             </div>
+
+                            <div class="form-outline mb-4">
+                                <label class="form-label" asp-for="ProfilePicture">Profile Picture</label>
+                                <input type="file" class="form-control" asp-for="ProfilePicture" accept="image/*" />
+                                <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                            </div>
+
                             <div class="text-center pt-1 mb-5 pb-1 d-flex flex-column align-items-center">
                                 <button class="btn btn-primary btn-block login-btn gradient-custom-2 mb-3" type="submit">
                                     Register
@@ -47,15 +55,16 @@
                                 </a>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 @section scripts {
     <script>
-        // Check for error message and display Toastr notification
         var errorMessage = '@TempData["ErrorMessage"]';
         if (errorMessage) {
             toastr.error(errorMessage);

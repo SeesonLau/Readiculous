@@ -117,6 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BookExists" xml:space="preserve">
+    <value>Book already exists!</value>
+  </data>
+  <data name="BookNotExists" xml:space="preserve">
+    <value>Book does not exist!</value>
+  </data>
+  <data name="BookTitleAndAuthorExists" xml:space="preserve">
+    <value>A book with the same title and author already exists!</value>
+  </data>
+  <data name="GenreExists" xml:space="preserve">
+    <value>Genre Name already exists!</value>
+  </data>
+  <data name="GenreNotExist" xml:space="preserve">
+    <value>Genre does not exist!</value>
+  </data>
   <data name="ImageFailedToDelete" xml:space="preserve">
     <value>Image failed to delete!</value>
   </data>

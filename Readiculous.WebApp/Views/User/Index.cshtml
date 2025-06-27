@@ -1,128 +1,104 @@
-﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserViewModel>  
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
+@using Microsoft.AspNetCore.Mvc.Rendering
 
-@using Microsoft.AspNetCore.Mvc.Rendering  
+@{
+    ViewData["Title"] = "User Management";
+}
 
-@{  
-    ViewData["Title"] = "Index";  
-}  
+<h1>User Management</h1>
 
-<h1>User Management</h1>  
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
 
-<p>  
-    <a asp-action="Create">Create New</a>  
-</p>  
+<form asp-action="Index" method="get" class="mb-4">
+    <div class="row align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Search Username/Email:</label>
+            <input type="text" name="searchString" class="form-control" placeholder="Enter username or email" value="@ViewData["CurrentFilter"]" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Role:</label>
+            <select name="roleType" class="form-control">
+                <option value="">-- Select Role --</option>
+                @foreach (var role in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.RoleTypes)
+                {
+                    <option value="@role.Value" selected="@(role.Value == (ViewData["CurrentRoleType"]?.ToString() ?? "") ? "selected" : "")">
+                        @role.Text
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Search Type:</label>
+            <select name="searchType" class="form-control">
+                @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
+                {
+                    <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentUserSearchType"]?.ToString() ?? "") ? "selected" : "")">
+                        @type.Text
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">Search</button>
+            <a asp-action="Index" class="btn btn-secondary">Clear</a>
+        </div>
+    </div>
+</form>
 
----  
-
-<form asp-action="Index" method="get" class="mb-4">  
-    <div class="row align-items-end">  
-        <div class="col-md-4">  
-            <div class="form-group">  
-                <label for="searchString" class="form-label">Search Username/Email:</label>  
-                <input type="text" name="searchString" class="form-control" placeholder="Enter username or email" value="@ViewData["CurrentFilter"]" />  
-            </div>  
-        </div>  
-        <div class="col-md-3">  
-            <div class="form-group">  
-                <label for="roleType" class="form-label">Role:</label>  
-                <select name="roleType" class="form-control">  
-                    <option value="">--Select Role--</option>  
-                    @foreach (var role in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.RoleTypes)  
-                    {  
-                        <option value="@role.Value" selected=@(role.Value == (ViewData["CurrentRoleType"]?.ToString() ?? "") ? "selected" : "")>  
-                            @role.Text  
-                        </option>  
-                    }  
-                </select>  
-            </div>  
-        </div>  
-        <div class="col-md-3">  
-            <div class="form-group">  
-                <label for="searchType" class="form-label">Search Type:</label>  
-                <select name="searchType" class="form-control">
-                    @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
-                    {  
-                        <option value="@type.Value" selected=@(type.Value == (ViewData["CurrentUserSearchType"]?.ToString() ?? "") ? "selected" : "")>  
-                            @type.Text  
-                        </option>  
-                    }  
-                </select>  
-            </div>  
-        </div>  
-        <div class="col-md-2 d-flex align-items-end">  
-            <button type="submit" class="btn btn-primary me-2">Search</button>  
-            <a asp-action="Index" class="btn btn-secondary">Clear</a>  
-        </div>  
-    </div>  
-</form>  
-
----  
-
-<table class="table table-striped table-bordered">  
-    <thead class="table-dark">  
-        <tr>  
-            <th>  
-                @Html.DisplayNameFor(model => model.UserId)  
-            </th>  
-            <th>  
-                @Html.DisplayNameFor(model => model.Username)  
-            </th>  
-            <th>  
-                @Html.DisplayNameFor(model => model.Email)  
-            </th>  
-            <th>  
-                @Html.DisplayNameFor(model => model.Password)  
-            </th>  
-            <th>  
-                @Html.DisplayNameFor(model => model.Role)  
-            </th>  
-            <th>
-                Profile Picture
-            </th>
-            <th>Actions</th>  
-        </tr>  
-    </thead>  
-    <tbody>  
-        @foreach (var item in Model)  
-        {  
-            <tr>  
-                <td>  
-                    @Html.DisplayFor(modelItem => item.UserId)  
-                </td>  
-                <td>  
-                    @Html.DisplayFor(modelItem => item.Username)  
-                </td>  
-                <td>  
-                    @Html.DisplayFor(modelItem => item.Email)  
-                </td>  
-                <td>  
-                    @Html.DisplayFor(modelItem => item.Password)  
-                </td>  
-                <td>  
-                    @Html.DisplayFor(modelItem => item.Role)
-                </td>
-                <td>
-                    @if (!string.IsNullOrEmpty(item.ProfilePictureUrl))
-                    {
-                        <img src="@item.ProfilePictureUrl" alt="Profile" style="width: 50px; height: 50px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <span class="text-muted">No Image</span>
-                    }
-                </td>
-                <td>  
-                    <a asp-action="Edit" asp-route-userId="@item.UserId" class="btn btn-sm btn-info">Edit</a> |  
-                    <a asp-action="Details" asp-route-userId="@item.UserId" class="btn btn-sm btn-secondary">Details</a> |  
-                    <a asp-action="Delete" asp-route-userId="@item.UserId" class="btn btn-sm btn-danger">Delete</a>  
-                </td>
-            </tr>  
-        }  
-        @if (!Model.Any())  
-        {  
-            <tr>  
-                <td colspan="6" class="text-center">No users found matching your search criteria.</td>  
-            </tr>  
-        }  
-    </tbody>  
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().UserId)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UserName)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Email)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Role)</th>
+            <th>Profile Picture</th>
+            <th>@Html.DisplayNameFor(model => model.First().CreatedByUsername)</th>
+            <th>@Html.DisplayNameFor(model => model.First().CreatedTime)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UpdatedByUsername)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.UserId</td>
+                    <td>@item.UserName</td>
+                    <td>@item.Email</td>
+                    <td>@item.Role</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ProfilePictureUrl))
+                        {
+                            <img src="@item.ProfilePictureUrl" alt="Profile" style="width: 50px; height: 50px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">No Image</span>
+                        }
+                    </td>
+                    <td>@item.CreatedByUsername</td>
+                    <td>@item.CreatedTime.ToString("g")</td>
+                    <td>@item.UpdatedByUsername</td>
+                    <td>@item.UpdatedTime.ToString("g")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-userId="@item.UserId" class="btn btn-sm btn-info">Edit</a> |
+                        <a asp-action="Details" asp-route-userId="@item.UserId" class="btn btn-sm btn-secondary">Details</a> |
+                        <a asp-action="Delete" asp-route-userId="@item.UserId" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" class="text-center">No users found matching your criteria.</td>
+            </tr>
+        }
+    </tbody>
 </table>

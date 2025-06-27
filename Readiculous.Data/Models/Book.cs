@@ -14,7 +14,7 @@ namespace Readiculous.Data.Models
         public int SeriesNumber { get; set; }
         public string Publisher { get; set; }
         public string PublicationYear { get; set; }
-        public decimal AverageRating { get; set; }
+        public string CoverImageUrl { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }
         public string UpdatedBy { get; set; }

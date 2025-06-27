@@ -24,46 +24,16 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult Index(string searchString, RoleType? roleType, UserSearchType searchType = UserSearchType.IDAscending)
+        public IActionResult Index(string searchString, RoleType? roleType, UserSortType searchType)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
             ViewData["CurrentUserSearchType"] = searchType.ToString();
 
-            ViewBag.RoleTypes = Enum.GetValues(typeof(RoleType))
-                .Cast<RoleType>()
-                .Select(r => new SelectListItem
-                {
-                    Value = ((int)r).ToString(), 
-                    Text = r.ToString()
-                }).ToList();
+            ViewBag.RoleTypes = _userService.GetUserRoles();
+            ViewBag.UserSearchTypes = _userService.GetUserSortTypes();
 
-            ViewBag.UserSearchTypes = Enum.GetValues(typeof(UserSearchType))
-                .Cast<UserSearchType>()
-                .Select(r => new SelectListItem
-                {
-                    Value = ((int)r).ToString(),
-                    Text = r.ToString()
-                }).ToList();
-
-            List<UserViewModel> users;
-
-            if (roleType.HasValue && !string.IsNullOrEmpty(searchString))
-            {
-                users = _userService.SearchUsersByRole(roleType.Value, searchString, searchType);
-            }
-            else if (roleType.HasValue)
-            {
-                users = _userService.SearchUsersByRole(roleType.Value, string.Empty, searchType);
-            }
-            else if (!string.IsNullOrEmpty(searchString))
-            {
-                users = _userService.SearchUsersByUsername(searchString, searchType);
-            }
-            else
-            {
-                users = _userService.SearchAllUsers();
-            }
+            List<UserListItemViewModel> users = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
 
             return View(users);
         }
@@ -97,7 +67,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserById(userId);
+                var user = _userService.SearchUserEditById(userId);
                 return View(user);
             }
             catch (InvalidDataException ex)
@@ -129,7 +99,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserById(userId);
+                var user = _userService.SearchUserDetailsById(userId);
                 return View(user);
             }
             catch (InvalidDataException ex)

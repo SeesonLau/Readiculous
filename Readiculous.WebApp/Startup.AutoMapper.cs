@@ -2,6 +2,7 @@
 using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace Readiculous.WebApp
 {
@@ -25,8 +26,23 @@ namespace Readiculous.WebApp
         {
             public AutoMapperProfileConfiguration()
             {
+                //User Mappings
+                CreateMap<User, UserListItemViewModel>();
+                CreateMap<User, UserDetailsViewModel>();
                 CreateMap<UserViewModel, User>();
                 CreateMap<User, UserViewModel>();
+
+                // Genre Mappings
+                CreateMap<Genre, GenreListItemViewModel>();
+                CreateMap<Genre, GenreDetailsViewModel>();
+                CreateMap<GenreViewModel, Genre>();
+                CreateMap<Genre, GenreViewModel>();
+
+                // Book Mappings
+                CreateMap<Book, BookDetailsViewModel>();
+                CreateMap<Book, BookListItemViewModel>();
+                CreateMap<BookViewModel, Book>();
+                CreateMap<Book, BookViewModel>();
             }
         }
     }

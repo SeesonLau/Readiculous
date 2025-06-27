@@ -1,48 +1,146 @@
-﻿@model Readiculous.Services.ServiceModels.UserViewModel
+﻿@model Readiculous.Services.ServiceModels.UserDetailsViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>User Details</h1> 
 
 <div>
-    <h4>User</h4>
+    <h4>User Information</h4> 
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.UserId)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.UserId)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Username)
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.UserName) 
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Username)
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.UserName) 
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Email)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Email)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Password)
+        <dt class="col-sm-3">
+            Profile Picture
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Password)
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+            {
+                <img src="@Model.ProfileImageUrl" alt="Profile" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" />
+            }
+            else
+            {
+                <span class="text-muted">No profile picture available.</span>
+            }
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Role)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Role)
         </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CreatedByUserName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.CreatedByUserName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CreatedTime)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.CreatedTime)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.UpdatedByUserName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.UpdatedByUserName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.UpdatedTime)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.UpdatedTime)
+        </dd>
     </dl>
+
+    @{/*
+    <h4 class="mt-4">User Reviews</h4>
+    <hr />
+    @if (Model.UserReviewModels != null && Model.UserReviewModels.Any())
+    {
+        <ul class="list-group mb-4">
+            @foreach (var review in Model.UserReviewModels)
+            {
+                <li class="list-group-item">
+                    <div>
+                        <strong>Book:</strong> @review.BookTitle
+                    </div>
+                    <div>
+                        <strong>Rating:</strong> @review.Rating.ToString("0.0")
+                    </div>
+                    <div>
+                        <strong>Comment:</strong> @review.Comment
+                    </div>
+                    <small class="text-muted">Reviewed on: @review.ReviewTime.ToString("g")</small>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">No reviews from this user.</p>
+    }
+
+        */
+    }
+
+    @{/*
+    <!-- Optional-->
+    <h4 class="mt-4">Favorite Books</h4>
+    <hr />
+    @if (Model.FavoriteBookModels != null && Model.FavoriteBookModels.Any())
+    {
+        <ul class="list-group mb-4">
+            @foreach (var favBook in Model.FavoriteBookModels)
+            {
+                <li class="list-group-item">
+                    <div>
+                        <strong>Title:</strong> @favBook.Title
+                    </div>
+                    <div>
+                        <strong>Author:</strong> @favBook.Author
+                    </div>
+                    @if (!string.IsNullOrEmpty(favBook.CoverImageUrl))
+                    {
+                        <img src="@favBook.CoverImageUrl" alt="Cover" style="width: 80px; height: 120px; object-fit: cover; margin-top: 5px; border-radius: 4px;" />
+                    }
+                    else
+                    {
+                        <small class="text-muted">No cover image.</small>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">No favorite books for this user.</p>
+    }
+        */
+    }
+
 </div>
 <div>
-    <a asp-action="Edit" asp-route-userId="@Model.UserId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-userId="@Model.UserId" class="btn btn-primary">Edit</a> |
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
