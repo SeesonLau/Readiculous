@@ -44,6 +44,7 @@ namespace Readiculous.WebApp
             this._services.AddScoped<IUserRepository, UserRepository>();
             this._services.AddScoped<IGenreRepository, GenreRepository>();
             this._services.AddScoped<IBookRepository, BookRepository>();
+            this._services.AddScoped<IFavoriteBookRepository, FavoriteBookRepository>();
 
             // Manager Class
             this._services.AddScoped<SignInManager>();
