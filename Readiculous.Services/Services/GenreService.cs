@@ -78,9 +78,13 @@ namespace Readiculous.Services.Services
         // Multiple Genre Listing methods
         public List<GenreListItemViewModel> GetGenreList(string genreName, GenreSortType sortType = GenreSortType.CreatedTimeDescending)
         {
-            if (string.IsNullOrEmpty(genreName))
+            if (string.IsNullOrEmpty(genreName) && sortType == GenreSortType.CreatedTimeDescending)
             {
                 return ListAllActiveGenres();
+            }
+            else if(string.IsNullOrEmpty(genreName))
+            {
+                return ListGenresByName(string.Empty, sortType);
             }
             else
             {
@@ -182,8 +186,8 @@ namespace Readiculous.Services.Services
                 GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name).ToList(),
                 GenreSortType.BookCountAscending => genres.OrderBy(g => g.BookCount).ToList(),
                 GenreSortType.BookCountDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
-                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.BookCount).ToList(),
-                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
+                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.CreatedTime).ToList(),
+                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.CreatedTime).ToList(),
                 _ => genres, // Default case
             };
         }
