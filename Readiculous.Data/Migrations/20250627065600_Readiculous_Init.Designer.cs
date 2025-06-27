@@ -12,7 +12,7 @@ using Readiculous.Data;
 namespace Readiculous.Data.Migrations
 {
     [DbContext(typeof(ReadiculousDbContext))]
-    [Migration("20250623054219_Readiculous_Init")]
+    [Migration("20250627065600_Readiculous_Init")]
     partial class Readiculous_Init
     {
         /// <inheritdoc />
@@ -143,12 +143,6 @@ namespace Readiculous.Data.Migrations
 
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
 
                     b.HasKey("UserId", "BookId");
 

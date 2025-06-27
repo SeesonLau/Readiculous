@@ -18,8 +18,7 @@ namespace Readiculous.Data.Repositories
         public bool FavoriteBookExists(string bookId, string userId)
         {
             return this.GetDbSet<FavoriteBook>().Any(fb => fb.UserId == userId 
-                                                        && fb.BookId == bookId 
-                                                        && fb.DeletedTime == null);
+                                                        && fb.BookId == bookId );
         }
 
         public void AddFavoriteBook(FavoriteBook favoriteBook)
@@ -29,28 +28,25 @@ namespace Readiculous.Data.Repositories
         }
         public void RemoveFavoriteBook(FavoriteBook favoriteBook)
         {
-            this.GetDbSet<FavoriteBook>().Update(favoriteBook);
+            this.GetDbSet<FavoriteBook>().Remove(favoriteBook);
             this.UnitOfWork.SaveChanges();
         }
 
         public IQueryable<FavoriteBook> GetFavoriteBooksByUserId(string userId)
         {
             return this.GetDbSet<FavoriteBook>()
-                .Where(fb => fb.UserId == userId 
-                            && fb.DeletedTime == null);
+                .Where(fb => fb.UserId == userId);
         }
         public IQueryable<FavoriteBook> GetFavoriteBooksByBookId(string bookId)
         {
             return this.GetDbSet<FavoriteBook>()
-                .Where(fb => fb.BookId == bookId 
-                            && fb.DeletedTime == null);
+                .Where(fb => fb.BookId == bookId);
         }
         public FavoriteBook GetFavoriteBookByBookIdAndUserId(string bookId, string userId)
         {
             return this.GetDbSet<FavoriteBook>()
                 .FirstOrDefault(fb => fb.BookId == bookId 
-                                    && fb.UserId == userId 
-                                    && fb.DeletedTime == null);
+                                    && fb.UserId == userId );
         }
     }
 }

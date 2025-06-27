@@ -512,7 +512,6 @@ namespace Readiculous.Services.Services
             }
 
             var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
-            favoriteBook.DeletedTime = DateTime.UtcNow;
 
             _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
         }

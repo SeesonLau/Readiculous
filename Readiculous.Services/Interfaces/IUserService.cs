@@ -13,7 +13,7 @@ namespace Readiculous.Services.Interfaces
         Task AddUserAsync(UserViewModel model, string creationId);
 
         Task UpdateUserAsync(UserViewModel model, string editorId);
-        Task DeleteUserAsync(string userId, string deleterId);
+        void DeleteUserAsync(string userId, string deleterId);
         List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.CreatedTimeDescending);
         UserViewModel SearchUserEditById(string userId);
         UserDetailsViewModel SearchUserDetailsById(string userId);
