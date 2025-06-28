@@ -12,11 +12,11 @@ namespace Readiculous.Data.Models
         public string Password { get; set; }
         public RoleType Role { get; set; } 
         public string ProfilePictureUrl { get; set; }
-        public string? CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }
-        public string? UpdatedBy { get; set; }
-        public DateTime? UpdatedTime { get; set; }
-        public string? DeletedBy { get; set; }
+        public string UpdatedBy { get; set; }
+        public DateTime UpdatedTime { get; set; }
+        public string DeletedBy { get; set; }
         public DateTime? DeletedTime { get; set; }
         public AccessStatus AccessStatus { get; set; }
 

@@ -151,23 +151,22 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        public void DeleteUserAsync(string userId, string deleterId)
+        public async Task DeleteUserAsync(string userId, string deleterId)
         {
-            if (_userRepository.UserExists(userId))
+            if (await Task.Run(() => _userRepository.UserExists(userId)))
             {
-                var user = _userRepository.GetUserById(userId);
+                var user = await Task.Run(() => _userRepository.GetUserById(userId));
 
                 user.DeletedBy = deleterId;
                 user.DeletedTime = DateTime.UtcNow;
 
-                _userRepository.UpdateUser(user);
+                await Task.Run(() => _userRepository.UpdateUser(user));
             }
             else
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
         {
