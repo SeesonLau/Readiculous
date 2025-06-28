@@ -1,36 +1,25 @@
 ﻿@model Readiculous.Services.ServiceModels.UserDetailsViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "User Details";
 }
 
-<h1>User Details</h1> 
+<h1>User Details</h1>
 
 <div>
-    <h4>User Information</h4> 
+    <h4>User Information</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.UserId)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.UserId)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.UserName) 
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.UserName) 
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class="col-sm-3">
-            Profile Picture
-        </dt>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UserId)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.UserId)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UserName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.UserName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+        <dt class="col-sm-3">Profile Picture</dt>
         <dd class="col-sm-9">
             @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
             {
@@ -41,36 +30,21 @@
                 <span class="text-muted">No profile picture available.</span>
             }
         </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Role)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.CreatedByUserName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.CreatedByUserName)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.CreatedTime)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.CreatedTime)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.UpdatedByUserName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.UpdatedByUserName)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.UpdatedTime)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.UpdatedTime)
-        </dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Role)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Role)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedByUserName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedByUserName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedTime)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedTime)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UpdatedByUserName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.UpdatedByUserName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UpdatedTime)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.UpdatedTime)</dd>
     </dl>
 
     @{/*
@@ -82,15 +56,9 @@
             @foreach (var review in Model.UserReviewModels)
             {
                 <li class="list-group-item">
-                    <div>
-                        <strong>Book:</strong> @review.BookTitle
-                    </div>
-                    <div>
-                        <strong>Rating:</strong> @review.Rating.ToString("0.0")
-                    </div>
-                    <div>
-                        <strong>Comment:</strong> @review.Comment
-                    </div>
+                    <div><strong>Book:</strong> @review.BookTitle</div>
+                    <div><strong>Rating:</strong> @review.Rating.ToString("0.0")</div>
+                    <div><strong>Comment:</strong> @review.Comment</div>
                     <small class="text-muted">Reviewed on: @review.ReviewTime.ToString("g")</small>
                 </li>
             }
@@ -100,12 +68,8 @@
     {
         <p class="text-muted">No reviews from this user.</p>
     }
+    */}
 
-        */
-    }
-
-    @{/*
-    <!-- Optional-->
     <h4 class="mt-4">Favorite Books</h4>
     <hr />
     @if (Model.FavoriteBookModels != null && Model.FavoriteBookModels.Any())
@@ -114,12 +78,8 @@
             @foreach (var favBook in Model.FavoriteBookModels)
             {
                 <li class="list-group-item">
-                    <div>
-                        <strong>Title:</strong> @favBook.Title
-                    </div>
-                    <div>
-                        <strong>Author:</strong> @favBook.Author
-                    </div>
+                    <div><strong>Title:</strong> @favBook.Title</div>
+                    <div><strong>Author:</strong> @favBook.Author</div>
                     @if (!string.IsNullOrEmpty(favBook.CoverImageUrl))
                     {
                         <img src="@favBook.CoverImageUrl" alt="Cover" style="width: 80px; height: 120px; object-fit: cover; margin-top: 5px; border-radius: 4px;" />
@@ -136,10 +96,8 @@
     {
         <p class="text-muted">No favorite books for this user.</p>
     }
-        */
-    }
-
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-userId="@Model.UserId" class="btn btn-primary">Edit</a> |
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>

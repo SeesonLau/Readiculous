@@ -109,11 +109,11 @@ namespace Readiculous.WebApp.Controllers
             }
         }
 
-        public async Task<IActionResult> Delete(string userId)
+        public IActionResult Delete(string userId)
         {
             try
             {
-                await _userService.DeleteUserAsync(userId, this.UserId);
+                _userService.DeleteUserAsync(userId, this.UserId);
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)

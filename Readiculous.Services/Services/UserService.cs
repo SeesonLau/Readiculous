@@ -22,13 +22,17 @@ namespace Readiculous.Services.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly IFavoriteBookRepository _favoriteBookRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
 
-        public UserService(IUserRepository repository, IMapper mapper, Client client)
+        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IMapper mapper, Client client)
         {
+            _userRepository = userRepository;
+            _bookRepository = bookRepository;
+            _favoriteBookRepository = favoriteBookRepository;
             _mapper = mapper;
-            _userRepository = repository;
             _client = client;
         }
 
@@ -147,7 +151,7 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        public async Task DeleteUserAsync(string userId, string deleterId)
+        public void DeleteUserAsync(string userId, string deleterId)
         {
             if (_userRepository.UserExists(userId))
             {
@@ -197,6 +201,7 @@ namespace Readiculous.Services.Services
             if (user != null)
             {
                 UserViewModel userViewModel = new();
+
                 _mapper.Map(user, userViewModel);
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
                 return userViewModel;
@@ -216,6 +221,20 @@ namespace Readiculous.Services.Services
 
                 _mapper.Map(user, userViewModel);
                 userViewModel.Role = user.Role.ToString();
+                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId)
+                    .ToList()
+                    .Select(fb =>
+                    {
+                        var favoriteBookModel = new FavoriteBookModel();
+                        var book = _bookRepository.GetBookById(fb.BookId);
+
+                        _mapper.Map(book, favoriteBookModel);
+                        favoriteBookModel.BookGenres = book.GenreAssociations.Select(bg => bg.Genre.Name)
+                            .ToList();
+
+                        return favoriteBookModel;
+                    })
+                    .ToList();
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;
                 userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
 
