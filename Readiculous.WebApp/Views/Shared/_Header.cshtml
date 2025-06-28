@@ -25,13 +25,20 @@
                         <a asp-action="SignOutUser" asp-controller="Account">Logout</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">User</a>
+                        <i class="fa-solid fa-users"></i>
+                        <a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Genre" asp-action="Index">Genre</a>
+                        <i class="fa-solid fa-users"></i>
+                        <a asp-controller="User" asp-action="Index">User</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Book</a>
+                        <i class="fa-solid fa-list"></i>
+                        <a asp-controller="Genre" asp-action="Index">Genre</a>
+                    </li>
+                    <li class="nav-item">
+                        <i class="fa-solid fa-book"></i>
+                        <a asp-controller="Book" asp-action="Index">Book</a>
                     </li>
                 </ul>
             </div>

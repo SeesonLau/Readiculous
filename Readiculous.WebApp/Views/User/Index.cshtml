@@ -11,12 +11,14 @@
     <a asp-action="Create" class="btn btn-success">Create New</a>
 </p>
 
-<form asp-action="Index" method="get" class="mb-4">
+<form asp-action="Index" method="get" class="mb-4" id="searchForm">
+
     <div class="row align-items-end">
         <div class="col-md-4">
             <label class="form-label">Search Username/Email:</label>
             <input type="text" name="searchString" class="form-control" placeholder="Enter username or email" value="@ViewData["CurrentFilter"]" />
         </div>
+
         <div class="col-md-3">
             <label class="form-label">Role:</label>
             <select name="roleType" class="form-control">
@@ -29,9 +31,10 @@
                 }
             </select>
         </div>
+
         <div class="col-md-3">
             <label class="form-label">Search Type:</label>
-            <select name="searchType" class="form-control">
+            <select name="searchType" class="form-control" id="searchType">
                 @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
                 {
                     <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentUserSearchType"]?.ToString() ?? "") ? "selected" : "")">
@@ -40,6 +43,7 @@
                 }
             </select>
         </div>
+
         <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-primary me-2">Search</button>
             <a asp-action="Index" class="btn btn-secondary">Clear</a>
@@ -50,11 +54,10 @@
 <table class="table table-bordered table-striped">
     <thead class="table-dark">
         <tr>
-            <th>@Html.DisplayNameFor(model => model.First().UserId)</th>
+            <th>Profile Picture</th>
             <th>@Html.DisplayNameFor(model => model.First().UserName)</th>
             <th>@Html.DisplayNameFor(model => model.First().Email)</th>
             <th>@Html.DisplayNameFor(model => model.First().Role)</th>
-            <th>Profile Picture</th>
             <th>@Html.DisplayNameFor(model => model.First().CreatedByUsername)</th>
             <th>@Html.DisplayNameFor(model => model.First().CreatedTime)</th>
             <th>@Html.DisplayNameFor(model => model.First().UpdatedByUsername)</th>
@@ -68,10 +71,6 @@
             foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.UserId</td>
-                    <td>@item.UserName</td>
-                    <td>@item.Email</td>
-                    <td>@item.Role</td>
                     <td>
                         @if (!string.IsNullOrEmpty(item.ProfilePictureUrl))
                         {
@@ -82,6 +81,9 @@
                             <span class="text-muted">No Image</span>
                         }
                     </td>
+                    <td>@item.UserName</td>
+                    <td>@item.Email</td>
+                    <td>@item.Role</td>                 
                     <td>@item.CreatedByUsername</td>
                     <td>@item.CreatedTime.ToString("g")</td>
                     <td>@item.UpdatedByUsername</td>
@@ -102,3 +104,11 @@
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchType').addEventListener('change', function() {
+            document.getElementById('searchForm').submit();
+        });
+    </script>
+}

@@ -1,4 +1,6 @@
-﻿namespace Readiculous.Resources.Constants
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Readiculous.Resources.Constants
 {
     /// <summary>
     /// Class for enumerated values
@@ -33,10 +35,14 @@
 
         public enum UserSortType
         {
+            [Display(Name = "Username: A-Z")]
             UsernameAscending = 0,
+            [Display(Name = "Username: Z-A")]
             UsernameDescending = 1,
-            CreatedTimeAscending = 2,
-            CreatedTimeDescending = 3,
+            [Display(Name = "Latest")]
+            Latest = 2,  
+            [Display(Name = "Oldest")]
+            Oldest = 3
         }
 
         public enum AccessStatus

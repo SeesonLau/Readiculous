@@ -24,7 +24,7 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult Index(string searchString, RoleType? roleType, UserSortType searchType)
+        public IActionResult Index(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.Latest)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;

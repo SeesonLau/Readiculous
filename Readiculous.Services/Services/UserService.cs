@@ -1,17 +1,20 @@
-﻿using Readiculous.Data.Interfaces;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.Manager;
 using Readiculous.Services.ServiceModels;
-using AutoMapper;
 using Supabase;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -102,57 +105,41 @@ namespace Readiculous.Services.Services
             if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
             {
                 var user = _userRepository.GetUserById(model.UserId);
-                if (string.IsNullOrEmpty(model.ProfilePictureUrl))
-                {
-                    model.ProfilePictureUrl = user.ProfilePictureUrl;
-                }
 
+                // Map properties for Username, Email, Updated Time, and UpdatedBy
                 _mapper.Map(model, user);
                 user.Username = model.Username.Trim();
                 user.Email = model.Email.Trim();
-                user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.UpdatedTime = DateTime.UtcNow;
                 user.UpdatedBy = editorId;
 
-                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+                // Only update password if a new one was provided
+                if (!string.IsNullOrEmpty(model.Password))
                 {
-                    var uri = new Uri(user.ProfilePictureUrl);
-                    var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
-
-                    var result = await _client.Storage
-                        .From(Const.BucketName)
-                        .Remove(new List<string> { relativePath });
-
-                    if (result == null)
-                    {
-                        throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
-                    }
-
-                    var extension = Path.GetExtension(model.ProfilePicture.FileName);
-                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}-{Guid.NewGuid():N}{extension}");
-
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await model.ProfilePicture.CopyToAsync(memoryStream);
-                        var fileBytes = memoryStream.ToArray();
-
-                        var uploadResult = await _client.Storage
-                            .From(Const.BucketName)
-                            .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                            {
-                                ContentType = model.ProfilePicture.ContentType,
-                                Upsert = true
-                            });
-
-                        if (!string.IsNullOrEmpty(uploadResult))
-                        {
-                            user.ProfilePictureUrl = _client.Storage
-                                .From(Const.BucketName)
-                                .GetPublicUrl(fileName);
-                        }
-                    }
+                    user.Password = PasswordManager.EncryptPassword(model.Password);
                 }
 
+                // Handle profile picture changes
+                if (model.RemoveProfilePicture) // If the remove checkbox was checked
+                {
+                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                    {
+                        await DeleteProfilePicture(user.ProfilePictureUrl);
+                        user.ProfilePictureUrl = null;
+                    }
+                }
+                // If a new picture was uploaded
+                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0) 
+                {
+                    // Upload new picture
+                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                    {
+                        // Delete old picture first
+                        await DeleteProfilePicture(user.ProfilePictureUrl);
+                    }
+                    user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+                }
+                // If neither, the picture remains unchanged
                 _userRepository.UpdateUser(user);
             }
             else
@@ -178,7 +165,7 @@ namespace Readiculous.Services.Services
         }
 
         // Multiple User Retrieval Methods
-        public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.CreatedTimeDescending)
+        public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
         {
             List<UserListItemViewModel> userViewModels = new();
 
@@ -255,13 +242,21 @@ namespace Readiculous.Services.Services
         {
             return Enum.GetValues(typeof(UserSortType))
                 .Cast<UserSortType>()
-                .Select(r => new SelectListItem
-                {
-                    Value = ((int)r).ToString(),
-                    Text = r.ToString()
+                .Select(r => {
+                    var displayName = r.GetType()
+                                     .GetMember(r.ToString())
+                                     .First()
+                                     .GetCustomAttribute<DisplayAttribute>()?
+                                     .Name ?? r.ToString();
+
+                    return new SelectListItem
+                    {
+                        Value = ((int)r).ToString(),
+                        Text = displayName,
+                        Selected = r == UserSortType.Latest 
+                    };
                 }).ToList();
         }
-
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
@@ -296,9 +291,9 @@ namespace Readiculous.Services.Services
             {
                 UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
                 UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.CreatedTimeAscending => userViewModels.OrderBy(u => u.CreatedTime).ToList(),
-                UserSortType.CreatedTimeDescending => userViewModels.OrderByDescending(u => u.CreatedTime).ToList(),
-                _ => userViewModels.ToList(),
+                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList()
             };
         }
         private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
@@ -321,10 +316,53 @@ namespace Readiculous.Services.Services
             {
                 UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
                 UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.CreatedTimeAscending => userViewModels.OrderBy(u => u.CreatedTime).ToList(),
-                UserSortType.CreatedTimeDescending => userViewModels.OrderByDescending(u => u.CreatedTime).ToList(),
-                _ => userViewModels.ToList(),
+                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
+        }
+
+        private async Task DeleteProfilePicture(string pictureUrl)
+        {
+            var uri = new Uri(pictureUrl);
+            var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+
+            var result = await _client.Storage
+                .From(Const.BucketName)
+                .Remove(new List<string> { relativePath });
+
+            if (result == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+            }
+        }
+        private async Task<string> UploadProfilePicture(IFormFile file, string userId)
+        {
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = Path.Combine(Const.UserDirectory, $"{userId}-{Guid.NewGuid():N}{extension}");
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                var uploadResult = await _client.Storage
+                    .From(Const.BucketName)
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                    {
+                        ContentType = file.ContentType,
+                        Upsert = true
+                    });
+
+                if (!string.IsNullOrEmpty(uploadResult))
+                {
+                    return _client.Storage
+                        .From(Const.BucketName)
+                        .GetPublicUrl(fileName);
+                }
+            }
+
+            throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
     }
 }

@@ -40,8 +40,4 @@
     <ProjectReference Include="..\Readiculous.Resources\Readiculous.Resources.csproj" />
     <ProjectReference Include="..\Readiculous.Services\Readiculous.Services.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\img\" />
-  </ItemGroup>
 </Project>
