@@ -19,10 +19,12 @@ namespace Readiculous.WebApp.Controllers
     {
         private readonly IBookService _bookService;
         private readonly IGenreService _genreService;
-        public BookController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IBookService bookService, IGenreService genreService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+        private readonly IReviewService _reviewService;
+        public BookController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IBookService bookService, IGenreService genreService, IReviewService reviewService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _bookService = bookService;
             _genreService = genreService;
+            _reviewService = reviewService;
         }
 
         public IActionResult Index(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder)
@@ -39,7 +41,6 @@ namespace Readiculous.WebApp.Controllers
 
             return View(model);
         }
-
         [HttpGet]
         public IActionResult Create()
         {
@@ -49,7 +50,6 @@ namespace Readiculous.WebApp.Controllers
 
             return View(model);
         }
-
         [HttpPost]
         public async Task<IActionResult> Create(BookViewModel model)
         {
@@ -64,7 +64,6 @@ namespace Readiculous.WebApp.Controllers
 
             return View(model);
         }
-
         [HttpGet]
         public IActionResult Edit(string id)
         {
@@ -104,7 +103,6 @@ namespace Readiculous.WebApp.Controllers
 
             return View(model);
         }
-
         public IActionResult Details(string id)
         {
             var model = _bookService.GetBookDetailsById(id);
@@ -114,7 +112,6 @@ namespace Readiculous.WebApp.Controllers
             }
             return View(model);
         }
-
         public IActionResult Delete(string id)
         {
             try
@@ -129,6 +126,7 @@ namespace Readiculous.WebApp.Controllers
             }
         }
 
+        // Favorite Book Methods
         public IActionResult AddToFavorites(string id)
         {
             try
@@ -142,7 +140,6 @@ namespace Readiculous.WebApp.Controllers
                 return RedirectToAction("Index");
             }
         }
-
         public IActionResult RemoveFromFavorites(string id)
         {
             try
@@ -154,6 +151,32 @@ namespace Readiculous.WebApp.Controllers
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return RedirectToAction("Index");
+            }
+        }
+
+        // Review Methods
+        [HttpGet]
+        public IActionResult CreateReview(string id)
+        {
+            var model = new ReviewViewModel { BookId = id, UserId = this.UserId };
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult CreateReview(ReviewViewModel model)
+        {
+            if(!@ModelState.IsValid)
+            {
+                return View(model);
+            }
+            try
+            {
+                _reviewService.AddReview(model);
+                return RedirectToAction("Details", new { id = model.BookId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
             }
         }
     }

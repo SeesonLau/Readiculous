@@ -21,14 +21,16 @@ namespace Readiculous.Services.Services
         private readonly IUserRepository _userRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IFavoriteBookRepository _favoriteBookRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
 
-        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IMapper mapper, Client client)
+        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
             _favoriteBookRepository = favoriteBookRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
             _client = client;
         }
@@ -246,6 +248,22 @@ namespace Readiculous.Services.Services
                             .ToList();
 
                         return favoriteBookModel;
+                    })
+                    .ToList();
+                userViewModel.UserReviewModels = _reviewRepository.GetReviewsByUserId(userId)
+                    .ToList()
+                    .Select(r =>
+                    {
+                        var reviewViewModel = new ReviewListItemViewModel();
+
+                        _mapper.Map(r, reviewViewModel);
+                        reviewViewModel.Reviewer = r.User.Username;
+                        reviewViewModel.BookName = r.Book.Title;
+                        reviewViewModel.Author = r.Book.Author;
+                        reviewViewModel.PublicationYear = r.Book.PublicationYear;
+                        reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
+
+                        return reviewViewModel;
                     })
                     .ToList();
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;

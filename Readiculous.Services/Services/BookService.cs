@@ -21,14 +21,16 @@ namespace Readiculous.Services.Services
         private readonly IBookRepository _bookRepository;
         private readonly IGenreRepository _genreRepository;
         private readonly IFavoriteBookRepository _favoriteBookRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
 
-        public BookService(IBookRepository bookRepository, IGenreRepository genreRepository, IFavoriteBookRepository favoriteBookRepository, IMapper mapper, Client client)
+        public BookService(IBookRepository bookRepository, IGenreRepository genreRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
         {
             _bookRepository = bookRepository;
             _genreRepository = genreRepository;
             _favoriteBookRepository = favoriteBookRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
             _client = client;
         }
@@ -249,12 +251,23 @@ namespace Readiculous.Services.Services
                 .Where(ga => ga.Genre.DeletedTime == null)
                 .Select(ga => ga.Genre.Name)
                 .ToList();
-            model.Reviews = book.BookReviews
-                .Select(br =>
+            model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
+                        ? book.BookReviews.Average(r => r.Rating)
+                        : 0);
+            model.Reviews = _reviewRepository.GetReviewsByBookId(book.BookId)
+                .ToList()
+                .Select(r =>
                 {
-                    var reviewModel = new ReviewViewModel();
-                    _mapper.Map(br, reviewModel);
-                    return reviewModel;
+                    ReviewListItemViewModel reviewViewModel = new();
+
+                    _mapper.Map(r, reviewViewModel);
+                    reviewViewModel.Reviewer = r.User.Username;
+                    reviewViewModel.BookName = r.Book.Title;
+                    reviewViewModel.Author = r.Book.Author;
+                    reviewViewModel.PublicationYear = r.Book.PublicationYear;
+                    reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
+
+                    return reviewViewModel;
                 })
                 .ToList();
             model.CreatedByUserName = book.CreatedByUser.Username;
@@ -315,6 +328,10 @@ namespace Readiculous.Services.Services
                         .Select(ga => ga.Genre.Name)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
+                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
+                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
+                        ? book.BookReviews.Average(r => r.Rating)
+                        : 0);
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
 
@@ -340,9 +357,10 @@ namespace Readiculous.Services.Services
                         .Select(ga => ga.Genre.Name)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
+                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
                         ? book.BookReviews.Average(r => r.Rating)
                         : 0);
 
@@ -374,9 +392,10 @@ namespace Readiculous.Services.Services
                         .Select(ga => ga.Genre.Name)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
+                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
                     model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                    model.UpdatedByUserName = book.UpdatedByUser.Username; 
+                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
                         ? book.BookReviews.Average(r => r.Rating)
                         : 0);
 
@@ -408,9 +427,10 @@ namespace Readiculous.Services.Services
                         .Select(ga => ga.Genre.Name)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
+                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(book.BookReviews.Count != 0
+                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
                         ? book.BookReviews.Average(r => r.Rating)
                         : 0);
 

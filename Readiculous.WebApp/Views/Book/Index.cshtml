@@ -95,7 +95,7 @@
                 <td>
                     @if (item.Genres.Any())
                     {
-                        @string.Join(", ", item.Genres)
+                        @string.Join(", ", item.Genres.OrderBy(g => g))
                     }
                     else
                     {
@@ -115,6 +115,10 @@
                     else
                     {
                         <a asp-action="AddToFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add to Favorites</a>
+                    }
+                    @if (!item.IsReviewed)
+                    {
+                        <a asp-action="CreateReview" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add Review</a>
                     }
                 </td>
             </tr>

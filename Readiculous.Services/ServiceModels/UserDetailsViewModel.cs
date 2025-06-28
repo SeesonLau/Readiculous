@@ -20,7 +20,7 @@ namespace Readiculous.Services.ServiceModels
         public string UpdatedByUserName { get; set; }
         public string UpdatedTime { get; set; }
 
-        public List<ReviewViewModel> UserReviewModels { get; set; } = [];
+        public List<ReviewListItemViewModel> UserReviewModels { get; set; } = [];
         public List<FavoriteBookModel> FavoriteBookModels { get; set; } = [];
 
 
