@@ -1,0 +1,130 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using static Readiculous.Resources.Constants.Enums
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container-fluid px-0">
+    <div class="row mb-4 mx-0">
+        <div class="col px-0">
+            <h1>User Management</h1>
+        </div>
+    </div>
+
+    <div class="row mb-4 mx-0">
+        <div class="col px-0">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="fas fa-plus me-2"></i>Add User
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-end mx-0 mb-4">
+        <div class="col-md-4 px-0 pe-md-2">
+            <label for="searchString" class="form-label">Search Username/Email</label>
+            <input type="text" id="searchString" name="searchString" class="form-control"
+                   placeholder="Enter username or email" value="@ViewData["CurrentFilter"]" />
+        </div>
+
+        <div class="col-md-4 px-0 pe-md-2">
+            <label for="roleType" class="form-label">Filter Role</label>
+            <select id="roleType" name="roleType" class="form-select">
+                <option value="">All Roles</option>
+                @foreach (var role in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.RoleTypes)
+                {
+                    bool isSelected = role.Value == (ViewData["CurrentRoleType"]?.ToString() ?? "");
+                    <option value="@role.Value" selected="@(isSelected ? "selected" : null)">
+                        @role.Text
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4 px-0">
+            <label for="searchType" class="form-label">Sort By</label>
+            <select id="searchType" name="searchType" class="form-select">
+                @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
+                {
+                    <option value="@type.Value" selected="@(type.Selected ? "selected" : null)">
+                        @type.Text
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="row mx-0">
+        <div class="col px-0">
+            <div id="userListContainer" class="table-responsive">
+                @await Html.PartialAsync("_UserListPartial", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addUserModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editUserModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View User Modal -->
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewUserModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        const userMasterSettings = {
+            userAddModalUrl: '@Url.Action("UserAddModal", "UserMaster")',
+            userEditModalUrl: '@Url.Action("UserEditModal", "UserMaster")',
+            userViewModalUrl: '@Url.Action("UserViewModal", "UserMaster")',
+            userMasterScreenUrl: '@Url.Action("UserMasterScreen", "UserMaster")',
+            deleteUserUrl: '@Url.Action("Delete", "UserMaster")'
+        };
+    </script>
+
+    <script src="~/js/adminUserMaster/usermasterScreen.js" asp-append-version="true"></script>
+}
+   

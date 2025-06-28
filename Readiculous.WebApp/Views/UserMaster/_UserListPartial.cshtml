@@ -1,0 +1,55 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Profile Picture</th>
+            <th>@Html.DisplayNameFor(model => model.First().UserName)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Email)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Role)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ProfilePictureUrl))
+                        {
+                            <img src="@item.ProfilePictureUrl" alt="Profile" style="width: 50px; height: 50px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">No Image</span>
+                        }
+                    </td>
+                    <td>@item.UserName</td>
+                    <td>@item.Email</td>
+                    <td>@item.Role</td>
+                    <td>@item.UpdatedTime.ToString("g")</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-info edit-user" data-userid="@item.UserId">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary view-user" data-userid="@item.UserId">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger delete-user" data-userid="@item.UserId" data-username="@item.UserName">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" class="text-center">No users found matching your criteria.</td>
+            </tr>
+        }
+    </tbody>
+</table>
