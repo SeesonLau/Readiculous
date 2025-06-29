@@ -18,7 +18,7 @@
 
     <div class="form-group mb-3">
         <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
+        <input asp-for="Email" class="form-control" readonly/>
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
@@ -68,11 +68,8 @@
         <button type="submit" class="btn btn-primary">Save Changes</button>
     </div>
 </form>
-
-<!--<script src="~/js/adminUserMaster/editUserMaster.js"></script>-->
-
-
-
+<script src="~/js/adminUserMaster/usermasterEdit.js" asp-append-version="true"></script>
+<!--
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const removeCheckbox = document.getElementById('removeProfilePicture');
@@ -95,4 +92,4 @@
         }
     });
 </script>
-
+-->

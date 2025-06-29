@@ -178,7 +178,6 @@
             </div>`);
     }
 
-    // Public API
     return {
         init: function (config) {
             settings = config;
@@ -188,7 +187,6 @@
     };
 })();
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
     UserMasterScreen.init(userMasterSettings);
 });
@@ -223,6 +221,7 @@ Current Issues:
 3. UserAddModal
     After successfully adding the user, the user automatically gets inputted in the list. 
         a. Issue: loads too long.
+        b. Issue: --Select Role-- is defaulted to Admin. Need to default to placeholder text.
        
 
 4. UserEditModal
