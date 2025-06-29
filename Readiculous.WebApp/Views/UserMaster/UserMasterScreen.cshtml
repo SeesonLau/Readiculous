@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
+﻿@model UserMasterViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using static Readiculous.Resources.Constants.Enums
 
@@ -58,11 +58,21 @@
     <div class="row mx-0">
         <div class="col px-0">
             <div id="userListContainer" class="table-responsive">
-                @await Html.PartialAsync("_UserListPartial", Model)
+                @await Html.PartialAsync("_UserListPartial", Model.Users)
             </div>
         </div>
     </div>
+    <div class="row mb-3 mx-0">
+        <div class="col-md-6 px-0 pe-md-2">
+            @await Component.InvokeAsync("Pagination", Model.Pagination)
+        </div>
+        <div class="col-md-6 px-0 text-md-end">
+            @await Component.InvokeAsync("PageSize", new { currentPageSize = Model.Pagination.PageSize })
+        </div>
+    </div>
+    
 </div>
+
 
 <!-- Add User Modal -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
@@ -123,8 +133,10 @@
             userMasterScreenUrl: '@Url.Action("UserMasterScreen", "UserMaster")',
             deleteUserUrl: '@Url.Action("Delete", "UserMaster")'
         };
+        
     </script>
-
+    <script src="~/js/pagination.js"></script>
+    <script src="~/js/pageSize.js"></script>
     <script src="~/js/adminUserMaster/usermasterScreen.js" asp-append-version="true"></script>
 }
    

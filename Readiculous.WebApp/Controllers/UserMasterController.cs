@@ -5,9 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
+using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
@@ -27,7 +31,7 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.Latest)
+        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.Latest, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
@@ -36,9 +40,18 @@ namespace Readiculous.WebApp.Controllers
             ViewBag.RoleTypes = _userService.GetUserRoles();
             ViewBag.UserSearchTypes = _userService.GetUserSortTypes();
 
-            List<UserListItemViewModel> users = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
+            List<UserListItemViewModel> allUsers = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
 
-            return View(users);
+            //Pagination
+            var paginatedUsers = allUsers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var model = new UserMasterViewModel
+            {
+                Users = paginatedUsers,
+                Pagination = new PaginationModel(allUsers.Count, page, pageSize)
+            };
+
+            return View(model);
         }
 
         [HttpGet]

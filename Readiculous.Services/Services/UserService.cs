@@ -47,7 +47,6 @@ namespace Readiculous.Services.Services
                 return LoginResult.Failed;
             return LoginResult.Success;
         }
-
         // CRUD Operations
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
@@ -190,6 +189,7 @@ namespace Readiculous.Services.Services
             }
 
             return userViewModels;
+
         }
 
         // Single User Retrieval Methods
@@ -244,7 +244,6 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-
         //Populating Dropdown Lists
         public List<SelectListItem> GetUserRoles()
         {
@@ -340,6 +339,7 @@ namespace Readiculous.Services.Services
             };
         }
 
+        // Helper methods for profile picture management
         private async Task DeleteProfilePicture(string pictureUrl)
         {
             var uri = new Uri(pictureUrl);
