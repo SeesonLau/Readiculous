@@ -207,6 +207,11 @@ namespace Readiculous.Services.Services
             }
 
             var book = _bookRepository.GetBookById(bookId);
+            book.FavoritedbyUsers = _favoriteBookRepository.GetFavoriteBooksByBookId(bookId).ToList();
+            foreach (var favoriteBook in book.FavoritedbyUsers)
+            {
+                _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
+            }
             book.DeletedBy = deleterId;
             book.DeletedTime = DateTime.UtcNow;
             _bookRepository.UpdateBook(book);

@@ -15,6 +15,7 @@ namespace Readiculous.Data.Interfaces
         void RemoveFavoriteBook(FavoriteBook favoriteBook);
 
         IQueryable<FavoriteBook> GetFavoriteBooksByUserId(string userId);
+        IQueryable<FavoriteBook> GetFavoriteBooksByBookId(string bookId);
         FavoriteBook GetFavoriteBookByBookIdAndUserId(string bookId, string userId);
     }
 }

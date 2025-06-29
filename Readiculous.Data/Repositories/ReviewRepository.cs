@@ -24,7 +24,8 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
-                .Where(r => r.BookId == bookId);
+                .Where(r => r.BookId == bookId &&
+                            r.User.DeletedTime == null);
         }
 
         public IQueryable<Review> GetReviewsByUserId(string userId)
@@ -32,7 +33,8 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
-                .Where(r => r.UserId == userId);
+                .Where(r => r.UserId == userId &&
+                        r.Book.DeletedTime == null);
         }
 
         public bool ReviewExists(string bookId, string userId)
