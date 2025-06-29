@@ -2,17 +2,13 @@
 
 <table class="table table-bordered table-striped">
     <thead class="table-dark">
-        <tr class="text-center">
-            <th rowspan="2" class="text-center align-middle">Profile Picture</th>
-            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().UserName)</th>
-            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Email)</th>
-            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Role)</th>
-            <th colspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
-            <th rowspan="2" class="text-center align-middle">Actions</th>
-        </tr>
-        <tr class="text-center">
-            <th class="text-center">Date</th>
-            <th class="text-center">Time</th>
+        <tr>
+            <th>Profile Picture</th>
+            <th>@Html.DisplayNameFor(model => model.First().UserName)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Email)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Role)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -21,22 +17,21 @@
             foreach (var item in Model)
             {
                 <tr>
-                    <td class="text-center align-middle">
+                    <td>
                         @if (!string.IsNullOrEmpty(item.ProfilePictureUrl))
                         {
-                            <img src="@item.ProfilePictureUrl" alt="Profile" class="mx-auto d-block" style="width: 50px; height: 50px; object-fit: cover;" />
+                            <img src="@item.ProfilePictureUrl" alt="Profile" style="width: 50px; height: 50px; object-fit: cover;" />
                         }
                         else
                         {
                             <span class="text-muted">No Image</span>
                         }
                     </td>
-                    <td class="align-middle">@item.UserName</td>
-                    <td class="align-middle">@item.Email</td>
-                    <td class="text-center align-middle">@item.Role</td>
-                    <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
-                    <td class="text-center align-middle">@item.UpdatedTime.ToString("h:mm tt")</td>
-                    <td class="text-center align-middle">
+                    <td>@item.UserName</td>
+                    <td>@item.Email</td>
+                    <td>@item.Role</td>
+                    <td>@item.UpdatedTime.ToString("g")</td>
+                    <td>
                         <button type="button" class="btn btn-sm btn-info edit-user" data-userid="@item.UserId">
                             <i class="fas fa-pen"></i>
                         </button>

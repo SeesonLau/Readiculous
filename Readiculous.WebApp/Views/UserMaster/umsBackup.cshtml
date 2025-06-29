@@ -7,18 +7,19 @@
 }
 
 <div class="container-fluid px-0">
-    <div class="row mb-4 mx-0 align-items-center">
-        <div class="col-md-6 px-0">
-            <h1 class="mb-0">User Management</h1>
+    <div class="row mb-4 mx-0">
+        <div class="col px-0">
+            <h1>User Management</h1>
         </div>
-        <div class="col-md-6 px-0 text-md-end">
+    </div>
+
+    <div class="row mb-4 mx-0">
+        <div class="col px-0">
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="fas fa-plus me-2"></i>Add User
             </button>
         </div>
     </div>
-
-   
 
     <div class="row g-3 align-items-end mx-0 mb-4">
         <div class="col-md-4 px-0 pe-md-2">
@@ -61,8 +62,8 @@
             </div>
         </div>
     </div>
-    <div class="row mx-0 align-items-center">
-        <div class="col-md-6 px-0 text-center text-md-start">
+    <div class="row mb-3 mx-0">
+        <div class="col-md-6 px-0 pe-md-2">
             @await Component.InvokeAsync("Pagination", Model.Pagination)
         </div>
         <div class="col-md-6 px-0 text-md-end">

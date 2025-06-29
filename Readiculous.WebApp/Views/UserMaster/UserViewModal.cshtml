@@ -1,14 +1,17 @@
 ﻿@model Readiculous.Services.ServiceModels.UserDetailsViewModel
 
 <div class="container-fluid">
-    <h4>User Details</h4>
+    <h4 class="mb-4">User Details</h4>
     <hr />
 
     <div class="row mb-4">
-        <div class="col-md-3 text-center">
+
+        <div class="col-md-3 pe-md-4 me-md-3 text-center mb-3 mb-md-0">
             @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
             {
-                <img src="@Model.ProfileImageUrl" alt="Profile Picture" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                <img src="@Model.ProfileImageUrl" alt="Profile Picture"
+                     class="img-thumbnail"
+                     style="max-width: 150px; max-height: 150px;" />
             }
             else
             {
@@ -16,49 +19,49 @@
             }
         </div>
 
-        <div class="col-md-9">
+        <div class="col-md-8">
             <dl class="row">
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UserId)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.UserId)</dd>
+                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.UserId)</dt>
+                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.UserId)</dd>
 
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UserName)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.UserName)</dd>
+                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.UserName)</dt>
+                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.UserName)</dd>
 
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.Email)</dt>
+                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.Email)</dd>
 
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Role)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Role)</dd>
+                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.Role)</dt>
+                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.Role)</dd>
             </dl>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <h5>Creation Info</h5>
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4 mb-md-0">
+            <h5 class="mb-3">Creation Info</h5>
             <dl class="row">
-                <dt class="col-sm-6">@Html.DisplayNameFor(model => model.CreatedByUserName)</dt>
-                <dd class="col-sm-6">@Html.DisplayFor(model => model.CreatedByUserName)</dd>
+                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.CreatedByUserName)</dt>
+                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.CreatedByUserName)</dd>
 
-                <dt class="col-sm-6">@Html.DisplayNameFor(model => model.CreatedTime)</dt>
-                <dd class="col-sm-6">@Html.DisplayFor(model => model.CreatedTime)</dd>
+                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.CreatedTime)</dt>
+                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.CreatedTime)</dd>
             </dl>
         </div>
 
         <div class="col-md-6">
-            <h5>Update Info</h5>
+            <h5 class="mb-3">Update Info</h5>
             <dl class="row">
-                <dt class="col-sm-6">@Html.DisplayNameFor(model => model.UpdatedByUserName)</dt>
-                <dd class="col-sm-6">@Html.DisplayFor(model => model.UpdatedByUserName)</dd>
+                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.UpdatedByUserName)</dt>
+                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.UpdatedByUserName)</dd>
 
-                <dt class="col-sm-6">@Html.DisplayNameFor(model => model.UpdatedTime)</dt>
-                <dd class="col-sm-6">@Html.DisplayFor(model => model.UpdatedTime)</dd>
+                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.UpdatedTime)</dt>
+                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.UpdatedTime)</dd>
             </dl>
         </div>
     </div>
 </div>
 
-<div class="modal-footer">
+<div class="modal-footer mt-4">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
     <button type="button" class="btn btn-primary edit-user" data-userid="@Model.UserId">
         <i class="fas fa-pen"></i> Edit

@@ -219,6 +219,7 @@ namespace Readiculous.Services.Services
                 UserDetailsViewModel userViewModel = new();
 
                 _mapper.Map(user, userViewModel);
+                userViewModel.ProfileImageUrl = user.ProfilePictureUrl;
                 userViewModel.Role = user.Role.ToString();
                 userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId)
                     .ToList()
