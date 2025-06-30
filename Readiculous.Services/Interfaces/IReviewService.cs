@@ -11,7 +11,11 @@ namespace Readiculous.Services.Interfaces
     public interface IReviewService
     {
         void AddReview(ReviewViewModel model);
+        void UpdateReview(ReviewViewModel model, string editorId);
+        void DeleteReview(string bookId, string userId, string deleterId);
+        bool ReviewExists(string bookId, string userId);
         List<ReviewListItemViewModel> GetReviewListFromBookId(string bookId);
         List<ReviewListItemViewModel> GetReviewListFromUserId(string userId);
+        ReviewViewModel GetReviewByBookIdAndUserId(string bookId, string userId);
     }
 }

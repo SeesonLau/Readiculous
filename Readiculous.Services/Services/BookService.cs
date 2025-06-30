@@ -212,6 +212,17 @@ namespace Readiculous.Services.Services
             {
                 _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
             }
+
+            book.BookReviews = _reviewRepository.GetReviewsByBookId(bookId).ToList();
+            foreach (var review in book.BookReviews)
+            {
+
+                review.DeletedBy = deleterId;
+                review.DeletedTime = DateTime.UtcNow;
+
+                _reviewRepository.UpdateReview(review);
+            }
+
             book.DeletedBy = deleterId;
             book.DeletedTime = DateTime.UtcNow;
             _bookRepository.UpdateBook(book);

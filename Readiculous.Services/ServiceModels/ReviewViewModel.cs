@@ -8,6 +8,7 @@ namespace Readiculous.Services.ServiceModels
 {
     public class ReviewViewModel
     {
+        public string ReviewId { get; set; } // Primary key
         public string BookId { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }

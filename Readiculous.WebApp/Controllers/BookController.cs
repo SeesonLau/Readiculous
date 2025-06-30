@@ -37,7 +37,7 @@ namespace Readiculous.WebApp.Controllers
             ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
-            var model = _bookService.GetBookList(searchString: searchString, genres: genres, userID: this.UserId, searchType: searchType, sortType: sortOrder); 
+            var model = _bookService.GetBookList(searchString: searchString, genres: genres, userID: this.UserId, searchType: searchType, sortType: sortOrder);
 
             return View(model);
         }
@@ -158,19 +158,48 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult CreateReview(string id)
         {
-            var model = new ReviewViewModel { BookId = id, UserId = this.UserId };
+            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName };
             return View(model);
         }
         [HttpPost]
         public IActionResult CreateReview(ReviewViewModel model)
         {
-            if(!@ModelState.IsValid)
+            if (!@ModelState.IsValid)
             {
                 return View(model);
             }
             try
             {
                 _reviewService.AddReview(model);
+                return RedirectToAction("Details", new { id = model.BookId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult EditReview(string id)
+        {
+            var model = _reviewService.GetReviewByBookIdAndUserId(id, this.UserId);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult EditReview(ReviewViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            try
+            {
+                _reviewService.UpdateReview(model, this.UserId);
                 return RedirectToAction("Details", new { id = model.BookId });
             }
             catch (Exception ex)

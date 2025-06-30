@@ -11,8 +11,10 @@ namespace Readiculous.Data.Interfaces
     {
         bool ReviewExists(string bookId, string userId);
         void AddReview(Review review);
+        void UpdateReview(Review review);
 
         IQueryable<Review> GetReviewsByBookId(string bookId);
         IQueryable<Review> GetReviewsByUserId(string userId);
+        Review GetReviewByBookIdAndUserId(string bookId, string userId);
     }
 }

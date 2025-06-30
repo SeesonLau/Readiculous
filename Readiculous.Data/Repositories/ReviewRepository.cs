@@ -18,6 +18,11 @@ namespace Readiculous.Data.Repositories
             this.GetDbSet<Review>().Add(review);
             UnitOfWork.SaveChanges();
         }
+        public void UpdateReview(Review review)
+        {
+            this.GetDbSet<Review>().Update(review);
+            UnitOfWork.SaveChanges();
+        }
 
         public IQueryable<Review> GetReviewsByBookId(string bookId)
         {
@@ -35,6 +40,14 @@ namespace Readiculous.Data.Repositories
                 .Include(r => r.User)
                 .Where(r => r.UserId == userId &&
                         r.Book.DeletedTime == null);
+        }
+        public Review GetReviewByBookIdAndUserId(string bookId, string userId)
+        {
+            return this.GetDbSet<Review>()
+                .Include(r => r.Book)
+                .Include(r => r.User)
+                .FirstOrDefault(r => r.BookId == bookId && 
+                                     r.UserId == userId);
         }
 
         public bool ReviewExists(string bookId, string userId)

@@ -32,9 +32,50 @@ namespace Readiculous.Services.Services
             }
 
             var review = new Review();
+
             _mapper.Map(model, review);
+            review.ReviewId = Guid.NewGuid().ToString();
+            review.CreatedTime = DateTime.UtcNow; 
+            review.UpdatedTime = DateTime.UtcNow;
+            review.UpdatedBy = model.UserId; 
 
             _reviewRepository.AddReview(review);
+        }
+        public void UpdateReview(ReviewViewModel model, string editorId)
+        {
+            if (!_reviewRepository.ReviewExists(model.BookId, model.UserId))
+            {
+                throw new InvalidOperationException("Review does not exist for this book by the user.");
+            }
+            var review = _reviewRepository.GetReviewByBookIdAndUserId(model.BookId, model.UserId);
+            if (review == null)
+            {
+                throw new InvalidOperationException("Review not found.");
+            }
+            _mapper.Map(model, review);
+            review.UpdatedBy = editorId;
+            review.UpdatedTime = DateTime.UtcNow;
+
+            _reviewRepository.UpdateReview(review);
+        }
+
+        public void DeleteReview(string bookId, string userId, string deleterId)
+        {
+            if (!_reviewRepository.ReviewExists(bookId, userId))
+            {
+                throw new InvalidOperationException("Review does not exist for this book by the user.");
+            }
+
+            var review = _reviewRepository.GetReviewByBookIdAndUserId(bookId, userId);
+            if (review == null)
+            {
+                throw new InvalidOperationException("Review not found.");
+            }
+
+            review.DeletedBy = deleterId;
+            review.DeletedTime = DateTime.UtcNow;
+
+            _reviewRepository.UpdateReview(review);
         }
 
         public List<ReviewListItemViewModel> GetReviewListFromBookId(string bookId)
@@ -44,8 +85,8 @@ namespace Readiculous.Services.Services
                 .Select(r =>
                 {
                     var reviewViewModel = new ReviewListItemViewModel();
-                    _mapper.Map(r, reviewViewModel);
 
+                    _mapper.Map(r, reviewViewModel);
                     reviewViewModel.Reviewer = r.User.Username;
                     reviewViewModel.BookName = r.Book.Title;
                     reviewViewModel.Author = r.Book.Author;
@@ -65,16 +106,35 @@ namespace Readiculous.Services.Services
                 .Select(r =>
                 {
                     var reviewViewModel = new ReviewListItemViewModel();
+
                     _mapper.Map(r, reviewViewModel);
                     reviewViewModel.Reviewer = r.User.Username;
                     reviewViewModel.BookName = r.Book.Title;
                     reviewViewModel.Author = r.Book.Author;
                     reviewViewModel.PublicationYear = r.Book.PublicationYear;
                     reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
+
                     return reviewViewModel;
                 })
                 .ToList();
             return reviews;
+        }
+
+        public ReviewViewModel GetReviewByBookIdAndUserId(string bookId, string userId)
+        {
+            var review = _reviewRepository.GetReviewByBookIdAndUserId(bookId, userId);
+            if (review == null)
+            {
+                throw new InvalidOperationException("Review not found for the specified book and user.");
+            }
+
+            var reviewViewModel = new ReviewViewModel();
+
+            _mapper.Map(review, reviewViewModel);
+            reviewViewModel.Email = review.User.Email;
+            reviewViewModel.UserName = review.User.Username;
+
+            return reviewViewModel;
         }
     }
 }

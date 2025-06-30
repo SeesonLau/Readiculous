@@ -120,6 +120,10 @@
                     {
                         <a asp-action="CreateReview" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add Review</a>
                     }
+                    else
+                    {
+                        <a asp-action="EditReview" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Edit Review</a>
+                    }
                 </td>
             </tr>
         }

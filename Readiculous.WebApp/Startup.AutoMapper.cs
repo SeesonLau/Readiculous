@@ -47,6 +47,7 @@ namespace Readiculous.WebApp
 
                 // Review Mappings
                 CreateMap<ReviewViewModel, Review>();
+                CreateMap<Review, ReviewViewModel>();
                 CreateMap<Review, ReviewListItemViewModel>();
             }
         }

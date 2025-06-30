@@ -172,6 +172,14 @@ namespace Readiculous.Services.Services
             {
                 var user = _userRepository.GetUserById(userId);
 
+                user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
+                foreach (var review in user.UserReviews)
+                {
+                    review.DeletedBy = deleterId;
+                    review.DeletedTime = DateTime.UtcNow;
+
+                    _reviewRepository.UpdateReview(review);
+                }
                 user.DeletedBy = deleterId;
                 user.DeletedTime = DateTime.UtcNow;
 
