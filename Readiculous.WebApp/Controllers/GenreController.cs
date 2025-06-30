@@ -88,17 +88,35 @@ namespace Readiculous.WebApp.Controllers
             return View(model);
         }
 
+        [HttpGet]
         public IActionResult Delete(string id)
+        {
+            var genre = _genreService.GetGenreEditById(id);
+            if (genre == null)
+            {
+                return NotFound();
+            }
+            // Map to the Genre model for the Delete view
+            var genreModel = new Readiculous.Data.Models.Genre
+            {
+                GenreId = genre.GenreId,
+                Name = genre.Name
+            };
+            return View(genreModel);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Readiculous.Data.Models.Genre model)
         {
             try
             {
-                _genreService.DeleteGenre(id, this.UserId);
+                _genreService.DeleteGenre(model.GenreId, this.UserId);
                 return RedirectToAction("Index");
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _genreService.GetGenreList(string.Empty));
+                return View(model);
             }
         }
 
