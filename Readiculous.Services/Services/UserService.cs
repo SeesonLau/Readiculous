@@ -339,7 +339,6 @@ namespace Readiculous.Services.Services
                 _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
         }
-
         // Helper methods for profile picture management
         private async Task DeleteProfilePicture(string pictureUrl)
         {
