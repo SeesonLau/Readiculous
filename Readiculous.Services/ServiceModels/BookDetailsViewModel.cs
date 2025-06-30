@@ -20,7 +20,7 @@ namespace Readiculous.Services.ServiceModels
         public List<string> Genres { get; set; } = [];
         public List<BookListItemViewModel> SimilarBooks { get; set; } = [];
         public decimal AverageRating { get; set; }  
-        public List<ReviewViewModel> Reviews { get; set; } = [];
+        public List<ReviewListItemViewModel> Reviews { get; set; } = [];
         public DateTime CreatedTime { get; set; }
         public DateTime UpdatedTime { get; set; }
         public string CreatedByUserName { get; set; }

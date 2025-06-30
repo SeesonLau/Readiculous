@@ -19,10 +19,12 @@ namespace Readiculous.WebApp.Controllers
     {
         private readonly IBookService _bookService;
         private readonly IGenreService _genreService;
-        public BookController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IBookService bookService, IGenreService genreService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+        private readonly IReviewService _reviewService;
+        public BookController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IBookService bookService, IGenreService genreService, IReviewService reviewService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _bookService = bookService;
             _genreService = genreService;
+            _reviewService = reviewService;
         }
 
         public IActionResult Index(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder)
@@ -35,21 +37,19 @@ namespace Readiculous.WebApp.Controllers
             ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
-            var model = _bookService.GetBookList(searchString: searchString, genres: genres, searchType: searchType, sortType: sortOrder);
+            var model = _bookService.GetBookList(searchString: searchString, genres: genres, userID: this.UserId, searchType: searchType, sortType: sortOrder);
 
             return View(model);
         }
-
         [HttpGet]
         public IActionResult Create()
         {
             var model = new BookViewModel();
-            var allGenres = _genreService.GetGenreList(genreName: string.Empty); 
+            var allGenres = _genreService.GetGenreList(genreName: string.Empty);
             model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
 
             return View(model);
         }
-
         [HttpPost]
         public async Task<IActionResult> Create(BookViewModel model)
         {
@@ -64,7 +64,6 @@ namespace Readiculous.WebApp.Controllers
 
             return View(model);
         }
-
         [HttpGet]
         public IActionResult Edit(string id)
         {
@@ -77,15 +76,16 @@ namespace Readiculous.WebApp.Controllers
 
                 return View(model);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null));
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
             }
         }
         [HttpPost]
         public async Task<IActionResult> Edit(BookViewModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 try
                 {
@@ -103,7 +103,6 @@ namespace Readiculous.WebApp.Controllers
 
             return View(model);
         }
-
         public IActionResult Details(string id)
         {
             var model = _bookService.GetBookDetailsById(id);
@@ -113,7 +112,6 @@ namespace Readiculous.WebApp.Controllers
             }
             return View(model);
         }
-
         public IActionResult Delete(string id)
         {
             try
@@ -124,7 +122,90 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null));
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
+        }
+
+        // Favorite Book Methods
+        public IActionResult AddToFavorites(string id)
+        {
+            try
+            {
+                _bookService.AddBookToFavorites(id, this.UserId);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return RedirectToAction("Index");
+            }
+        }
+        public IActionResult RemoveFromFavorites(string id)
+        {
+            try
+            {
+                _bookService.RemoveBookFromFavorites(id, this.UserId);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return RedirectToAction("Index");
+            }
+        }
+
+        // Review Methods
+        [HttpGet]
+        public IActionResult CreateReview(string id)
+        {
+            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName };
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult CreateReview(ReviewViewModel model)
+        {
+            if (!@ModelState.IsValid)
+            {
+                return View(model);
+            }
+            try
+            {
+                _reviewService.AddReview(model);
+                return RedirectToAction("Details", new { id = model.BookId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult EditReview(string id)
+        {
+            var model = _reviewService.GetReviewByBookIdAndUserId(id, this.UserId);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult EditReview(ReviewViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            try
+            {
+                _reviewService.UpdateReview(model, this.UserId);
+                return RedirectToAction("Details", new { id = model.BookId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
             }
         }
     }

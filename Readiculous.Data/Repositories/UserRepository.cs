@@ -93,9 +93,10 @@ namespace Readiculous.Data.Repositories
         }
         public User GetUserByEmailAndPassword(string email, string password)
         {
-            return this.GetDbSet<User>().FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
-                                                    && u.Password == password
-                                                    && u.DeletedTime == null);
+            return this.GetDbSet<User>()
+                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
+                                    && u.Password == password
+                                    && u.DeletedTime == null);
         }
     }
 }

@@ -95,7 +95,7 @@
                 <td>
                     @if (item.Genres.Any())
                     {
-                        @string.Join(", ", item.Genres)
+                        @string.Join(", ", item.Genres.OrderBy(g => g))
                     }
                     else
                     {
@@ -108,7 +108,22 @@
                     <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-info">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.BookId" class="btn btn-sm btn-secondary">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger">Delete</a>
-                    <a asp-action="AddToFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add to Favorites</a>
+                    @if (item.IsFavorite)
+                    {
+                        <a asp-action="RemoveFromFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-outline-warning">Remove from Favorites</a>
+                    }
+                    else
+                    {
+                        <a asp-action="AddToFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add to Favorites</a>
+                    }
+                    @if (!item.IsReviewed)
+                    {
+                        <a asp-action="CreateReview" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add Review</a>
+                    }
+                    else
+                    {
+                        <a asp-action="EditReview" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Edit Review</a>
+                    }
                 </td>
             </tr>
         }

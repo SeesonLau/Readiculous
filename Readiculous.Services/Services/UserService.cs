@@ -19,13 +19,19 @@ namespace Readiculous.Services.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly IFavoriteBookRepository _favoriteBookRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
 
-        public UserService(IUserRepository repository, IMapper mapper, Client client)
+        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
         {
+            _userRepository = userRepository;
+            _bookRepository = bookRepository;
+            _favoriteBookRepository = favoriteBookRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
-            _userRepository = repository;
             _client = client;
         }
 
@@ -160,12 +166,20 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        public async Task DeleteUserAsync(string userId, string deleterId)
+        public void DeleteUserAsync(string userId, string deleterId)
         {
             if (_userRepository.UserExists(userId))
             {
                 var user = _userRepository.GetUserById(userId);
 
+                user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
+                foreach (var review in user.UserReviews)
+                {
+                    review.DeletedBy = deleterId;
+                    review.DeletedTime = DateTime.UtcNow;
+
+                    _reviewRepository.UpdateReview(review);
+                }
                 user.DeletedBy = deleterId;
                 user.DeletedTime = DateTime.UtcNow;
 
@@ -210,6 +224,7 @@ namespace Readiculous.Services.Services
             if (user != null)
             {
                 UserViewModel userViewModel = new();
+
                 _mapper.Map(user, userViewModel);
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
                 return userViewModel;
@@ -229,6 +244,36 @@ namespace Readiculous.Services.Services
 
                 _mapper.Map(user, userViewModel);
                 userViewModel.Role = user.Role.ToString();
+                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId)
+                    .ToList()
+                    .Select(fb =>
+                    {
+                        var favoriteBookModel = new FavoriteBookModel();
+                        var book = _bookRepository.GetBookById(fb.BookId);
+
+                        _mapper.Map(book, favoriteBookModel);
+                        favoriteBookModel.BookGenres = book.GenreAssociations.Select(bg => bg.Genre.Name)
+                            .ToList();
+
+                        return favoriteBookModel;
+                    })
+                    .ToList();
+                userViewModel.UserReviewModels = _reviewRepository.GetReviewsByUserId(userId)
+                    .ToList()
+                    .Select(r =>
+                    {
+                        var reviewViewModel = new ReviewListItemViewModel();
+
+                        _mapper.Map(r, reviewViewModel);
+                        reviewViewModel.Reviewer = r.User.Username;
+                        reviewViewModel.BookName = r.Book.Title;
+                        reviewViewModel.Author = r.Book.Author;
+                        reviewViewModel.PublicationYear = r.Book.PublicationYear;
+                        reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
+
+                        return reviewViewModel;
+                    })
+                    .ToList();
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;
                 userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
 

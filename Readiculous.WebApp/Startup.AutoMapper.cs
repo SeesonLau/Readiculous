@@ -43,6 +43,12 @@ namespace Readiculous.WebApp
                 CreateMap<Book, BookListItemViewModel>();
                 CreateMap<BookViewModel, Book>();
                 CreateMap<Book, BookViewModel>();
+                CreateMap<Book, FavoriteBookModel>();
+
+                // Review Mappings
+                CreateMap<ReviewViewModel, Review>();
+                CreateMap<Review, ReviewViewModel>();
+                CreateMap<Review, ReviewListItemViewModel>();
             }
         }
     }

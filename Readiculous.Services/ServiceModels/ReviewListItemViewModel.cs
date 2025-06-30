@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Readiculous.Services.ServiceModels
 {
-    public class FavoriteBookModel
+    public class ReviewListItemViewModel
     {
-        public string BookId { get; set; }
-        public string UserId { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public List<string> BookGenres { get; set; } = [];
+        public string ReviewId { get; set; } 
+        public string Reviewer { get; set; }
+        public string BookName { get; set; }
         public string Author { get; set; }
-        public string CoverImageUrl { get; set; }
         public string PublicationYear { get; set; }
+        public string ReviewBookCrImageUrl { get; set; }
+        public string Comment { get; set; }
+        public decimal Rating { get; set; }
         public DateTime CreatedTime { get; set; }
     }
 }

@@ -16,6 +16,8 @@ namespace Readiculous.Services.ServiceModels
         public string CoverImageUrl { get; set; }
         public string PublicationYear { get; set; }
         public decimal AverageRating { get; set; }
+        public bool IsFavorite { get; set; }
+        public bool IsReviewed { get; set; }
         public string CreatedByUserName { get; set; }
         public DateTime CreatedTime { get; set; }
         public string UpdatedByUserName { get; set; }
