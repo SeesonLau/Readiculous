@@ -11,10 +11,9 @@ namespace Readiculous.Services.Interfaces
     {
         LoginResult AuthenticateUserByEmail(string email, string password, ref User user);
         Task AddUserAsync(UserViewModel model, string creationId);
-
         Task UpdateUserAsync(UserViewModel model, string editorId);
-        void DeleteUserAsync(string userId, string deleterId);
-        List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.CreatedTimeDescending);
+        List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest);
+        Task DeleteUserAsync(string userId, string deleterId);
         UserViewModel SearchUserEditById(string userId);
         UserDetailsViewModel SearchUserDetailsById(string userId);
         List<SelectListItem> GetUserRoles();

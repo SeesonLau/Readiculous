@@ -1,0 +1,14 @@
+﻿@model PageSizeModel
+
+<div class="page-size-container d-flex align-items-center">
+    <span class="me-2">Show:</span>
+    <div class="btn-group" role="group">
+        @foreach (var size in Model.AvailablePageSizes)
+        {
+            <button type="button" class="btn btn-outline-secondary @(size == Model.CurrentPageSize ? "active" : "")"
+                    data-page-size="@size">
+                @size
+            </button>
+        }
+    </div>
+</div>

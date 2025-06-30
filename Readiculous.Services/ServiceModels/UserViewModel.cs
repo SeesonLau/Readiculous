@@ -33,5 +33,7 @@ namespace Readiculous.Services.ServiceModels
         public DateTime CreatedTime { get; set; }
         public string UpdatedBy { get; set; }
         public DateTime? UpdatedTime { get; set; }
+        [Display(Name = "Remove Profile Picture")]
+        public bool RemoveProfilePicture { get; set; }
     }
 }
