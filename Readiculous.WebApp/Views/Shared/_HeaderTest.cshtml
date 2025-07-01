@@ -1,0 +1,63 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")" style="background-color: var(--color-header); color: var(--color-text);">
+    <div class="logosec hover-pointer" style="display: flex; align-items: center; gap: 10px;">
+        <img src="~/img/readiculous-logo.svg"
+             style="width: 40px; height: 40px;" alt="logo"
+             onclick="window.location.href = '@Url.Action("Index", "Home")';">
+        <span style="font-weight: bold; font-size: 1.2rem;"
+              onclick="window.location.href = '@Url.Action("Index", "Home")';">Readiculous</span>
+    </div>
+    <div class="logosec">
+        @HttpContextAccessor.HttpContext.Session.GetString("UserName")
+        <div class="mr-20 hover-pointer" style="position: relative">
+            <div class="dp">
+                <img src="~/img/profile-logo.png"
+                     class="dpicn hover-pointer"
+                     alt="dp">
+            </div>
+            <div class="dropdown" style="background-color: var(--color-modal);">
+                <ul>
+                    <li>
+                        <i class="fa-solid fa-gear"></i>
+                        <a href="#">Settings</a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <a asp-action="SignOutUser" asp-controller="Account">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <i class="fa-solid fa-users"></i>
+                        <a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a>
+                    </li>
+                    <li class="nav-item">
+                        <i class="fa-solid fa-users"></i>
+                        <a asp-controller="User" asp-action="Index">User</a>
+                    </li>
+                    <li class="nav-item">
+                        <i class="fa-solid fa-list"></i>
+                        <a asp-controller="Genre" asp-action="Index">Genre</a>
+                    </li>
+                    <li class="nav-item">
+                        <i class="fa-solid fa-book"></i>
+                        <a asp-controller="Book" asp-action="Index">Book</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+
+<style>
+    .dropdown ul li:hover {
+        background-color: var(--color-btn);
+    }
+
+    .dropdown a {
+        color: var(--color-text);
+    }
+
+    header {
+        border-bottom: 1px solid var(--color-text);
+    }
+</style>

@@ -1,0 +1,145 @@
+﻿@model Readiculous.Services.ServiceModels.BookDetailsViewModel
+
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<h1>Book Details</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Title:</label>
+            <p class="form-control-plaintext">@Model.Title</p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Author:</label>
+            <p class="form-control-plaintext">@Model.Author</p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Description:</label>
+            <p class="form-control-plaintext">@Model.Description</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">ISBN:</label>
+                <p class="form-control-plaintext">@Model.ISBN</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Publisher:</label>
+                <p class="form-control-plaintext">@Model.Publisher</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Series Number:</label>
+                <p class="form-control-plaintext">@Model.SeriesNumber</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Publication Year:</label>
+                <p class="form-control-plaintext">@Model.PublicationYear</p>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Average Rating:</label>
+            <p class="form-control-plaintext">@Model.AverageRating.ToString("0.0")</p>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">Genres:</label>
+            @if (Model.Genres != null && Model.Genres.Any())
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var genre in Model.Genres)
+                    {
+                        <li class="list-group-item">@genre</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="form-control-plaintext text-muted">No genres assigned.</p>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Cover Image:</label><br />
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <img src="@Model.CoverImageUrl" alt="Cover Image" style="max-width: 200px; max-height: 300px;" />
+            }
+            else
+            {
+                <span class="text-muted">No image available.</span>
+            }
+        </div>
+
+        <hr />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Created By:</label>
+                <p class="form-control-plaintext">@Model.CreatedByUserName</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Created Time:</label>
+                <p class="form-control-plaintext">@Model.CreatedTime.ToString("g")</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Updated By:</label>
+                <p class="form-control-plaintext">@Model.UpdatedByUserName</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Updated Time:</label>
+                <p class="form-control-plaintext">@Model.UpdatedTime.ToString("g")</p>
+            </div>
+        </div>
+
+        <!-- Optional: Similar Books Section -->
+        @if (Model.SimilarBooks != null && Model.SimilarBooks.Any())
+        {
+            <div class="mb-4">
+                <label class="form-label fw-bold">Similar Books:</label>
+                <ul class="list-group list-group-flush">
+                    @foreach (var similar in Model.SimilarBooks)
+                    {
+                        <li class="list-group-item">
+                            <strong>@similar.Title</strong> by @similar.Author
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            <div class="mb-4">
+                <label class="form-label fw-bold">Reviews:</label>
+                <ul class="list-group list-group-flush">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <li class="list-group-item">
+                            <strong>Rating:</strong> @review.Rating.ToString("0.0")<br />
+                            <strong>Comment:</strong> @review.Comment
+                            <p>Posted at: @review.CreatedTime</p>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="form-group mt-4">
+            <a asp-action="Edit" asp-route-id="@Model.BookId" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
