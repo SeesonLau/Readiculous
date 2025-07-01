@@ -4,164 +4,27 @@
     ViewData["Title"] = "Manage Genre";
 }
 
-<!-- Custom styles for pastel pink theme -->
-<style>
-    .genre-header {
-        font-size: 2.8rem;
-        font-weight: bold;
-        color: #3d2230;
-        margin-bottom: 2rem;
-        font-family: 'Georgia', serif;
-    }
-
-    .genre-card {
-        background: #ffe6ef;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 2px 8px #e7c3d1;
-        border: 1px solid #f8c6d8;
-    }
-
-    .genre-btn-pink {
-        background: #f8bfcf;
-        color: #3d2230;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        padding: 0.7rem 2rem;
-        font-size: 1.1rem;
-        box-shadow: 0 2px 6px #e7c3d1;
-        transition: background 0.2s;
-    }
-
-        .genre-btn-pink:hover {
-            background: #f59bb8;
-            color: #fff;
-        }
-
-    .genre-search-bar {
-        background: #ffe6ef;
-        border-radius: 12px;
-        border: 1px solid #f8c6d8;
-        padding: 0.7rem 1.2rem 0.7rem 2.5rem;
-        font-size: 1.1rem;
-        width: 100%;
-        outline: none;
-    }
-
-    .genre-sort-select {
-        background: #ffe6ef;
-        border-radius: 12px;
-        border: 1px solid #f8c6d8;
-        padding: 0.7rem 1.2rem;
-        font-size: 1.1rem;
-        width: 100%;
-        outline: none;
-    }
-
-    .genre-table {
-        background: #ffe6ef;
-        border-radius: 16px;
-        border: 1px solid #f8c6d8;
-        margin-top: 2rem;
-        overflow: hidden;
-    }
-
-        .genre-table th, .genre-table td {
-            background: #ffe6ef;
-            color: #3d2230;
-            font-size: 1.1rem;
-            vertical-align: middle;
-            padding: 0.5rem 0.7rem;
-        }
-
-        .genre-table th {
-            font-weight: bold;
-            border-bottom: 2px solid #f8c6d8;
-        }
-
-        .genre-table tbody tr:not(:last-child) {
-            border-bottom: 1px solid #f8c6d8;
-        }
-
-        .genre-table .id-col {
-            max-width: 60px;
-            width: 60px;
-            word-break: break-all;
-        }
-
-    .genre-action-btn {
-        background: none;
-        border: none;
-        margin: 0 0.1rem;
-        font-size: 1.2rem;
-        color: #a06b8c;
-        transition: color 0.2s;
-        padding: 0;
-        vertical-align: middle;
-    }
-
-        .genre-action-btn:hover {
-            color: #e75480;
-        }
-
-    .genre-action-group {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.2rem;
-    }
-
-    .genre-search-icon {
-        position: absolute;
-        left: 1.2rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #a06b8c;
-        font-size: 1.2rem;
-    }
-
-    .genre-form-row {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-        .genre-form-row > * {
-            flex: 1;
-        }
-
-        .genre-form-row .genre-sort {
-            max-width: 220px;
-        }
-
-        .genre-form-row .genre-sort-btn {
-            max-width: 50px;
-            flex: none;
-        }
-    /* Responsive: Use Bootstrap's flex-column on small screens */
-</style>
+<link rel="stylesheet" href="~/css/genre.css" />
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="genre-header">Manage Genre</span>
         <a asp-action="Create" class="genre-btn-pink">+ New Genre</a>
     </div>
-    <div class="genre-card mb-4">
+    <div class="genre-card sleek-filter mb-4">
         <form asp-action="Index" method="get">
-            <div class="genre-form-row flex-md-row align-items-end" style="gap: 1rem;">
-                <div style="position:relative; flex:4; min-width: 200px;">
+            <div class="genre-form-row row g-3 align-items-end">
+                <div class="col-md-6 col-lg-8 position-relative">
                     <span class="genre-search-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.106a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
                         </svg>
                     </span>
-                    <input type="text" name="searchString" class="genre-search-bar" placeholder="Search by genre..." value="@ViewData["CurrentFilter"]" />
+                    <input type="text" name="searchString" class="genre-search-bar form-control" placeholder="Search by genre..." value="@ViewData["CurrentFilter"]" />
                 </div>
-                <div class="genre-sort" style="flex:3; min-width: 160px;">
-                    <label for="searchType" class="form-label mb-0" style="font-weight: 500; color: #3d2230;">Sort By:</label>
-                    <select name="searchType" class="genre-sort-select" style="margin-top: 0.2rem; min-width: 160px; height: 48px;">
+                <div class="col-md-3 col-lg-2">
+                    <label for="searchType" class="form-label mb-1 fw-medium">Sort By:</label>
+                    <select name="searchType" class="genre-sort-select form-select">
                         @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
                         {
                             <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")">
@@ -170,14 +33,14 @@
                         }
                     </select>
                 </div>
-                <div class="genre-sort-btn d-flex align-items-end" style="flex:1; min-width: 160px;">
-                    <button type="submit" class="genre-btn-pink w-100" style="padding:0.5rem 0; font-weight:600; min-width: 160px; height: 48px; border-radius: 12px;">Search</button>
+                <div class="col-md-3 col-lg-2 d-flex align-items-end">
+                    <button type="submit" class="genre-btn-pink btn w-100">Search</button>
                 </div>
             </div>
         </form>
     </div>
     <div class="genre-table">
-        <table class="table mb-0">
+        <table class="table table-hover mb-0">
             <thead>
                 <tr>
                     <th class="id-col">ID</th>
@@ -192,37 +55,41 @@
                 {
                     <tr id="genre-row-@item.GenreId">
                         <td class="id-col align-middle">
-                            @(item.GenreId != null && item.GenreId.Length > 6 ? item.GenreId.Substring(0, 6) + "..." : item.GenreId)
+                            <small class="text-muted">@(item.GenreId != null && item.GenreId.Length > 6 ? item.GenreId.Substring(0, 6) + "..." : item.GenreId)</small>
                         </td>
-                        <td class="align-middle">@item.Name</td>
+                        <td class="align-middle fw-medium">@item.Name</td>
                         <td class="align-middle">@item.Description</td>
-                        <td class="align-middle">@item.BookCount</td>
                         <td class="align-middle text-center">
-                            <span class="genre-action-group">
-                                <a asp-action="Details" asp-route-id="@item.GenreId" class="genre-action-btn" title="View">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <span class="badge bg-secondary">@item.BookCount</span>
+                        </td>
+                        <td class="align-middle text-center">
+                            <div class="genre-action-group btn-group" role="group">
+                                <a asp-action="Details" asp-route-id="@item.GenreId" class="genre-action-btn btn btn-sm" title="View">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4.5c-2.485 0-4.5-2.015-4.5-4.5S5.515 3.5 8 3.5s4.5 2.015 4.5 4.5-2.015 4.5-4.5 4.5zm0-7A2.5 2.5 0 1 0 8 11a2.5 2.5 0 0 0 0-5z" />
                                     </svg>
                                 </a>
-                                <a asp-action="Edit" asp-route-id="@item.GenreId" class="genre-action-btn" title="Edit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <a asp-action="Edit" asp-route-id="@item.GenreId" class="genre-action-btn btn btn-sm" title="Edit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M15.502 1.94a1.5 1.5 0 0 1 0 2.12l-1.439 1.439-2.12-2.12 1.439-1.44a1.5 1.5 0 0 1 2.12 0zm-2.56 3.182-2.12-2.12L2.5 11.122V13.5h2.378l8.064-8.378z" />
                                     </svg>
                                 </a>
-                                <a asp-action="Delete" asp-route-id="@item.GenreId" class="genre-action-btn" title="Delete">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <a asp-action="Delete" asp-route-id="@item.GenreId" class="genre-action-btn btn btn-sm" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6zm3 .5a.5.5 0 0 1 .5-.5.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6z" />
                                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V4h11V3a.5.5 0 0 0-.5-.5h-10a.5.5 0 0 0-.5.5z" />
                                     </svg>
                                 </a>
-                            </span>
+                            </div>
                         </td>
                     </tr>
                 }
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="5" class="text-center text-muted">No genres found matching your criteria.</td>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="fas fa-search me-2"></i>No genres found matching your criteria.
+                        </td>
                     </tr>
                 }
             </tbody>

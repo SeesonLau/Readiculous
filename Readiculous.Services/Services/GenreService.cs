@@ -204,5 +204,24 @@ namespace Readiculous.Services.Services
                 Name = g.Name,
             }).ToList();
         }
+
+        public List<BookViewModel> GetBooksByGenreId(string genreId)
+        {
+            var genre = _genreRepository.GetGenreById(genreId);
+            if (genre == null || genre.DeletedTime != null)
+            {
+                return new List<BookViewModel>();
+            }
+            var books = genre.Books
+                .Where(bga => bga.Book != null && bga.Book.DeletedTime == null)
+                .Select(bga => bga.Book)
+                .ToList();
+            return books.Select(book =>
+            {
+                var model = new BookViewModel();
+                _mapper.Map(book, model);
+                return model;
+            }).ToList();
+        }
     }
 }

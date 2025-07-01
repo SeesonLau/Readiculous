@@ -2,20 +2,23 @@
 @{
     ViewData["Title"] = "Delete Genre";
 }
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div style="background: #fdf1f5; border-radius: 16px; border: 1.5px solid #e7c3d1; max-width: 370px; width: 100%; padding: 2.5rem 2rem 2rem 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center;">
+
+<link rel="stylesheet" href="~/css/genre.css" />
+
+<div class="genre-delete-container">
+    <div class="genre-delete-modal">
         <!-- Cat Image -->
-        <div style="margin-bottom: 1.2rem;">
-            <img src="~/img/cat-delete.png" alt="Cat" style="max-width: 210px; width: 100%; height: auto; display: block; margin: 0 auto;" />
+        <div class="genre-delete-image-container">
+            <img src="~/img/cat-delete.png" alt="Cat" class="genre-delete-image" />
         </div>
-        <div style="font-size:2rem; font-family:'Georgia',serif; color:#3d2230; font-weight:700; text-align:center; margin-bottom:2.2rem;">
+        <div class="genre-delete-title">
             Are you sure you want to delete?
         </div>
-        <div class="d-flex justify-content-center" style="gap:1.5rem;">
-            <a asp-action="Index" class="btn" style="background:#fff; color:#222; border:1.5px solid #bfa6b8; border-radius:8px; font-family:'Georgia',serif; font-size:1.1rem; font-weight:500; min-width:100px; box-shadow:none;">Cancel</a>
-            <form asp-action="Delete" method="post" style="display:inline;">
+        <div class="genre-delete-actions">
+            <a asp-action="Index" class="genre-delete-cancel btn">Cancel</a>
+            <form asp-action="Delete" method="post" class="genre-delete-form">
                 <input type="hidden" asp-for="GenreId" />
-                <button type="submit" class="btn" style="background:#f8bfcf; color:#3d2230; border:none; border-radius:8px; font-family:'Georgia',serif; font-size:1.1rem; font-weight:500; min-width:100px; box-shadow:none; margin-right:0.5rem;">Delete</button>
+                <button type="submit" class="genre-delete-submit btn">Delete</button>
             </form>
         </div>
     </div>
