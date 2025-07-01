@@ -202,7 +202,7 @@ namespace Readiculous.WebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return PartialView("_EditReviewModal", model);
             }
             try
             {
@@ -212,7 +212,7 @@ namespace Readiculous.WebApp.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
+                return PartialView("_EditReviewModal", model);
             }
         }
     }

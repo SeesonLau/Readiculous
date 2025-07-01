@@ -63,36 +63,36 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(string userId)
+        public IActionResult EditUserModal(string userId)
         {
             try
             {
                 var user = _userService.SearchUserEditById(userId);
-                return View(user);
+                return PartialView("_EditUserModal", user);
             }
             catch (InvalidDataException ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return RedirectToAction("Index");
+                return BadRequest(new { error = ex.Message });
             }
         }
 
         [HttpPost]
         public async Task<IActionResult> EditAsync(UserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    await _userService.UpdateUserAsync(model, this.UserId);
-                    return RedirectToAction("Index");
-                }
-                catch (InvalidDataException ex)
-                {
-                    ModelState.AddModelError(string.Empty, ex.Message);
-                }
+                return PartialView("_EditUserModal", model);
             }
-            return View(model);
+            try
+            {
+                await _userService.UpdateUserAsync(model, this.UserId);
+                return RedirectToAction("Index");
+            }
+            catch (InvalidDataException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return PartialView("_EditUserModal", model);
+            }
         }
 
         public IActionResult Details(string userId)
