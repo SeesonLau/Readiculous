@@ -154,27 +154,29 @@ namespace Readiculous.Services.Services
         }
         public async Task DeleteUserAsync(string userId, string deleterId)
         {
-            if (await Task.Run(() => _userRepository.UserExists(userId)))
-            {
-                var user = await Task.Run(() => _userRepository.GetUserById(userId));
-
-                user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
-                foreach (var review in user.UserReviews)
-                {
-                    review.DeletedBy = deleterId;
-                    review.DeletedTime = DateTime.UtcNow;
-
-                    _reviewRepository.UpdateReview(review);
-                }
-                user.DeletedBy = deleterId;
-                user.DeletedTime = DateTime.UtcNow;
-
-                await Task.Run(() => _userRepository.UpdateUser(user));
-            }
-            else
+            if (await Task.Run(() => !_userRepository.UserExists(userId)))
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
+            if(userId == deleterId)
+            {
+                throw new InvalidDataException(Resources.Messages.Errors.UserCannotDeleteSelf);
+            }
+
+            var user = await Task.Run(() => _userRepository.GetUserById(userId));
+
+            user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
+            foreach (var review in user.UserReviews)
+            {
+                review.DeletedBy = deleterId;
+                review.DeletedTime = DateTime.UtcNow;
+
+                _reviewRepository.UpdateReview(review);
+            }
+            user.DeletedBy = deleterId;
+            user.DeletedTime = DateTime.UtcNow;
+
+            await Task.Run(() => _userRepository.UpdateUser(user));
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)

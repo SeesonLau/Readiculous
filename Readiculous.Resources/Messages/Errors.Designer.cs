@@ -133,6 +133,15 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User cannot delete self!.
+        /// </summary>
+        public static string UserCannotDeleteSelf {
+            get {
+                return ResourceManager.GetString("UserCannotDeleteSelf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UserId already exists!.
         /// </summary>
         public static string UserExists {
