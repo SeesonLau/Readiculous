@@ -14,10 +14,16 @@
     background: var(--color-modal);
     border-radius: 1rem;
     border: 1px solid var(--color-btn);
-    max-width: 540px;
+    width: 600px;
+    min-height: 450px;
+    max-width: 90vw;
+    max-height: 90vh;
     margin: 2rem auto;
     padding: 2.5rem 2rem 2rem 2rem;
     box-shadow: 0 0.125rem 0.5rem rgba(237, 174, 192, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .genre-modal-header {
@@ -40,6 +46,7 @@
     border: 1px solid var(--color-btn);
     color: var(--color-text);
     transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
 }
 
 .genre-modal-input:focus, .genre-modal-textarea:focus {
@@ -428,7 +435,93 @@
     margin: 0 auto 2rem auto;
 }
 
-/* Delete Modal Styles */
+/* Genre Details Search Styles */
+.genre-details-search {
+    margin: 2rem auto 2rem auto;
+}
+
+.genre-details-search-form {
+    background: none;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Delete Modal Styles for Bootstrap Modal */
+#deleteGenreModal .modal-content {
+    background: #fdf1f5;
+    border: 1.5px solid #e7c3d1;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+#deleteGenreModal .modal-dialog {
+    max-width: 370px;
+}
+
+#deleteGenreModal .genre-delete-modal {
+    background: transparent;
+    border: none;
+    padding: 2.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#deleteGenreModal .genre-delete-image-container {
+    margin-bottom: 1.2rem;
+}
+
+#deleteGenreModal .genre-delete-image {
+    max-width: 210px;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+#deleteGenreModal .genre-delete-title {
+    font-size: 2rem;
+    font-family: 'Georgia', serif;
+    color: #3d2230;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2.2rem;
+}
+
+#deleteGenreModal .genre-delete-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+#deleteGenreModal .genre-delete-cancel {
+    background: #fff;
+    color: #222;
+    border: 1.5px solid #bfa6b8;
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    min-width: 100px;
+    box-shadow: none;
+}
+
+#deleteGenreModal .genre-delete-submit {
+    background: #f8bfcf;
+    color: #3d2230;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    min-width: 100px;
+    box-shadow: none;
+    margin-right: 0.5rem;
+}
+
+/* Original Delete Container Styles (for reference and potential use) */
 .genre-delete-container {
     min-height: 80vh;
     display: flex;
@@ -505,15 +598,20 @@
     margin-right: 0.5rem;
 }
 
-/* Genre Details Search Styles */
-.genre-details-search {
-    margin: 2rem auto 2rem auto;
+/* Custom overlay for delete modal */
+.genre-delete-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44, 33, 51, 0.18); /* soft dim */
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.genre-details-search-form {
-    background: none;
-    border: none;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
+.genre-modal-textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
 } 

@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = Model.Genre.Name;
-    var books = Model.Books ?? new List<Readiculous.Services.ServiceModels.BookViewModel>();
+    var books = Model.Books ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
     int totalSlots = 10;
     int booksPerRow = 5;
     int rows = 2;
@@ -11,6 +11,9 @@
 <link rel="stylesheet" href="~/css/genre.css" />
 
 <div class="genre-main-container">
+    <div class="mb-3">
+        <a href="@Url.Action("Index", "Genre")" class="btn genre-btn-pink">Return to Genre List</a>
+    </div>
     <div class="genre-card sleek-search mb-4 genre-details-search">
         <form method="get" class="genre-search-bar-container genre-details-search-form">
             <input type="hidden" name="id" value="@Model.Genre.GenreId" />

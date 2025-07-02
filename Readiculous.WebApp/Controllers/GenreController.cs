@@ -51,12 +51,29 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     _genreService.AddGenre(model, this.UserId);
+                    // AJAX support
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = true });
+                    }
                     return RedirectToAction("Index");
                 }
                 catch (InvalidOperationException ex)
                 {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = ex.Message });
+                    }
                     ModelState.AddModelError(string.Empty, ex.Message);
                 }
+            }
+            // AJAX support for validation errors
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return BadRequest(new { success = false, errors = ModelState.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).FirstOrDefault()
+                ) });
             }
             return View(model);
         }
@@ -80,12 +97,27 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     _genreService.UpdateGenre(model, this.UserId);
-                    return RedirectToAction("Index");
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = true });
+                    }
+                    // No redirect
                 }
                 catch (InvalidOperationException ex)
                 {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = ex.Message });
+                    }
                     ModelState.AddModelError(string.Empty, ex.Message);
                 }
+            }
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return BadRequest(new { success = false, errors = ModelState.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).FirstOrDefault()
+                ) });
             }
             return View(model);
         }
@@ -99,7 +131,7 @@ namespace Readiculous.WebApp.Controllers
                 return NotFound();
             }
             // Map to the Genre model for the Delete view
-            var genreModel = new Readiculous.Data.Models.Genre
+            var genreModel = new Genre
             {
                 GenreId = genre.GenreId,
                 Name = genre.Name
@@ -108,18 +140,27 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(Readiculous.Data.Models.Genre model)
+        public IActionResult Delete(Genre model)
         {
             try
             {
                 _genreService.DeleteGenre(model.GenreId, this.UserId);
-                return RedirectToAction("Index");
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, message = "Genre deleted successfully" });
+                }
+                // No redirect
             }
             catch (Exception ex)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return View(model);
             }
+            return View(model);
         }
 
         //GenreDetailsViewModel
