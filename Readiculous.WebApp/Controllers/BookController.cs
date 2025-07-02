@@ -160,10 +160,10 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult CreateReview(string id)
         {
-            var book = _bookService.GetBookDetailsById(id);
-            var user = _userService.SearchUserEditById(this.UserId); // CREATE RETURN EMAIL FUNCTION
+            var title = _bookService.GetTitleByBookId(id);
+            var email = _userService.GetEmailByUserId(id); 
 
-            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName, BookTitle = book.Title, Email = user.Email };
+            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName, BookTitle = title, Email = email };
             return PartialView("_AddReviewModal", model);
         }
         [HttpPost]

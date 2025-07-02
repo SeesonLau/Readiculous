@@ -1,5 +1,5 @@
 ﻿.modal-dialog {
-    width: auto;
+    width: 500px;
     height: auto;
     border-radius: 10px;
     border: 1px var(--color-header) solid;
@@ -24,7 +24,7 @@
     line-height: normal;
 }
 
-.review-modal-body {
+.modal-body {
     width: 100%;
     background: var(--color-modal);
     flex-grow: 1;
@@ -56,13 +56,20 @@ textarea.form-control {
     font-weight: 700;
 }
 
-.btn-success {
+.btn-primary {
     background: var(--color-btn);
     color: var(--color-text);
     border: 1px solid var(--color-header);
     font-family: var(--font-primary);
     font-style: normal;
     font-weight: 700;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--color-header);
+    color: var(--color-text);
+    border: 1px solid var(--color-header);
 }
 
 

@@ -93,7 +93,7 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(UserViewModel model)
+        public async Task<IActionResult> Edit(EditUserViewModel model)
         {
             if (ModelState.IsValid)
             {

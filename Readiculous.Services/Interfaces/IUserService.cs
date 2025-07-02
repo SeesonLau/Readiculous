@@ -11,12 +11,13 @@ namespace Readiculous.Services.Interfaces
     {
         LoginResult AuthenticateUserByEmail(string email, string password, ref User user);
         Task AddUserAsync(UserViewModel model, string creationId);
-        Task UpdateUserAsync(UserViewModel model, string editorId);
+        Task UpdateUserAsync(EditUserViewModel model, string editorId);
         List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest);
         Task DeleteUserAsync(string userId, string deleterId);
-        UserViewModel SearchUserEditById(string userId);
+        EditUserViewModel SearchUserEditById(string userId);
         UserDetailsViewModel SearchUserDetailsById(string userId);
         List<SelectListItem> GetUserRoles();
         List<SelectListItem> GetUserSortTypes();
+        string GetEmailByUserId(string userId);
     }
 }

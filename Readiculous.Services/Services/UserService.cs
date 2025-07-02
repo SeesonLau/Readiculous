@@ -105,7 +105,7 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserExists);
             }
         }
-        public async Task UpdateUserAsync(UserViewModel model, string editorId)
+        public async Task UpdateUserAsync(EditUserViewModel model, string editorId)
         {
             if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
             {
@@ -203,13 +203,13 @@ namespace Readiculous.Services.Services
         }
 
         // Single User Retrieval Methods
-        public UserViewModel SearchUserEditById(string userId)
+        public EditUserViewModel SearchUserEditById(string userId)
         {
             User user = _userRepository.GetUserById(userId);
 
             if (user != null)
             {
-                UserViewModel userViewModel = new();
+                var userViewModel = new EditUserViewModel();
 
                 _mapper.Map(user, userViewModel);
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
@@ -300,6 +300,12 @@ namespace Readiculous.Services.Services
                         Selected = r == UserSortType.Latest 
                     };
                 }).ToList();
+        }
+        // String Helper
+        public string GetEmailByUserId(string userId)
+        {
+            var user = _userRepository.GetUserById(userId);
+            return user.Email;
         }
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()

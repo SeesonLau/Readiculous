@@ -1,12 +1,15 @@
-﻿using Readiculous.Services.Interfaces;
-using Readiculous.Services.ServiceModels;
-using Readiculous.WebApp.Mvc;
+﻿using AspNetCoreGeneratedDocument;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using Readiculous.Services.Interfaces;
+using Readiculous.Services.ServiceModels;
+using Readiculous.WebApp.Models;
+using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -77,30 +80,31 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditAsync(UserViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAsync(EditUserViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return PartialView("_EditUserModal", model);
             }
-            try
-            {
-                await _userService.UpdateUserAsync(model, this.UserId);
-                return RedirectToAction("Index");
-            }
-            catch (InvalidDataException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return PartialView("_EditUserModal", model);
-            }
+
+            await _userService.UpdateUserAsync(model, this.UserId);
+            return Json(new { success = true });
         }
 
         public IActionResult Details(string userId)
         {
             try
             {
-                var user = _userService.SearchUserDetailsById(userId);
-                return View(user);
+                var user = _userService.SearchUserEditById(userId);
+                var registrationComplete = new RegisterSuccessfulViewModel
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Password = user.Password
+                };
+                return PartialView("_RegistrationSuccessfulModal", registrationComplete);
             }
             catch (InvalidDataException ex)
             {

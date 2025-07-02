@@ -31,6 +31,9 @@ namespace Readiculous.WebApp
                 CreateMap<User, UserDetailsViewModel>();
                 CreateMap<UserViewModel, User>();
                 CreateMap<User, UserViewModel>();
+                CreateMap<EditUserViewModel, User>();
+                CreateMap<User, EditUserViewModel>();
+
 
                 // Genre Mappings
                 CreateMap<Genre, GenreListItemViewModel>();

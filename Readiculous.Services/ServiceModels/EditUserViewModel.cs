@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -24,11 +25,17 @@ namespace Readiculous.Services.ServiceModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
+        [DisplayName("Confirm Password")]
+        [Required(ErrorMessage = "Confirm Password is required.")]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = ("Passwords do not match!"))]
+        public string ConfirmPassword { get; set; }
         public string UserId { get; set; }
         public RoleType Role { get; set; }
         public IFormFile ProfilePicture { get; set; }
         public string ProfilePictureUrl { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }
+        public bool RemoveProfilePicture { get; set; }
     }
 }

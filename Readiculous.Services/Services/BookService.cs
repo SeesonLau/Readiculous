@@ -328,6 +328,13 @@ namespace Readiculous.Services.Services
                 }).ToList();
         }
 
+        // String Helper Functions
+        public string GetTitleByBookId(string bookId)
+        {
+            var book = _bookRepository.GetBookById(bookId);
+            return book.Title;
+        }
+
         // Private Helper Methods for Book Listing
         private List<BookListItemViewModel> ListAllActiveBooks(string userID)
         {
