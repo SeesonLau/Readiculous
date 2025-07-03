@@ -235,7 +235,7 @@ Current Issues:
         Issue: None
 
 6. UserViewDetails
-        Issue: Profile picture is not showing up
+        Issue: Profile picture is not showing up: STATUS: DONE
 
 7. User Add Feature
     Currently lack a logic to generate userId and password for the user.

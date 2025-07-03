@@ -1,0 +1,112 @@
+﻿@model Readiculous.Services.ServiceModels.BookDetailsViewModel
+
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <img src="@Model.CoverImageUrl" alt="Cover Image" class="img-fluid rounded" />
+            }
+            else
+            {
+                <div class="text-center py-5 bg-light rounded">
+                    <i class="fas fa-book fa-5x text-muted"></i>
+                    <p class="mt-2">No cover image</p>
+                </div>
+            }
+        </div>
+        <div class="col-md-8">
+            <h3>@Model.Title</h3>
+            <p class="text-muted">by @Model.Author</p>
+            <hr />
+
+            <div class="mb-3">
+                <h5>Description</h5>
+                <p>@Model.Description</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">ISBN</dt>
+                        <dd class="col-sm-8">@Model.ISBN</dd>
+
+                        <dt class="col-sm-4">Publisher</dt>
+                        <dd class="col-sm-8">@Model.Publisher</dd>
+
+                        <dt class="col-sm-4">Series Number</dt>
+                        <dd class="col-sm-8">@Model.SeriesNumber</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Publication Year</dt>
+                        <dd class="col-sm-8">@Model.PublicationYear</dd>
+
+                        <dt class="col-sm-4">Average Rating</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.AverageRating > 0)
+                            {
+                                <div class="star-rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= Model.AverageRating ? "text-warning" : "text-muted")"></i>
+                                    }
+                                    <span class="ms-2">@Model.AverageRating.ToString("0.0")</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <span>No ratings yet</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h5>Genres</h5>
+                @if (Model.Genres != null && Model.Genres.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var genre in Model.Genres)
+                        {
+                            <span class="badge bg-primary">@genre</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No genres assigned</p>
+                }
+            </div>
+
+            @if (Model.Reviews != null && Model.Reviews.Any())
+            {
+                <div class="mb-3">
+                    <h5>Reviews</h5>
+                    <div class="list-group">
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div class="star-rating">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                        }
+                                    </div>
+                                    <small class="text-muted">@review.CreatedTime.ToString("MMMM dd, yyyy")</small>
+                                </div>
+                                <p class="mt-2 mb-0">@review.Comment</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>
