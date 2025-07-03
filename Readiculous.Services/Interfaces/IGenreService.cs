@@ -20,5 +20,6 @@ namespace Readiculous.Services.Interfaces
         List<string> GetSelectedGenreIds(List<GenreViewModel> genreViewModels);
         List<SelectListItem> GetGenreSortTypes();
         List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels);
+        List<BookListItemViewModel> GetBooksByGenreId(string genreId);
     }
 }
