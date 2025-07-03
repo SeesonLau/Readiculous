@@ -17,16 +17,6 @@
     </div>
 </div>
 
-<!-- Registration Success Modal -->
-<div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" id="registrationModalContent">
-            <!-- Partial view content will be loaded here -->
-        </div>
-    </div>
-</div>
-
-
 <h1>User Management</h1>
 
 <p>
@@ -128,13 +118,3 @@
     </tbody>
 </table>
 
-@section Scripts {
-    <script>
-        document.getElementById('searchType').addEventListener('change', function() {
-            document.getElementById('searchForm').submit();
-        });
-    </script>
-    <script src="~/js/user.js"></script>
-
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
-}

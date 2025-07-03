@@ -63,6 +63,7 @@ namespace Readiculous.Data.Repositories
 
             return users;
         }
+
         public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
         {
             // CAN BE OPTIMIZED TO REMOVE USER FAVORITE BOOKS AND USER REVIEWS IF NOT NEEDED

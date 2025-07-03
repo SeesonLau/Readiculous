@@ -138,6 +138,9 @@
   <data name="ImageFailedToUpload" xml:space="preserve">
     <value>Image failed to upload!</value>
   </data>
+  <data name="InvalidCurrentPassword" xml:space="preserve">
+    <value>Current Password does not match your current password!</value>
+  </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error occured!</value>
   </data>

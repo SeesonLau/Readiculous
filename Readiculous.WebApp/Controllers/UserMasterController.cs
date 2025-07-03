@@ -83,7 +83,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserEditById(userId);
+                var user = _userService.GetUserEditById(userId);
                 return PartialView(user);
             }
             catch (InvalidDataException ex)
@@ -93,7 +93,7 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(EditUserViewModel model)
+        public async Task<IActionResult> Edit(UserViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -115,7 +115,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserDetailsById(userId);
+                var user = _userService.GetUserDetailsById(userId);
                 return PartialView(user);
             }
             catch (InvalidDataException ex)

@@ -70,7 +70,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserEditById(userId);
+                var user = _userService.GetUserEditById(userId);
                 return PartialView("_EditUserModal", user);
             }
             catch (InvalidDataException ex)
@@ -81,7 +81,7 @@ namespace Readiculous.WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditAsync(EditUserViewModel model)
+        public async Task<IActionResult> EditAsync(UserViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -96,7 +96,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserEditById(userId);
+                var user = _userService.GetUserEditById(userId);
                 var registrationComplete = new RegisterSuccessfulViewModel
                 {
                     UserId = user.UserId,

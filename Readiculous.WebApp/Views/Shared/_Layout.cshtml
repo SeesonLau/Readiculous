@@ -29,6 +29,20 @@
         @RenderBody()
     </main>
 
+    <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="registrationModalContent">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="editProfileModalContent">
+            </div>
+        </div>
+    </div>
+
     <footer class="border-top footer text-muted">
         <div class="container">
             @Copyright
@@ -60,7 +74,48 @@
         };
     </script>
     
-    
+    <script>
+        $(document).on('click', '.open-edit-profile', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '@Url.Action("EditProfile", "Home")',
+                type: 'GET',
+                success: function (result) {
+                    $('#editProfileModalContent').html(result);
+                    $('#editProfileModal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Failed to load Edit Profile form.');
+                }
+            });
+        });
+
+        $(document).on('submit', '#editProfileForm', function (e) {
+            e.preventDefault();
+
+            const form = $(this)[0];
+            const formData = new FormData(form); 
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: $(this).attr('method'),
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                        if (result.success) {
+                    $('#editProfileModal').modal('hide');
+                    location.reload(); 
+                } else {
+                    $('#editProfileModalContent').html(result); 
+                }},
+                error: function () {
+                    toastr.error("An error occurred while saving the profile.");
+                }
+            });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
