@@ -153,9 +153,9 @@ namespace Readiculous.Services.Services
                     GenreListItemViewModel model = new();
 
                     _mapper.Map(genre, model);
-                    model.CreatedByUsername = genre.CreatedByUser.Username;
-                    model.UpdatedByUsername = genre.UpdatedByUser.Username;
-                    model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+                    model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
+                    model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
+                    model.BookCount = genre.Books != null ? genre.Books.Count(bga => bga.Book != null && bga.Book.DeletedTime == null) : 0;
 
                     return model;
                 })
@@ -173,9 +173,9 @@ namespace Readiculous.Services.Services
                 {
                     GenreListItemViewModel model = new GenreListItemViewModel();
                     _mapper.Map(genre, model);
-                    model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
-                    model.CreatedByUsername = genre.CreatedByUser.Username;
-                    model.UpdatedByUsername = genre.UpdatedByUser.Username;
+                    model.BookCount = genre.Books != null ? genre.Books.Count(bga => bga.Book != null && bga.Book.DeletedTime == null) : 0;
+                    model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
+                    model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
                     return model;
                 })
                 .ToList();
@@ -202,6 +202,25 @@ namespace Readiculous.Services.Services
             {
                 GenreId = g.GenreId,
                 Name = g.Name,
+            }).ToList();
+        }
+
+        public List<BookListItemViewModel> GetBooksByGenreId(string genreId)
+        {
+            var genre = _genreRepository.GetGenreById(genreId);
+            if (genre == null || genre.DeletedTime != null)
+            {
+                return new List<BookListItemViewModel>();
+            }
+            var books = genre.Books
+                .Where(bga => bga.Book != null && bga.Book.DeletedTime == null)
+                .Select(bga => bga.Book)
+                .ToList();
+            return books.Select(book =>
+            {
+                var model = new BookListItemViewModel();
+                _mapper.Map(book, model);
+                return model;
             }).ToList();
         }
     }

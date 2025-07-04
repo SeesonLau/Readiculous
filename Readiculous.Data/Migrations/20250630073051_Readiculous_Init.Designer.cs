@@ -12,7 +12,11 @@ using Readiculous.Data;
 namespace Readiculous.Data.Migrations
 {
     [DbContext(typeof(ReadiculousDbContext))]
+<<<<<<<< HEAD:Readiculous.Data/Migrations/20250630130823_Readiculous_Init.Designer.cs
     [Migration("20250630130823_Readiculous_Init")]
+========
+    [Migration("20250630073051_Readiculous_Init")]
+>>>>>>>> 404fa6e7949e9bc5397baf0f10b5fff14cf53a90:Readiculous.Data/Migrations/20250630073051_Readiculous_Init.Designer.cs
     partial class Readiculous_Init
     {
         /// <inheritdoc />
