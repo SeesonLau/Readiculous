@@ -154,9 +154,9 @@ namespace Readiculous.Services.Services
         }
         public async Task DeleteUserAsync(string userId, string deleterId)
         {
-            if (await Task.Run(() => _userRepository.UserExists(userId)))
+            if ( _userRepository.UserExists(userId))
             {
-                var user = await Task.Run(() => _userRepository.GetUserById(userId));
+                var user = _userRepository.GetUserById(userId);
 
                 user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
                 foreach (var review in user.UserReviews)
