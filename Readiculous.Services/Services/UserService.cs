@@ -256,7 +256,7 @@ namespace Readiculous.Services.Services
         }
         public UserDetailsViewModel GetUserDetailsById(string userId)
         {
-            User user = _userRepository.GetUserWithFilledNavigationPropertiesById(userId);
+            User user = _userRepository.GetUserWithNavigationPropertiesById(userId);
 
             if (user != null)
             {
