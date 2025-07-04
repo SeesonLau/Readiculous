@@ -202,7 +202,7 @@ namespace Readiculous.Services.Services
 
         public List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels)
         {
-                       if (genreListItemViewModels == null || !genreListItemViewModels.Any())
+            if (genreListItemViewModels == null || !genreListItemViewModels.Any())
             {
                 return new List<GenreViewModel>();
             }

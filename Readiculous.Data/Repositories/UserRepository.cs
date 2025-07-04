@@ -87,7 +87,7 @@ namespace Readiculous.Data.Repositories
                 .FirstOrDefault(u => u.UserId == id
                                     && u.DeletedTime == null);
         }
-        public User GetUserWithFilledNavigationPropertiesById(string id)
+        public User GetUserWithNavigationPropertiesById(string id)
         {
             return this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
