@@ -12,7 +12,7 @@
 
 <div class="genre-main-container">
     <div class="mb-3">
-        <a href="@Url.Action("Index", "Genre")" class="btn genre-btn-pink">Return to Genre List</a>
+        <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn genre-btn-pink">Return to Genre List</a>
     </div>
     <div class="genre-card sleek-search mb-4 genre-details-search">
         <form method="get" class="genre-search-bar-container genre-details-search-form">
@@ -61,22 +61,22 @@
         <nav aria-label="Book page navigation">
             <ul class="pagination mb-0">
                 <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link" href="@Url.Action("Details", new { id = Model.Genre.GenreId, page = 1 })" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+                    <a class="page-link" href="@Url.Action("GenreMasterScreen", new { id = Model.Genre.GenreId, page = 1 })" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
                 </li>
                 <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link" href="@Url.Action("Details", new { id = Model.Genre.GenreId, page = Model.CurrentPage - 1 })" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a>
+                    <a class="page-link" href="@Url.Action("GenreMasterScreen", new { id = Model.Genre.GenreId, page = Model.CurrentPage - 1 })" aria-label="Previous"><span aria-hidden="true">&lsaquo;</span></a>
                 </li>
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                        <a class="page-link @(i == Model.CurrentPage ? "fw-bold text-dark" : "")" href="@Url.Action("Details", new { id = Model.Genre.GenreId, page = i })">@i</a>
+                        <a class="page-link @(i == Model.CurrentPage ? "fw-bold text-dark" : "")" href="@Url.Action("GenreMasterScreen", new { id = Model.Genre.GenreId, page = i })">@i</a>
                     </li>
                 }
                 <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link" href="@Url.Action("Details", new { id = Model.Genre.GenreId, page = Model.CurrentPage + 1 })" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a>
+                    <a class="page-link" href="@Url.Action("GenreMasterScreen", new { id = Model.Genre.GenreId, page = Model.CurrentPage + 1 })" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a>
                 </li>
                 <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link" href="@Url.Action("Details", new { id = Model.Genre.GenreId, page = Model.TotalPages })" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+                    <a class="page-link" href="@Url.Action("GenreMasterScreen", new { id = Model.Genre.GenreId, page = Model.TotalPages })" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
                 </li>
             </ul>
         </nav>

@@ -4,12 +4,12 @@
     <thead class="table-dark">
         <tr class="text-center">
             <th rowspan="2" class="text-center align-middle" >Cover</th>
-            <th rowspan ="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Title)</th>
-            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Author)</th>
+            <th rowspan="2" class="text-center align-middle">Title</th>
+            <th rowspan="2" class="text-center align-middle">Author</th>
             <th rowspan="2" class="text-center align-middle">Genres</th>
-            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().SeriesNumber)</th>
-            <th rowspan="2" class="text-center align-middle"> @Html.DisplayNameFor(model => model.First().AverageRating)</th>
-            <th colspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
+            <th rowspan="2" class="text-center align-middle">Series #</th>
+            <th rowspan="2" class="text-center align-middle">Rating</th>
+            <th colspan="2" class="text-center align-middle">Modified</th>
             <th rowspan="2" class="text-center align-middle">Actions</th>
         </tr>
         <tr class="text-center">
@@ -48,18 +48,20 @@
                 </td>
                 <td class="text-center align-middle">@Html.DisplayFor(modelItem => item.SeriesNumber)</td>
                 <td class="text-center align-middle">@item.AverageRating.ToString("0.0")</td>
-                <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
-                <td class="text-center align-middle">@item.UpdatedTime.ToString("h:mm tt")</td>
+                <td class="text-center align-middle" style="white-space: nowrap;">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
+                <td class="text-center align-middle" style="white-space: nowrap;">@item.UpdatedTime.ToString("h:mm tt")</td>
                 <td class="text-center align-middle">
-                    <button class="btn btn-primary btn-sm btn-edit-book" data-bookid="@item.BookId">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-info btn-sm btn-view-book" data-bookid="@item.BookId">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm btn-delete-book" data-bookid="@item.BookId"data-bookname="@item.Title">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-primary btn-sm btn-edit-book" data-bookid="@item.BookId" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-info btn-sm btn-view-book" data-bookid="@item.BookId" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm btn-delete-book" data-bookid="@item.BookId" data-bookname="@item.Title" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         }

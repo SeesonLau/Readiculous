@@ -174,9 +174,9 @@
         }
 
         submitBtn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Processing...
-        `);
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Processing...
+    `);
 
         const formData = new FormData(form[0]);
 
@@ -188,7 +188,14 @@
             contentType: false,
             success: function (response) {
                 if (response.success) {
-                    window.location.reload();
+                    // Get current pageSize from URL or use default
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const pageSize = urlParams.get('pageSize') || '10';
+
+                    // Reload with the preserved pageSize
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('pageSize', pageSize);
+                    window.location.href = newUrl.toString();
                 } else {
                     const modalBody = form.closest('.modal-body').attr('id');
                     $(`#${modalBody}`).html(response);
@@ -210,13 +217,18 @@
         const bookId = $('#userToDeleteId').val();
 
         btn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Deleting...
-        `);
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Deleting...
+    `);
 
         $.post(settings.deleteBookUrl, { id: bookId })
             .done(function () {
-                window.location.reload();
+                // Preserve pageSize on delete
+                const urlParams = new URLSearchParams(window.location.search);
+                const pageSize = urlParams.get('pageSize') || '10';
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('pageSize', pageSize);
+                window.location.href = newUrl.toString();
             })
             .fail(function () {
                 showErrorAlert('Failed to delete book');
