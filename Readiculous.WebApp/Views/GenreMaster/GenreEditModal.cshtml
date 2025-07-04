@@ -1,0 +1,39 @@
+﻿@model Readiculous.Services.ServiceModels.GenreViewModel
+
+@{
+    ViewData["Title"] = "Edit Genre";
+}
+
+<link rel="stylesheet" href="~/css/genre.css" />
+
+<div class="genre-modal-card">
+    <div class="genre-modal-header">Edit Genre</div>
+    <form asp-action="Edit" autocomplete="off">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="GenreId" />
+        <div class="mb-3">
+            <label asp-for="Name" class="genre-modal-label form-label"></label>
+            <input asp-for="Name" class="genre-modal-input form-control" placeholder="Enter genre name" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Description" class="genre-modal-label form-label"></label>
+            <textarea asp-for="Description" class="genre-modal-textarea form-control" rows="4" placeholder="Enter genre description"></textarea>
+            <span asp-validation-for="Description" class="text-danger small"></span>
+        </div>
+        <input type="hidden" asp-for="CreatedBy" />
+        <input type="hidden" asp-for="CreatedTime" />
+        <input type="hidden" asp-for="UpdatedBy" />
+        <input type="hidden" asp-for="UpdatedTime" />
+        <div class="genre-modal-actions d-flex justify-content-end gap-3">
+            <a asp-action="Index" class="genre-btn-cancel btn">Cancel</a>
+            <button type="submit" class="genre-btn-save btn">Save</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

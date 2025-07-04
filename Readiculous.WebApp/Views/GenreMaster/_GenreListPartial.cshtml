@@ -1,0 +1,58 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
+
+<div class="genre-table">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th rowspan="2" class="text-center align-middle">GENRE</th>
+                <th rowspan="2" class="text-center align-middle">DESCRIPTION</th>
+                <th rowspan="2" class="text-center align-middle">BOOK COUNT</th>
+                <th colspan="2" class="text-center align-middle">MODIFIED</th>
+                <th rowspan="2" class="text-center align-middle">ACTIONS</th>
+            </tr>
+            <tr class="text-center">
+                <th class="text-center">Date</th>
+                <th class="text-center">Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr id="genre-row-@item.GenreId">
+                    <td class="align-middle fw-medium">@item.Name</td>
+                    <td class="align-middle">@item.Description</td>
+                    <td class="align-middle text-center">
+                        <span class="badge bg-secondary">@item.BookCount</span>
+                    </td>
+                    <td class="text-center align-middle" style="white-space: nowrap;">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
+                    <td class="text-center align-middle" style="white-space: nowrap;">@item.UpdatedTime.ToString("h:mm tt")</td>
+                    <td class="align-middle text-center">
+                        <div class="d-flex justify-content-center gap-2">
+
+                            <a asp-action="GenreViewModal" asp-route-id="@item.GenreId" class="genre-action-btn btn btn-sm" title="View">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zm-8 4.5c-2.485 0-4.5-2.015-4.5-4.5S5.515 3.5 8 3.5s4.5 2.015 4.5 4.5-2.015 4.5-4.5 4.5zm0-7A2.5 2.5 0 1 0 8 11a2.5 2.5 0 0 0 0-5z" />
+                                </svg>
+                            </a>
+
+                            <button class="btn btn-primary btn-sm edit-genre-btn"data-genre-id="@item.GenreId"data-genre-name="@item.Name"data-genre-description="@item.Description" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm btn-delete-genre"data-genre-id="@item.GenreId"data-genre-name="@item.Name"title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i class="fas fa-search me-2"></i>No genres found matching your criteria.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
