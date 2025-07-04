@@ -15,6 +15,15 @@ namespace Readiculous.WebApp.Models
             CurrentPage = currentPage;
             PageSize = pageSize;
             TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            if (totalItems == 0)
+            {
+                TotalPages = 1; 
+            }
+            else
+            {
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            }
         }
 
         public bool HasPrevious => CurrentPage > 1;
