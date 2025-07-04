@@ -18,5 +18,13 @@ namespace Readiculous.Services.Interfaces
         UserDetailsViewModel SearchUserDetailsById(string userId);
         List<SelectListItem> GetUserRoles();
         List<SelectListItem> GetUserSortTypes();
+        
+        // OTP Methods
+        Task<bool> SendOtpForRegistrationAsync(string email);
+        bool ValidateOtpForRegistration(string email, string otp);
+        Task<bool> ResendOtpForRegistrationAsync(string email);
+        // Optionally, you may want to expose a method to get the temp password for testing, but not required for production.
+        string GetTempPasswordForEmail(string email);
+        Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword);
     }
 }

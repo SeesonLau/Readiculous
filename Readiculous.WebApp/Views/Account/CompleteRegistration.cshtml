@@ -1,8 +1,8 @@
-﻿@using Readiculous.Services.ServiceModels
-@model EmailRequestModel
+@using Readiculous.Services.ServiceModels
+@model UserViewModel
 @{
     ViewBag.LoginView = true;
-    ViewData["Title"] = "Register Page";
+    ViewData["Title"] = "Complete Registration";
 }
 @section styles {
     <style>
@@ -25,24 +25,6 @@
             margin: auto;
             text-align: center;
             position: relative;
-        }
-        .register-back-btn {
-            position: absolute;
-            top: 1.2rem;
-            left: 1.2rem;
-            color: #4b2e4c;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 1rem;
-            background: none;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .register-back-btn:hover {
-            color: #b993b2;
-            text-decoration: underline;
         }
         .register-cat-img-wrap {
             display: flex;
@@ -105,20 +87,62 @@
         .register-signin a:hover {
             text-decoration: underline;
         }
+        .register-file-input {
+            background: #f7e6f7;
+            border: none;
+            border-radius: 16px;
+            padding: 1.1rem 1.2rem;
+            font-size: 1.1rem;
+            margin-bottom: 1.4rem;
+            width: 100%;
+            color: #39243b;
+            font-family: inherit;
+        }
+        .register-file-input::-webkit-file-upload-button {
+            background: #f7b6c2;
+            color: #39243b;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .register-file-input::file-selector-button {
+            background: #f7b6c2;
+            color: #39243b;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
     </style>
 }
 <div class="register-box-custom">
-    <div class="register-card-custom position-relative">
-        <a href="@Url.Action("Login", "Account")" class="register-back-btn" title="Back to Login">
-            <span style="font-size:1.3rem;vertical-align:middle;">&#8592;</span> Back
-        </a>
+    <div class="register-card-custom">
         <div class="register-cat-img-wrap">
             <img src="~/img/cat-sleep.png" alt="Cat with Book" class="register-cat-img" />
         </div>
         <div class="register-title">Create Your Account</div>
-        <form method="post" asp-action="RequestOtp" asp-controller="Account">
-            <input type="email" class="register-input" asp-for="Email" placeholder="Email Address" autocomplete="off" />
-            <span asp-validation-for="Email" class="text-danger"></span>
+        <form method="post" enctype="multipart/form-data" asp-action="CompleteRegistration" asp-controller="Account">
+            <input type="hidden" asp-for="UserId" />
+            <div>
+                <input type="text" class="register-input" asp-for="Username" placeholder="Username" autocomplete="off" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div>
+                <input type="password" class="register-input" asp-for="Password" placeholder="Password" autocomplete="off" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div>
+                <input type="password" class="register-input" name="ConfirmPassword" placeholder="Confirm Password" autocomplete="off" />
+            </div>
+            <div>
+                <input type="file" class="register-file-input" asp-for="ProfilePicture" accept="image/*" />
+                <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+            </div>
             <button class="register-btn" type="submit">Sign Up</button>
         </form>
         <div class="register-signin">
@@ -126,16 +150,11 @@
         </div>
     </div>
 </div>
-
 @section scripts {
     <script>
         var errorMessage = '@TempData["ErrorMessage"]';
-        var successMessage = '@TempData["SuccessMessage"]';
         if (errorMessage) {
             toastr.error(errorMessage);
         }
-        if (successMessage) {
-            toastr.success(successMessage);
-        }
     </script>
-}
+} 

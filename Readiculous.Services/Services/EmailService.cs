@@ -1,0 +1,196 @@
+using Readiculous.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
+
+namespace Readiculous.Services.Services
+{
+    public class EmailService : IEmailService
+    {
+        private readonly IConfiguration _configuration;
+
+        public EmailService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public async Task<bool> SendOtpEmailAsync(string email, string otp, string tempPassword)
+        {
+            try
+            {
+                var smtpSettings = _configuration.GetSection("SmtpSettings");
+                
+                // Check if SMTP is properly configured
+                if (string.IsNullOrEmpty(smtpSettings["Host"]) || 
+                    string.IsNullOrEmpty(smtpSettings["Username"]) || 
+                    string.IsNullOrEmpty(smtpSettings["Password"]) ||
+                    smtpSettings["Password"] == "your-app-password-here" ||
+                    smtpSettings["Password"] == "mewmew@holyshit")
+                {
+                    // Development mode - show OTP and password in console
+                    Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine("📧 EMAIL OTP (Development Mode)");
+                    Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine($"📧 To: {email}");
+                    Console.WriteLine($"🔑 OTP Code: {otp}");
+                    Console.WriteLine($"🔒 Temporary Password: {tempPassword}");
+                    Console.WriteLine($"⏰ Expires: 10 minutes");
+                    Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine("💡 To enable real email sending:");
+                    Console.WriteLine("   1. Use email account: noted2001@gmail.com");
+                    Console.WriteLine("   2. Enable 2-Factor Authentication");
+                    Console.WriteLine("   3. Generate App Password and update appsettings.json");
+                    Console.WriteLine("   4. Replace 'your-app-password-here' with the actual App Password");
+                    Console.WriteLine("=".PadRight(60, '='));
+                    return true;
+                }
+
+                // Real email sending
+                Console.WriteLine($"🔧 SMTP Configuration:");
+                Console.WriteLine($"   Host: {smtpSettings["Host"]}");
+                Console.WriteLine($"   Port: {smtpSettings["Port"]}");
+                Console.WriteLine($"   SSL: {smtpSettings["EnableSsl"]}");
+                Console.WriteLine($"   Username: {smtpSettings["Username"]}");
+                Console.WriteLine($"   Password: {smtpSettings["Password"].Substring(0, Math.Min(4, smtpSettings["Password"].Length))}***");
+                
+                var smtpClient = new SmtpClient
+                {
+                    Host = smtpSettings["Host"],
+                    Port = int.Parse(smtpSettings["Port"]),
+                    EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"]),
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Timeout = 10000 // 10 seconds timeout
+                };
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
+                    Subject = "Your OTP and Temporary Password - Readiculous",
+                    Body = $@"
+                        <html>
+                        <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                            <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
+                                <h2 style='color: #007bff; margin-bottom: 20px;'>Welcome to Readiculous!</h2>
+                                <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                                    <p style='margin-bottom: 10px;'>Your verification code is:</p>
+                                    <div style='font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 5px; padding: 15px; background-color: #e9ecef; border-radius: 5px;'>
+                                        {otp}
+                                
+                                </div>
+                                <p style='color: #6c757d; font-size: 14px;'>This code and password will expire in 10 minutes.</p>
+                                <p style='color: #6c757d; font-size: 14px;'>If you didn't request this code, please ignore this email.</p>
+                                <hr style='margin: 30px 0; border: none; border-top: 1px solid #dee2e6;'>
+                                <p style='color: #6c757d; font-size: 14px;'>Best regards,<br>The Readiculous Team</p>
+                            </div>
+                        </body>
+                        </html>",
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(email);
+
+                await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine($"✅ Email sent successfully to {email}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the error and fallback to console output
+                Console.WriteLine($"❌ Failed to send email: {ex.Message}");
+                Console.WriteLine($"📧 OTP for {email}: {otp}");
+                Console.WriteLine($"🔒 Temporary Password: {tempPassword}");
+                
+                // Provide specific guidance based on error
+                if (ex.Message.Contains("Authentication Required") || ex.Message.Contains("5.7.0"))
+                {
+                    Console.WriteLine("🔐 Authentication Issue:");
+                    Console.WriteLine("   1. Make sure 2-Factor Authentication is enabled on noted2001@gmail.com");
+                    Console.WriteLine("   2. Generate a new App Password (not regular password)");
+                    Console.WriteLine("   3. Use the 16-character App Password in appsettings.json");
+                    Console.WriteLine("   4. Wait a few minutes after generating new App Password");
+                }
+                else if (ex.Message.Contains("secure connection"))
+                {
+                    Console.WriteLine("🔒 Security Issue:");
+                    Console.WriteLine("   1. Make sure 'EnableSsl' is set to 'true'");
+                    Console.WriteLine("   2. Use port 587 for Gmail SMTP");
+                }
+                else
+                {
+                    Console.WriteLine("💡 Check your SMTP settings in appsettings.json");
+                }
+                
+                return true; // Return true so the flow continues
+            }
+        }
+
+        public async Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword)
+        {
+            try
+            {
+                var smtpSettings = _configuration.GetSection("SmtpSettings");
+                if (string.IsNullOrEmpty(smtpSettings["Host"]) || 
+                    string.IsNullOrEmpty(smtpSettings["Username"]) || 
+                    string.IsNullOrEmpty(smtpSettings["Password"]) ||
+                    smtpSettings["Password"] == "your-app-password-here" ||
+                    smtpSettings["Password"] == "mewmew@holyshit")
+                {
+                    // Development mode - show temp password in console
+                    Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine("📧 TEMP PASSWORD EMAIL (Development Mode)");
+                    Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine($"📧 To: {email}");
+                    Console.WriteLine($"🔒 Temporary Password: {tempPassword}");
+                    Console.WriteLine("=".PadRight(60, '='));
+                    return true;
+                }
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
+                    Subject = "Your Temporary Password - Readiculous",
+                    Body = $@"
+                        <html>
+                        <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                            <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
+                                <h2 style='color: #007bff; margin-bottom: 20px;'>Welcome to Readiculous!</h2>
+                                <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                                    <p style='margin-bottom: 10px;'>Your temporary password is:</p>
+                                    <div style='font-size: 22px; font-weight: bold; color: #d63384; letter-spacing: 2px; padding: 10px; background-color: #f7e6f7; border-radius: 5px;'>
+                                        {tempPassword}
+                                    </div>
+                                </div>
+                                <p style='color: #6c757d; font-size: 14px;'>Use this password to log in. You will be prompted to change it after your first login.</p>
+                                <hr style='margin: 30px 0; border: none; border-top: 1px solid #dee2e6;'>
+                                <p style='color: #6c757d; font-size: 14px;'>Best regards,<br>The Readiculous Team</p>
+                            </div>
+                        </body>
+                        </html>",
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(email);
+                var smtpClient = new SmtpClient
+                {
+                    Host = smtpSettings["Host"],
+                    Port = int.Parse(smtpSettings["Port"]),
+                    EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"]),
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Timeout = 10000 // 10 seconds timeout
+                };
+                await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine($"✅ Temp password email sent successfully to {email}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Failed to send temp password email: {ex.Message}");
+                Console.WriteLine($"📧 Temp password for {email}: {tempPassword}");
+                return true;
+            }
+        }
+    }
+} 

@@ -1,0 +1,197 @@
+@using Readiculous.Services.ServiceModels
+@model OtpVerificationModel
+@{
+    ViewBag.LoginView = true;
+    ViewData["Title"] = "Enter OTP";
+}
+@section styles {
+    <style>
+        body, html {
+            background: #fff !important;
+        }
+        .otp-box-custom {
+            background: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .otp-card-custom {
+            background: #b993b2;
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2.5rem 2rem 2rem 2rem;
+            max-width: 370px;
+            margin: auto;
+            text-align: center;
+            position: relative;
+        }
+        .otp-icon {
+            font-size: 3.2rem;
+            color: #222;
+            margin-bottom: 1.2rem;
+        }
+        .otp-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #39243b;
+            margin-bottom: 0.7rem;
+            font-family: inherit;
+        }
+        .otp-subtitle {
+            color: #39243b;
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+        }
+        .otp-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
+        }
+        .otp-input {
+            width: 44px;
+            height: 54px;
+            border-radius: 10px;
+            border: none;
+            background: #f7e6f7;
+            text-align: center;
+            font-size: 2rem;
+            color: #39243b;
+            font-weight: 700;
+            outline: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .otp-input:focus {
+            background: #fff;
+            border: 2px solid #f7b6c2;
+        }
+        .otp-btn {
+            background: #f7b6c2;
+            color: #39243b;
+            border: none;
+            border-radius: 16px;
+            padding: 1.1rem 0;
+            width: 100%;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.1rem;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+        .otp-btn:hover {
+            background: #e89ab0;
+        }
+        .otp-resend {
+            color: #39243b;
+            font-size: 1.05rem;
+            margin-bottom: 1.2rem;
+        }
+        .otp-resend a {
+            color: #a03c5b;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .otp-resend a:hover {
+            text-decoration: underline;
+        }
+        .otp-back-btn {
+            background: #f7e6f7;
+            color: #39243b;
+            border: none;
+            border-radius: 16px;
+            padding: 1.1rem 0;
+            width: 100%;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .otp-back-btn:hover {
+            background: #e2d0e2;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+}
+<div class="otp-box-custom">
+    <div class="otp-card-custom">
+        <div class="otp-icon">
+            <i class="fa-solid fa-envelope"></i>
+        </div>
+        <div class="otp-title">Enter OTP</div>
+        <div class="otp-subtitle">We sent a code to <span>@Model.Email</span></div>
+        <form method="post" asp-action="VerifyOtp" asp-controller="Account" autocomplete="off" id="otpForm">
+            <div class="otp-inputs">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <input type="password" maxlength="1" class="otp-input" name="OtpBox" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+                }
+            </div>
+            <input type="hidden" asp-for="Email" />
+            <input type="hidden" asp-for="Otp" id="OtpHidden" />
+            <button class="otp-btn" type="submit">Continue</button>
+        </form>
+        <div class="otp-resend">
+            Didn't receive the email? <a href="#" id="resendOtpLink">Click to resend</a>
+        </div>
+        <form method="get" asp-action="Register" asp-controller="Account">
+            <button type="submit" class="otp-back-btn">Back</button>
+        </form>
+    </div>
+</div>
+@section scripts {
+    <script>
+        // OTP input logic: auto-advance, backspace, and collect value
+        const inputs = document.querySelectorAll('.otp-input');
+        const hiddenOtp = document.getElementById('OtpHidden');
+        const otpForm = document.getElementById('otpForm');
+        inputs[0].focus();
+        inputs.forEach((input, idx) => {
+            input.addEventListener('input', function(e) {
+                if (this.value.length > 1) this.value = this.value.slice(0, 1);
+                if (this.value && idx < inputs.length - 1) {
+                    inputs[idx + 1].focus();
+                }
+                updateHiddenOtp();
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && idx > 0) {
+                    inputs[idx - 1].focus();
+                }
+            });
+        });
+        function updateHiddenOtp() {
+            let otp = '';
+            inputs.forEach(i => otp += i.value);
+            hiddenOtp.value = otp;
+        }
+        otpForm.addEventListener('submit', function(e) {
+            updateHiddenOtp();
+        });
+        // Resend OTP link
+        document.getElementById('resendOtpLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '@Url.Action("ResendOtp", "Account")';
+            const emailInput = document.createElement('input');
+            emailInput.type = 'hidden';
+            emailInput.name = 'email';
+            emailInput.value = '@Model.Email';
+            form.appendChild(emailInput);
+            document.body.appendChild(form);
+            form.submit();
+        });
+        // Toastr notifications
+        var errorMessage = '@TempData["ErrorMessage"]';
+        var successMessage = '@TempData["SuccessMessage"]';
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
+        if (successMessage) {
+            toastr.success(successMessage);
+        }
+    </script>
+} 

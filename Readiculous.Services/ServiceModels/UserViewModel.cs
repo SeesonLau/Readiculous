@@ -35,5 +35,6 @@ namespace Readiculous.Services.ServiceModels
         public DateTime? UpdatedTime { get; set; }
         [Display(Name = "Remove Profile Picture")]
         public bool RemoveProfilePicture { get; set; }
+        public AccessStatus AccessStatus { get; set; }
     }
 }
