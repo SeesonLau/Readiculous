@@ -18,6 +18,7 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [AllowAnonymous]
     public class LandingPageController : ControllerBase<LandingPageController>
     {
 
@@ -51,7 +52,7 @@ namespace Readiculous.WebApp.Controllers
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
             this._sessionManager.Clear();
             this._session.SetString("SessionId", System.Guid.NewGuid().ToString());
-            return PartialView("_LoginModal", null);
+            return PartialView("_LoginModal");
 
         }
         [HttpPost]

@@ -25,7 +25,7 @@
             <a href="@Url.Action("GuestView", "UserView")#new-books"><span>📖</span> New Books</a>
             <a href="@Url.Action("GuestView", "UserView")#top-books"><span>🏆</span> Top Books</a>
             <a href="@Url.Action("GenreBooks", "UserView")"><span>🏷️</span> Genre</a>
-            <a href="javascript:void(0);" onclick="showModal('login')"><span>👤</span></a>
+            <a href="#" onclick="loadModalContent()">Login</a>
         </nav>
     </header>
 
@@ -47,10 +47,8 @@
         </div>
     </section>
 
-    <!-- Auth Modal Container -->
-    @Html.Partial("~/Views/Shared/Modals/_AuthModal.cshtml")
 
-    <script>
+   @*  <script>
         function showModal(modalId) {
             const url = new URL(window.location);
             url.searchParams.set("modal", modalId);
@@ -98,6 +96,18 @@
                 showModal(modalFromUrl);
             }
         };
+    </script> *@
+
+    <script>
+        function showLoginModal() {
+            fetch('/LandingPage/Login')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('loginModalBody').innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+                    modal.show();
+                });
+        }
     </script>
 </body>
 </html>
