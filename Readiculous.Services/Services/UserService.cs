@@ -49,36 +49,17 @@ namespace Readiculous.Services.Services
                 return LoginResult.Failed;
             return LoginResult.Success;
         }
-        public bool IsCurrentPasswordCorrect(string userId, string currentPassword)
-        {
-            var user = _userRepository.GetUserById(userId);
-            if (user == null)
-            {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
-            }
-            return PasswordManager.DecryptPassword(user.Password) == currentPassword;
-        }
-        public bool IsChangingPassword(EditProfileViewModel editProfileViewModel)
-        {
-            return !string.IsNullOrWhiteSpace(editProfileViewModel.CurrentPassword) ||
-                !string.IsNullOrWhiteSpace(editProfileViewModel.NewPassword) ||
-                !string.IsNullOrWhiteSpace(editProfileViewModel.ConfirmPassword);
-        }
-        
         // CRUD Operations
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
-            // Adds User when Email does not exist
             if (!_userRepository.EmailExists(model.Email.Trim()))
             {
-                // Creation of New User Entity
                 var user = new User();
                 if (string.IsNullOrEmpty(model.UserId))
                 {
                     model.UserId = Guid.NewGuid().ToString();
                 }
 
-                // Map properties for Username, Email, Password, CreatedTime and UpdatedTime
                 _mapper.Map(model, user);
                 user.Username = user.Username.Trim();
                 user.Email = user.Email.Trim();
@@ -86,15 +67,38 @@ namespace Readiculous.Services.Services
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
 
-                // If a picture was uploaded
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
-                    // Upload picture
-                    user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+                    var extension = Path.GetExtension(model.ProfilePicture.FileName);
+                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}-{Guid.NewGuid():N}{extension}");
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.ProfilePicture.CopyToAsync(memoryStream);
+                        var fileBytes = memoryStream.ToArray();
+
+                        var uploadResult = await _client.Storage
+                            .From(Const.BucketName)
+                            .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                            {
+                                ContentType = model.ProfilePicture.ContentType,
+                                Upsert = true
+                            });
+
+                        if (!string.IsNullOrEmpty(uploadResult))
+                        {
+                            user.ProfilePictureUrl = _client.Storage
+                                .From(Const.BucketName)
+                                .GetPublicUrl(fileName);
+                        }
+                        else
+                        {
+                            throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
+                        }
+                    }
                 }
 
-                // Add User
-                _userRepository.AddUser(user, creatorId);
+                await Task.Run(() => _userRepository.AddUser(user, creatorId));
             }
             else
             {
@@ -108,7 +112,6 @@ namespace Readiculous.Services.Services
                 var user = _userRepository.GetUserById(model.UserId);
 
                 // Map properties for Username, Email, Updated Time, and UpdatedBy
-                
                 _mapper.Map(model, user);
                 user.Username = model.Username.Trim();
                 user.Email = model.Email.Trim();
@@ -142,56 +145,36 @@ namespace Readiculous.Services.Services
                     user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
                 }
                 // If neither, the picture remains unchanged
-                _userRepository.UpdateUser(user);
+                await Task.Run(() => _userRepository.UpdateUser(user));
             }
             else
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
-        {
-            if(!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
-            {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
-            }
-
-            var user = _userRepository.GetUserById(editProfileViewModel.UserId);
-            var userViewModel = new UserViewModel();
-
-            _mapper.Map(editProfileViewModel, userViewModel);
-            if (string.IsNullOrEmpty(editProfileViewModel.NewPassword))
-            {
-                userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
-            }
-            
-            await UpdateUserAsync(userViewModel, editorId);
-        }
         public async Task DeleteUserAsync(string userId, string deleterId)
         {
-            if (await Task.Run(() => _userRepository.UserExists(userId)))
+            if ( _userRepository.UserExists(userId))
+            {
+                var user = _userRepository.GetUserById(userId);
+
+                user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
+                foreach (var review in user.UserReviews)
+                {
+                    review.DeletedBy = deleterId;
+                    review.DeletedTime = DateTime.UtcNow;
+
+                    _reviewRepository.UpdateReview(review);
+                }
+                user.DeletedBy = deleterId;
+                user.DeletedTime = DateTime.UtcNow;
+
+                await Task.Run(() => _userRepository.UpdateUser(user));
+            }
+            else
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
-            if(userId == deleterId)
-            {
-                throw new InvalidDataException(Resources.Messages.Errors.UserCannotDeleteSelf);
-            }
-
-            var user = await Task.Run(() => _userRepository.GetUserById(userId)); // you can use the _userRepository directly here
-
-            user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
-            foreach (var review in user.UserReviews)
-            {
-                review.DeletedBy = deleterId;
-                review.DeletedTime = DateTime.UtcNow;
-
-                _reviewRepository.UpdateReview(review);
-            }
-            user.DeletedBy = deleterId;
-            user.DeletedTime = DateTime.UtcNow;
-
-            await Task.Run(() => _userRepository.UpdateUser(user)); // you can use the _userRepository directly here
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
@@ -220,13 +203,13 @@ namespace Readiculous.Services.Services
         }
 
         // Single User Retrieval Methods
-        public UserViewModel GetUserEditById(string userId)
+        public UserViewModel SearchUserEditById(string userId)
         {
             User user = _userRepository.GetUserById(userId);
 
             if (user != null)
             {
-                var userViewModel = new UserViewModel();
+                UserViewModel userViewModel = new();
 
                 _mapper.Map(user, userViewModel);
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
@@ -237,26 +220,9 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        public EditProfileViewModel GetEditProfileById(string userId)
+        public UserDetailsViewModel SearchUserDetailsById(string userId)
         {
             User user = _userRepository.GetUserById(userId);
-            if (user != null)
-            {
-                EditProfileViewModel userViewModel = new();
-                _mapper.Map(user, userViewModel);
-                userViewModel.ProfilePictureUrl = user.ProfilePictureUrl;
-                userViewModel.NewPassword = PasswordManager.DecryptPassword(user.Password);
-                userViewModel.RemoveProfilePicture = string.IsNullOrEmpty(user.ProfilePictureUrl) ? false : true;
-                return userViewModel;
-            }
-            else
-            {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
-            }
-        }
-        public UserDetailsViewModel GetUserDetailsById(string userId)
-        {
-            User user = _userRepository.GetUserWithFilledNavigationPropertiesById(userId);
 
             if (user != null)
             {
@@ -305,7 +271,6 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        
         //Populating Dropdown Lists
         public List<SelectListItem> GetUserRoles()
         {
@@ -336,14 +301,6 @@ namespace Readiculous.Services.Services
                     };
                 }).ToList();
         }
-        
-        // String Helper
-        public string GetEmailByUserId(string userId)
-        {
-            var user = _userRepository.GetUserById(userId);
-            return user.Email;
-        }
-        
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
@@ -450,6 +407,41 @@ namespace Readiculous.Services.Services
             }
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
+
+        public bool IsCurrentPasswordCorrect(string userId, string currentPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsChangingPassword(EditProfileViewModel editProfileViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public UserViewModel GetUserEditById(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public EditProfileViewModel GetEditProfileById(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public UserDetailsViewModel GetUserDetailsById(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetEmailByUserId(string userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
