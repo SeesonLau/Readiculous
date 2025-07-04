@@ -9,13 +9,25 @@ namespace Readiculous.Services.Interfaces
 {
     public interface IUserService
     {
+        // Authentication Methods
         LoginResult AuthenticateUserByEmail(string email, string password, ref User user);
+        bool IsCurrentPasswordCorrect(string userId, string currentPassword);
+        bool IsChangingPassword(EditProfileViewModel editProfileViewModel);
+
+        // CRUD Methods
         Task AddUserAsync(UserViewModel model, string creationId);
         Task UpdateUserAsync(UserViewModel model, string editorId);
-        List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest);
+        Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId);
         Task DeleteUserAsync(string userId, string deleterId);
-        UserViewModel SearchUserEditById(string userId);
-        UserDetailsViewModel SearchUserDetailsById(string userId);
+
+        // Retrieval Methods
+        List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest);
+        UserViewModel GetUserEditById(string userId);
+        EditProfileViewModel GetEditProfileById(string userId);
+        UserDetailsViewModel GetUserDetailsById(string userId);
+        string GetEmailByUserId(string userId);
+
+        // Dropdown Filler Methods
         List<SelectListItem> GetUserRoles();
         List<SelectListItem> GetUserSortTypes();
     }

@@ -133,6 +133,7 @@ namespace Readiculous.Services.Services
             _mapper.Map(review, reviewViewModel);
             reviewViewModel.Email = review.User.Email;
             reviewViewModel.UserName = review.User.Username;
+            reviewViewModel.BookTitle = review.Book.Title;
 
             return reviewViewModel;
         }
