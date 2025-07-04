@@ -1,0 +1,34 @@
+﻿@model dynamic
+
+<div id="authModal" class="custom-modal">
+    <div class="modal-content">
+        <button type="button" class="modal-close" onclick="closeModal()">×</button>
+
+        <div class="auth-columns">
+            <div class="auth-box hidden" data-id="login">
+                @Html.Partial("~/Views/Shared/Modals/LoginModal.cshtml", new Readiculous.WebApp.Models.LoginViewModel())
+            </div>
+            <div class="auth-box hidden" data-id="register">
+                @Html.Partial("~/Views/Shared/Modals/RegisterModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
+            </div>
+            <div class="auth-box hidden" data-id="forgot">
+                @Html.Partial("~/Views/Shared/Modals/ForgotPassModal.cshtml", new Readiculous.WebApp.Models.ForgotPasswordViewModel())
+            </div>
+            <div class="auth-box hidden" data-id="otp">
+                @Html.Partial("~/Views/Shared/Modals/OTPModal.cshtml", new Readiculous.WebApp.Models.OTPViewModel())
+            </div>
+            <div class="auth-box hidden" data-id="newpass">
+                @Html.Partial("~/Views/Shared/Modals/NewPassModal.cshtml", new Readiculous.WebApp.Models.NewPasswordViewModel())
+            </div>
+            <div class="auth-box hidden" data-id="successpass">
+                @Html.Partial("~/Views/Shared/Modals/SuccessfullyNewPassModal.cshtml")
+            </div>
+            <div class="auth-box hidden" data-id="registersuccess">
+                @Html.Partial("~/Views/Shared/Modals/RegistrationSuccessModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
+            </div>
+            <div class="auth-box hidden" data-id="required">
+                @Html.Partial("~/Views/Shared/Modals/RequiredModal.cshtml")
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+﻿@model dynamic
+<button type="button" class="modal-close" onclick="closeModal()">×</button>
+<img src="@Url.Content("~/img/mewmew.png")" class="auth-icon" />
+<h2>Login Required</h2>
+<p>You need to login to review more books.</p>
+
+<button type="button" class="auth-btn" onclick="showModal('login')">Login</button>
+<button type="button" class="auth-btn" onclick="showModal('register')">Sign Up</button>

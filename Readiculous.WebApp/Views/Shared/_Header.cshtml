@@ -4,7 +4,7 @@
     <div class="logosec hover-pointer">
         <img src="~/img/asi-logo-invert.svg"
              style="width: 185px;" alt="logo"
-             onclick="window.location.href = '@Url.Action("Index", "Home")';">
+             onclick="window.location.href = '@Url.Action("LandingPage", ";LandingPage")';">
     </div>
     <div class="logosec">
         @HttpContextAccessor.HttpContext.Session.GetString("UserName")

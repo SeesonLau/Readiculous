@@ -22,6 +22,13 @@ namespace Readiculous.Data.Models
         public string DeletedBy { get; set; }
         public DateTime? DeletedTime { get; set; }
 
+        public string ImagePath { get; set; }
+        public int Year { get; set; }
+
+        public double Rating { get; set; }
+
+
+
         // Navigation properties
         public virtual User CreatedByUser { get; set; }
         public virtual User UpdatedByUser { get; set; }

@@ -1,0 +1,102 @@
+﻿@model List<Readiculous.Services.ServiceModels.BookViewModel>
+@{
+    Layout = null;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Readiculous - Top Books</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/landing.css")" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <style>
+        .book-card-clickable {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.href='@Url.Action("GuestView", "UserView")'">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="@Url.Action("GuestView", "UserView", new { section = "new-books" })">📖 New Books</a>
+            <a href="@Url.Action("GuestView", "UserView", new { section = "top-books" })">🏆 Top Books</a>
+            <a href="@Url.Action("GenreBooks", "UserView")">🏷️ Genre</a>
+        </nav>
+    </header>
+
+    <main class="content-container">
+        <input type="text" class="book-search" placeholder="🔍 Book Search..." />
+
+        <section class="section-box">
+            <h2 class="section-title">Top Books</h2>
+
+            <div class="book-grid row row-cols-2 row-cols-md-4 g-4 mt-3">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var book in Model)
+                    {
+                        <div class="col">
+                            <div class="card h-100 book-card-clickable"
+                                 onclick="location.href='@Url.Action("UserBookDetails", "UserView", new { title = book.Title })'">
+                                <img src="@book.CoverImageUrl" class="card-img-top" alt="@book.Title" />
+                                <div class="card-body">
+                                    <h5 class="card-title">@book.Title</h5>
+                                    <p class="card-text">@book.Author</p>
+                                    <p class="card-text">⭐ @book.Rating</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col">
+                        <div class="card h-100 book-card-clickable"
+                             onclick="location.href='@Url.Action("UserBookDetails", "UserView", new { title = "Circe" })'">
+                            <img src="@Url.Content("~/img/circe.jpg")" class="card-img-top" alt="Circe" />
+                            <div class="card-body">
+                                <h5 class="card-title">Circe</h5>
+                                <p class="card-text">by Madeline Miller</p>
+                                <p class="card-text">⭐ 4.9</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <div class="pagination-container text-center mt-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("ViewTopBooks", "UserView", new { page = 1 })">«</a>
+                    </li>
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("ViewTopBooks", "UserView", new { page = currentPage - 1 })">‹</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Page @currentPage of @totalPages</span>
+                    </li>
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("ViewTopBooks", "UserView", new { page = currentPage + 1 })">›</a>
+                    </li>
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("ViewTopBooks", "UserView", new { page = totalPages })">»</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

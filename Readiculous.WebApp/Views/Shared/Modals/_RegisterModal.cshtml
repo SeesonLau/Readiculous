@@ -1,0 +1,20 @@
+﻿@model Readiculous.WebApp.Models.RegisterViewModel
+
+<form novalidate>
+    <button type="button" class="modal-close" onclick="closeModal()">×</button>
+
+    <img src="~/img/png-logo.png" class="auth-icon" />
+    <h2>Create Your Account</h2>
+
+    <input asp-for="Email" class="form-input" placeholder="Email" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+
+    <button type="button" class="auth-btn" onclick="showModal('registersuccess')">
+        Sign Up
+    </button>
+
+    <p>
+        Already have an account?
+        <a href="javascript:void(0);" onclick="showModal('login')">Sign in</a>
+    </p>
+</form>

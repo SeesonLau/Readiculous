@@ -1,0 +1,18 @@
+﻿@model Readiculous.WebApp.Models.OTPViewModel
+
+<form novalidate>
+    <button type="button" class="modal-close" onclick="closeModal()">×</button>
+    <img src="~/img/email.png" class="auth-icon" />
+    <h2>Enter Verification Code</h2>
+
+    <input asp-for="Code" class="form-input" placeholder="Enter OTP Code" />
+    <span asp-validation-for="Code" class="text-danger"></span>
+
+    <button type="button" class="auth-btn" onclick="showModal('newpass')">
+        Continue
+    </button>
+
+    <a href="javascript:void(0);" onclick="showModal('forgot')" class="auth-btn back-btn">
+        Back
+    </a>
+</form>

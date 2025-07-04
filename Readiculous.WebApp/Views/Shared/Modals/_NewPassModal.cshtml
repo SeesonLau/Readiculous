@@ -1,0 +1,16 @@
+﻿@model Readiculous.WebApp.Models.NewPasswordViewModel
+
+<form novalidate>
+    <button type="button" class="modal-close" onclick="closeModal()">×</button>
+    <img src="~/img/typing-icon.png" class="auth-icon" />
+    <h2>Create New Password</h2>
+
+    <input asp-for="NewPassword" class="form-input" placeholder="New Password" type="password" />
+    <span asp-validation-for="NewPassword" class="text-danger"></span>
+
+    <input asp-for="ConfirmPassword" class="form-input" placeholder="Confirm Password" type="password" />
+    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+
+    <button type="button"class="auth-btn"onclick="showModal('successpass')">Submit</button>
+    <a href="javascript:void(0);" onclick="showModal('otp')" class="auth-btn back-btn">Back</a>
+</form>

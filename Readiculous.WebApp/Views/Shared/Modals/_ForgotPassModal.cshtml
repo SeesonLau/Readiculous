@@ -1,0 +1,14 @@
+﻿@model Readiculous.WebApp.Models.ForgotPasswordViewModel
+
+<form asp-action="ForgotPassword" asp-controller="User" method="post" novalidate>
+    <button type="button" class="modal-close" onclick="closeModal()">×</button>
+    <img src="~/img/png-logo.png" class="auth-icon" />
+    <h2>Reset Your Password</h2>
+
+    <input asp-for="Email" class="form-input" placeholder="Enter your email" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+
+    <button type="button" class="auth-btn" onclick="showModal('otp')">Reset Password</button>
+
+    <a href="javascript:void(0);" onclick="showModal('login')" class="auth-btn back-btn">Back</a>
+</form>

@@ -1,0 +1,130 @@
+﻿@{
+    Layout = null;
+
+    var bookTitle = ViewData["Title"] as string ?? "Dune";
+    var author = ViewData["Author"] as string ?? "Frank Herbert";
+    var genre = ViewData["Genre"] as string ?? "Science Fiction";
+    var series = ViewData["Series"] as string ?? "Dune Series";
+    var rating = ViewData["Rating"] as double? ?? 4.7;
+    var addedDate = ViewData["AddedDate"] as string ?? "July 1, 2025";
+    var description = ViewData["Description"] as string ?? "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides...";
+    var imagePath = ViewData["ImagePath"] as string ?? "~/img/dune.jpg";
+    var reviews = ViewData["Reviews"] as List<dynamic> ?? new List<dynamic>
+    {
+        new { Reviewer = "Alice", Date = "June 30, 2025", Stars = 5, Comment = "Amazing book with rich world building!" },
+        new { Reviewer = "Bob", Date = "June 28, 2025", Stars = 4, Comment = "Classic sci-fi that everyone should read." }
+    };
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@bookTitle - Book Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/landing.css")" />
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.href='@Url.Action("GuestView", "UserView")'">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="@Url.Action("GuestView", "UserView")#new-books">📖 New Books</a>
+            <a href="@Url.Action("GuestView", "UserView")#top-books">🏆 Top Books</a>
+            <a href="@Url.Action("GenreBooks", "UserView")">🏷️ Genre</a>
+            <a href="#" onclick="toggleAuthModal()">👤</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="book-header">Book Details</div>
+
+        <!-- Book Details Section -->
+        <div class="book-details-container">
+            <div class="book-details-left">
+                <img src="@Url.Content(imagePath)" alt="@bookTitle Cover" class="book-details-cover" />
+                <button class="add-fav-btn">Add to Favorites</button>
+            </div>
+
+            <div class="book-info-card">
+                <h2 class="book-title">@bookTitle</h2>
+                <table class="book-info-table">
+                    <tr><th>Author</th><td>@author</td></tr>
+                    <tr><th>Genre</th><td>@genre</td></tr>
+                    <tr><th>Series</th><td>@series</td></tr>
+                    <tr>
+                        <th>Rating</th>
+                        <td>@rating <span style="color: gold;">&#9733;</span></td>
+                    </tr>
+                    <tr><th>Added Date</th><td>@addedDate</td></tr>
+                </table>
+
+                <h3>Description</h3>
+                <p>@description</p>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="review-section">
+            <div class="review-header">
+                <span>Reviews (@reviews.Count)</span>
+                <!-- Show RequiredModal when clicking Add Review -->
+                <button class="add-review-btn" onclick="showModal('required')">+ Add Review</button>
+            </div>
+
+            @foreach (var review in reviews)
+            {
+                <div class="review-card">
+                    <div class="review-top">
+                        <strong>@review.Reviewer</strong>
+                        <span class="review-date">@review.Date</span>
+                    </div>
+                    <div class="review-stars">
+                        @for (int i = 0; i < review.Stars; i++)
+                        {
+                            <span style="color: gold;">&#9733;</span>
+                        }
+                        @for (int i = review.Stars; i < 5; i++)
+                        {
+                            <span style="color: lightgray;">&#9733;</span>
+                        }
+                    </div>
+                    <p>@review.Comment</p>
+                </div>
+            }
+        </div>
+    </main>
+
+    @Html.Partial("~/Views/Shared/Modals/_AuthModal.cshtml")
+
+    <script>
+       
+        function showModal(id) {
+            const modal = document.getElementById('authModal');
+            modal.classList.add('show');
+
+            const boxes = modal.querySelectorAll('.auth-box');
+            boxes.forEach(box => box.classList.add('hidden'));
+
+            const target = modal.querySelector(`.auth-box[data-id="${id}"]`);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('authModal');
+            modal.classList.remove('show');
+        }
+
+        function toggleAuthModal() {
+            const modal = document.getElementById('authModal');
+            if (modal.classList.contains('show')) {
+                closeModal();
+            } else {
+                showModal('login');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -18,28 +18,16 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
-    public class AccountController : ControllerBase<AccountController>
+    public class LandingPageController : ControllerBase<LandingPageController>
     {
+
         private readonly SessionManager _sessionManager;
         private readonly SignInManager _signInManager;
         private readonly TokenValidationParametersFactory _tokenValidationParametersFactory;
         private readonly TokenProviderOptionsFactory _tokenProviderOptionsFactory;
         private readonly IConfiguration _appConfiguration;
         private readonly IUserService _userService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AccountController"/> class.
-        /// </summary>
-        /// <param name="signInManager">The sign in manager.</param>
-        /// <param name="localizer">The localizer.</param>
-        /// <param name="userService">The user service.</param>
-        /// <param name="httpContextAccessor">The HTTP context accessor.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <param name="mapper">The mapper.</param>
-        /// <param name="tokenValidationParametersFactory">The token validation parameters factory.</param>
-        /// <param name="tokenProviderOptionsFactory">The token provider options factory.</param>
-        public AccountController(
+        public LandingPageController(
                             SignInManager signInManager,
                             IHttpContextAccessor httpContextAccessor,
                             ILoggerFactory loggerFactory,
@@ -56,11 +44,6 @@ namespace Readiculous.WebApp.Controllers
             this._appConfiguration = configuration;
             this._userService = userService;
         }
-
-        /// <summary>
-        /// Login Method
-        /// </summary>
-        /// <returns>Created response view</returns>
         [HttpGet]
         [AllowAnonymous]
         public ActionResult Login()
@@ -68,38 +51,22 @@ namespace Readiculous.WebApp.Controllers
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
             this._sessionManager.Clear();
             this._session.SetString("SessionId", System.Guid.NewGuid().ToString());
-            return this.View();
-        }
+            return PartialView("_LoginModal", null);
 
-        /// <summary>
-        /// Authenticate user and signs the user in when successful.
-        /// </summary>
-        /// <param name="model">The model.</param>
-        /// <param name="returnUrl">The return URL.</param>
-        /// <returns> Created response view </returns>
+        }
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
             this._session.SetString("HasSession", "Exist");
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            /*
-            var tempModel = _userService.GetUserByEmail(model.Email);
-            User user = new() { UserId = tempModel.UserId, Username = "Name", Password = "Password" };
-
-            await this._signInManager.SignInAsync(user);
-            this._session.SetString("UserName", user.UserId);
-
-            return RedirectToAction("Index", "Home");
-            */
-            
             User user = null;
-            
+
             var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
             if (loginResult == LoginResult.Success)
             {
@@ -134,26 +101,27 @@ namespace Readiculous.WebApp.Controllers
                 await _userService.AddUserAsync(model, model.UserId);
                 return RedirectToAction("Login", "Account");
             }
-            catch(InvalidDataException ex)
+            catch (InvalidDataException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
             }
             return View();
         }
 
-        /// <summary>
-        /// Sign Out current account and return login view.
-        /// </summary>
-        /// <returns>Created response view</returns>
         [AllowAnonymous]
         public async Task<IActionResult> SignOutUser()
         {
             await this._signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
+        }
+        public IActionResult LandingPage()
+        {
+
+            return View();
         }
 
     }

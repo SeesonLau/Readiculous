@@ -25,5 +25,9 @@ namespace Readiculous.Services.ServiceModels
         public DateTime UpdatedTime { get; set; }
         public string CreatedByUserName { get; set; }
         public string UpdatedByUserName { get; set; }
+
+        public string Id { get; set; }
+        public double Rating { get; set; }
+        public string Genre { get; set; }
     }
 }

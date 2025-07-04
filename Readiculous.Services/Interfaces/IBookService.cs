@@ -21,6 +21,10 @@ namespace Readiculous.Services.Interfaces
         List<SelectListItem> GetBookSearchTypes(BookSearchType searchType);
         List<SelectListItem> GetBookSortTypes(BookSortType sortType);
 
+        List<BookViewModel> GetNewBooks();
+        List<BookViewModel> GetTopBooks();
+
+
         void AddBookToFavorites(string bookId, string userId);
         void RemoveBookFromFavorites(string bookId, string userId);
     }

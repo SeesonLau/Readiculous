@@ -12,7 +12,7 @@ using Readiculous.Data;
 namespace Readiculous.Data.Migrations
 {
     [DbContext(typeof(ReadiculousDbContext))]
-    [Migration("20250630030401_Readiculous_Init")]
+    [Migration("20250630130823_Readiculous_Init")]
     partial class Readiculous_Init
     {
         /// <inheritdoc />
@@ -61,6 +61,9 @@ namespace Readiculous.Data.Migrations
                         .HasMaxLength(17)
                         .HasColumnType("nvarchar(17)");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PublicationYear")
                         .HasColumnType("nvarchar(max)");
 
@@ -68,6 +71,9 @@ namespace Readiculous.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.Property<int>("SeriesNumber")
                         .HasColumnType("int");
@@ -82,6 +88,9 @@ namespace Readiculous.Data.Migrations
 
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
 
                     b.HasKey("BookId");
 

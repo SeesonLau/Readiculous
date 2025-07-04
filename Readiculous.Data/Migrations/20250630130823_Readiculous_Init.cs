@@ -108,6 +108,9 @@ namespace Readiculous.Data.Migrations
                     UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     DeletedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<double>(type: "float", nullable: false),
                     BookGenreGenreId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>

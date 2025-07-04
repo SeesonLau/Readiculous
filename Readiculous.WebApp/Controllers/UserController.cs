@@ -1,6 +1,7 @@
 ﻿using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using Readiculous.WebApp.Mvc;
+using Readiculous.WebApp.Models;               // ✅ ADD THIS
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +14,21 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Readiculous.WebApp.Controllers
 {
     public class UserController : ControllerBase<UserController>
     {
         private readonly IUserService _userService;
-        public UserController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IMapper mapper, IUserService userService) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+
+        public UserController(
+            IHttpContextAccessor httpContextAccessor,
+            ILoggerFactory loggerFactory,
+            IConfiguration configuration,
+            IMapper mapper,
+            IUserService userService)
+            : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _userService = userService;
         }
@@ -122,5 +131,25 @@ namespace Readiculous.WebApp.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+
+        [AllowAnonymous]
+        [HttpPost]
+        public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ModalToShow = "forgot";
+                return View("GuestView");
+            }
+
+            // TODO: Add OTP send logic here
+
+            return RedirectToAction("LandingPage", "Home", new { modal = "otp" });
+        }
+
+       
+
+
     }
 }

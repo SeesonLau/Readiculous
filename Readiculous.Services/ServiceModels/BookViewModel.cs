@@ -45,5 +45,13 @@ namespace Readiculous.Services.ServiceModels
         public DateTime CreatedTime { get; set; }
         public string UpdatedBy { get; set; }
         public DateTime UpdatedTime { get; set; }
+
+        public string Genre { get; set; }
+        public double Rating { get; set; }
+
+
+
+        public string Id { get; set; }           
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
 }

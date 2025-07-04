@@ -1,0 +1,16 @@
+﻿@model Readiculous.WebApp.Models.RegisterViewModel
+<button type="button" class="modal-close" onclick="closeModal()">×</button>
+    <img src="~/img/mewmewhap.png" class="auth-icon" />
+    <h2>Registration Successful!</h2>
+
+    <p><em>You have successfully created your account.</em></p>
+    <p>You may now continue, or optionally update your account details.</p>
+
+    <p class="mt-3"><strong>Your current details:</strong></p>
+    <p>Email: <span>@Model.Email</span></p>
+
+
+    <p class="mt-3">Would you like to make any changes?</p>
+
+    <button class="auth-btn" onclick="showOnlyById('registerForm')">Edit Details</button>
+    <button class="auth-btn back-btn" onclick="showOnlyById('loginForm')">Continue</button>

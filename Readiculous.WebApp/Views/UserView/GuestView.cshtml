@@ -1,0 +1,133 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Readiculous - Guest View</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/landing.css")" />
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .book-card {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo-group" onclick="location.href='@Url.Action("GuestView", "UserView")'">
+            <img src="@Url.Content("~/img/png-logo.png")" alt="Readiculous Logo" class="logo-icon" />
+            <h1 class="team-name">Readiculous</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="@Url.Action("GuestView", "UserView", new { section = "new-books" })">📖 New Books</a>
+            <a href="@Url.Action("GuestView", "UserView", new { section = "top-books" })">🏆 Top Books</a>
+            <a href="@Url.Action("GenreBooks", "UserView")">🏷️ Genre</a>
+            <a href="javascript:void(0);" onclick="showModal('login')">👤</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content-container">
+        <input type="text" class="book-search" placeholder="🔍 Book Search..." />
+
+        <!-- New Books Section -->
+        <section id="new-books" class="section-box">
+            <div class="section-header-box">
+                <h2 class="section-title">New Books</h2>
+                <a class="view-more-link" href="@Url.Action("ViewNewBooks", "UserView", new { page = 1 })">View More</a>
+            </div>
+            <div class="book-grid">
+                <div class="book-card" onclick="location.href='@Url.Action("UserBookDetails", "UserView", new { title = "Dune" })'">
+                    <img src="@Url.Content("~/img/dune.jpg")" alt="Dune" class="book-cover" />
+                    <div class="book-details">
+                        <p class="book-title">Dune</p>
+                        <p class="book-author">Frank Herbert</p>
+                        <p class="book-rating">⭐ 4.7</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Books Section -->
+        <section id="top-books" class="section-box">
+            <div class="section-header-box">
+                <h2 class="section-title">Top Books</h2>
+                <a class="view-more-link" href="@Url.Action("ViewTopBooks", "UserView", new { page = 1 })">View More</a>
+            </div>
+            <div class="book-grid">
+                <div class="book-card" onclick="location.href='@Url.Action("UserBookDetails", "UserView", new { title = "Circe" })'">
+                    <img src="@Url.Content("~/img/circe.jpg")" alt="Circe" class="book-cover" />
+                    <div class="book-details">
+                        <p class="book-title">Circe</p>
+                        <p class="book-author">Madeline Miller</p>
+                        <p class="book-rating">⭐ 4.9</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Auth Modal -->
+    @Html.Partial("~/Views/Shared/Modals/_AuthModal.cshtml")
+
+    <!-- JavaScript -->
+    <script>
+        function scrollToSection(id) {
+            const section = document.getElementById(id);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                const header = section.querySelector('.section-title');
+                if (header) {
+                    header.classList.add('highlight');
+                    setTimeout(() => header.classList.remove('highlight'), 1500);
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const params = new URLSearchParams(window.location.search);
+            const section = params.get("section");
+            if (section) {
+                scrollToSection(section);
+            }
+        });
+
+        function showModal(modalId) {
+            const modal = document.getElementById("authModal");
+            if (!modal) return;
+
+            modal.classList.add("show");
+
+            document.querySelectorAll(".auth-box").forEach(div => {
+                div.classList.add("hidden");
+                div.classList.remove("active");
+            });
+
+            const target = document.querySelector(`.auth-box[data-id="${modalId}"]`);
+            if (target) {
+                target.classList.remove("hidden");
+                target.classList.add("active");
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById("authModal");
+            if (modal) {
+                modal.classList.remove("show");
+            }
+
+            document.querySelectorAll(".auth-box").forEach(div => {
+                div.classList.add("hidden");
+                div.classList.remove("active");
+            });
+        }
+    </script>
+</body>
+</html>
