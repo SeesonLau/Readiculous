@@ -52,7 +52,7 @@ namespace Readiculous.WebApp.Controllers
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
             this._sessionManager.Clear();
             this._session.SetString("SessionId", System.Guid.NewGuid().ToString());
-            return PartialView("_LoginModal");
+            return PartialView("_LoginModal", new LoginViewModel { Email = string.Empty, Password = string.Empty});
 
         }
         [HttpPost]
@@ -74,7 +74,11 @@ namespace Readiculous.WebApp.Controllers
                 // 認証OK
                 await this._signInManager.SignInAsync(user);
                 this._session.SetString("UserName", user.Username);
+
+                //if(user.Role == RoleType.Reviewer)
                 return RedirectToAction("Index", "Home");
+                //else if(user.Role == RoleType.Admin)
+                //return Admin Page
             }
             else
             {

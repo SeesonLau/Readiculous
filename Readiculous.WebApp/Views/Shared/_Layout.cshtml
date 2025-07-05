@@ -8,8 +8,7 @@
     <title>@ViewData["Title"]</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus&display=swap" rel="stylesheet">    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -40,6 +39,7 @@
             </div>
         </div>
     </div>
+
     <!-- Register Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -53,6 +53,7 @@
             </div>
         </div>
     </div>
+
     <!-- Forgot Password Modal -->
     <div class="modal fade" id="forgotPassModal" tabindex="-1" aria-labelledby="forgotPassModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -66,6 +67,7 @@
             </div>
         </div>
     </div>
+
     <!-- OTP Modal -->
     <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -79,6 +81,7 @@
             </div>
         </div>
     </div>
+
     <!-- New Password Modal -->
     <div class="modal fade" id="newPassModal" tabindex="-1" aria-labelledby="newPassModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -92,6 +95,7 @@
             </div>
         </div>
     </div>
+
     <!-- Successfully Reset Modal -->
     <div class="modal fade" id="successPassModal" tabindex="-1" aria-labelledby="successPassModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -105,6 +109,7 @@
             </div>
         </div>
     </div>
+
     <!-- Registration Success Modal -->
     <div class="modal fade" id="registerSuccessModal" tabindex="-1" aria-labelledby="registerSuccessModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -118,6 +123,7 @@
             </div>
         </div>
     </div>
+
     <!-- Required Login Modal -->
     <div class="modal fade" id="requiredModal" tabindex="-1" aria-labelledby="requiredModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -131,6 +137,7 @@
             </div>
         </div>
     </div>
+
     <!-- Footer -->
     <footer class="border-top footer text-muted">
         <div class="container">
@@ -159,6 +166,17 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
+    <script>
+       function openLoginModal() {
+            fetch(`/LandingPage/Login`)
+                .then(Response => response.text())
+                .then(html => {
+                    document.getElementById('loginModalBody').innerHTML = html;
+                    let modal = new bootstrap.Modal(document.getElementById(`loginModal`));
+                    modal.show();
+                })
+       }
+    </script>
     
     <script src="~/js/userModal/RegisterModal.js"></script>
     <script src="~/js/userModal/ForgotPassModal.js"></script>
