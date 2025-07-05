@@ -5,7 +5,7 @@
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2">Loading genres...</p>
+            <p class="mt-2">Loading...</p>
         </div>`;
 
     function debounce(func, wait) {
@@ -20,14 +20,22 @@
     }
 
     function initializeEventHandlers() {
-        // Pagination handlers
+        // View Modal
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.view-genre-btn')) {
+                e.preventDefault();
+                const genreId = e.target.closest('.view-genre-btn').dataset.genreId;
+                openGenreViewModal(genreId);
+            }
+        });
+        // Main screen pagination handlers
         $(document).on('click', '[data-page-size]', function (e) {
             e.preventDefault();
             const pageSize = $(this).data('page-size');
             updateUrlWithPageSize(pageSize);
         });
 
-        $(document).on('click', '.pagination .page-link:not(.jump-to-page)', function (e) {
+        $(document).on('click', '.pagination-container .page-link:not(.jump-to-page)', function (e) {
             e.preventDefault();
             const page = $(this).data('page');
             if (page && !$(this).closest('.page-item').hasClass('disabled')) {
@@ -35,8 +43,8 @@
             }
         });
 
-        // Jump to page handler
-        $('#confirmJumpToPage').on('click', function () {
+        // Main screen jump to page handler
+        $(document).on('click', '#confirmJumpToPage', function () {
             const pageNumber = parseInt($('#pageNumberInput').val());
             const totalPages = parseInt($('#pageNumberInput').attr('max'));
 
@@ -59,10 +67,18 @@
         });
 
         // Search and filter handlers
-        $('input[name="searchString"]').on('input', debounce(loadFilteredResults, 300));
-        $('select[name="searchType"]').on('change', loadFilteredResults);
+        $(document).on('input', 'input[name="searchString"]', debounce(loadFilteredResults, 300));
+        $(document).on('change', 'select[name="searchType"]', loadFilteredResults);
 
         // Modal handlers
+        $(document).on('click', '#openAddGenreModalBtn', loadAddGenreModal);
+        $(document).on('click', '.edit-genre-btn', function (e) {
+            e.preventDefault();
+            const genreId = $(this).data('genre-id');
+            loadEditGenreModal(genreId);
+        });
+
+        // Delete handlers
         $(document).on('click', '.btn-delete-genre', function () {
             const genreId = $(this).data('genre-id');
             const genreName = $(this).data('genre-name');
@@ -71,39 +87,141 @@
             $('#deleteUserModal').modal('show');
         });
 
-        $('#cancelDeleteGenreBtn').on('click', function () {
+        $(document).on('click', '#cancelDeleteGenreBtn', function () {
             $('#deleteUserModal').modal('hide');
         });
 
-        $('#openAddGenreModalBtn').on('click', function () {
-            $('#addGenreOverlay').fadeIn(150);
+        $(document).on('click', '#confirmDeleteBtn', handleDeleteConfirmation);
+    }
+
+    function loadAddGenreModal() {
+        $('#addGenreModalBody').html(loadingSpinner);
+        $('#addGenreModal').modal('show');
+
+        $.get(settings.genreAddModalUrl)
+            .done(function (data) {
+                $('#addGenreModalBody').html(data);
+                initializeAddGenreForm();
+            })
+            .fail(function () {
+                $('#addGenreModalBody').html('<div class="alert alert-danger">Failed to load add genre form</div>');
+            });
+    }
+
+    function loadEditGenreModal(genreId) {
+        $('#editGenreModalBody').html(loadingSpinner);
+        $('#editGenreModal').modal('show');
+
+        $.get(settings.genreEditModalUrl, { id: genreId })
+            .done(function (data) {
+                $('#editGenreModalBody').html(data);
+                initializeEditGenreForm();
+            })
+            .fail(function () {
+                $('#editGenreModalBody').html('<div class="alert alert-danger">Failed to load edit form</div>');
+            });
+    }
+    function initializeAddGenreForm() {
+        $('#addGenreForm').off('submit').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const originalBtnText = submitBtn.html();
+
+            submitBtn.prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Saving...
+            `);
+
+            // Clear previous errors
+            $('#addGenreValidationSummary').text('');
+            $('#addGenreNameError').text('');
+            $('#addGenreDescriptionError').text('');
+
+            $.ajax({
+                url: settings.createGenreUrl,
+                type: 'POST',
+                data: form.serialize(),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (response) {
+                    if (response.success) {
+                        $('#addGenreModal').modal('hide');
+                        loadFilteredResults();
+                    } else {
+                        if (response.errors) {
+                            Object.keys(response.errors).forEach(key => {
+                                $(`#addGenre${key}Error`).text(response.errors[key][0]);
+                            });
+                        } else if (response.message) {
+                            $('#addGenreValidationSummary').text(response.message);
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        Object.keys(xhr.responseJSON.errors).forEach(key => {
+                            $(`#addGenre${key}Error`).text(xhr.responseJSON.errors[key][0]);
+                        });
+                    } else {
+                        $('#addGenreValidationSummary').text('An error occurred while saving.');
+                    }
+                },
+                complete: function () {
+                    submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
         });
+    }
+    function initializeEditGenreForm() {
+        $('#editGenreForm').off('submit').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const originalBtnText = submitBtn.html();
 
-        $('#cancelAddGenreBtn').on('click', function () {
-            $('#addGenreOverlay').fadeOut(150);
-        });
+            submitBtn.prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Saving...
+            `);
 
-        $('#addGenreForm').on('submit', handleAddGenreSubmit);
-
-        $(document).on('click', '.edit-genre-btn', function () {
-            const genreId = $(this).data('genre-id');
-            const genreName = $(this).data('genre-name');
-            const genreDescription = $(this).data('genre-description');
-            $('#editGenreId').val(genreId);
-            $('#editGenreName').val(genreName);
-            $('#editGenreDescription').val(genreDescription);
+            // Clear previous errors
             $('#editGenreValidationSummary').text('');
             $('#editGenreNameError').text('');
             $('#editGenreDescriptionError').text('');
-            $('#editGenreOverlay').fadeIn(150);
-        });
 
-        $('#cancelEditGenreBtn').on('click', function () {
-            $('#editGenreOverlay').fadeOut(150);
+            $.ajax({
+                url: settings.editGenreUrl,
+                type: 'POST',
+                data: form.serialize(),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (response) {
+                    if (response.success) {
+                        $('#editGenreModal').modal('hide');
+                        loadFilteredResults();
+                    } else {
+                        if (response.errors) {
+                            Object.keys(response.errors).forEach(key => {
+                                $(`#editGenre${key}Error`).text(response.errors[key][0]);
+                            });
+                        } else if (response.message) {
+                            $('#editGenreValidationSummary').text(response.message);
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        Object.keys(xhr.responseJSON.errors).forEach(key => {
+                            $(`#editGenre${key}Error`).text(xhr.responseJSON.errors[key][0]);
+                        });
+                    } else {
+                        $('#editGenreValidationSummary').text('An error occurred while saving.');
+                    }
+                },
+                complete: function () {
+                    submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
         });
-
-        $('#editGenreForm').on('submit', handleEditGenreSubmit);
-        $('#confirmDeleteBtn').on('click', handleDeleteConfirmation);
     }
 
     function updateUrlWithPage(page) {
@@ -116,13 +234,13 @@
     function updateUrlWithPageSize(pageSize) {
         const url = new URL(window.location.href);
         url.searchParams.set('pageSize', pageSize);
-        url.searchParams.set('page', '1'); // Reset to first page when changing page size
+        url.searchParams.set('page', '1');
         window.history.replaceState({ path: url.toString() }, '', url.toString());
         loadFilteredResults();
     }
 
     async function loadFilteredResults() {
-        const form = $('#genreFilterForm');
+        const form = $('form[method="get"]');
         const urlParams = new URLSearchParams(window.location.search);
         const page = urlParams.get('page') || '1';
         const pageSize = urlParams.get('pageSize') || '10';
@@ -158,129 +276,6 @@
         }
     }
 
-    function handleAddGenreSubmit(e) {
-        e.preventDefault();
-        const form = $(this);
-        const submitBtn = form.find('button[type="submit"]');
-        const originalBtnText = submitBtn.html();
-
-        const name = $('#addGenreName').val().trim();
-        const description = $('#addGenreDescription').val().trim();
-        let isValid = true;
-
-        $('#addGenreValidationSummary').text('');
-        $('#addGenreNameError').text('');
-        $('#addGenreDescriptionError').text('');
-
-        if (!name) {
-            $('#addGenreNameError').text('Genre Name is required.');
-            isValid = false;
-        }
-        if (!description) {
-            $('#addGenreDescriptionError').text('Genre Description is required.');
-            isValid = false;
-        }
-        if (!isValid) return;
-
-        submitBtn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Processing...
-        `);
-
-        $.ajax({
-            url: settings.addGenreUrl,
-            type: 'POST',
-            data: { Name: name, Description: description },
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            success: function (result) {
-                if (result.success) {
-                    // Preserve pageSize on add
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const pageSize = urlParams.get('pageSize') || '10';
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('pageSize', pageSize);
-                    window.location.href = newUrl.toString();
-                } else {
-                    $('#addGenreValidationSummary').text(result.message || 'Failed to add genre.');
-                }
-            },
-            error: function (xhr) {
-                const response = xhr.responseJSON;
-                if (response && response.errors) {
-                    if (response.errors.Name) $('#addGenreNameError').text(response.errors.Name);
-                    if (response.errors.Description) $('#addGenreDescriptionError').text(response.errors.Description);
-                } else {
-                    $('#addGenreValidationSummary').text('An error occurred while adding the genre.');
-                }
-            },
-            complete: function () {
-                submitBtn.prop('disabled', false).html(originalBtnText);
-            }
-        });
-    }
-
-    function handleEditGenreSubmit(e) {
-        e.preventDefault();
-        const form = $(this);
-        const submitBtn = form.find('button[type="submit"]');
-        const originalBtnText = submitBtn.html();
-
-        const genreId = $('#editGenreId').val();
-        const name = $('#editGenreName').val().trim();
-        const description = $('#editGenreDescription').val().trim();
-        let isValid = true;
-
-        $('#editGenreValidationSummary').text('');
-        $('#editGenreNameError').text('');
-        $('#editGenreDescriptionError').text('');
-
-        if (!name) {
-            $('#editGenreNameError').text('Genre Name is required.');
-            isValid = false;
-        }
-        if (!description) {
-            $('#editGenreDescriptionError').text('Genre Description is required.');
-            isValid = false;
-        }
-        if (!isValid) return;
-
-        submitBtn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Processing...
-        `);
-
-        $.ajax({
-            url: settings.editGenreUrl,
-            type: 'POST',
-            data: { GenreId: genreId, Name: name, Description: description },
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            success: function (result) {
-                if (result.success) {
-                    // Preserve pageSize on edit
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const pageSize = urlParams.get('pageSize') || '10';
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('pageSize', pageSize);
-                    window.location.href = newUrl.toString();
-                } else {
-                    $('#editGenreValidationSummary').text(result.message || 'Failed to update genre.');
-                }
-            },
-            error: function (xhr) {
-                const response = xhr.responseJSON;
-                if (response && response.errors) {
-                    if (response.errors.Name) $('#editGenreNameError').text(response.errors.Name);
-                    if (response.errors.Description) $('#editGenreDescriptionError').text(response.errors.Description);
-                } else {
-                    $('#editGenreValidationSummary').text('An error occurred while updating the genre.');
-                }
-            },
-            complete: function () {
-                submitBtn.prop('disabled', false).html(originalBtnText);
-            }
-        });
-    }
-
     function handleDeleteConfirmation() {
         const submitBtn = $(this);
         const originalBtnText = submitBtn.html();
@@ -298,12 +293,8 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             success: function (result) {
                 if (result.success) {
-                    // Preserve pageSize on delete
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const pageSize = urlParams.get('pageSize') || '10';
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('pageSize', pageSize);
-                    window.location.href = newUrl.toString();
+                    $('#deleteUserModal').modal('hide');
+                    loadFilteredResults();
                 } else {
                     showErrorAlert('Error deleting genre: ' + (result.message || 'Unknown error'));
                 }
@@ -313,7 +304,6 @@
             },
             complete: function () {
                 submitBtn.prop('disabled', false).html(originalBtnText);
-                $('#deleteUserModal').modal('hide');
             }
         });
     }
@@ -326,9 +316,36 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>`;
 
-        $('.container-fluid').prepend(alertHtml);
+        $('.container').prepend(alertHtml);
         setTimeout(() => $('.alert').alert('close'), 5000);
     }
+
+    function openGenreViewModal(genreId) {
+        fetch(`${genreMasterSettings.genreViewModalUrl}?id=${genreId}`)
+            .then(response => response.text())
+            .then(html => {
+                // Create modal container if it doesn't exist
+                let modalContainer = document.getElementById('genreViewModalContainer');
+                if (!modalContainer) {
+                    modalContainer = document.createElement('div');
+                    modalContainer.id = 'genreViewModalContainer';
+                    document.body.appendChild(modalContainer);
+                }
+
+                modalContainer.innerHTML = `<div class="modal fade" id="genreViewModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    ${html}
+                </div>
+            </div>`;
+
+                const modal = new bootstrap.Modal(document.getElementById('genreViewModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error loading genre view modal:', error);
+            });
+    }
+
 
     return {
         init: function (config) {
@@ -344,9 +361,11 @@
 
 $(function () {
     GenreMasterScreen.init({
-        genreMasterScreenUrl: window.location.pathname,
-        addGenreUrl: '@Url.Action("Create", "Genre")',
-        editGenreUrl: '@Url.Action("Edit", "Genre")',
-        deleteGenreUrl: '@Url.Action("Delete", "Genre")'
+        genreMasterScreenUrl: '/GenreMaster/GenreMasterScreen',
+        genreAddModalUrl: '/GenreMaster/GenreAddModal',
+        genreEditModalUrl: '/GenreMaster/GenreEditModal',
+        createGenreUrl: '/GenreMaster/Create',
+        editGenreUrl: '/GenreMaster/Edit',
+        deleteGenreUrl: '/GenreMaster/Delete'
     });
 });

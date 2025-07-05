@@ -51,7 +51,7 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult GenreAddModal()
         {
-            return View();
+            return PartialView(new GenreViewModel());
         }
 
         [HttpPost]
@@ -93,12 +93,15 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult GenreEditModal(string id)
         {
-            var genre = _genreService.GetGenreEditById(id);
-            if (genre == null)
+            try
             {
-                return NotFound();
+                var genre = _genreService.GetGenreEditById(id);
+                return PartialView(genre);
             }
-            return View(genre);
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         [HttpPost]
         public IActionResult Edit(GenreViewModel model)
@@ -147,25 +150,30 @@ namespace Readiculous.WebApp.Controllers
             }
         }
 
-        //GenreDetailsViewModel
-        public IActionResult GenreViewModal(string id, int page = 1, string bookSearch = null)
+        [HttpGet]
+        public IActionResult GenreViewModal(string id, int page = 1, string bookSearch = null) 
         {
             var genre = _genreService.GetGenreEditById(id);
             if (genre == null)
             {
-                return NotFound();
+                return BadRequest("Genre not found.");
             }
+
             var allBooks = _genreService.GetBooksByGenreId(id);
+
             if (!string.IsNullOrWhiteSpace(bookSearch))
             {
                 allBooks = allBooks.Where(b => b.Title != null && b.Title.ToLower().Contains(bookSearch.ToLower())).ToList();
             }
+
             ViewData["BookSearch"] = bookSearch;
             int pageSize = 10;
             int totalBooks = allBooks.Count;
             int totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
             page = Math.Max(1, Math.Min(page, totalPages == 0 ? 1 : totalPages));
+
             var books = allBooks.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             var viewModel = new GenreBooksViewModel
             {
                 Genre = genre,
@@ -174,7 +182,8 @@ namespace Readiculous.WebApp.Controllers
                 TotalPages = totalPages,
                 PageSize = pageSize
             };
-            return View(viewModel);
+
+            return PartialView("GenreViewModal", viewModel);
         }
     }
 }
