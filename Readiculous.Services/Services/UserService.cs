@@ -98,7 +98,7 @@ namespace Readiculous.Services.Services
                     }
                 }
 
-                _userRepository.AddUser(user, creatorId);
+                await Task.Run(() => _userRepository.AddUser(user, creatorId));
             }
             else
             {
@@ -145,7 +145,7 @@ namespace Readiculous.Services.Services
                     user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
                 }
                 // If neither, the picture remains unchanged
-                _userRepository.UpdateUser(user);
+                await Task.Run(() => _userRepository.UpdateUser(user));
             }
             else
             {
@@ -154,9 +154,9 @@ namespace Readiculous.Services.Services
         }
         public async Task DeleteUserAsync(string userId, string deleterId)
         {
-            if (await Task.Run(() => _userRepository.UserExists(userId)))
+            if ( _userRepository.UserExists(userId))
             {
-                var user = await Task.Run(() => _userRepository.GetUserById(userId));
+                var user = _userRepository.GetUserById(userId);
 
                 user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
                 foreach (var review in user.UserReviews)
@@ -407,6 +407,41 @@ namespace Readiculous.Services.Services
             }
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
+
+        public bool IsCurrentPasswordCorrect(string userId, string currentPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsChangingPassword(EditProfileViewModel editProfileViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public UserViewModel GetUserEditById(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public EditProfileViewModel GetEditProfileById(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public UserDetailsViewModel GetUserDetailsById(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetEmailByUserId(string userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

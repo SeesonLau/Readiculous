@@ -1,0 +1,52 @@
+﻿@model Readiculous.Services.ServiceModels.ReviewViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Edit Review for @Model.BookTitle</h5>
+</div>
+
+<div class="modal-body review-modal-body">
+    <form id="editReviewForm">
+        <input type="hidden" asp-for="ReviewId" />
+        <input type="hidden" asp-for="BookId" />
+        <input type="hidden" asp-for="UserId" />
+        <input type="hidden" asp-for="CreatedTime"/>
+
+        <div class="mb-3">
+            <label asp-for="UserName" class="form-label"></label>
+            <input asp-for="UserName" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Rating</label>
+            <div id="ratingWidget">
+                <i class="bi bi-star fs-2 text-secondary" data-value="1" onclick="setRating(1)" role="button" tabindex="0"></i>
+                <i class="bi bi-star fs-2 text-secondary" data-value="2" onclick="setRating(2)" role="button" tabindex="0"></i>
+                <i class="bi bi-star fs-2 text-secondary" data-value="3" onclick="setRating(3)" role="button" tabindex="0"></i>
+                <i class="bi bi-star fs-2 text-secondary" data-value="4" onclick="setRating(4)" role="button" tabindex="0"></i>
+                <i class="bi bi-star fs-2 text-secondary" data-value="5" onclick="setRating(5)" role="button" tabindex="0"></i>
+            </div>
+            <input type="hidden" asp-for="Rating" id="Rating" />
+        </div>
+
+        <div class="mb-3 comment-box">
+            <label asp-for="Comment" class="form-label"></label>
+            <textarea asp-for="Comment" class="form-control"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        setRating(@Model.Rating); 
+    </script>
+}

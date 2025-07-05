@@ -82,9 +82,9 @@ namespace Readiculous.Resources.Constants
             AuthorAscending = 2,
             [Display(Name = "Author: Z-A")]
             AuthorDescending = 3,
-            [Display(Name = "Rating: 1-5")]
-            RatingAscending = 4,
             [Display(Name = "Rating: 5-1")]
+            RatingAscending = 4,
+            [Display(Name = "Rating: 1-5")]
             RatingDescending = 5,
             [Display(Name = "Oldest")]
             Oldest = 6,

@@ -1,0 +1,43 @@
+﻿@model Readiculous.WebApp.Models.RegisterSuccessfulViewModel
+
+<div class="modal-header">
+    <h3 class="modal-title w-100 text-center">Registration Successful!</h3>
+</div>
+
+
+<div class="modal-body">
+    <div class="mb-4 text-center">
+        <img src="~/img/registration-successful.png" class="img-fluid mb-3 mx-auto d-block" alt="Success Image" style="max-height: 250px;" />
+        <h5>You have successfully created your account!</h5>
+    </div>
+
+    <div class="mb-4">
+        <p>You may now continue, or optionally update your account details.</p>
+    </div>
+
+    <div class="mb-4">
+        <h5>Your current details:</h5>
+        <div class="row mb-2 ml-3">
+            <div class="col-sm-3 fw-bold">Username:</div>
+            <div class="col-sm-9 text-break"><pre class="mb-0">@Model.Username</pre></div>
+        </div>
+        <div class="row mb-2 ml-3">
+            <div class="col-sm-3 fw-bold">Email:</div>
+            <div class="col-sm-9 text-break"><pre class="mb-0">@Model.Email</pre></div>
+        </div>
+        <div class="row mb-2 ml-3">
+            <div class="col-sm-3 fw-bold">Password:</div>
+            <div class="col-sm-9 text-break"><pre class="mb-0">@Model.Password</pre></div>
+        </div>
+    </div>
+
+    <div class="mb-4 text-center">
+        <p class="mb-0">Would you like to make any changes?</p>
+    </div>
+
+    <div class="d-grid gap-2">
+        <a class="btn btn-primary" href="@Url.Action("Edit", "Account")">Edit Details</a>
+        <a class="btn btn-secondary" href="@Url.Action("Index", "Home")">Continue</a>
+        
+    </div>
+</div>

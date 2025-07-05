@@ -5,6 +5,18 @@
     ViewData["Title"] = "User Management";
 }
 
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/modal-styles.css" />
+}
+
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="modalContent">
+        </div>
+    </div>
+</div>
+
 <h1>User Management</h1>
 
 <p>
@@ -89,8 +101,9 @@
                     <td>@item.UpdatedByUsername</td>
                     <td>@item.UpdatedTime.ToString("g")</td>
                     <td>
-                        <a asp-action="Edit" asp-route-userId="@item.UserId" class="btn btn-sm btn-info">Edit</a> |
-                        <a asp-action="Details" asp-route-userId="@item.UserId" class="btn btn-sm btn-secondary">Details</a> |
+                        <a href="javascript:void(0)" class="btn btn-sm btn-warning"
+                           onclick="openEditUserModal('@item.UserId')">Edit User</a>
+                        <a href="javascript:void(0)" class="btn btn-sm btn-secondary" onclick="openRegistrationModal('@item.UserId')">Details</a> |
                         <a asp-action="Delete" asp-route-userId="@item.UserId" class="btn btn-sm btn-danger">Delete</a>
                     </td>
                 </tr>
@@ -105,10 +118,3 @@
     </tbody>
 </table>
 
-@section Scripts {
-    <script>
-        document.getElementById('searchType').addEventListener('change', function() {
-            document.getElementById('searchForm').submit();
-        });
-    </script>
-}
