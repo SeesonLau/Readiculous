@@ -61,7 +61,7 @@ namespace Readiculous.Resources.Views {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ©2023 Alliance Software Inc. All rights reserved..
+        ///   Looks up a localized string similar to ©2025 Readiculous. All rights reserved..
         /// </summary>
         public static string Copyright {
             get {

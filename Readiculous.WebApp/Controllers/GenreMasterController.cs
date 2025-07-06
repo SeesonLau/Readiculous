@@ -150,40 +150,42 @@ namespace Readiculous.WebApp.Controllers
             }
         }
 
-        [HttpGet]
-        public IActionResult GenreViewModal(string id, int page = 1, string bookSearch = null) 
+        public IActionResult GenreViewPage(string id, int page = 1, string bookSearch = null)
         {
             var genre = _genreService.GetGenreEditById(id);
             if (genre == null)
             {
-                return BadRequest("Genre not found.");
+                return NotFound();
             }
 
             var allBooks = _genreService.GetBooksByGenreId(id);
-
             if (!string.IsNullOrWhiteSpace(bookSearch))
             {
                 allBooks = allBooks.Where(b => b.Title != null && b.Title.ToLower().Contains(bookSearch.ToLower())).ToList();
             }
-
             ViewData["BookSearch"] = bookSearch;
-            int pageSize = 10;
-            int totalBooks = allBooks.Count;
-            int totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
-            page = Math.Max(1, Math.Min(page, totalPages == 0 ? 1 : totalPages));
 
-            var books = allBooks.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            int pageSize = 10; 
+            int totalBooks = allBooks.Count;
+
+            var paginationModel = new PaginationModel(totalBooks, page, pageSize);
+            var books = allBooks
+                .Skip((paginationModel.CurrentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             var viewModel = new GenreBooksViewModel
             {
                 Genre = genre,
                 Books = books,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PageSize = pageSize
+                CurrentPage = paginationModel.CurrentPage,
+                TotalPages = paginationModel.TotalPages,
+                PageSize = pageSize,
+                TotalBooksCount = totalBooks,
+                AllGenres = _genreService.GetGenreList("", GenreSortType.NameAscending)
             };
 
-            return PartialView("GenreViewModal", viewModel);
+            return View(viewModel);
         }
     }
 }

@@ -1,94 +1,193 @@
-﻿// in genremasterView.js
+﻿// genreViewPage.js
+const GenreViewPage = (function () {
+    let settings = {};
+    const loadingSpinner = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading...</p>
+        </div>`;
 
-document.addEventListener('DOMContentLoaded', function () {
-    const genreViewModalElement = document.getElementById('genreViewModal');
-    const genreViewModal = new bootstrap.Modal(genreViewModalElement);
-    const genreViewModalBodyDiv = document.getElementById('genreViewModalBody'); // This div will receive the entire partial view content
+    function debounce(func, wait) {
+        let timeout;
+        return function () {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(context, args);
+            }, wait);
+        };
+    }
 
-    // Handle view button clicks
-    document.addEventListener('click', function (e) {
-        const viewBtn = e.target.closest('.view-genre-btn');
-        if (viewBtn) {
+    function initializeEventHandlers() {
+        // Book search handler
+        $(document).on('input', '#bookSearchForm input[name="bookSearch"]', debounce(function () {
+            updateUrlAndLoad({ page: 1, bookSearch: $(this).val() });
+        }, 300));
+
+        $(document).on('submit', '#bookSearchForm', function (e) {
             e.preventDefault();
-            const genreId = viewBtn.dataset.genreId;
+            updateUrlAndLoad({ page: 1, bookSearch: $(this).find('input[name="bookSearch"]').val() });
+        });
 
-            // Optional: Show loading spinner immediately
-            genreViewModalBodyDiv.innerHTML = '<div class="modal-content"><div class="modal-body text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div></div>';
-            genreViewModal.show();
-
-            // Fetch the content from the new partial-only action
-            fetch(`${genreMasterSettings.genreViewModalUrl}?id=${genreId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        // Handle non-2xx responses from the controller (e.g., BadRequest)
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    // Directly inject the entire HTML received from the partial view
-                    genreViewModalBodyDiv.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error loading modal:', error);
-                    genreViewModalBodyDiv.innerHTML = `<div class="modal-content"><div class="modal-header"><h5 class="modal-title text-danger">Error</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><p>Error loading genre details: ${error.message || 'An unexpected error occurred.'}</p></div><div class="modal-footer"><button type="button" class="btn genre-btn-pink" data-bs-dismiss="modal">Close</button></div></div>`;
-                });
-        }
-    });
-
-    // Handle search and pagination within the modal
-    // Note: The form's asp-action should point to the new partial action as well.
-    document.addEventListener('submit', function (e) {
-        const form = e.target.closest('.genre-details-search-form');
-        if (form) { // Check if the submitted form is within the modal's search form
+        // Show jump to page modal
+        $(document).on('click', '.genre-main-container .pagination-container .jump-to-page', function (e) {
             e.preventDefault();
-            const formData = new FormData(form);
-            const urlParams = new URLSearchParams(formData);
+            const totalPages = $(this).closest('.pagination').data('total-pages');
+            $('#jumpToPageModal #pageNumberInput').attr({
+                'min': 1,
+                'max': totalPages,
+                'placeholder': `Enter page (1-${totalPages})`
+            }).val('');
+            $('#pageNumberError').text('');
+            $('#jumpToPageModal').modal('show');
+        });
 
-            fetch(`${genreMasterSettings.genreViewModalUrl}?${urlParams}`) // Use the new partial action URL
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    genreViewModalBodyDiv.innerHTML = html; // Replace the whole modal content
-                })
-                .catch(error => {
-                    console.error('Search error:', error);
-                    // Decide how to show errors for search/pagination within the already open modal
-                    // Perhaps update a specific error div inside the modal, or a toast.
-                });
-        }
-    });
-
-    document.addEventListener('click', function (e) {
-        const pageLink = e.target.closest('.page-link');
-        // Ensure the clicked link is specifically within the genreViewModal (important for pagination)
-        if (pageLink && e.target.closest('#genreViewModal')) {
+        // Jump to page handling
+        $(document).on('click', '#confirmJumpToPage', function (e) {
             e.preventDefault();
-            const url = new URL(pageLink.href);
 
-            fetch(`${genreMasterSettings.genreViewModalUrl}?${url.searchParams}`) // Use the new partial action URL
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    genreViewModalBodyDiv.innerHTML = html; // Replace the whole modal content
-                })
-                .catch(error => {
-                    console.error('Pagination error:', error);
-                    // Same error handling consideration as search
-                });
+            const pageNumberInput = $('#pageNumberInput');
+            const pageNumberError = $('#pageNumberError');
+            const pageNumber = parseInt(pageNumberInput.val());
+            const totalPages = parseInt(pageNumberInput.attr('max'));
+
+            // Clear validation
+            pageNumberInput.removeClass('is-invalid');
+            pageNumberError.text('');
+
+            // Validate input
+            if (isNaN(pageNumber)) {
+                pageNumberInput.addClass('is-invalid');
+                pageNumberError.text('Please enter a valid page number.');
+                return;
+            }
+
+            if (pageNumber < 1 || pageNumber > totalPages) {
+                pageNumberInput.addClass('is-invalid');
+                pageNumberError.text(`Please enter a number between 1 and ${totalPages}.`);
+                return;
+            }
+
+            $('#jumpToPageModal').modal('hide');
+            updateUrlAndLoad({ page: pageNumber });
+        });
+
+        // Prevent non-numeric input
+        $(document).on('input', '#pageNumberInput', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', function () {
+            loadFromUrl();
+        });
+    }
+
+    function updateUrlAndLoad(params = {}) {
+        const currentUrl = new URL(window.location.href);
+        const currentParams = new URLSearchParams(currentUrl.search);
+
+        // Always include the genre ID
+        if (!currentParams.has('id')) {
+            currentParams.set('id', settings.genreId);
         }
-    });
 
-    // Optional: Clear modal content when closed
-    genreViewModalElement.addEventListener('hidden.bs.modal', function (event) {
-        genreViewModalBodyDiv.innerHTML = '';
-    });
+        // Update parameters
+        if (params.page !== undefined) {
+            // Special case: page 1 - we'll remove the page parameter
+            if (params.page == 1) {
+                currentParams.delete('page');
+            } else {
+                currentParams.set('page', params.page);
+            }
+        }
+
+        if (params.bookSearch !== undefined) {
+            if (params.bookSearch) {
+                currentParams.set('bookSearch', params.bookSearch);
+            } else {
+                currentParams.delete('bookSearch');
+            }
+        }
+
+        // Always include pageSize for consistency
+        currentParams.set('pageSize', 10);
+
+        // Update URL
+        currentUrl.search = currentParams.toString();
+
+        // Only push state if URL actually changed
+        if (currentUrl.href !== window.location.href) {
+            window.history.pushState({}, '', currentUrl);
+        }
+
+        // Load content
+        loadFilteredBooks(params);
+    }
+
+    function loadFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        loadFilteredBooks({
+            page: urlParams.get('page'),
+            bookSearch: urlParams.get('bookSearch')
+        });
+    }
+
+    async function loadFilteredBooks(params = {}) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataToSend = {
+            id: settings.genreId,
+            page: params.page || urlParams.get('page') || '1',
+            bookSearch: params.bookSearch || urlParams.get('bookSearch') || settings.initialBookSearch || '',
+            pageSize: 10
+        };
+
+        $('#genreBookListContainer').html(loadingSpinner);
+
+        try {
+            const response = await $.ajax({
+                url: settings.genreViewPageUrl,
+                type: 'GET',
+                data: dataToSend,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const responseHtml = $(response);
+            const bookListHtml = responseHtml.find('#genreBookListContainer').html();
+            const paginationHtml = responseHtml.find('.pagination-container').html();
+
+            $('#genreBookListContainer').html(bookListHtml);
+            $('.genre-main-container .pagination-container').html(paginationHtml);
+        } catch (error) {
+            console.error('Error loading books:', error);
+            showErrorAlert('Failed to load books. Please try again.');
+        }
+    }
+
+    function showErrorAlert(message) {
+        const alertHtml = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+        $('.genre-main-container').prepend(alertHtml);
+        setTimeout(() => $('.genre-main-container .alert').alert('close'), 5000);
+    }
+
+    return {
+        init: function (config) {
+            settings = config;
+            initializeEventHandlers();
+            loadFromUrl();
+        }
+    };
+})();
+
+$(document).ready(function () {
+    if (typeof genreViewPageSettings !== 'undefined') {
+        GenreViewPage.init(genreViewPageSettings);
+    }
 });
