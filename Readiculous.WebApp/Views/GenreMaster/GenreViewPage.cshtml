@@ -1,0 +1,143 @@
+﻿@model Readiculous.Services.ServiceModels.GenreBooksViewModel
+
+@{
+    ViewData["Title"] = Model.Genre.Name;
+    var books = Model.Books ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/genrePage.css" />
+}
+
+
+<div class="genre-view-container">
+    <div class="genre-details-container">
+        <div class="genre-info-card">
+            <div class="genre-header-section">
+                <h1 class="genre-name">@Model.Genre.Name</h1>
+                <div class="genre-description">@Model.Genre.Description</div>
+            </div>
+            
+            <div class="genre-divider"></div>
+            
+            <div class="genre-meta-section">
+                <div class="genre-meta-item">
+                    <span class="meta-label">Total Books:</span>
+                    <span class="meta-value">@Model.TotalBooksCount</span>
+                </div>
+                <div class="genre-meta-item">
+                    <span class="meta-label">Last Updated:</span>
+                    <span class="meta-value">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+                </div>
+            </div>
+
+            <div class="genre-scrollable-section">
+                <div class="genre-list-section">
+                    <div class="genre-divider"></div>
+                    <h3 class="genre-list-title">Browse Genres</h3>
+                    <div class="genre-list-container">
+                        <ul class="genre-list">
+                            @foreach (var genre in Model.AllGenres)
+                            {
+                                <li class="genre-list-item">
+                                    <a href="@Url.Action("GenreViewPage", "GenreMaster", new { id = genre.GenreId })"
+                                       class="@(genre.GenreId == Model.Genre.GenreId ? "active" : "")">
+                                        @genre.Name
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="genre-actions">
+                <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn genre-back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Genres
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="genre-books-container">
+        <div class="books-header-section">
+            <h2 class="books-header">Books In This Genre</h2>
+            <div class="book-search-container">
+                <form method="get" id="bookSearchForm">
+                    <input type="hidden" name="id" value="@Model.Genre.GenreId" />
+                    <div class="search-input-group">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="bookSearch" class="search-input" 
+                               placeholder="Search books..." value="@ViewData["BookSearch"]" autocomplete="off" />
+                        <button type="submit" class="search-btn">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="books-grid-container">
+            @if (Model.Books.Any())
+            {
+                <div class="books-grid">
+                    @foreach (var book in books)
+                    {
+                        <div class="book-card">
+                            <div class="book-cover">
+                                @if (!string.IsNullOrEmpty(book.CoverImageUrl))
+                                {
+                                    <img src="@book.CoverImageUrl" alt="@book.Title" />
+                                }
+                                else
+                                {
+                                    <div class="cover-placeholder">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="book-info">
+                                <h3 class="book-title">@book.Title</h3>
+                                <div class="book-author">@book.Author</div>
+                                <div class="book-year">@book.PublicationYear</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-books-message">
+                    <i class="fas fa-book-open"></i>
+                    <p>No books found in this genre</p>
+                </div>
+            }
+        </div>
+        
+        @if (Model.TotalBooksCount > 0 || Model.TotalPages > 0)
+        {
+            <div class="pagination-container">
+                @await Component.InvokeAsync("Pagination", new
+                {
+                    currentPage = Model.CurrentPage,
+                    totalPages = Model.TotalPages,
+                    pageSize = Model.PageSize,
+                    totalItems = Model.TotalBooksCount,
+                    action = "GenreViewPage",
+                    controller = "GenreMaster",
+                    routeId = Model.Genre.GenreId,
+                    routeBookSearch = ViewData["BookSearch"]
+                })
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const genreViewPageSettings = {
+            genreViewPageUrl: '@Url.Action("GenreViewPage", "GenreMaster")',
+            genreId: '@Model.Genre.GenreId',
+            initialBookSearch: '@(ViewData["BookSearch"]?.ToString() ?? "")'
+        };
+    </script>
+    <script src="~/js/adminGenreMaster/genreViewPage.js"></script>
+}
+
