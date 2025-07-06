@@ -223,6 +223,23 @@ namespace Readiculous.Services.Services
         public UserDetailsViewModel SearchUserDetailsById(string userId)
         {
             User user = _userRepository.GetUserById(userId);
+            if (user != null)
+            {
+                EditProfileViewModel userViewModel = new();
+                _mapper.Map(user, userViewModel);
+                userViewModel.ProfilePictureUrl = user.ProfilePictureUrl;
+                userViewModel.NewPassword = PasswordManager.DecryptPassword(user.Password);
+                userViewModel.RemoveProfilePicture = string.IsNullOrEmpty(user.ProfilePictureUrl) ? false : true;
+                return userViewModel;
+            }
+            else
+            {
+                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+            }
+        }
+        public UserDetailsViewModel GetUserDetailsById(string userId)
+        {
+            User user = _userRepository.GetUserWithNavigationPropertiesById(userId);
 
             if (user != null)
             {
