@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
 
 namespace Readiculous.Resources.Constants
 {
@@ -64,24 +65,31 @@ namespace Readiculous.Resources.Constants
 
         public enum BookSearchType
         {
+            [Display(Name = "All Books")]
             AllBooks = 0,
+            [Display(Name = "Top Books")]
             TopBooks = 1,
+            [Display(Name = "New Books")]
             NewBooks = 2,
         }
         public enum BookSortType
         {
-            GenreAscending = 0,
-            GenreDescending = 1,
-            TitleAscending = 2,
-            TitleDescending = 3,
-            AuthorAscending = 4,
-            AuthorDescending = 5,
-            RatingAscending = 6,
-            RatingDescending = 7,
-            SeriesAscending = 8,
-            SeriesDescending = 9,
-            CreatedTimeAscending = 10,
-            CreatedTimeDescending = 11,
+            [Display(Name = "Title: A-Z")]
+            TitleAscending = 0,
+            [Display(Name = "Title: Z-A")]
+            TitleDescending = 1,
+            [Display(Name = "Author: A-Z")]
+            AuthorAscending = 2,
+            [Display(Name = "Author: Z-A")]
+            AuthorDescending = 3,
+            [Display(Name = "Rating: 1-5")]
+            RatingAscending = 4,
+            [Display(Name = "Rating: 5-1")]
+            RatingDescending = 5,
+            [Display(Name = "Oldest")]
+            Oldest = 6,
+            [Display(Name = "Latest")]
+            Latest = 7,
         }
     }
 }

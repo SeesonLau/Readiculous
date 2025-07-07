@@ -7,6 +7,7 @@ using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -25,7 +26,7 @@ namespace Readiculous.Services.Services
         }
 
         // CRUD operations for Genre
-        public void AddGenre(GenreViewModel model, string creatorId)
+        public Task AddGenre(GenreViewModel model, string creatorId)
         {
             if (_genreRepository.GenreNameExists(model.Name))
             {
@@ -44,8 +45,10 @@ namespace Readiculous.Services.Services
             genre.UpdatedTime = DateTime.UtcNow;
 
             _genreRepository.AddGenre(genre);
+
+            return Task.CompletedTask;
         }
-        public void UpdateGenre(GenreViewModel model, string updaterId)
+        public Task UpdateGenre(GenreViewModel model, string updaterId)
         {
             if (!_genreRepository.GenreNameExists(model.Name))
             {
@@ -61,8 +64,10 @@ namespace Readiculous.Services.Services
             genre.UpdatedTime = DateTime.UtcNow;
 
             _genreRepository.UpdateGenre(genre);
+
+            return Task.CompletedTask;
         }
-        public void DeleteGenre(string genreId, string deleterId)
+        public Task DeleteGenre(string genreId, string deleterId)
         {
             if (!_genreRepository.GenreIdExists(genreId))
             {
@@ -72,7 +77,10 @@ namespace Readiculous.Services.Services
             var genre = _genreRepository.GetGenreById(genreId);
             genre.DeletedBy = deleterId;
             genre.DeletedTime = DateTime.UtcNow;
+
             _genreRepository.UpdateGenre(genre);
+
+            return Task.CompletedTask;
         }
 
         // Multiple Genre Listing methods
@@ -194,7 +202,7 @@ namespace Readiculous.Services.Services
 
         public List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels)
         {
-                       if (genreListItemViewModels == null || !genreListItemViewModels.Any())
+            if (genreListItemViewModels == null || !genreListItemViewModels.Any())
             {
                 return new List<GenreViewModel>();
             }

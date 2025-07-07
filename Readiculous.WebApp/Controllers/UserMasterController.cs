@@ -83,7 +83,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserEditById(userId);
+                var user = _userService.GetUserEditById(userId);
                 return PartialView(user);
             }
             catch (InvalidDataException ex)
@@ -115,7 +115,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserDetailsById(userId);
+                var user = _userService.GetUserDetailsById(userId);
                 return PartialView(user);
             }
             catch (InvalidDataException ex)
