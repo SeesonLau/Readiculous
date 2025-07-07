@@ -124,6 +124,15 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Email or Password!.
+        /// </summary>
+        public static string IncorrectLoginCredentials {
+            get {
+                return ResourceManager.GetString("IncorrectLoginCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Current Password does not match your current password!.
         /// </summary>
         public static string InvalidCurrentPassword {

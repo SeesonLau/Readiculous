@@ -83,38 +83,40 @@ namespace Readiculous.WebApp.Controllers
         {
             this._session.SetString("HasSession", "Exist");
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            /*
-            var tempModel = _userService.GetUserByEmail(model.Email);
-            User user = new() { UserId = tempModel.UserId, Username = "Name", Password = "Password" };
-
-            await this._signInManager.SignInAsync(user);
-            this._session.SetString("UserName", user.UserId);
-
-            return RedirectToAction("Index", "Home");
-            */
-            
-            User user = null;
-            
-            var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
-            if (loginResult == LoginResult.Success)
+            try
             {
-                // 認証OK
-                await this._signInManager.SignInAsync(user);
-                this._session.SetString("UserName", user.Username);
-                return RedirectToAction("Index", "Home");
+                User user = null;
+                var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
+                if (loginResult == LoginResult.Success)
+                {
+                    await this._signInManager.SignInAsync(user);
+                    this._session.SetString("UserName", user.Username);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.IncorrectLoginCredentials;
+                    return View(model);
+                }
             }
-            else
+            catch (InvalidDataException ex)
             {
-                // 認証NG
-                TempData["ErrorMessage"] = "Incorrect UserId or Password";
-                return View();
+                TempData["ErrorMessage"] = ex.Message;
+                return View(model);
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                // Optionally log ex.Message
+                return View(model);
             }
         }
+
 
         [HttpGet]
         [AllowAnonymous]
