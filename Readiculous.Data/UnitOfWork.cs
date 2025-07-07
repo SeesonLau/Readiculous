@@ -1,6 +1,7 @@
-﻿using System;
-using Readiculous.Data.Interfaces;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Readiculous.Data.Interfaces;
+using System;
 
 namespace Readiculous.Data
 {

@@ -1,4 +1,4 @@
-﻿/* user-master.css */
+﻿/* book-master.css */
 :root {
     --color-text: #2C2133;
     --color-header: #B089A5;
@@ -18,6 +18,8 @@
     --color-secondary-hover: #5c636a;
     --color-success: #198754;
     --color-success-hover: #157347;
+    --color-primary: #0d6efd;
+    --color-primary-hover: #0b5ed7;
 }
 
 body {
@@ -51,6 +53,16 @@ body {
         color: var(--color-text);
     }
 
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+    .btn-primary:hover {
+        background-color: var(--color-primary-hover);
+        border-color: var(--color-primary-hover);
+    }
+
 .btn-info {
     background-color: var(--color-info);
     border-color: var(--color-info);
@@ -82,7 +94,7 @@ body {
     }
 
 /* Form Controls */
-.form-control, .form-select {
+.form-control, .form-select, .form-check-input {
     border-color: var(--color-table-border);
     font-family: var(--font-primary);
 }
@@ -125,6 +137,11 @@ body {
     border-bottom-color: var(--color-table-border);
 }
 
+/* Badge Styles */
+.badge.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .table-responsive {
@@ -135,6 +152,10 @@ body {
         padding: 0.375rem 0.5rem;
         font-size: 0.875rem;
     }
+
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
+    }
 }
 
 /* Action Buttons Container */
@@ -142,15 +163,15 @@ body {
     white-space: nowrap;
 }
 
-/* Profile Picture Styles */
+/* Cover Image Styles */
 .img-thumbnail {
     background-color: var(--color-modal);
     border-color: var(--color-table-border);
 }
 
 /* No Results Message */
-.text-center {
-    color: var(--color-text-placeholder);
+.text-center.text-muted {
+    color: var(--color-text-placeholder) !important;
     font-style: italic;
 }
 
@@ -170,19 +191,36 @@ body {
         color: var(--color-text);
     }
 
-/* Add these styles to your user-master.css */
+/* Checkbox Styles */
+.form-check-input:checked {
+    background-color: var(--color-btn);
+    border-color: var(--color-btn);
+}
+
+.form-check-input:focus {
+    border-color: var(--color-btn);
+    box-shadow: 0 0 0 0.25rem rgba(237, 174, 192, 0.25);
+}
+
+/* Genre Filter Section */
+.form-label {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+/* Add these styles to your book-master.css */
 
 /* Table cell styling for text content */
 .table td {
-    max-width: 150px; /* Adjust this value as needed */
+    max-width: 200px; /* Adjust this value as needed */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-    /* Special handling for username and email columns */
-    .table td:nth-child(2), /* Username column */
-    .table td:nth-child(3) { /* Email column */
+    /* Special handling for title and author columns to show they might be truncated */
+    .table td:nth-child(2), /* Title column */
+    .table td:nth-child(3) { /* Author column */
         position: relative;
     }
 
@@ -195,23 +233,35 @@ body {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-    /* Profile picture cell sizing */
-    .table td:first-child {
-        width: 60px; /* Fixed width for profile picture column */
+    /* Genre cell styling */
+    .table td:nth-child(4) { /* Genre column */
+        white-space: normal !important;
+        overflow: visible !important;
+        max-width: 250px; /* Adjust as needed */
+        min-width: 150px; /* Ensure enough space for at least one genre */
     }
 
-    /* Action buttons cell sizing */
-    .table td:last-child {
-        width: 180px; /* Fixed width for actions column */
-    }
+/* Genre badges styling */
+.badge.bg-primary {
+    display: inline-block;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 /* Ensure row height stays consistent */
 .table tbody tr {
-    height: 70px; /* Fixed height for rows, adjust as needed */
+    height: 80px; /* Fixed height for rows, adjust as needed */
 }
 
-/* Date/Time columns */
-.table td:nth-child(5),
-.table td:nth-child(6) {
-    width: 120px; /* Fixed width for date/time columns */
+/* Cover image cell sizing */
+.table td:first-child {
+    width: 60px; /* Fixed width for cover column */
+}
+
+/* Action buttons cell sizing */
+.table td:last-child {
+    width: 180px; /* Fixed width for actions column */
 }

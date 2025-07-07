@@ -4,12 +4,10 @@
     ViewData["Title"] = Model.Genre.Name;
     var books = Model.Books ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
 }
-@section Styles {
-    <link rel="stylesheet" href="~/css/genrePage.css" />
-}
 
+<link rel="stylesheet" href="~/css/genre-view.css" />
 
-<div class="genre-view-container">
+<div class="container-fluid genre-view-container">
     <div class="genre-details-container">
         <div class="genre-info-card">
             <div class="genre-header-section">
@@ -51,7 +49,7 @@
             </div>
             
             <div class="genre-actions">
-                <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn genre-back-btn">
+                <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn btn-secondary genre-back-btn">
                     <i class="fas fa-arrow-left"></i> Back to Genres
                 </a>
             </div>
@@ -68,7 +66,7 @@
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" name="bookSearch" class="search-input" 
                                placeholder="Search books..." value="@ViewData["BookSearch"]" autocomplete="off" />
-                        <button type="submit" class="search-btn">Search</button>
+                        <button type="submit" class="btn btn-success search-btn">Search</button>
                     </div>
                 </form>
             </div>

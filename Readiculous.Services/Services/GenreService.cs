@@ -188,8 +188,8 @@ namespace Readiculous.Services.Services
                 GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name).ToList(),
                 GenreSortType.BookCountAscending => genres.OrderBy(g => g.BookCount).ToList(),
                 GenreSortType.BookCountDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
-                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.CreatedTime).ToList(),
-                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.CreatedTime).ToList(),
+                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.UpdatedTime).ToList(),
+                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.UpdatedTime).ToList(),
                 _ => genres, // Default case
             };
         }
