@@ -1,0 +1,401 @@
+﻿:root {
+    /* Color Scheme */
+    --color-text: #2C2133;
+    --color-header: #B089A5;
+    --color-btn: #EDAEC0;
+    --color-modal: #F8ECE9;
+    --color-background: #F2EFF1;
+    --font-primary: 'Gentium Book Plus', serif;
+    /* Dimensions */
+    --genre-sidebar-width: 260px;
+    --book-cover-height: 180px;
+    --book-card-width: 160px;
+    --book-info-height: 80px;
+    --genre-list-item-height: 32px;
+}
+
+/* Base Layout */
+body.d-flex.flex-column {
+    overflow: auto;
+    min-width: 320px;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: var(--color-background);
+}
+
+main.container-xxl {
+    padding: 0;
+    min-height: calc(100vh - 120px);
+    overflow: visible;
+}
+
+.genre-view-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 144px);
+}
+
+/* Genre Sidebar */
+.genre-details-container {
+    width: 100%;
+    background: var(--color-modal);
+    border-radius: 12px;
+    border: 1px solid var(--color-btn);
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.genre-header-section {
+    margin-bottom: 12px;
+}
+
+.genre-name {
+    font: 600 1.25rem/1.2 var(--font-primary);
+    color: var(--color-header);
+    margin: 0 0 8px 0;
+}
+
+.genre-description {
+    font: 400 0.875rem/1.4 sans-serif;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.genre-divider {
+    height: 1px;
+    background: var(--color-btn);
+    margin: 12px 0;
+    opacity: 0.3;
+}
+
+.genre-meta-section {
+    margin-bottom: 12px;
+}
+
+.genre-meta-item {
+    display: flex;
+    justify-content: space-between;
+    font: 500 0.8125rem/1.4 sans-serif;
+    margin-bottom: 8px;
+}
+
+.meta-label {
+    color: var(--color-header);
+}
+
+.meta-value {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+/* 2-Column Genre List */
+.genre-list-section {
+    margin-top: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+}
+
+.genre-list-title {
+    font: 600 0.75rem/1.2 sans-serif;
+    color: var(--color-header);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+}
+
+.genre-list-container {
+    flex-grow: 1;
+    max-height: none;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.genre-list {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    align-content: start; 
+    min-height: min-content; 
+}
+
+.genre-list-item a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--genre-list-item-height);
+    padding: 0 8px;
+    font: 500 0.75rem/1.2 sans-serif;
+    color: var(--color-text);
+    text-decoration: none;
+    border: 1px solid var(--color-btn);
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: rgba(176, 137, 165, 0.05);
+    transition: all 0.15s;
+}
+
+    .genre-list-item a:hover {
+        background: rgba(176, 137, 165, 0.1);
+    }
+
+    .genre-list-item a.active {
+        background: var(--color-header);
+        color: white;
+        border-color: var(--color-header);
+    }
+
+.genre-actions {
+    margin-top: 12px;
+}
+
+.genre-back-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--color-btn);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font: 500 0.875rem/1.2 sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .genre-back-btn:hover {
+        background: var(--color-header);
+    }
+
+/* Books Grid */
+.genre-books-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-background);
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 300px;
+}
+
+.books-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.books-header {
+    font: 600 1.125rem/1.2 var(--font-primary);
+    color: var(--color-header);
+    margin: 0;
+}
+
+.book-search-container {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    background: var(--color-modal);
+    border: 1px solid var(--color-btn);
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+
+.search-icon {
+    color: var(--color-header);
+    font-size: 0.875rem;
+    margin-right: 8px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font: 400 0.875rem/1.4 sans-serif;
+    min-width: 120px;
+}
+
+.search-btn {
+    background: var(--color-btn);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-left: 8px;
+    font: 500 0.875rem/1.2 sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .search-btn:hover {
+        background: var(--color-header);
+    }
+
+.books-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 4px 4px 16px 0;
+    width: 100%;
+}
+
+.book-card {
+    width: 100%;
+    height: calc(var(--book-cover-height) + var(--book-info-height));
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+    .book-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+.book-cover {
+    height: var(--book-cover-height);
+    background: #F2E5E9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+    .book-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+.book-card:hover .book-cover img {
+    transform: scale(1.03);
+}
+
+.cover-placeholder {
+    color: #D9C2CC;
+    font-size: 2rem;
+}
+
+.book-info {
+    padding: 10px;
+    height: var(--book-info-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.book-title {
+    font: 600 0.9375rem/1.2 sans-serif;
+    color: var(--color-text);
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-author {
+    font: 400 0.8125rem/1.2 sans-serif;
+    color: #5E4D5E;
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-year {
+    font: 400 0.75rem/1.2 sans-serif;
+    color: #8A7B8A;
+    margin: 0;
+}
+
+.pagination-container {
+    padding: 12px 0 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Desktop Layout (≥769px) */
+@media (min-width: 769px) {
+    .genre-view-container {
+        flex-direction: row;
+        height: calc(100vh - 120px);
+        overflow: hidden;
+    }
+
+    .genre-details-container {
+        width: var(--genre-sidebar-width);
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .genre-books-container {
+        overflow: hidden;
+    }
+
+    .books-grid {
+        grid-template-columns: repeat(auto-fill, minmax(var(--book-card-width), 1fr));
+        overflow-y: auto;
+        height: calc(100% - 60px);
+    }
+}
+
+/* Larger Mobile Devices (≥425px) */
+@media (min-width: 425px) and (max-width: 768px) {
+    :root {
+        --book-card-width: 170px;
+    }
+}
+
+/* Small Mobile Devices (<425px) */
+@media (max-width: 424px) {
+    :root {
+        --book-card-width: 140px;
+        --book-cover-height: 160px;
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-btn);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-background);
+}
+

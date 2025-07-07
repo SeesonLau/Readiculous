@@ -1,0 +1,13 @@
+﻿@using static Readiculous.Resources.Views.Screen
+@{
+    var height = ViewData["FooterHeight"] ?? "60px";
+    <!-- Slightly taller for better centering -->
+    var textClass = ViewData["FooterTextClass"] ?? "text-muted";
+    var additionalClasses = ViewData["FooterAdditionalClasses"] ?? "";
+}
+
+<footer class="@textClass @additionalClasses" style="height: @height; display: flex; align-items: center; justify-content: center;">
+    <div class="text-center">
+        @Copyright
+    </div>
+</footer>

@@ -1,45 +1,56 @@
 ﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
-@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Manage Genre";
 }
 
-<link rel="stylesheet" href="~/css/genre.css" />
+<link rel="stylesheet" href="~/css/genre-master.css" />
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <span class="genre-header">Manage Genre</span>
-        <button type="button" id="openAddGenreModalBtn" class="genre-btn-pink">+ New Genre</button>
-    </div>
-    <div class="genre-card sleek-filter mb-4">
-        <form asp-action="Index" method="get">
-            <div class="genre-form-row row g-3 align-items-end">
-                <div class="col-md-6 col-lg-8 position-relative">
-                    <span class="genre-search-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.106a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
-                        </svg>
-                    </span>
-                    <input type="text" name="searchString" class="genre-search-bar form-control" placeholder="Search by genre..." value="@ViewData["CurrentFilter"]" />
-                </div>
-                <div class="col-md-3 col-lg-2">
-                    <label for="searchType" class="form-label mb-1 fw-medium">Sort By:</label>
-                    <select name="searchType" class="genre-sort-select form-select">
-                        @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
-                        {
-                            <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")">
-                                @type.Text
-                            </option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3 col-lg-2 d-flex align-items-end">
-                    <button type="submit" class="genre-btn-pink btn w-100">Search</button>
-                </div>
-            </div>
-        </form>
+<div class="container-fluid px-0">
+    <!-- Changed to container-fluid for consistency -->
+    <div class="row mb-4 mx-0 align-items-center">
+        <!-- Unified header row styling -->
+        <div class="col-md-6 px-0">
+            <h1 class="mb-0">Manage Genre</h1> <!-- Changed to h1 for consistency -->
+        </div>
+        <div class="col-md-6 px-0 text-md-end">
+            <button type="button" id="openAddGenreModalBtn" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>New Genre
+            </button>
+        </div>
     </div>
 
+    <!-- Updated filter card to use CoreUI classes -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6 col-lg-8 position-relative">
+                        <span class="genre-search-icon">
+                            <i class="fas fa-search"></i> <!-- Using Font Awesome for consistency -->
+                        </span>
+                        <input type="text" name="searchString" class="form-control genre-search-bar"
+                               placeholder="Search by genre..." value="@ViewData["CurrentFilter"]" />
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                        <label for="searchType" class="form-label">Sort By:</label>
+                        <select name="searchType" class="form-select">
+                            @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
+                            {
+                                <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")">
+                                    @type.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-lg-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rest of your content remains the same -->
     <div class="row mx-0">
         <div class="col px-0">
             <div id="genreListContainer" class="table-responsive">
@@ -61,61 +72,47 @@
     </div>
 </div>
 
-<!-- Custom Add Genre Modal Overlay -->
-<div id="addGenreOverlay" class="genre-delete-overlay" style="display:none;">
-    <div class="genre-delete-container">
-        <div class="genre-modal-card">
-            <div class="genre-modal-header">Add Genre</div>
-            <form id="addGenreForm" autocomplete="off">
-                <div id="addGenreValidationSummary" class="text-danger mb-3"></div>
-                <div class="mb-3">
-                    <label for="addGenreName" class="genre-modal-label form-label">Name</label>
-                    <input id="addGenreName" name="Name" class="genre-modal-input form-control" placeholder="Enter genre name" />
-                    <span id="addGenreNameError" class="text-danger small"></span>
-                </div>
-                <div class="mb-3">
-                    <label for="addGenreDescription" class="genre-modal-label form-label">Description</label>
-                    <textarea id="addGenreDescription" name="Description" class="genre-modal-textarea form-control" rows="4" placeholder="Enter genre description"></textarea>
-                    <span id="addGenreDescriptionError" class="text-danger small"></span>
-                </div>
-                <div class="genre-modal-actions d-flex justify-content-end gap-3">
-                    <button type="button" class="genre-btn-cancel btn" id="cancelAddGenreBtn">Cancel</button>
-                    <button type="submit" class="genre-btn-save btn">Save</button>
-                </div>
-            </form>
+<!-- Modal Containers - Updated to use CoreUI modal structure -->
+<div class="modal fade" id="addGenreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Genre</h5>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addGenreModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Custom Edit Genre Modal Overlay -->
-<div id="editGenreOverlay" class="genre-delete-overlay" style="display:none;">
-    <div class="genre-delete-container">
-        <div class="genre-modal-card">
-            <div class="genre-modal-header">Edit Genre</div>
-            <form id="editGenreForm" autocomplete="off">
-                <div id="editGenreValidationSummary" class="text-danger mb-3"></div>
-                <input type="hidden" id="editGenreId" name="GenreId" />
-                <div class="mb-3">
-                    <label for="editGenreName" class="genre-modal-label form-label">Name</label>
-                    <input id="editGenreName" name="Name" class="genre-modal-input form-control" placeholder="Enter genre name" />
-                    <span id="editGenreNameError" class="text-danger small"></span>
-                </div>
-                <div class="mb-3">
-                    <label for="editGenreDescription" class="genre-modal-label form-label">Description</label>
-                    <textarea id="editGenreDescription" name="Description" class="genre-modal-textarea form-control" rows="4" placeholder="Enter genre description"></textarea>
-                    <span id="editGenreDescriptionError" class="text-danger small"></span>
-                </div>
-                <div class="genre-modal-actions d-flex justify-content-end gap-3">
-                    <button type="button" class="genre-btn-cancel btn" id="cancelEditGenreBtn">Cancel</button>
-                    <button type="submit" class="genre-btn-save btn">Save</button>
-                </div>
-            </form>
+<div class="modal fade" id="editGenreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Genre</h5>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editGenreModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
         </div>
     </div>
 </div>
-
-@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
 
 @section Scripts {
+    <!-- CoreUI JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/js/coreui.bundle.min.js"></script>
+
+    <script>
+        const genreMasterSettings = {
+            genreMasterScreenUrl: '/GenreMaster/GenreMasterScreen',
+            genreAddModalUrl: '/GenreMaster/GenreAddModal',
+            genreEditModalUrl: '/GenreMaster/GenreEditModal',
+            genreViewModalUrl: '/GenreMaster/GenreViewPage',
+            deleteGenreUrl: '/GenreMaster/Delete'
+        };
+    </script>
     <script src="~/js/adminGenreMaster/genremasterScreen.js"></script>
 }

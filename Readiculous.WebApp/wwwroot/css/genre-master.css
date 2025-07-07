@@ -1,0 +1,134 @@
+﻿/* genre-master.css - CoreUI compatible version */
+:root {
+    /* CoreUI compatible variables */
+    --cui-body-color: #2C2133;
+    --cui-body-bg: #F2EFF1;
+    --cui-border-color: #d9c7d0;
+    --cui-primary: #B089A5;
+    --cui-secondary: #6c757d;
+    --cui-success: #EDAEC0;
+    --cui-info: #0dcaf0;
+    --cui-warning: #ffc107;
+    --cui-danger: #dc3545;
+    --cui-light: #F8ECE9;
+    --cui-dark: #2C2133;
+}
+
+/* Header Styles */
+.genre-header {
+    color: var(--cui-primary);
+    font-weight: 700;
+    font-size: 1.75rem;
+}
+
+/* Table Styles - CoreUI compatible */
+.genre-table .table {
+    --cui-table-color: var(--cui-body-color);
+    --cui-table-bg: transparent;
+    --cui-table-border-color: var(--cui-border-color);
+    --cui-table-striped-bg: #f9f5f7;
+    --cui-table-hover-bg: rgba(237, 174, 192, 0.1);
+}
+
+.genre-table .table-hover tbody tr:hover {
+    --cui-table-hover-bg: rgba(237, 174, 192, 0.2);
+}
+
+/* Custom button hover states */
+.btn-success:hover {
+    --cui-btn-hover-bg: #d89cb1;
+    --cui-btn-hover-border-color: #d89cb1;
+}
+
+.btn-warning:hover {
+    --cui-btn-hover-bg: #e0a800;
+    --cui-btn-hover-border-color: #e0a800;
+}
+
+/* Search bar adjustments */
+.genre-search-bar {
+    padding-left: 2.5rem;
+    background-color: var(--cui-light);
+    border-color: var(--cui-border-color);
+}
+
+.genre-search-icon {
+    color: var(--cui-secondary);
+}
+
+/* Card styling */
+.genre-card.sleek-filter {
+    background-color: var(--cui-light);
+    border-color: var(--cui-border-color);
+}
+
+/* Ensure consistent row heights */
+.genre-table tbody tr {
+    height: 70px;
+}
+
+/* Text truncation */
+.genre-table td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    /* Hover states for truncated cells */
+    .genre-table td:nth-child(1):hover,
+    .genre-table td:nth-child(2):hover {
+        white-space: normal;
+        overflow: visible;
+        z-index: 10;
+        background-color: var(--cui-table-striped-bg);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .genre-form-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .genre-search-bar {
+        width: 100%;
+    }
+}
+
+/* Table cell styling */
+.genre-table td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    /* Description column specific styling */
+    .genre-table td:nth-child(2) { /* Description column */
+        max-width: 300px; /* Wider for descriptions */
+        position: relative;
+    }
+
+        .genre-table td:nth-child(2):hover {
+            white-space: normal;
+            overflow: visible;
+            z-index: 10;
+            background-color: var(--cui-table-striped-bg);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+    /* Date/Time columns - prevent wrapping and ensure full width */
+    .genre-table td:nth-child(4), /* Modified Date */
+    .genre-table td:nth-child(5) { /* Modified Time */
+        white-space: nowrap;
+        width: 1%; /* Makes the column take only the space it needs */
+        min-width: 120px; /* Minimum width for date/time columns */
+    }
+
+    /* Ensure action buttons column stays compact */
+    .genre-table td:nth-child(6) { /* Actions column */
+        width: 180px;
+        white-space: nowrap;
+    }

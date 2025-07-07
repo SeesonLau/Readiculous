@@ -26,7 +26,7 @@ namespace Readiculous.Services.Services
         }
 
         // CRUD operations for Genre
-        public Task AddGenre(GenreViewModel model, string creatorId)
+        public async Task AddGenre(GenreViewModel model, string creatorId)
         {
             if (_genreRepository.GenreNameExists(model.Name))
             {
@@ -44,11 +44,9 @@ namespace Readiculous.Services.Services
             genre.UpdatedBy = creatorId;
             genre.UpdatedTime = DateTime.UtcNow;
 
-            _genreRepository.AddGenre(genre);
-
-            return Task.CompletedTask;
+            await Task.Run(() => _genreRepository.AddGenre(genre));
         }
-        public Task UpdateGenre(GenreViewModel model, string updaterId)
+        public async Task UpdateGenre(GenreViewModel model, string updaterId)
         {
             if (!_genreRepository.GenreNameExists(model.Name))
             {
@@ -63,11 +61,9 @@ namespace Readiculous.Services.Services
             genre.UpdatedBy = updaterId;
             genre.UpdatedTime = DateTime.UtcNow;
 
-            _genreRepository.UpdateGenre(genre);
-
-            return Task.CompletedTask;
+            await Task.Run(() => _genreRepository.UpdateGenre(genre));
         }
-        public Task DeleteGenre(string genreId, string deleterId)
+        public async Task DeleteGenre(string genreId, string deleterId)
         {
             if (!_genreRepository.GenreIdExists(genreId))
             {
@@ -78,9 +74,7 @@ namespace Readiculous.Services.Services
             genre.DeletedBy = deleterId;
             genre.DeletedTime = DateTime.UtcNow;
 
-            _genreRepository.UpdateGenre(genre);
-
-            return Task.CompletedTask;
+            await Task.Run(() => _genreRepository.UpdateGenre(genre));
         }
 
         // Multiple Genre Listing methods
@@ -194,8 +188,8 @@ namespace Readiculous.Services.Services
                 GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name).ToList(),
                 GenreSortType.BookCountAscending => genres.OrderBy(g => g.BookCount).ToList(),
                 GenreSortType.BookCountDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
-                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.CreatedTime).ToList(),
-                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.CreatedTime).ToList(),
+                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.UpdatedTime).ToList(),
+                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.UpdatedTime).ToList(),
                 _ => genres, // Default case
             };
         }

@@ -64,7 +64,7 @@ namespace Readiculous.Services.Services
                 !string.IsNullOrWhiteSpace(editProfileViewModel.NewPassword) ||
                 !string.IsNullOrWhiteSpace(editProfileViewModel.ConfirmPassword);
         }
-        
+
         // CRUD Operations
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
@@ -108,7 +108,7 @@ namespace Readiculous.Services.Services
                 var user = _userRepository.GetUserById(model.UserId);
 
                 // Map properties for Username, Email, Updated Time, and UpdatedBy
-                
+
                 _mapper.Map(model, user);
                 user.Username = model.Username.Trim();
                 user.Email = model.Email.Trim();
@@ -131,7 +131,7 @@ namespace Readiculous.Services.Services
                     }
                 }
                 // If a new picture was uploaded
-                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0) 
+                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
                     // Upload new picture
                     if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
@@ -151,7 +151,7 @@ namespace Readiculous.Services.Services
         }
         public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
-            if(!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
+            if (!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
@@ -164,7 +164,7 @@ namespace Readiculous.Services.Services
             {
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
             }
-            
+
             await UpdateUserAsync(userViewModel, editorId);
         }
         public async Task DeleteUserAsync(string userId, string deleterId)
@@ -173,7 +173,7 @@ namespace Readiculous.Services.Services
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
-            if(userId == deleterId)
+            if (userId == deleterId)
             {
                 throw new InvalidDataException(Resources.Messages.Errors.UserCannotDeleteSelf);
             }
@@ -305,7 +305,7 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
-        
+
         //Populating Dropdown Lists
         public List<SelectListItem> GetUserRoles()
         {
@@ -332,18 +332,18 @@ namespace Readiculous.Services.Services
                     {
                         Value = ((int)r).ToString(),
                         Text = displayName,
-                        Selected = r == UserSortType.Latest 
+                        Selected = r == UserSortType.Latest
                     };
                 }).ToList();
         }
-        
+
         // String Helper
         public string GetEmailByUserId(string userId)
         {
             var user = _userRepository.GetUserById(userId);
             return user.Email;
         }
-        
+
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
