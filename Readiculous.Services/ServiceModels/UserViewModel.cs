@@ -13,15 +13,17 @@ namespace Readiculous.Services.ServiceModels
     {
 
         [Required(ErrorMessage = "Username is required.")]
+        [StringLength(20, ErrorMessage = "Your Username should have at most 20 characters.")]
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
+        [StringLength(50, ErrorMessage = "Your email should not exceed 50 characters")]
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
-        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d\\s]).{8,}$",
-        ErrorMessage = "Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, one digit, and one special character.")]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d\\s]).{8,16}$",
+        ErrorMessage = "Password must be 8-16 characters long and contain at least one lowercase letter, one uppercase letter, one digit, and one special character.")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
