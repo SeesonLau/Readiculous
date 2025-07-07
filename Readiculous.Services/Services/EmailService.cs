@@ -21,32 +21,6 @@ namespace Readiculous.Services.Services
             try
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
-                
-                // Check if SMTP is properly configured
-                if (string.IsNullOrEmpty(smtpSettings["Host"]) || 
-                    string.IsNullOrEmpty(smtpSettings["Username"]) || 
-                    string.IsNullOrEmpty(smtpSettings["Password"]) ||
-                    smtpSettings["Password"] == "your-app-password-here" ||
-                    smtpSettings["Password"] == "mewmew@holyshit")
-                {
-                    // Development mode - show OTP and password in console
-                    Console.WriteLine("=".PadRight(60, '='));
-                    Console.WriteLine("📧 EMAIL OTP (Development Mode)");
-                    Console.WriteLine("=".PadRight(60, '='));
-                    Console.WriteLine($"📧 To: {email}");
-                    Console.WriteLine($"🔑 OTP Code: {otp}");
-                    Console.WriteLine($"🔒 Temporary Password: {tempPassword}");
-                    Console.WriteLine($"⏰ Expires: 10 minutes");
-                    Console.WriteLine("=".PadRight(60, '='));
-                    Console.WriteLine("💡 To enable real email sending:");
-                    Console.WriteLine("   1. Use email account: noted2001@gmail.com");
-                    Console.WriteLine("   2. Enable 2-Factor Authentication");
-                    Console.WriteLine("   3. Generate App Password and update appsettings.json");
-                    Console.WriteLine("   4. Replace 'your-app-password-here' with the actual App Password");
-                    Console.WriteLine("=".PadRight(60, '='));
-                    return true;
-                }
-
                 // Real email sending
                 Console.WriteLine($"🔧 SMTP Configuration:");
                 Console.WriteLine($"   Host: {smtpSettings["Host"]}");
@@ -132,21 +106,6 @@ namespace Readiculous.Services.Services
             try
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
-                if (string.IsNullOrEmpty(smtpSettings["Host"]) || 
-                    string.IsNullOrEmpty(smtpSettings["Username"]) || 
-                    string.IsNullOrEmpty(smtpSettings["Password"]) ||
-                    smtpSettings["Password"] == "your-app-password-here" ||
-                    smtpSettings["Password"] == "mewmew@holyshit")
-                {
-                    // Development mode - show temp password in console
-                    Console.WriteLine("=".PadRight(60, '='));
-                    Console.WriteLine("📧 TEMP PASSWORD EMAIL (Development Mode)");
-                    Console.WriteLine("=".PadRight(60, '='));
-                    Console.WriteLine($"📧 To: {email}");
-                    Console.WriteLine($"🔒 Temporary Password: {tempPassword}");
-                    Console.WriteLine("=".PadRight(60, '='));
-                    return true;
-                }
                 var mailMessage = new MailMessage
                 {
                     From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
