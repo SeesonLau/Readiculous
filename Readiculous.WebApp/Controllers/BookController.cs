@@ -78,9 +78,13 @@ namespace Readiculous.WebApp.Controllers
 
                 return View(model);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
             }
         }
@@ -96,7 +100,7 @@ namespace Readiculous.WebApp.Controllers
                 }
                 catch (InvalidOperationException ex)
                 {
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                    TempData["ErrorMessage"] = ex.Message;
                 }
             }
 
@@ -123,7 +127,7 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
             }
         }
@@ -138,7 +142,7 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return RedirectToAction("Index");
             }
         }
@@ -151,7 +155,7 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return RedirectToAction("Index");
             }
         }
@@ -181,7 +185,7 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return PartialView("_AddReviewModal", model); // Return modal with error
             }
         }
@@ -189,12 +193,20 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult EditReviewModal(string id)
         {
-            var model = _reviewService.GetReviewByBookIdAndUserId(id, this.UserId);
-            if (model == null)
+            try
             {
-                return NotFound();
+                var model = _reviewService.GetReviewByBookIdAndUserId(id, this.UserId);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+                return PartialView("_EditReviewModal", model);
             }
-            return PartialView("_EditReviewModal", model);
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                return RedirectToAction("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
         }
 
         [HttpPost]
@@ -211,7 +223,7 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return PartialView("_EditReviewModal", model);
             }
         }

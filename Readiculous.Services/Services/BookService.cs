@@ -119,7 +119,7 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(model.BookId);
             if (book == null)
             {
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ServerError  );
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -203,7 +203,7 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ServerError);
             }
 
             var book = _bookRepository.GetBookById(bookId);
@@ -255,7 +255,7 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(id);
             if (book == null)
             {
-                return null;
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
 
             var model = new BookDetailsViewModel();
@@ -295,7 +295,7 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(id);
             if (book == null)
             {
-                return null;
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
 
             var model = new BookViewModel();
@@ -332,6 +332,11 @@ namespace Readiculous.Services.Services
         public string GetTitleByBookId(string bookId)
         {
             var book = _bookRepository.GetBookById(bookId);
+            if (book == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
+            }
+
             return book.Title;
         }
 
@@ -523,13 +528,11 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book is already in favorites.");
+                throw new InvalidOperationException(Resources.Messages.Errors.FavoriteBookExists);
             }
 
             var favoriteBook = new FavoriteBook
@@ -545,13 +548,11 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (!_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book is not in favorites.");
+                throw new InvalidOperationException(Resources.Messages.Errors.FavoritedBookNotExists);
             }
 
             var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);

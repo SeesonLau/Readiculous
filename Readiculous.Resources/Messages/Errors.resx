@@ -126,6 +126,12 @@
   <data name="BookTitleAndAuthorExists" xml:space="preserve">
     <value>A book with the same title and author already exists!</value>
   </data>
+  <data name="FavoriteBookExists" xml:space="preserve">
+    <value>Book already favorited!</value>
+  </data>
+  <data name="FavoritedBookNotExists" xml:space="preserve">
+    <value>Book not favorited!</value>
+  </data>
   <data name="GenreExists" xml:space="preserve">
     <value>Genre Name already exists!</value>
   </data>
@@ -146,6 +152,9 @@
   </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error occured!</value>
+  </data>
+  <data name="UnableToAddFavorite" xml:space="preserve">
+    <value>Unable to Update Favorite: </value>
   </data>
   <data name="UserCannotDeleteSelf" xml:space="preserve">
     <value>User cannot delete self!</value>

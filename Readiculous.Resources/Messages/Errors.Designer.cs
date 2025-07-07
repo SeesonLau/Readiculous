@@ -88,6 +88,24 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Book already favorited!.
+        /// </summary>
+        public static string FavoriteBookExists {
+            get {
+                return ResourceManager.GetString("FavoriteBookExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Book not favorited!.
+        /// </summary>
+        public static string FavoritedBookNotExists {
+            get {
+                return ResourceManager.GetString("FavoritedBookNotExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Genre Name already exists!.
         /// </summary>
         public static string GenreExists {
@@ -147,6 +165,15 @@ namespace Readiculous.Resources.Messages {
         public static string ServerError {
             get {
                 return ResourceManager.GetString("ServerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to Update Favorite: .
+        /// </summary>
+        public static string UnableToAddFavorite {
+            get {
+                return ResourceManager.GetString("UnableToAddFavorite", resourceCulture);
             }
         }
         
