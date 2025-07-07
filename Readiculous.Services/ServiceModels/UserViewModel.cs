@@ -13,11 +13,11 @@ namespace Readiculous.Services.ServiceModels
     {
 
         [Required(ErrorMessage = "Username is required.")]
-        [StringLength(20, ErrorMessage = "Your Username should have at most 20 characters.")]
+        [StringLength(20, ErrorMessage = "Your Username must not exceed 20 characters!")]
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
-        [StringLength(50, ErrorMessage = "Your email should not exceed 50 characters")]
+        [StringLength(50, ErrorMessage = "Your email must not exceed 50 characters!")]
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
         public string Email { get; set; }
 
