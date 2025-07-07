@@ -13,9 +13,9 @@ namespace Readiculous.Services.ServiceModels
         public string UserName { get; set; }
         public string BookTitle { get; set; }
         public string Email { get; set; }
-        [Range(1, 5, ErrorMessage = ("Ratings must be between 1 to 5."))]
+        [Range(1, 5, ErrorMessage = ("Ratings must be between 1 to 5!"))]
         public int Rating { get; set; }
-        [StringLength(200, ErrorMessage = "Comment should be at most 200 characters long.")]
+        [StringLength(200, ErrorMessage = "Comment must not exceed 200 characters!")]
         public string Comment { get; set; }
         public DateTime CreatedTime { get; set; }
 
