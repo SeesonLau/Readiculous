@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Readiculous.Services.ServiceModels
 {
@@ -16,7 +13,9 @@ namespace Readiculous.Services.ServiceModels
         public string UserName { get; set; }
         public string BookTitle { get; set; }
         public string Email { get; set; }
+        [Range(1, 5, ErrorMessage = ("Ratings must be between 1 to 5."))]
         public int Rating { get; set; }
+        [StringLength(200, ErrorMessage = "Comment should be at most 200 characters long.")]
         public string Comment { get; set; }
         public DateTime CreatedTime { get; set; }
 
