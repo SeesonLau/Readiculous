@@ -1,9 +1,6 @@
 ﻿@model Readiculous.Services.ServiceModels.GenreViewModel
 
-<link rel="stylesheet" href="~/css/genre.css" />
-
 <div class="genre-modal-card">
-    <div class="genre-modal-header">Edit Genre</div>
     <form id="editGenreForm" asp-action="Edit" autocomplete="off">
         <div id="editGenreValidationSummary" asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <input type="hidden" asp-for="GenreId" />

@@ -1,217 +1,286 @@
-﻿/* user-master.css */
-:root {
-    --color-text: #2C2133;
-    --color-header: #B089A5;
-    --color-btn: #EDAEC0;
-    --color-modal: #F8ECE9;
-    --color-background: #F2EFF1;
-    --font-primary: 'Gentium Book Plus', serif;
-    --color-text-placeholder: rgba(39, 39, 42, 0.6);
-    --color-table-border: #d9c7d0;
-    --color-table-stripe: #f9f5f7;
-    --color-btn-hover: #d89cb1;
-    --color-danger: #dc3545;
-    --color-danger-hover: #bb2d3b;
-    --color-info: #0dcaf0;
-    --color-info-hover: #0aa2c0;
-    --color-secondary: #6c757d;
-    --color-secondary-hover: #5c636a;
-    --color-success: #198754;
-    --color-success-hover: #157347;
-}
-
-body {
-    font-family: var(--font-primary);
-    color: var(--color-text);
+﻿.user-management-container {
     background-color: var(--color-background);
+    padding: 2rem;
+    border-radius: 15px;
 }
 
-/* Header Styles */
-.container-fluid .row.mb-4.mx-0 h1 {
-    color: var(--color-header);
-    font-weight: 700;
+.user-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-border);
 }
 
-/* Button Styles */
-.btn {
-    font-family: var(--font-primary);
+.user-management-title {
+    font-family: var(--font-secondary);
+    color: var(--color-secondary);
+    font-size: 2rem;
     font-weight: 600;
+    margin: 0;
+}
+
+/* Filter Controls */
+.user-filter-controls {
+    margin-bottom: 2rem;
+    align-items: end;
+}
+
+.filter-group {
+    margin-bottom: 0;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-ui);
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.filter-input {
+    width: 100%; 
+    padding: 0.25rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-primary);
+    background-color: var(--color-modal);
+    color: var(--color-text);
     transition: all 0.3s ease;
 }
 
-.btn-success {
-    background-color: var(--color-btn);
-    border-color: var(--color-btn);
-    color: var(--color-text);
-}
-
-    .btn-success:hover {
-        background-color: var(--color-btn-hover);
-        border-color: var(--color-btn-hover);
-        color: var(--color-text);
+    .filter-input:focus {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+        outline: none;
     }
 
-.btn-info {
-    background-color: var(--color-info);
-    border-color: var(--color-info);
+/* User Table Styles */
+.user-table-container {
+    overflow-x: auto;
+    background-color: var(--color-modal);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(176, 137, 165, 0.1);
+    margin-bottom: 2rem;
 }
 
-    .btn-info:hover {
-        background-color: var(--color-info-hover);
-        border-color: var(--color-info-hover);
-    }
-
-.btn-secondary {
-    background-color: var(--color-secondary);
-    border-color: var(--color-secondary);
-}
-
-    .btn-secondary:hover {
-        background-color: var(--color-secondary-hover);
-        border-color: var(--color-secondary-hover);
-    }
-
-.btn-danger {
-    background-color: var(--color-danger);
-    border-color: var(--color-danger);
-}
-
-    .btn-danger:hover {
-        background-color: var(--color-danger-hover);
-        border-color: var(--color-danger-hover);
-    }
-
-/* Form Controls */
-.form-control, .form-select {
-    border-color: var(--color-table-border);
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
     font-family: var(--font-primary);
 }
 
-    .form-control:focus, .form-select:focus {
-        border-color: var(--color-btn);
-        box-shadow: 0 0 0 0.25rem rgba(237, 174, 192, 0.25);
+    .user-table thead {
+        background-color: var(--color-secondary);
+        color: var(--color-modal);
+        height: 40px;
     }
 
-    .form-control::placeholder {
-        color: var(--color-text-placeholder);
-        opacity: 1;
+        .user-table thead tr {
+            line-height: 1.2; 
+        }
+
+            .user-table thead tr:last-child th {
+                padding-top: 0.25rem; 
+                font-size: 0.85rem; 
+            }
+
+    .user-table th {
+        padding: 0.5rem; 
+        font-weight: 600;
+        text-align: center;
+        font-family: var(--font-secondary);
+        vertical-align: middle;
+        font-size: 0.9rem; 
     }
 
-/* Table Styles */
-.table {
-    border-color: var(--color-table-border);
+        .user-table th[colspan="2"] {
+            padding-bottom: 0.25rem; 
+        }
+
+    .user-table td {
+        padding: 0.75rem; 
+        vertical-align: middle;
+        border-bottom: 1px solid var(--color-border);
+        font-size: 0.9rem;
+    }
+
+    .user-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-table tbody tr:hover {
+        background-color: var(--color-highlight);
+        transition: background-color 0.2s ease;
+    }
+
+/* Profile Picture Styles */
+.profile-picture-cell {
+    width: 60px;
 }
 
-.table-dark {
-    background-color: var(--color-header);
-    color: white;
+.profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+    border: 2px solid var(--color-border);
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: var(--color-table-stripe);
+.profile-picture-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: var(--color-text);
+    font-size: 0.8rem;
 }
 
-.table-bordered th, .table-bordered td {
-    border-color: var(--color-table-border);
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+}
+
+.btn-edit {
+    background-color: var(--color-btn);
+    color: var(--color-text);
+}
+
+.btn-delete {
+    background-color: var(--color-danger);
+    color: var(--color-modal);
+}
+
+.btn-action:hover {
+    transform: scale(1.1);
+}
+
+.btn-action i {
+    font-size: 0.9rem;
 }
 
 /* Modal Styles */
-.modal-content {
+.user-modal .modal-header {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.user-modal .modal-title {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+}
+
+.user-modal .modal-body {
+    padding: 1.5rem;
     background-color: var(--color-modal);
-    border-color: var(--color-table-border);
 }
 
-.modal-header {
-    border-bottom-color: var(--color-table-border);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .table-responsive {
-        border-color: var(--color-table-border);
-    }
-
-    .btn {
-        padding: 0.375rem 0.5rem;
-        font-size: 0.875rem;
-    }
-}
-
-/* Action Buttons Container */
-.text-center.align-middle {
-    white-space: nowrap;
-}
-
-/* Profile Picture Styles */
-.img-thumbnail {
+.user-modal .modal-footer {
     background-color: var(--color-modal);
-    border-color: var(--color-table-border);
+    border-top: 1px solid var(--color-border);
+    padding: 1rem 1.5rem;
 }
 
-/* No Results Message */
-.text-center {
-    color: var(--color-text-placeholder);
-    font-style: italic;
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
 }
 
-/* Pagination Styles */
-.pagination .page-item.active .page-link {
-    background-color: var(--color-btn);
-    border-color: var(--color-btn);
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
     color: var(--color-text);
+    font-family: var(--font-primary);
 }
 
-.pagination .page-link {
-    color: var(--color-text);
+.btn-success {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-modal);
+    font-family: var(--font-secondary);
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s ease;
 }
 
-    .pagination .page-link:hover {
-        background-color: var(--color-btn-hover);
+    .btn-success:hover {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
         color: var(--color-text);
     }
 
-/* Add these styles to your user-master.css */
-
-/* Table cell styling for text content */
-.table td {
-    max-width: 150px; /* Adjust this value as needed */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-    /* Special handling for username and email columns */
-    .table td:nth-child(2), /* Username column */
-    .table td:nth-child(3) { /* Email column */
-        position: relative;
+    .btn-success:focus {
+        box-shadow: 0 0 0 0.25rem rgba(139, 94, 131, 0.5);
     }
 
-        .table td:nth-child(2):hover,
-        .table td:nth-child(3):hover {
-            white-space: normal;
-            overflow: visible;
-            z-index: 10;
-            background-color: var(--color-table-stripe);
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-    /* Profile picture cell sizing */
-    .table td:first-child {
-        width: 60px; /* Fixed width for profile picture column */
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .user-management-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
     }
 
-    /* Action buttons cell sizing */
-    .table td:last-child {
-        width: 180px; /* Fixed width for actions column */
+    .user-filter-controls {
+        grid-template-columns: 1fr;
     }
 
-/* Ensure row height stays consistent */
-.table tbody tr {
-    height: 70px; /* Fixed height for rows, adjust as needed */
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 100%;
+        border-radius: 4px;
+    }
 }
 
-/* Date/Time columns */
-.table td:nth-child(5),
-.table td:nth-child(6) {
-    width: 120px; /* Fixed width for date/time columns */
+@media (max-width: 576px) {
+    .user-table th,
+    .user-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .profile-picture,
+    .profile-picture-placeholder {
+        width: 40px;
+        height: 40px;
+    }
 }
+

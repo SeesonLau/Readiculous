@@ -1,82 +1,103 @@
 ﻿@model Readiculous.Services.ServiceModels.UserDetailsViewModel
 
-<div class="container-fluid">
-    <h4 class="mb-4">User Details</h4>
-    <hr />
+<div class="user-view-container">
+    <h4 class="user-view-title">Profile</h4>
+    <hr class="user-view-divider" />
 
-    <div class="row mb-4">
-
-        <div class="col-md-3 pe-md-4 me-md-3 text-center mb-3 mb-md-0">
+    <div class="user-view-profile-section">
+        <div class="user-view-profile-picture">
             @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
             {
-                <img src="@Model.ProfileImageUrl" alt="Profile Picture"
-                     class="img-thumbnail"
-                     style="max-width: 150px; max-height: 150px;" />
+                <img src="@Model.ProfileImageUrl" alt="Profile Picture" class="user-view-profile-img" />
             }
             else
             {
-                <div class="text-muted p-4 border rounded">No profile picture</div>
+                <div class="user-view-profile-placeholder">
+                    <i class="fas fa-user-circle"></i>
+                    <span>No profile picture</span>
+                </div>
             }
         </div>
 
-        <div class="col-md-8">
-            <dl class="row">
-                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.UserId)</dt>
-                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.UserId)</dd>
+        <div class="user-view-details">
+            <dl class="user-view-details-list">
+                <div class="user-view-detail-item">
+                    <dt>User ID</dt>
+                    <dd>@Html.DisplayFor(model => model.UserId)</dd>
+                </div>
 
-                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.UserName)</dt>
-                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.UserName)</dd>
+                <div class="user-view-detail-item">
+                    <dt>Username</dt>
+                    <dd>@Html.DisplayFor(model => model.UserName)</dd>
+                </div>
 
-                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.Email)</dt>
-                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.Email)</dd>
+                <div class="user-view-detail-item">
+                    <dt>Email Address</dt>
+                    <dd>@Html.DisplayFor(model => model.Email)</dd>
+                </div>
 
-                <dt class="col-sm-4 mb-2">@Html.DisplayNameFor(model => model.Role)</dt>
-                <dd class="col-sm-8 mb-2">@Html.DisplayFor(model => model.Role)</dd>
+                <div class="user-view-detail-item">
+                    <dt>User Role</dt>
+                    <dd>@Html.DisplayFor(model => model.Role)</dd>
+                </div>
             </dl>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-6 mb-4 mb-md-0">
-            <h5 class="mb-3">Creation Info</h5>
-            <dl class="row">
-                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.CreatedByUserName)</dt>
-                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.CreatedByUserName)</dd>
-
-                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.CreatedTime)</dt>
-                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.CreatedTime)</dd>
+    <div class="user-view-meta-grid">
+        <div class="user-view-meta-group">
+            <h5 class="user-view-meta-title">Account Information</h5>
+            <dl class="user-view-meta-list">
+                <div class="user-view-meta-item">
+                    <dt>Created By</dt>
+                    <dd>@Html.DisplayFor(model => model.CreatedByUserName)</dd>
+                </div>
+                <div class="user-view-meta-item">
+                    <dt>Date Joined</dt>
+                    <dd>@Html.DisplayFor(model => model.CreatedTime)</dd>
+                </div>
+                <div class="user-view-meta-item">
+                    <dt>Last Modified By</dt>
+                    <dd>@Html.DisplayFor(model => model.UpdatedByUserName)</dd>
+                </div>
+                <div class="user-view-meta-item">
+                    <dt>Last Modified On</dt>
+                    <dd>@Html.DisplayFor(model => model.UpdatedTime)</dd>
+                </div>
             </dl>
         </div>
 
-        <div class="col-md-6">
-            <h5 class="mb-3">Update Info</h5>
-            <dl class="row">
-                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.UpdatedByUserName)</dt>
-                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.UpdatedByUserName)</dd>
-
-                <dt class="col-sm-6 mb-2">@Html.DisplayNameFor(model => model.UpdatedTime)</dt>
-                <dd class="col-sm-6 mb-2">@Html.DisplayFor(model => model.UpdatedTime)</dd>
-            </dl>
+        <!-- Placeholder -->
+        <div class="user-view-activity-group">
+            <h5 class="user-view-meta-title">Activity Summary</h5>
+            <div class="user-view-activity-stats">
+                <div class="activity-stat">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">Reviews Written</div>
+                </div>
+                <div class="activity-stat">
+                    <div class="stat-value">18</div>
+                    <div class="stat-label">Book Favorites</div>
+                </div>
+                <div class="activity-stat">
+                    <div class="stat-value">4.2</div>
+                    <div class="stat-label">Avg Rating</div>
+                </div>
+                <div class="activity-stat">
+                    <div class="stat-value">Fantasy</div>
+                    <div class="stat-label">Top Genre</div>
+                </div>
+            </div>
         </div>
+
     </div>
 </div>
 
-<div class="modal-footer mt-4">
+<div class="user-view-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
     <button type="button" class="btn btn-primary edit-user" data-userid="@Model.UserId">
         <i class="fas fa-pen"></i> Edit
     </button>
 </div>
 
-<script>
-    $(function () {
-        $('.edit-user').click(function () {
-            var userId = $(this).data('userid');
-            $('#viewUserModal').modal('hide');
-
-            $('#editUserModalBody').load('@Url.Action("UserEditModal", "UserMaster")?userId=' + userId, function () {
-                $('#editUserModal').modal('show');
-            });
-        });
-    });
-</script>
+<script src="~/js/adminUserMaster/usermasterModal.js" asp-append-version="true"></script>

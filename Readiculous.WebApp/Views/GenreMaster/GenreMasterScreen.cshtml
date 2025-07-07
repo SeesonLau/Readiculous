@@ -1,16 +1,12 @@
 ﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
 @{
-    ViewData["Title"] = "Manage Genre";
+    ViewData["Title"] = "Genre Management";
 }
 
-<link rel="stylesheet" href="~/css/genre-master.css" />
-
 <div class="container-fluid px-0">
-    <!-- Changed to container-fluid for consistency -->
     <div class="row mb-4 mx-0 align-items-center">
-        <!-- Unified header row styling -->
         <div class="col-md-6 px-0">
-            <h1 class="mb-0">Manage Genre</h1> <!-- Changed to h1 for consistency -->
+            <h1 class="mb-0">Manage Genre</h1> 
         </div>
         <div class="col-md-6 px-0 text-md-end">
             <button type="button" id="openAddGenreModalBtn" class="btn btn-success">
@@ -19,14 +15,13 @@
         </div>
     </div>
 
-    <!-- Updated filter card to use CoreUI classes -->
     <div class="card mb-4">
         <div class="card-body">
             <form asp-action="Index" method="get">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-6 col-lg-8 position-relative">
                         <span class="genre-search-icon">
-                            <i class="fas fa-search"></i> <!-- Using Font Awesome for consistency -->
+                            <i class="fas fa-search"></i> 
                         </span>
                         <input type="text" name="searchString" class="form-control genre-search-bar"
                                placeholder="Search by genre..." value="@ViewData["CurrentFilter"]" />
@@ -50,7 +45,6 @@
         </div>
     </div>
 
-    <!-- Rest of your content remains the same -->
     <div class="row mx-0">
         <div class="col px-0">
             <div id="genreListContainer" class="table-responsive">
@@ -72,7 +66,6 @@
     </div>
 </div>
 
-<!-- Modal Containers - Updated to use CoreUI modal structure -->
 <div class="modal fade" id="addGenreModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -101,10 +94,10 @@
     </div>
 </div>
 
-@section Scripts {
-    <!-- CoreUI JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/js/coreui.bundle.min.js"></script>
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
 
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/js/coreui.bundle.min.js"></script>
     <script>
         const genreMasterSettings = {
             genreMasterScreenUrl: '/GenreMaster/GenreMasterScreen',
