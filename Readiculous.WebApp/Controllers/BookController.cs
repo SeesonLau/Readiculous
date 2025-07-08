@@ -81,6 +81,7 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
             }
             catch (Exception)
             {
@@ -102,6 +103,10 @@ namespace Readiculous.WebApp.Controllers
                 {
                     TempData["ErrorMessage"] = ex.Message;
                 }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                }
             }
 
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
@@ -111,12 +116,22 @@ namespace Readiculous.WebApp.Controllers
         }
         public IActionResult Details(string id)
         {
-            var model = _bookService.GetBookDetailsById(id);
-            if (model == null)
+            try
             {
-                return NotFound();
+                var model = _bookService.GetBookDetailsById(id);
+                return View(model);
             }
-            return View(model);
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
+            
         }
         public IActionResult Delete(string id)
         {
@@ -126,6 +141,11 @@ namespace Readiculous.WebApp.Controllers
                 return RedirectToAction("Index");
             }
             catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
@@ -140,7 +160,12 @@ namespace Readiculous.WebApp.Controllers
                 _bookService.AddBookToFavorites(id, this.UserId);
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return RedirectToAction("Index");
@@ -153,7 +178,12 @@ namespace Readiculous.WebApp.Controllers
                 _bookService.RemoveBookFromFavorites(id, this.UserId);
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return RedirectToAction("Index");
@@ -164,11 +194,25 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult CreateReview(string id)
         {
-            var title = _bookService.GetTitleByBookId(id);
-            var email = _userService.GetEmailByUserId(id); 
+            try
+            {
+                var title = _bookService.GetTitleByBookId(id);
+                var email = _userService.GetEmailByUserId(id);
 
-            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName, BookTitle = title, Email = email };
-            return PartialView("_AddReviewModal", model);
+
+                var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName, BookTitle = title, Email = email };
+                return PartialView("_AddReviewModal", model);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                return RedirectToAction("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+            }
         }
         [HttpPost]
         public IActionResult CreateReview(ReviewViewModel model)
@@ -183,7 +227,7 @@ namespace Readiculous.WebApp.Controllers
                 _reviewService.AddReview(model);
                 return RedirectToAction("Details", new { id = model.BookId }); // redirect if success
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return PartialView("_AddReviewModal", model); // Return modal with error
@@ -221,11 +265,16 @@ namespace Readiculous.WebApp.Controllers
                 _reviewService.UpdateReview(model, this.UserId);
                 return RedirectToAction("Details", new { id = model.BookId });
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                return PartialView("_EditReviewModal", model);
             }
+
+            return PartialView("_EditReviewModal", model);
         }
     }
 }

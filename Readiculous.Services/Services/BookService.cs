@@ -8,7 +8,6 @@ using Readiculous.Services.ServiceModels;
 using Supabase;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -111,9 +110,13 @@ namespace Readiculous.Services.Services
         }
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+            }
+            if(_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ISBNExists);
             }
 
             var book = _bookRepository.GetBookById(model.BookId);
@@ -260,8 +263,6 @@ namespace Readiculous.Services.Services
 
             var model = new BookDetailsViewModel();
 
-
-            //TO ADD: REVIEW COUNT AND RATING AVERAGE
             _mapper.Map(book, model);
             model.Genres = book.GenreAssociations
                 .Where(ga => ga.Genre.DeletedTime == null)

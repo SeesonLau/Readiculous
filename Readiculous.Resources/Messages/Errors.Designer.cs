@@ -160,6 +160,15 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Book with the same ISBN already exists!.
+        /// </summary>
+        public static string ISBNExists {
+            get {
+                return ResourceManager.GetString("ISBNExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server error occured!.
         /// </summary>
         public static string ServerError {

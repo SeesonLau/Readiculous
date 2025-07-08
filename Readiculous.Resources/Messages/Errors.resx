@@ -150,6 +150,9 @@
   <data name="InvalidCurrentPassword" xml:space="preserve">
     <value>Current Password does not match your current password!</value>
   </data>
+  <data name="ISBNExists" xml:space="preserve">
+    <value>Book with the same ISBN already exists!</value>
+  </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error occured!</value>
   </data>
