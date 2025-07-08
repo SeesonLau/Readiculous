@@ -41,9 +41,13 @@ namespace Readiculous.Services.Services
         public async Task AddBook(BookViewModel model, string creatorId)
         {
             // Books can only be added if the title and author combination does not already exist.
-            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+            }
+            if (_bookRepository.ISBNExists(model.BookId, model.ISBN))
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ISBNExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
