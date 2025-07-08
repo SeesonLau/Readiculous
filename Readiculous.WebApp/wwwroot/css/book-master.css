@@ -1,267 +1,380 @@
-﻿/* book-master.css */
-:root {
-    --color-text: #2C2133;
-    --color-header: #B089A5;
-    --color-btn: #EDAEC0;
-    --color-modal: #F8ECE9;
-    --color-background: #F2EFF1;
-    --font-primary: 'Gentium Book Plus', serif;
-    --color-text-placeholder: rgba(39, 39, 42, 0.6);
-    --color-table-border: #d9c7d0;
-    --color-table-stripe: #f9f5f7;
-    --color-btn-hover: #d89cb1;
-    --color-danger: #dc3545;
-    --color-danger-hover: #bb2d3b;
-    --color-info: #0dcaf0;
-    --color-info-hover: #0aa2c0;
-    --color-secondary: #6c757d;
-    --color-secondary-hover: #5c636a;
-    --color-success: #198754;
-    --color-success-hover: #157347;
-    --color-primary: #0d6efd;
-    --color-primary-hover: #0b5ed7;
-}
-
-body {
-    font-family: var(--font-primary);
-    color: var(--color-text);
+﻿/*  CONTAINER & HEADER STYLES  */
+.book-management-container {
     background-color: var(--color-background);
+    padding: 2rem;
+    border-radius: 15px;
 }
 
-/* Header Styles */
-.container-fluid .row.mb-4.mx-0 h1 {
-    color: var(--color-header);
-    font-weight: 700;
+.book-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-border);
 }
 
-/* Button Styles */
-.btn {
-    font-family: var(--font-primary);
+.book-management-title {
+    font-family: var(--font-secondary);
+    color: var(--color-secondary);
+    font-size: 2rem;
     font-weight: 600;
+    margin: 0;
+}
+
+/*  FILTER CONTROLS  */
+.book-filter-controls {
+    margin-bottom: 2rem;
+    align-items: end;
+}
+
+.filter-group {
+    margin-bottom: 0;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-ui);
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.filter-input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-primary);
+    background-color: var(--color-modal);
+    color: var(--color-text);
     transition: all 0.3s ease;
 }
 
-.btn-success {
-    background-color: var(--color-btn);
-    border-color: var(--color-btn);
-    color: var(--color-text);
-}
-
-    .btn-success:hover {
-        background-color: var(--color-btn-hover);
-        border-color: var(--color-btn-hover);
-        color: var(--color-text);
+    .filter-input:focus {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+        outline: none;
     }
 
-.btn-primary {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
+/*  TABLE STYLES  */
+.book-table-container {
+    overflow-x: auto;
+    background-color: var(--color-modal);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(176, 137, 165, 0.1);
+    margin-bottom: 2rem;
 }
 
-    .btn-primary:hover {
-        background-color: var(--color-primary-hover);
-        border-color: var(--color-primary-hover);
-    }
-
-.btn-info {
-    background-color: var(--color-info);
-    border-color: var(--color-info);
-}
-
-    .btn-info:hover {
-        background-color: var(--color-info-hover);
-        border-color: var(--color-info-hover);
-    }
-
-.btn-secondary {
-    background-color: var(--color-secondary);
-    border-color: var(--color-secondary);
-}
-
-    .btn-secondary:hover {
-        background-color: var(--color-secondary-hover);
-        border-color: var(--color-secondary-hover);
-    }
-
-.btn-danger {
-    background-color: var(--color-danger);
-    border-color: var(--color-danger);
-}
-
-    .btn-danger:hover {
-        background-color: var(--color-danger-hover);
-        border-color: var(--color-danger-hover);
-    }
-
-/* Form Controls */
-.form-control, .form-select, .form-check-input {
-    border-color: var(--color-table-border);
+.book-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
     font-family: var(--font-primary);
 }
 
-    .form-control:focus, .form-select:focus {
-        border-color: var(--color-btn);
-        box-shadow: 0 0 0 0.25rem rgba(237, 174, 192, 0.25);
+    .book-table thead {
+        background-color: var(--color-secondary);
+        color: var(--color-modal);
+        height: 40px;
     }
 
-    .form-control::placeholder {
-        color: var(--color-text-placeholder);
-        opacity: 1;
+    .book-table th {
+        padding: 0.5rem;
+        font-weight: 600;
+        text-align: center;
+        font-family: var(--font-secondary);
+        vertical-align: middle;
+        font-size: 0.9rem;
     }
 
-/* Table Styles */
-.table {
-    border-color: var(--color-table-border);
-}
-
-.table-dark {
-    background-color: var(--color-header);
-    color: white;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: var(--color-table-stripe);
-}
-
-.table-bordered th, .table-bordered td {
-    border-color: var(--color-table-border);
-}
-
-/* Modal Styles */
-.modal-content {
-    background-color: var(--color-modal);
-    border-color: var(--color-table-border);
-}
-
-.modal-header {
-    border-bottom-color: var(--color-table-border);
-}
-
-/* Badge Styles */
-.badge.bg-primary {
-    background-color: var(--color-primary) !important;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .table-responsive {
-        border-color: var(--color-table-border);
+    /*  TABLE ROWS & CELLS  */
+    .book-table tbody tr {
+        height: 100px; 
+        transition: background-color 0.2s ease;
     }
 
-    .btn {
-        padding: 0.375rem 0.5rem;
-        font-size: 0.875rem;
+        .book-table tbody tr:hover {
+            background-color: var(--color-highlight);
+        }
+
+    .book-table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--color-border);
+        font-size: 0.9rem;
     }
 
-    .d-flex.gap-2 {
-        gap: 0.5rem !important;
-    }
+/*  COVER IMAGE STYLES  */
+.cover-image-cell {
+    width: 80px;
+    padding: 8px;
 }
 
-/* Action Buttons Container */
-.text-center.align-middle {
+.cover-image-container {
+    width: 64px;
+    height: 96px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    border-radius: 3px;
+    background-color: var(--color-border);
+}
+
+.cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cover-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text);
+    font-size: 1.5rem;
+}
+
+/*  TEXT TRUNCATION  */
+.table-cell-truncate {
+    max-width: 150px; 
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.2s ease;
+    vertical-align: top;
+    padding: 8px 12px;
 }
 
-/* Cover Image Styles */
-.img-thumbnail {
-    background-color: var(--color-modal);
-    border-color: var(--color-table-border);
+    /* Specific column widths */
+    .table-cell-truncate.title-cell {
+        max-width: 200px; 
+    }
+
+    .table-cell-truncate.author-cell {
+        max-width: 120px; 
+    }
+
+/* Hover effects */
+tr:hover .table-cell-truncate {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    position: relative;
+    z-index: 10;
 }
 
-/* No Results Message */
-.text-center.text-muted {
-    color: var(--color-text-placeholder) !important;
-    font-style: italic;
+
+.table-auto-row {
+    height: auto;
+}
+/*  GENRE BADGES  */
+.genre-badges-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-height: 90px;
+    overflow-y: auto;
+    padding: 2px;
+    align-content: flex-start;
+    justify-content: center;
 }
 
-/* Pagination Styles */
-.pagination .page-item.active .page-link {
+.genre-badge {
     background-color: var(--color-btn);
-    border-color: var(--color-btn);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    display: inline-block;
+}
+
+/* Hide scrollbar but keep functionality */
+.genre-badges-container::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/*  ACTION BUTTONS  */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+}
+
+.btn-edit {
+    background-color: var(--color-btn);
     color: var(--color-text);
 }
 
-.pagination .page-link {
-    color: var(--color-text);
+.btn-delete {
+    background-color: var(--color-danger);
+    color: var(--color-modal);
 }
 
-    .pagination .page-link:hover {
-        background-color: var(--color-btn-hover);
+.btn-action:hover {
+    transform: scale(1.1);
+}
+
+/*  EMPTY STATE  */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text);
+    font-family: var(--font-primary);
+}
+
+/*  ADD BOOK BUTTON  */
+.btn-add-book {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-modal);
+    font-family: var(--font-secondary);
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+    .btn-add-book:hover {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
         color: var(--color-text);
     }
 
-/* Checkbox Styles */
-.form-check-input:checked {
-    background-color: var(--color-btn);
-    border-color: var(--color-btn);
+    .btn-add-book:focus {
+        box-shadow: 0 0 0 0.25rem rgba(139, 94, 131, 0.5);
+    }
+
+/*  MODAL STYLES  */
+.book-modal .modal-header {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    border-bottom: none;
+    padding: 1.5rem;
 }
 
-.form-check-input:focus {
-    border-color: var(--color-btn);
-    box-shadow: 0 0 0 0.25rem rgba(237, 174, 192, 0.25);
-}
-
-/* Genre Filter Section */
-.form-label {
-    color: var(--color-text);
+.book-modal .modal-title {
+    font-family: var(--font-secondary);
     font-weight: 600;
 }
 
-/* Add these styles to your book-master.css */
-
-/* Table cell styling for text content */
-.table td {
-    max-width: 200px; /* Adjust this value as needed */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.book-modal .modal-body {
+    padding: 1.5rem;
+    background-color: var(--color-modal);
 }
 
-    /* Special handling for title and author columns to show they might be truncated */
-    .table td:nth-child(2), /* Title column */
-    .table td:nth-child(3) { /* Author column */
-        position: relative;
+.book-modal .modal-footer {
+    background-color: var(--color-modal);
+    border-top: 1px solid var(--color-border);
+    padding: 1rem 1.5rem;
+}
+
+/*  PAGINATION CONTROLS  */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/*  RESPONSIVE ADJUSTMENTS  */
+@media (max-width: 992px) {
+    .book-table th,
+    .book-table td {
+        padding: 0.5rem;
     }
 
-        .table td:nth-child(2):hover,
-        .table td:nth-child(3):hover {
-            white-space: normal;
-            overflow: visible;
-            z-index: 10;
-            background-color: var(--color-table-stripe);
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-    /* Genre cell styling */
-    .table td:nth-child(4) { /* Genre column */
-        white-space: normal !important;
-        overflow: visible !important;
-        max-width: 250px; /* Adjust as needed */
-        min-width: 150px; /* Ensure enough space for at least one genre */
+    .table-cell-truncate.title-cell {
+        max-width: 150px;
     }
 
-/* Genre badges styling */
-.badge.bg-primary {
-    display: inline-block;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    .table-cell-truncate.author-cell {
+        max-width: 100px;
+    }
 }
 
-/* Ensure row height stays consistent */
-.table tbody tr {
-    height: 80px; /* Fixed height for rows, adjust as needed */
+@media (max-width: 768px) {
+    .book-table tbody tr {
+        height: 90px;
+    }
+
+    .cover-image-container {
+        width: 50px;
+        height: 75px;
+    }
+
+    .genre-badge {
+        max-width: 80px;
+    }
+
+    .book-management-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .table-cell-truncate.title-cell {
+        max-width: 120px;
+    }
+
+    .table-cell-truncate.author-cell {
+        max-width: 80px;
+    }
 }
 
-/* Cover image cell sizing */
-.table td:first-child {
-    width: 60px; /* Fixed width for cover column */
-}
+@media (max-width: 576px) {
+    .book-table th,
+    .book-table td {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.8rem;
+    }
 
-/* Action buttons cell sizing */
-.table td:last-child {
-    width: 180px; /* Fixed width for actions column */
+    .book-table tbody tr {
+        height: 80px;
+    }
+
+    .cover-image-container {
+        width: 40px;
+        height: 60px;
+    }
+
+    .genre-badge {
+        font-size: 0.6rem;
+        max-width: 60px;
+    }
+
+    .btn-action {
+        width: 28px;
+        height: 28px;
+    }
+
+    .book-management-container {
+        padding: 1rem;
+    }
 }
