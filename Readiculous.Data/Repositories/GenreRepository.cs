@@ -82,5 +82,12 @@ namespace Readiculous.Data.Repositories
                 .FirstOrDefault(g => g.Name == name &&
                                     g.DeletedTime == null);
         }
+        public IQueryable<string> GetGenreNamesByBookId(string bookId)
+        {
+            return this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => bga.BookId == bookId &&
+                                bga.Genre.DeletedTime == null)
+                .Select(bga => bga.Genre.Name);
+        }        
     }
 }

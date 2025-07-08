@@ -271,9 +271,7 @@ namespace Readiculous.Services.Services
             var model = new BookDetailsViewModel();
 
             _mapper.Map(book, model);
-            model.Genres = book.GenreAssociations
-                .Where(ga => ga.Genre.DeletedTime == null)
-                .Select(ga => ga.Genre.Name)
+            model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                 .ToList();
             model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
                         ? book.BookReviews.Average(r => r.Rating)
@@ -374,11 +372,8 @@ namespace Readiculous.Services.Services
                 {
                     var model = new BookListItemViewModel();
 
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
@@ -405,9 +400,7 @@ namespace Readiculous.Services.Services
 
                     //TO ADD: REVIEW COUNT AND RATING AVERAGE
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
@@ -427,22 +420,21 @@ namespace Readiculous.Services.Services
         {
             var bookGenres = genres.Select(g =>
             {
-                var genre = _genreRepository.GetGenreById(g.GenreId);
+                Genre genre = new();
+                _mapper.Map(g, genre);
+
                 return genre;
             })
                 .ToList();
 
             var books = _bookRepository.GetBooksByGenreList(bookGenres)
-                .Where(b => b.DeletedTime == null)
                 .ToList()
                 .Select(book =>
                 {
                     var model = new BookListItemViewModel();
 
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
@@ -468,16 +460,13 @@ namespace Readiculous.Services.Services
                 .ToList();
 
             var books = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres)
-                .Where(b => b.DeletedTime == null)
                 .ToList()
                 .Select(book =>
                 {
                     var model = new BookListItemViewModel();
 
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
