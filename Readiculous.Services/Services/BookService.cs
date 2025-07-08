@@ -577,9 +577,12 @@ namespace Readiculous.Services.Services
             _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
         }
 
+        // String Helper Functions
         public string GetTitleByBookId(string bookId)
         {
-            throw new NotImplementedException();
+            var book = _bookRepository.GetBookById(bookId);
+            return book.Title;
         }
+
     }
 }

@@ -5,8 +5,6 @@
     var books = Model.Books ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
 }
 
-<link rel="stylesheet" href="~/css/genre-view.css" />
-
 <div class="container-fluid genre-view-container">
     <div class="genre-details-container">
         <div class="genre-info-card">
@@ -28,47 +26,46 @@
                 </div>
             </div>
 
-            <div class="genre-scrollable-section">
-                <div class="genre-list-section">
-                    <div class="genre-divider"></div>
-                    <h3 class="genre-list-title">Browse Genres</h3>
-                    <div class="genre-list-container">
-                        <ul class="genre-list">
-                            @foreach (var genre in Model.AllGenres)
-                            {
-                                <li class="genre-list-item">
-                                    <a href="@Url.Action("GenreViewPage", "GenreMaster", new { id = genre.GenreId })"
-                                       class="@(genre.GenreId == Model.Genre.GenreId ? "active" : "")">
-                                        @genre.Name
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
+            <div class="genre-list-section">
+                <div class="genre-divider"></div>
+                <h3 class="genre-list-title">Browse Genres</h3>
+                <div class="genre-list-container">
+                    <ul class="genre-list">
+                        @foreach (var genre in Model.AllGenres)
+                        {
+                            <li class="genre-list-item">
+                                <a href="@Url.Action("GenreViewPage", "GenreMaster", new { id = genre.GenreId })"
+                                   class="@(genre.GenreId == Model.Genre.GenreId ? "active" : "")">
+                                    @genre.Name
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </div>
-            </div>
-            
-            <div class="genre-actions">
-                <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn btn-secondary genre-back-btn">
-                    <i class="fas fa-arrow-left"></i> Back to Genres
-                </a>
             </div>
         </div>
     </div>
     
     <div class="genre-books-container">
         <div class="books-header-section">
-            <h2 class="books-header">Books In This Genre</h2>
-            <div class="book-search-container">
-                <form method="get" id="bookSearchForm">
-                    <input type="hidden" name="id" value="@Model.Genre.GenreId" />
-                    <div class="search-input-group">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="bookSearch" class="search-input" 
-                               placeholder="Search books..." value="@ViewData["BookSearch"]" autocomplete="off" />
-                        <button type="submit" class="btn btn-success search-btn">Search</button>
+            <div class="books-header-row">
+                <h2 class="books-header">Books In This Genre</h2>
+                <div class="header-controls">
+                    <div class="book-search-container">
+                        <form method="get" id="bookSearchForm">
+                            <input type="hidden" name="id" value="@Model.Genre.GenreId" />
+                            <div class="search-input-group">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" name="bookSearch" class="search-input"
+                                       placeholder="Search books..." value="@ViewData["BookSearch"]" autocomplete="off" />
+                                <button type="submit" class="btn btn-success search-btn">Search</button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                    <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn btn-secondary genre-back-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Genres
+                    </a>
+                </div>
             </div>
         </div>
         

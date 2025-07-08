@@ -22,10 +22,6 @@
                         <i class="fa-solid fa-gear"></i>
                         <a class="open-edit-profile">Edit Profile</a>
                     </li>
-                    <li>
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <a asp-action="SignOutUser" asp-controller="Account">Logout</a>
-                    </li>
                     <li class="nav-item">
                         <i class="fa-solid fa-users"></i>
                         <a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a>
@@ -46,22 +42,12 @@
                         <i class="fa-solid fa-book"></i>
                         <a asp-controller="Book" asp-action="Index">Book</a>
                     </li>
+                    <li>
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <a asp-action="SignOutUser" asp-controller="Account">Logout</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
 </header>
-
-<style>
-    .dropdown ul li:hover {
-        background-color: var(--color-btn);
-    }
-
-    .dropdown a {
-        color: var(--color-text);
-    }
-
-    header {
-        border-bottom: 1px solid var(--color-text);
-    }
-</style>

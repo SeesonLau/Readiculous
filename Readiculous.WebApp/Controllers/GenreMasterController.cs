@@ -26,7 +26,7 @@ namespace Readiculous.WebApp.Controllers
         }
 
         //GenreListItemViewModel
-        public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType = GenreSortType.CreatedTimeAscending, int page = 1, int pageSize = 10)
+        public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType = GenreSortType.Latest, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentGenreSearchType"] = searchType.ToString();

@@ -78,9 +78,9 @@ namespace Readiculous.Services.Services
         }
 
         // Multiple Genre Listing methods
-        public List<GenreListItemViewModel> GetGenreList(string genreName, GenreSortType sortType = GenreSortType.CreatedTimeDescending)
+        public List<GenreListItemViewModel> GetGenreList(string genreName, GenreSortType sortType = GenreSortType.Latest)
         {
-            if (string.IsNullOrEmpty(genreName) && sortType == GenreSortType.CreatedTimeDescending)
+            if (string.IsNullOrEmpty(genreName) && sortType == GenreSortType.Latest)
             {
                 return ListAllActiveGenres();
             }
@@ -166,7 +166,7 @@ namespace Readiculous.Services.Services
 
             return genres;
         }
-        private List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.CreatedTimeDescending)
+        private List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.Latest)
         {
             var genres = _genreRepository.GetGenresByName(genreName)
                 .Where(g => g.DeletedTime == null)
@@ -188,8 +188,8 @@ namespace Readiculous.Services.Services
                 GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name).ToList(),
                 GenreSortType.BookCountAscending => genres.OrderBy(g => g.BookCount).ToList(),
                 GenreSortType.BookCountDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
-                GenreSortType.CreatedTimeAscending => genres.OrderBy(g => g.UpdatedTime).ToList(),
-                GenreSortType.CreatedTimeDescending => genres.OrderByDescending(g => g.UpdatedTime).ToList(),
+                GenreSortType.Oldest => genres.OrderBy(g => g.UpdatedTime).ToList(),
+                GenreSortType.Latest => genres.OrderByDescending(g => g.UpdatedTime).ToList(),
                 _ => genres, // Default case
             };
         }

@@ -55,12 +55,18 @@ namespace Readiculous.Resources.Constants
 
         public enum GenreSortType
         {
+            [Display(Name = "Username: A-Z")]
             NameAscending = 0,
+            [Display(Name = "Username: Z-A")]
             NameDescending = 1,
+            [Display(Name = "Book Count: 🡡")]
             BookCountAscending = 2,
+            [Display(Name = "Book Count: 🡣")]
             BookCountDescending = 3,
-            CreatedTimeAscending = 4,
-            CreatedTimeDescending = 5,
+            [Display(Name = "Oldest")]
+            Oldest = 4,
+            [Display(Name = "Latest")]
+            Latest = 5,
         }
 
         public enum BookSearchType
@@ -82,9 +88,9 @@ namespace Readiculous.Resources.Constants
             AuthorAscending = 2,
             [Display(Name = "Author: Z-A")]
             AuthorDescending = 3,
-            [Display(Name = "Rating: 5-1")]
+            [Display(Name = "Rating: 🡡")]
             RatingAscending = 4,
-            [Display(Name = "Rating: 1-5")]
+            [Display(Name = "Rating: 🡣")]
             RatingDescending = 5,
             [Display(Name = "Oldest")]
             Oldest = 6,
