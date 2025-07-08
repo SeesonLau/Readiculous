@@ -16,18 +16,42 @@ namespace Readiculous.Services.Services
             _configuration = configuration;
         }
 
+        
+        private string ResolveSmtpPassword(IConfigurationSection smtpSettings)
+        {
+            var password = smtpSettings["Password"];
+            
+            
+            if (password != null && password.StartsWith("%") && password.EndsWith("%"))
+            {
+                var envVarName = password.Substring(1, password.Length - 2);
+                var envPassword = Environment.GetEnvironmentVariable(envVarName);
+                
+                if (string.IsNullOrEmpty(envPassword))
+                {
+                    throw new InvalidOperationException($"Environment variable '{envVarName}' is not set. Please set the SMTP password environment variable.");
+                }
+                
+                return envPassword;
+            }
+            
+            return password;
+        }
+
         public async Task<bool> SendOtpEmailAsync(string email, string otp, string tempPassword)
         {
             try
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
-                // Real email sending
+                var resolvedPassword = ResolveSmtpPassword(smtpSettings);
+                
+                
                 Console.WriteLine($"🔧 SMTP Configuration:");
                 Console.WriteLine($"   Host: {smtpSettings["Host"]}");
                 Console.WriteLine($"   Port: {smtpSettings["Port"]}");
                 Console.WriteLine($"   SSL: {smtpSettings["EnableSsl"]}");
                 Console.WriteLine($"   Username: {smtpSettings["Username"]}");
-                Console.WriteLine($"   Password: {smtpSettings["Password"].Substring(0, Math.Min(4, smtpSettings["Password"].Length))}***");
+                Console.WriteLine($"   Password: {resolvedPassword.Substring(0, Math.Min(4, resolvedPassword.Length))}***");
                 
                 var smtpClient = new SmtpClient
                 {
@@ -35,15 +59,15 @@ namespace Readiculous.Services.Services
                     Port = int.Parse(smtpSettings["Port"]),
                     EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"]),
+                    Credentials = new NetworkCredential(smtpSettings["Username"], resolvedPassword),
                     DeliveryMethod = SmtpDeliveryMethod.Network,
-                    Timeout = 10000 // 10 seconds timeout
+                    Timeout = 10000 
                 };
 
                 var mailMessage = new MailMessage
                 {
                     From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
-                    Subject = "Your OTP and Temporary Password - Readiculous",
+                    Subject = "Your OTP - Readiculous",
                     Body = $@"
                         <html>
                         <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
@@ -72,32 +96,9 @@ namespace Readiculous.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error and fallback to console output
+               
                 Console.WriteLine($"❌ Failed to send email: {ex.Message}");
-                Console.WriteLine($"📧 OTP for {email}: {otp}");
-                Console.WriteLine($"🔒 Temporary Password: {tempPassword}");
-                
-                // Provide specific guidance based on error
-                if (ex.Message.Contains("Authentication Required") || ex.Message.Contains("5.7.0"))
-                {
-                    Console.WriteLine("🔐 Authentication Issue:");
-                    Console.WriteLine("   1. Make sure 2-Factor Authentication is enabled on noted2001@gmail.com");
-                    Console.WriteLine("   2. Generate a new App Password (not regular password)");
-                    Console.WriteLine("   3. Use the 16-character App Password in appsettings.json");
-                    Console.WriteLine("   4. Wait a few minutes after generating new App Password");
-                }
-                else if (ex.Message.Contains("secure connection"))
-                {
-                    Console.WriteLine("🔒 Security Issue:");
-                    Console.WriteLine("   1. Make sure 'EnableSsl' is set to 'true'");
-                    Console.WriteLine("   2. Use port 587 for Gmail SMTP");
-                }
-                else
-                {
-                    Console.WriteLine("💡 Check your SMTP settings in appsettings.json");
-                }
-                
-                return true; // Return true so the flow continues
+                return false; 
             }
         }
 
@@ -106,6 +107,8 @@ namespace Readiculous.Services.Services
             try
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
+                var resolvedPassword = ResolveSmtpPassword(smtpSettings);
+                
                 var mailMessage = new MailMessage
                 {
                     From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
@@ -136,9 +139,9 @@ namespace Readiculous.Services.Services
                     Port = int.Parse(smtpSettings["Port"]),
                     EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"]),
+                    Credentials = new NetworkCredential(smtpSettings["Username"], resolvedPassword),
                     DeliveryMethod = SmtpDeliveryMethod.Network,
-                    Timeout = 10000 // 10 seconds timeout
+                    Timeout = 10000 
                 };
                 await smtpClient.SendMailAsync(mailMessage);
                 Console.WriteLine($"✅ Temp password email sent successfully to {email}");
@@ -147,8 +150,7 @@ namespace Readiculous.Services.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Failed to send temp password email: {ex.Message}");
-                Console.WriteLine($"📧 Temp password for {email}: {tempPassword}");
-                return true;
+                return false; 
             }
         }
     }
