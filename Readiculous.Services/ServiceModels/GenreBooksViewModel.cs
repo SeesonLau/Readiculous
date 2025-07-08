@@ -9,5 +9,8 @@ namespace Readiculous.Services.ServiceModels
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public int PageSize { get; set; } = 10;
+        public int TotalItems { get; set; }
+        public int TotalBooksCount { get; set; }
+        public List<GenreListItemViewModel> AllGenres { get; set; }
     }
 } 

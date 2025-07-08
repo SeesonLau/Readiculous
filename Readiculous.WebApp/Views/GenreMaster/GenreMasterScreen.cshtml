@@ -1,0 +1,111 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
+@{
+    ViewData["Title"] = "Genre Management";
+}
+
+<div class="container-fluid px-0">
+    <div class="row mb-4 mx-0 align-items-center">
+        <div class="col-md-6 px-0">
+            <h1 class="mb-0">Manage Genre</h1> 
+        </div>
+        <div class="col-md-6 px-0 text-md-end">
+            <button type="button" id="openAddGenreModalBtn" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>New Genre
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6 col-lg-8 position-relative">
+                        <span class="genre-search-icon">
+                            <i class="fas fa-search"></i> 
+                        </span>
+                        <input type="text" name="searchString" class="form-control genre-search-bar"
+                               placeholder="Search by genre..." value="@ViewData["CurrentFilter"]" />
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                        <label for="searchType" class="form-label">Sort By:</label>
+                        <select name="searchType" class="form-select">
+                            @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
+                            {
+                                <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentGenreSearchType"]?.ToString() ?? "") ? "selected" : "")">
+                                    @type.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-lg-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mx-0">
+        <div class="col px-0">
+            <div id="genreListContainer" class="table-responsive">
+                @await Html.PartialAsync("_GenreListPartial", Model)
+            </div>
+        </div>
+    </div>
+
+    <div class="row mx-0 mt-3">
+        <div class="col-md-6 px-0">
+            @if (ViewBag.PaginationModel != null)
+            {
+                @await Component.InvokeAsync("Pagination", ViewBag.PaginationModel)
+            }
+        </div>
+        <div class="col-md-6 px-0 text-md-end">
+            @await Component.InvokeAsync("PageSize", new { currentPageSize = ViewBag.PageSize ?? 10 })
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addGenreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Genre</h5>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addGenreModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editGenreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Genre</h5>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editGenreModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/js/coreui.bundle.min.js"></script>
+    <script>
+        const genreMasterSettings = {
+            genreMasterScreenUrl: '/GenreMaster/GenreMasterScreen',
+            genreAddModalUrl: '/GenreMaster/GenreAddModal',
+            genreEditModalUrl: '/GenreMaster/GenreEditModal',
+            genreViewModalUrl: '/GenreMaster/GenreViewPage',
+            deleteGenreUrl: '/GenreMaster/Delete'
+        };
+    </script>
+    <script src="~/js/adminGenreMaster/genremasterScreen.js"></script>
+}

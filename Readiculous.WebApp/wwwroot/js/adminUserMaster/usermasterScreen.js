@@ -7,6 +7,7 @@
             </div>
             <p class="mt-2">Loading users...</p>
         </div>`;
+
     function initializeEventHandlers() {
         // Search string input with debounce
         let filterTimeout;
@@ -14,18 +15,18 @@
             clearTimeout(filterTimeout);
             filterTimeout = setTimeout(loadFilteredResults, 300);
         });
-        // Role filter 
+
+        // Role filter
         $('#roleType').on('change', loadFilteredResults);
+
         // Sort type 
-        $('#searchType').on('change', function () {
-            const searchType = $(this).val();
-            updateUrlWithFilters(searchType);
-        });
+        $('#searchType').on('change', loadFilteredResults);
 
         // Add User Modal
         $('#addUserModal').on('show.bs.modal', function () {
             $('#addUserModalBody').load(settings.userAddModalUrl);
         });
+
         // Edit User Modal
         $(document).on('click', '.edit-user', function () {
             const userId = $(this).data('userid');
@@ -34,7 +35,8 @@
                 $('#editUserModal').modal('show');
             });
         });
-        //View User Modal
+
+        // View User Modal
         $(document).on('click', '.view-user', function () {
             const userId = $(this).data('userid');
             $('#viewUserModalBody').html(loadingSpinner);
@@ -42,7 +44,8 @@
                 $('#viewUserModal').modal('show');
             });
         });
-        //Delete User Modal
+
+        // Delete User Modal
         $(document).on('click', '.delete-user', function () {
             const userId = $(this).data('userid');
             const userName = $(this).data('username');
@@ -67,23 +70,6 @@
         });
     }
 
-    function updateUrlWithFilters(searchType) {
-        const searchString = $('#searchString').val().trim();
-        const roleType = $('#roleType').val();
-
-        let url = `${settings.userMasterScreenUrl}?`;
-        url += `searchType=${encodeURIComponent(searchType)}`;
-
-        if (searchString) {
-            url += `&searchString=${encodeURIComponent(searchString)}`;
-        }
-        if (roleType) {
-            url += `&roleType=${encodeURIComponent(roleType)}`;
-        }
-
-        window.location.href = url;
-    }
-
     async function loadFilteredResults() {
         const filters = {
             searchString: $('#searchString').val().trim(),
@@ -102,6 +88,7 @@
             showErrorAlert('Failed to load users. Please try again.');
         }
     }
+
     // Submit Button
     function handleFormSubmit(e) {
         e.preventDefault();
@@ -169,6 +156,7 @@
                 $('#deleteUserModal').modal('hide');
             });
     }
+
     // Alert for errors
     function showErrorAlert(message) {
         $('#userListContainer').html(`
@@ -190,7 +178,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     UserMasterScreen.init(userMasterSettings);
 });
-
 
 /* 
 Current Issues:
@@ -235,7 +222,7 @@ Current Issues:
         Issue: None
 
 6. UserViewDetails
-        Issue: Profile picture is not showing up
+        Issue: Profile picture is not showing up: STATUS: DONE
 
 7. User Add Feature
     Currently lack a logic to generate userId and password for the user.

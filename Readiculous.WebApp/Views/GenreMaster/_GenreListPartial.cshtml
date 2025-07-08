@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
+
+<table class="table table-hover table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th rowspan="2" class="text-center align-middle">Genre</th>
+            <th rowspan="2" class="text-center align-middle">Description</th>
+            <th rowspan="2" class="text-center align-middle">Book Count</th>
+            <th colspan="2" class="text-center align-middle">Modified</th>
+            <th rowspan="2" class="text-center align-middle">Actions</th>
+        </tr>
+        <tr class="text-center">
+            <th class="text-center">Date</th>
+            <th class="text-center">Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="genre-row-@item.GenreId">
+                <td class="align-middle fw-medium" title="@item.Name">@item.Name</td>
+                <td class="align-middle" title="@item.Description">@item.Description</td>
+                <td class="align-middle text-center">
+                    <span class="badge bg-secondary">@item.BookCount</span>
+                </td>
+                <td class="text-center align-middle" style="white-space: nowrap;">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
+                <td class="text-center align-middle" style="white-space: nowrap;">@item.UpdatedTime.ToString("h:mm tt")</td>
+                <td class="align-middle text-center">
+                    <div class="d-flex justify-content-center gap-2">
+                        <a asp-action="GenreViewPage" asp-route-id="@item.GenreId" class="btn btn-sm btn-info" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button class="btn btn-sm btn-warning edit-genre-btn"
+                                data-genre-id="@item.GenreId" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-delete-genre"
+                                data-genre-id="@item.GenreId"
+                                data-genre-name="@item.Name" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-search me-2"></i>No genres found matching your criteria.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

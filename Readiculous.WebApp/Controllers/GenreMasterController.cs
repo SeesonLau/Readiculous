@@ -7,40 +7,51 @@ using Microsoft.Extensions.Logging;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
-    public class GenreController : ControllerBase<GenreController>
+    public class GenreMasterController : ControllerBase<GenreMasterController>
     {
         private readonly IGenreService _genreService;
-        public GenreController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IGenreService genreService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+        public GenreMasterController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IGenreService genreService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _genreService = genreService;
         }
 
         //GenreListItemViewModel
-        public IActionResult Index(string searchString, GenreSortType searchType = GenreSortType.CreatedTimeAscending)
+        public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType = GenreSortType.Latest, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentGenreSearchType"] = searchType.ToString();
 
             ViewBag.GenreSearchTypes = _genreService.GetGenreSortTypes();
 
-            List<GenreListItemViewModel> genres = _genreService.GetGenreList(searchString, searchType);
-            return View(genres);
+            var allGenres = _genreService.GetGenreList(searchString, searchType);
+            var totalItems = allGenres.Count;
+            var paginatedGenres = allGenres
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
+            ViewBag.PageSize = pageSize;
+
+            return View(paginatedGenres);
         }
 
 
         // GenreViewModel
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult GenreAddModal()
         {
-            return View();
+            return PartialView(new GenreViewModel());
         }
 
         [HttpPost]
@@ -80,14 +91,17 @@ namespace Readiculous.WebApp.Controllers
 
         // GenreViewModel
         [HttpGet]
-        public IActionResult Edit(string id)
+        public IActionResult GenreEditModal(string id)
         {
-            var genre = _genreService.GetGenreEditById(id);
-            if (genre == null)
+            try
             {
-                return NotFound();
+                var genre = _genreService.GetGenreEditById(id);
+                return PartialView(genre);
             }
-            return View(genre);
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         [HttpPost]
         public IActionResult Edit(GenreViewModel model)
@@ -123,73 +137,54 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Delete(string id)
-        {
-            var genre = _genreService.GetGenreEditById(id);
-            if (genre == null)
-            {
-                return NotFound();
-            }
-            // Map to the Genre model for the Delete view
-            var genreModel = new Genre
-            {
-                GenreId = genre.GenreId,
-                Name = genre.Name
-            };
-            return View(genreModel);
-        }
-
-        [HttpPost]
-        public IActionResult Delete(Genre model)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
-                _genreService.DeleteGenre(model.GenreId, this.UserId);
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return Json(new { success = true, message = "Genre deleted successfully" });
-                }
-                // No redirect
+                await _genreService.DeleteGenre(id, this.UserId);
+                return Json(new { success = true });
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return Json(new { success = false, message = ex.Message });
-                }
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
+                return BadRequest(ex.Message);
             }
-            return View(model);
         }
 
-        //GenreDetailsViewModel
-        public IActionResult Details(string id, int page = 1, string bookSearch = null)
+        public IActionResult GenreViewPage(string id, int page = 1, string bookSearch = null)
         {
             var genre = _genreService.GetGenreEditById(id);
             if (genre == null)
             {
                 return NotFound();
             }
+
             var allBooks = _genreService.GetBooksByGenreId(id);
             if (!string.IsNullOrWhiteSpace(bookSearch))
             {
                 allBooks = allBooks.Where(b => b.Title != null && b.Title.ToLower().Contains(bookSearch.ToLower())).ToList();
             }
             ViewData["BookSearch"] = bookSearch;
-            int pageSize = 10;
+
+            int pageSize = 10; 
             int totalBooks = allBooks.Count;
-            int totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
-            page = Math.Max(1, Math.Min(page, totalPages == 0 ? 1 : totalPages));
-            var books = allBooks.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var paginationModel = new PaginationModel(totalBooks, page, pageSize);
+            var books = allBooks
+                .Skip((paginationModel.CurrentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             var viewModel = new GenreBooksViewModel
             {
                 Genre = genre,
                 Books = books,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PageSize = pageSize
+                CurrentPage = paginationModel.CurrentPage,
+                TotalPages = paginationModel.TotalPages,
+                PageSize = pageSize,
+                TotalBooksCount = totalBooks,
+                AllGenres = _genreService.GetGenreList("", GenreSortType.NameAscending)
             };
+
             return View(viewModel);
         }
     }

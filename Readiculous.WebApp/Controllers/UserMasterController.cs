@@ -31,7 +31,7 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.Latest, int page = 1, int pageSize = 10)
+        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
@@ -83,7 +83,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserEditById(userId);
+                var user = _userService.GetUserEditById(userId);
                 return PartialView(user);
             }
             catch (InvalidDataException ex)
@@ -115,7 +115,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                var user = _userService.SearchUserDetailsById(userId);
+                var user = _userService.GetUserDetailsById(userId);
                 return PartialView(user);
             }
             catch (InvalidDataException ex)

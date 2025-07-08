@@ -17,11 +17,13 @@ namespace Readiculous.WebApp.Controllers
 {
     public class BookController : ControllerBase<BookController>
     {
+        private readonly IUserService _userService;
         private readonly IBookService _bookService;
         private readonly IGenreService _genreService;
         private readonly IReviewService _reviewService;
-        public BookController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IBookService bookService, IGenreService genreService, IReviewService reviewService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+        public BookController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IUserService userService, IBookService bookService, IGenreService genreService, IReviewService reviewService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
+            _userService = userService;
             _bookService = bookService;
             _genreService = genreService;
             _reviewService = reviewService;
@@ -158,44 +160,49 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult CreateReview(string id)
         {
-            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName };
-            return View(model);
+            var title = _bookService.GetTitleByBookId(id);
+            var email = _userService.GetEmailByUserId(this.UserId); 
+
+            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName, BookTitle = title, Email = email };
+            return PartialView("_AddReviewModal", model);
         }
         [HttpPost]
         public IActionResult CreateReview(ReviewViewModel model)
         {
-            if (!@ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                return View(model);
+                return PartialView("_AddReviewModal", model); // Return modal with validation errors
             }
+
             try
             {
                 _reviewService.AddReview(model);
-                return RedirectToAction("Details", new { id = model.BookId });
+                return RedirectToAction("Details", new { id = model.BookId }); // redirect if success
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
+                return PartialView("_AddReviewModal", model); // Return modal with error
             }
         }
 
         [HttpGet]
-        public IActionResult EditReview(string id)
+        public IActionResult EditReviewModal(string id)
         {
             var model = _reviewService.GetReviewByBookIdAndUserId(id, this.UserId);
             if (model == null)
             {
                 return NotFound();
             }
-            return View(model);
+            return PartialView("_EditReviewModal", model);
         }
+
         [HttpPost]
         public IActionResult EditReview(ReviewViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return PartialView("_EditReviewModal", model);
             }
             try
             {
@@ -205,7 +212,7 @@ namespace Readiculous.WebApp.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
+                return PartialView("_EditReviewModal", model);
             }
         }
     }
