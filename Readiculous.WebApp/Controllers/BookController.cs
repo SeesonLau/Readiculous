@@ -200,7 +200,7 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 var title = _bookService.GetTitleByBookId(id);
-                var email = _userService.GetEmailByUserId(id);
+                var email = _userService.GetEmailByUserId(this.UserId);
 
 
                 var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName, BookTitle = title, Email = email };

@@ -117,7 +117,7 @@ namespace Readiculous.Services.Services
         }
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }

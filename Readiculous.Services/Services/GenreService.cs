@@ -178,7 +178,10 @@ namespace Readiculous.Services.Services
                     _mapper.Map(genre, model);
                     model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
                     model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
-                    model.BookCount = genre.Books != null ? genre.Books.Count(bga => bga.Book != null && bga.Book.DeletedTime == null) : 0;
+                    model.BookCount = genre.Books != null ? 
+                        genre.Books.Count(bga => bga.Book != null &&
+                                                    bga.Book.DeletedTime == null) 
+                                                    : 0;
 
                     return model;
                 })
@@ -236,7 +239,8 @@ namespace Readiculous.Services.Services
                 return new List<BookListItemViewModel>();
             }
             var books = genre.Books
-                .Where(bga => bga.Book != null && bga.Book.DeletedTime == null)
+                .Where(bga => bga.Book != null && 
+                    bga.Book.DeletedTime == null)
                 .Select(bga => bga.Book)
                 .ToList();
             return books.Select(book =>
