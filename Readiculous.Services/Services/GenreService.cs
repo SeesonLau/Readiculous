@@ -125,7 +125,7 @@ namespace Readiculous.Services.Services
 
             var model = new GenreDetailsViewModel();
             _mapper.Map(genre, model);
-            model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+            model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
             model.CreatedByUsername = genre.CreatedByUser.Username;
             model.UpdatedByUsername = genre.UpdatedByUser.Username;
 
@@ -178,10 +178,7 @@ namespace Readiculous.Services.Services
                     _mapper.Map(genre, model);
                     model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
                     model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
-                    model.BookCount = genre.Books != null ? 
-                        genre.Books.Count(bga => bga.Book != null &&
-                                                    bga.Book.DeletedTime == null) 
-                                                    : 0;
+                    model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
 
                     return model;
                 })
@@ -199,7 +196,7 @@ namespace Readiculous.Services.Services
                 {
                     GenreListItemViewModel model = new GenreListItemViewModel();
                     _mapper.Map(genre, model);
-                    model.BookCount = genre.Books != null ? genre.Books.Count(bga => bga.Book != null && bga.Book.DeletedTime == null) : 0;
+                    model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
                     model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
                     model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
                     return model;
