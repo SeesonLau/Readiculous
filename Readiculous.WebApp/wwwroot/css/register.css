@@ -1,0 +1,54 @@
+/* Registration and Success Card Styles */
+body, html {
+    background: #fff !important;
+}
+.success-box-custom {
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.success-card-custom {
+    background: #b993b2;
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 2.5rem 2rem;
+    max-width: 320px;
+    margin: auto;
+    text-align: center;
+    position: relative;
+}
+.success-icon {
+    font-size: 3.2rem;
+    color: #222;
+    margin-bottom: 1.2rem;
+}
+.success-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #39243b;
+    margin-bottom: 1.1rem;
+    font-family: inherit;
+}
+.success-subtitle {
+    color: #39243b;
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+}
+.success-btn {
+    background: #f7b6c2;
+    color: #39243b;
+    border: none;
+    border-radius: 16px;
+    padding: 1.1rem 0;
+    width: 100%;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    transition: background 0.2s;
+    font-family: inherit;
+}
+.success-btn:hover {
+    background: #e89ab0;
+} 

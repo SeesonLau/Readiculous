@@ -27,8 +27,9 @@ namespace Readiculous.Services.Services
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
+        private readonly IEmailService _emailService;
 
-        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
+        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client, IEmailService emailService)
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
@@ -36,6 +37,7 @@ namespace Readiculous.Services.Services
             _reviewRepository = reviewRepository;
             _mapper = mapper;
             _client = client;
+            _emailService = emailService;
         }
 
         // Authentication Method
@@ -85,6 +87,7 @@ namespace Readiculous.Services.Services
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
+                user.AccessStatus = AccessStatus.FirstTime;
 
                 // If a picture was uploaded
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
@@ -450,6 +453,71 @@ namespace Readiculous.Services.Services
             }
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
+
+        // OTP Methods
+        public async Task<bool> SendOtpForRegistrationAsync(string email)
+        {
+            try
+            {
+                // Check if email already exists
+                if (_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store OTP only
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null); // Store null for temp password for now
+
+                // Send OTP via email service (no temp password)
+                return await _emailService.SendOtpEmailAsync(email, otp, null);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ResendOtpForRegistrationAsync(string email)
+        {
+            try
+            {
+                // Check if email already exists
+                if (_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store new OTP only
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service (no temp password)
+                return await _emailService.SendOtpEmailAsync(email, otp, null);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        // New method to send temp password after OTP is confirmed
+        public async Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword)
+        {
+            // Compose and send a new email with only the temp password
+            return await _emailService.SendTempPasswordEmailAsync(email, tempPassword);
+        }
+
+        public bool ValidateOtpForRegistration(string email, string otp)
+        {
+            // Only validate OTP, do not remove temp password yet
+            return OtpManager.ValidateOtp(email, otp);
+        }
+
+        public string GetTempPasswordForEmail(string email)
+        {
+            return OtpManager.GetTempPassword(email);
         }
     }
 }

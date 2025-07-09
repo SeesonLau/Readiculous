@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var showFirstTimeModal = TempData["AccessStatus"] != null && TempData["AccessStatus"].ToString() == "FirstTime";
 }
 
 @section Styles {
@@ -11,7 +12,57 @@
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
+
+@if (showFirstTimeModal)
+{
+    <div id="firstTimeModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:2rem 2.5rem;border-radius:16px;min-width:320px;max-width:90vw;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:center;">
+            <h2>Complete Your Profile</h2>
+            <form id="firstTimeForm" enctype="multipart/form-data">
+                <div style="margin-bottom:1rem;">
+                    <input type="text" name="Username" placeholder="Username" required style="width:100%;padding:0.7rem;border-radius:8px;border:1px solid #ccc;" />
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <input type="password" name="Password" placeholder="New Password" required style="width:100%;padding:0.7rem;border-radius:8px;border:1px solid #ccc;" />
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <input type="password" name="ConfirmPassword" placeholder="Confirm Password" required style="width:100%;padding:0.7rem;border-radius:8px;border:1px solid #ccc;" />
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <input type="file" name="ProfilePicture" accept="image/*" style="width:100%;" />
+                </div>
+                <button type="submit" style="background:#b993b2;color:#fff;font-weight:700;padding:0.8rem 2.5rem;border:none;border-radius:8px;">Save</button>
+            </form>
+        </div>
+    </div>
+}
+@section scripts {
+    <script>
+        if (@(showFirstTimeModal.ToString().ToLower())) {
+            document.body.style.overflow = 'hidden';
+            const modal = document.getElementById('firstTimeModal');
+            const form = document.getElementById('firstTimeForm');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const response = await fetch('/Account/CompleteFirstTimeProfile', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    modal.remove();
+                    document.body.style.overflow = '';
+                    location.reload();
+                } else {
+                    alert('Failed to update profile. Please try again.');
+                }
+            });
+        }
+    </script>
+}
+
 @section Scripts {
     <script src="~/js/site.js" asp-append-version="true"></script>
 }
+
 
