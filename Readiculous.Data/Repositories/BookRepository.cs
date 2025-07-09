@@ -57,7 +57,6 @@ namespace Readiculous.Data.Repositories
                 .Include(b => b.UpdatedByUser)
                 .Where(b => b.DeletedTime == null);
         }
-        //Searching
         public IQueryable<Book> GetBooksByTitle(string bookTitle)
         {
             var books = this.GetDbSet<Book>()
@@ -68,7 +67,6 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
-        //Searching
         public IQueryable<Book> GetBooksByGenreList(List<Genre> genres)
         {
             IQueryable<Book> books;

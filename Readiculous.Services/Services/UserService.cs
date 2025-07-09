@@ -370,7 +370,12 @@ namespace Readiculous.Services.Services
                 .Select(user =>
                 {
                     UserListItemViewModel userViewModel = new();
+
                     _mapper.Map(user, userViewModel);
+                    userViewModel.Role = user.Role.ToString();
+                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
+                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
+                    
                     return userViewModel;
                 });
 
