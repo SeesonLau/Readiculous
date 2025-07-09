@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Readiculous.WebApp.Authentication;
 using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
@@ -20,15 +23,18 @@ namespace Readiculous.WebApp.Controllers
     public class UserMasterController : ControllerBase<UserController>
     {
         private readonly IUserService _userService;
+        private readonly SignInManager _signInManager;
 
         public UserMasterController(IHttpContextAccessor httpContextAccessor,
                                   ILoggerFactory loggerFactory,
                                   IConfiguration configuration,
                                   IMapper mapper,
-                                  IUserService userService)
+                                  IUserService userService,
+                                  SignInManager signInManager)
             : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _userService = userService;
+            _signInManager = signInManager;
         }
 
         public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.Latest, int page = 1, int pageSize = 10)
@@ -100,6 +106,13 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     await _userService.UpdateUserAsync(model, this.UserId);
+
+                    if (model.UserId == User.FindFirst("UserId")?.Value)
+                    {
+                        User updatedUser = _userService.GetUserById(model.UserId);
+                        await _signInManager.SignInAsync(updatedUser, isPersistent: true);
+                    }
+
                     return Json(new { success = true });
                 }
                 catch (InvalidDataException ex)

@@ -9,12 +9,12 @@
               onclick="window.location.href = '@Url.Action("Index", "Home")';">Readiculous</span>
     </div>
     <div class="logosec">
-        @HttpContextAccessor.HttpContext.Session.GetString("UserName")
+        @User.FindFirst("UserName")?.Value
         <div class="mr-20 hover-pointer" style="position: relative">
             <div class="dp">
-                <img src="~/img/profile-logo.png"
+                <img src="@User.FindFirst("UserProfilePictureUrl")?.Value"
                      class="dpicn hover-pointer"
-                     alt="dp">
+                     alt="dp" />
             </div>
             <div class="dropdown" style="background-color: var(--color-modal);">
                 <ul>

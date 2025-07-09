@@ -208,12 +208,12 @@ namespace Readiculous.WebApp.Controllers
             catch (InvalidOperationException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
-                return RedirectToAction("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+                return StatusCode(400);
             }
             catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                return RedirectToAction("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
+                return StatusCode(500);
             }
         }
         [HttpPost]

@@ -305,6 +305,10 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
             }
         }
+        public User GetUserById(string userId)
+        {
+            return _userRepository.GetUserById(userId);
+        }
         
         //Populating Dropdown Lists
         public List<SelectListItem> GetUserRoles()

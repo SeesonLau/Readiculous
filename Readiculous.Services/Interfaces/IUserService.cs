@@ -25,6 +25,7 @@ namespace Readiculous.Services.Interfaces
         UserViewModel GetUserEditById(string userId);
         EditProfileViewModel GetEditProfileById(string userId);
         UserDetailsViewModel GetUserDetailsById(string userId);
+        User GetUserById(string userId);
         string GetEmailByUserId(string userId);
 
         // Dropdown Filler Methods

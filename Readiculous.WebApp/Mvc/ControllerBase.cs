@@ -109,6 +109,11 @@ namespace Readiculous.WebApp.Mvc
             get { return User.FindFirst("ClientUserRole").Value; }
         }
 
+        public string UserProfilePicture
+        {
+            get { return User.FindFirst("UserProfilePictureUrl").Value; }
+        }
+
         /// <summary>
         /// Return filter default if expiration session.
         /// </summary>

@@ -9,6 +9,8 @@ using Readiculous.Services.ServiceModels;
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using Readiculous.WebApp.Authentication;
+using Readiculous.Data.Models;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -18,6 +20,7 @@ namespace Readiculous.WebApp.Controllers
     public class HomeController : ControllerBase<HomeController>
     {
         private readonly IUserService _userService;
+        private readonly SignInManager _signInManager;
         /// <summary>
         /// Constructor
         /// </summary>
@@ -29,9 +32,11 @@ namespace Readiculous.WebApp.Controllers
         public HomeController(IHttpContextAccessor httpContextAccessor,
                               ILoggerFactory loggerFactory,
                               IConfiguration configuration, IUserService userService,
+                              SignInManager signInManager,
                               IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _userService = userService;
+            _signInManager = signInManager;
         }
 
         /// <summary>
@@ -83,6 +88,13 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 await _userService.UpdateProfileAsync(editProfileViewModel, this.UserId);
+
+
+                if (editProfileViewModel.UserId == User.FindFirst("UserId")?.Value)
+                {
+                    User updatedUser = _userService.GetUserById(editProfileViewModel.UserId);
+                    await _signInManager.SignInAsync(updatedUser, isPersistent: true);
+                }
                 return Json(new { success = true });
             }
             catch
