@@ -153,6 +153,12 @@
   <data name="ISBNExists" xml:space="preserve">
     <value>Book with the same ISBN already exists!</value>
   </data>
+  <data name="ReviewExists" xml:space="preserve">
+    <value>Review already exists for this book by the user!</value>
+  </data>
+  <data name="ReviewNotExist" xml:space="preserve">
+    <value>Review does not exist for this book by the user!</value>
+  </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error occured!</value>
   </data>

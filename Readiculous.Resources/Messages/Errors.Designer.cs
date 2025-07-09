@@ -169,6 +169,24 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Review already exists for this book by the user!.
+        /// </summary>
+        public static string ReviewExists {
+            get {
+                return ResourceManager.GetString("ReviewExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Review does not exist for this book by the user!.
+        /// </summary>
+        public static string ReviewNotExist {
+            get {
+                return ResourceManager.GetString("ReviewNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server error occured!.
         /// </summary>
         public static string ServerError {

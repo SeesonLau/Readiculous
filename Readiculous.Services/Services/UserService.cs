@@ -178,7 +178,7 @@ namespace Readiculous.Services.Services
                 throw new InvalidDataException(Resources.Messages.Errors.UserCannotDeleteSelf);
             }
 
-            var user = await Task.Run(() => _userRepository.GetUserById(userId)); // you can use the _userRepository directly here
+            var user = _userRepository.GetUserById(userId); 
 
             user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
             foreach (var review in user.UserReviews)
@@ -191,7 +191,7 @@ namespace Readiculous.Services.Services
             user.DeletedBy = deleterId;
             user.DeletedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _userRepository.UpdateUser(user)); // you can use the _userRepository directly here
+            await Task.Run(() => _userRepository.UpdateUser(user)); 
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
@@ -279,7 +279,7 @@ namespace Readiculous.Services.Services
                         return favoriteBookModel;
                     })
                     .ToList();
-                userViewModel.UserReviewModels = _reviewRepository.GetReviewsByUserId(userId)
+                userViewModel.UserReviewModels = _reviewRepository.GetReviewsWithNavigationPropertiesByUserId(userId)
                     .ToList()
                     .Select(r =>
                     {

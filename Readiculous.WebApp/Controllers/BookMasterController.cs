@@ -67,10 +67,18 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookAddModal()
         {
-            var model = new BookViewModel();
-            var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
-            return PartialView(model);
+            try
+            {
+                var model = new BookViewModel();
+                var allGenres = _genreService.GetGenreList(genreName: string.Empty);
+                model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+                return PartialView(model);
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                return RedirectToAction("Index", "Home");
+            }
         }
         [HttpPost]
         public async Task<IActionResult> Create(BookViewModel model)
@@ -85,6 +93,10 @@ namespace Readiculous.WebApp.Controllers
                 catch (InvalidOperationException ex)
                 {
                     ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (Exception)
+                {
+                    ModelState.AddModelError(string.Empty, Resources.Messages.Errors.ServerError);
                 }
             }
 
@@ -104,9 +116,10 @@ namespace Readiculous.WebApp.Controllers
                 model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
                 return PartialView(model);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception)
             {
-                return BadRequest(ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
         }
 
@@ -139,9 +152,10 @@ namespace Readiculous.WebApp.Controllers
                 var model = _bookService.GetBookDetailsById(id);
                 return PartialView(model);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
         }
         [HttpPost]
@@ -164,12 +178,12 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 _bookService.AddBookToFavorites(id, this.UserId);
-                return RedirectToAction("Index");
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return RedirectToAction("Index");
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
         }
         public IActionResult RemoveFromFavorites(string id)
@@ -177,12 +191,12 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 _bookService.RemoveBookFromFavorites(id, this.UserId);
-                return RedirectToAction("Index");
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return RedirectToAction("Index");
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
         }
 
