@@ -16,12 +16,14 @@ namespace Readiculous.Services.Services
     {
         private readonly IGenreRepository _genreRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public GenreService(IGenreRepository genreRepository, IBookRepository bookRepository, IMapper mapper)
+        public GenreService(IGenreRepository genreRepository, IBookRepository bookRepository, IReviewRepository reviewRepository, IMapper mapper)
         {
             _genreRepository = genreRepository;
             _bookRepository = bookRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
@@ -150,7 +152,20 @@ namespace Readiculous.Services.Services
                     Text = t.ToString(),
                 }).ToList();
         }
-
+        public List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter)
+        {
+            var genres = _genreRepository.GetAllActiveGenres()
+                .Where(g => g.DeletedTime == null)
+                .OrderBy(g => g.Name)
+                .Select(g => new SelectListItem
+                {
+                    Value = g.GenreId,
+                    Text = g.Name,
+                    Selected = (genreFilter != null && g.Name.Equals(genreFilter, StringComparison.OrdinalIgnoreCase))
+                })
+                .ToList();
+            return genres;
+        }
         // Helper methods for Searching genres
         private List<GenreListItemViewModel> ListAllActiveGenres()
         {

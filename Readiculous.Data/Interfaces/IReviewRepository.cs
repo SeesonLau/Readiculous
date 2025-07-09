@@ -16,6 +16,7 @@ namespace Readiculous.Data.Interfaces
         IQueryable<Review> GetReviewsByBookId(string bookId);
         IQueryable<Review> GetReviewsWithNavigationPropertiesByUserId(string userId);
         IQueryable<Review> GetReviewsByUserId(string userId);
+        IQueryable<Review> GetReviewsByGenreId(string genreId);
         Review GetReviewByBookIdAndUserId(string bookId, string userId);
     }
 }

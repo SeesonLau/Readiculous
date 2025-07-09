@@ -129,7 +129,7 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(model.BookId);
             if (book == null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.ServerError  );
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -273,9 +273,6 @@ namespace Readiculous.Services.Services
             _mapper.Map(book, model);
             model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                 .ToList();
-            model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
             model.Reviews = _reviewRepository.GetReviewsByBookId(book.BookId)
                 .ToList()
                 .Select(r =>
@@ -292,6 +289,10 @@ namespace Readiculous.Services.Services
                     return reviewViewModel;
                 })
                 .ToList();
+
+            model.AverageRating = model.Reviews.Count != 0
+                        ? (decimal)book.BookReviews.Average(r => r.Rating)
+                        : 0;
             model.CreatedByUserName = book.CreatedByUser.Username;
             model.UpdatedByUserName = book.UpdatedByUser.Username;
             return model;
@@ -398,7 +399,6 @@ namespace Readiculous.Services.Services
                 {
                     var model = new BookListItemViewModel();
 
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
                     _mapper.Map(book, model);
                     model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();

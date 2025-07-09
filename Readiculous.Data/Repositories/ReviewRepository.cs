@@ -42,6 +42,14 @@ namespace Readiculous.Data.Repositories
                 .Where(r => r.UserId == userId &&
                         r.Book.DeletedTime == null);
         }
+        public IQueryable<Review> GetReviewsByGenreId(string genreId) 
+        {
+            return this.GetDbSet<Review>()
+                .Where(r => r.DeletedTime == null && 
+                            r.Book.GenreAssociations
+                    .Any(ga => ga.GenreId == genreId &&
+                                ga.Genre.DeletedTime == null));
+        }
         public IQueryable<Review> GetReviewsByUserId(string userId)
         {
             return this.GetDbSet<Review>()
@@ -54,7 +62,8 @@ namespace Readiculous.Data.Repositories
                 .Include(r => r.Book)
                 .Include(r => r.User)
                 .FirstOrDefault(r => r.BookId == bookId && 
-                                     r.UserId == userId);
+                                     r.UserId == userId &&
+                                     r.DeletedTime == null );
         }
 
         public bool ReviewExists(string bookId, string userId)

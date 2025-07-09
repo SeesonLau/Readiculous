@@ -63,7 +63,7 @@ namespace Readiculous.Services.Services
         {
             if (!_reviewRepository.ReviewExists(bookId, userId))
             {
-                throw new InvalidOperationException("Review does not exist for this book by the user.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ReviewNotExist);
             }
 
             var review = _reviewRepository.GetReviewByBookIdAndUserId(bookId, userId);

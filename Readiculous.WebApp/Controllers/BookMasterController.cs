@@ -34,13 +34,7 @@ namespace Readiculous.WebApp.Controllers
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;
 
-            ViewBag.GenreList = _genreService.GetGenreList(string.Empty)
-            .Select(g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            {
-                Value = g.Name,
-                Text = g.Name,
-                Selected = (genreFilter != null && g.Name.Equals(genreFilter, StringComparison.OrdinalIgnoreCase))
-            }).ToList();
+            ViewBag.GenreList = _genreService.GetAllGenreSelectListItems(genreFilter);
             ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
             ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
@@ -77,7 +71,7 @@ namespace Readiculous.WebApp.Controllers
             catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("BookMasterScreen", "BookMaster");
             }
         }
         [HttpPost]
@@ -152,7 +146,7 @@ namespace Readiculous.WebApp.Controllers
                 var model = _bookService.GetBookDetailsById(id);
                 return PartialView(model);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return RedirectToAction("BookMasterScreen", "BookMaster");
@@ -168,7 +162,8 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                TempData["ErrorMessage"] = ex.Message;
+                return  RedirectToAction("BookMasterScreen", "BookMaster");
             }
         }
 
