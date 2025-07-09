@@ -18,5 +18,9 @@ namespace Readiculous.Services.Interfaces
         UserDetailsViewModel SearchUserDetailsById(string userId);
         List<SelectListItem> GetUserRoles();
         List<SelectListItem> GetUserSortTypes();
+        bool IsEmailRegistered(string email);
+        User GetUserByEmailAndPassword(string email, string password);
+        void CreateUser(User user);
+        bool IsEmailTaken(string email);
     }
 }

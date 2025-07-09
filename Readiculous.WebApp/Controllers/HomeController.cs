@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -32,6 +33,9 @@ namespace Readiculous.WebApp.Controllers
         /// Returns Home View.
         /// </summary>
         /// <returns> Home View </returns>
+        /// 
+
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();

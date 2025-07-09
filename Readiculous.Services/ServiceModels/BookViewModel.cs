@@ -23,6 +23,8 @@ namespace Readiculous.Services.ServiceModels
         [Required(ErrorMessage = "Description is required!")]
         public string Author { get; set; }
 
+        public string ImagePath { get; set; }
+
         [Required(ErrorMessage = "Series number is required!")]
         public int SeriesNumber { get; set; }
 

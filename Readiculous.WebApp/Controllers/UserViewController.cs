@@ -1,165 +1,136 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Readiculous.Services.Interfaces;
+using Readiculous.WebApp.Models;
+using Readiculous.Data.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
+using System;
+using static Readiculous.Resources.Constants.Enums;
+using Readiculous.Data;
 using Readiculous.Services.ServiceModels;
+using Microsoft.AspNetCore.Http;
 
-namespace ASI.Readiculous.WebApp.Controllers
+
+namespace Readiculous.WebApp.Controllers
 {
     [AllowAnonymous]
     public class UserViewController : Controller
     {
         private readonly IBookService _bookService;
+        private readonly IUserService _userService;
+        private readonly IGuestViewService _guestViewService;
+        private readonly ReadiculousDbContext _context;
 
-        // ✅ Inject IBookService
-        public UserViewController(IBookService bookService)
+        public UserViewController(IBookService bookService, IUserService userService, IGuestViewService guestViewService, ReadiculousDbContext context)
         {
             _bookService = bookService;
+            _userService = userService;
+            _guestViewService = guestViewService;
+            _context = context;
         }
-
-        /// <summary>
-        /// Landing page for guest users.
-        /// </summary>
         [HttpGet]
-        public IActionResult GuestView()
+        public IActionResult GuestView(string section, string modal = null)
         {
-            // If you want to show any featured books, fetch them here.
-            var books = new List<BookViewModel>();
-            return View("GuestView", books);
-        }
+            var newBooks = _bookService.GetBooksForGuest("new-books");
+            var topBooks = _bookService.GetBooksForGuest("top-books");
 
-        /// <summary>
-        /// Displays books of selected genres, filtered by type and option.
-        /// Example URL:
-        /// /UserView/GenreBooks?genres=Romance,Thriller&filterType=Top&filterOption=High%20Rating
-        /// </summary>
-        [HttpGet]
-        public IActionResult GenreBooks(
-            string genres,
-            string filterType = "Top",
-            string filterOption = "High Rating")
-        {
-            var selectedGenres = genres?.Split(',').ToList() ?? new List<string>();
+            ViewBag.Section = section;
+            ViewBag.Modal = modal;
 
-            ViewBag.SelectedGenres = selectedGenres;
-            ViewBag.FilterType = filterType;
-            ViewBag.FilterOption = filterOption;
-
-            var books = new List<BookViewModel>();
-            return View("GenreBooks", books);
-        }
-
-        /// <summary>
-        /// Displays books from selected genres, but specifically the NEW ones.
-        /// This could be routed separately if needed.
-        /// </summary>
-        [HttpGet]
-        public IActionResult NewGenreBooks(
-            string genres,
-            string filterType = "New",
-            string filterOption = "High Rating")
-        {
-            var selectedGenres = genres?.Split(',').ToList() ?? new List<string>();
-
-            ViewBag.SelectedGenres = selectedGenres;
-            ViewBag.FilterType = filterType;
-            ViewBag.FilterOption = filterOption;
-
-            var books = new List<BookViewModel>();
-            return View("GenreBooks", books);
-        }
-
-        [HttpGet]
-        public IActionResult ViewNewBooks(int page = 1, int pageSize = 1)
-        {
-            var allBooks = new List<BookViewModel>();
-
-            // Only show Dune on first page
-            if (page == 1)
+            var model = new GuestViewModel
             {
-                allBooks.Add(new BookViewModel
+                NewBooks = newBooks,
+                TopBooks = topBooks
+            };
+
+            return View("GuestView", model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult RegisterAjax(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToArray();
+
+                return Json(new
                 {
-                    Title = "Dune",
-                    Author = "Frank Herbert",
-                    Rating = 4.7,
-                    CoverImageUrl = "/img/dune.jpg"
+                    success = false,
+                    message = errors.Any() ? string.Join(" ", errors) : "Please complete all fields correctly."
                 });
             }
 
-            int totalPages = 1;
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = totalPages;
+            if (_context.Users.Any(u => u.Email == model.Email))
+            {
+                return Json(new { success = false, message = "Email is already registered." });
+            }
 
-            return View("ViewNewBooks", allBooks);
+            var newUser = new User
+            {
+                Email = model.Email,
+                Password = model.Password,
+                Role = RoleType.Reviewer,
+                CreatedTime = DateTime.Now
+            };
+
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+
+            return Json(new { success = true });
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult ViewTopBooks(int page = 1)
-        {
-            var topBooks = new List<BookViewModel>
-        {
-            new BookViewModel
-            {
-                Title = "Circe",
-                Author = "Madeline Miller",
-                CoverImageUrl = "/img/circe.jpg",
-                Rating = 4.9
-            },
-        };
 
-            return View(topBooks);
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult UserBookDetails(string title)
+        public IActionResult GenreBooks()
         {
-            if (string.IsNullOrEmpty(title))
-            {
-                title = "Dune";  // Default
-            }
-
-            // Example static data - replace with your actual DB or service call
-            if (title == "Circe")
-            {
-                ViewData["Title"] = "Circe";
-                ViewData["Author"] = "Madeline Miller";
-                ViewData["Genre"] = "Fantasy";
-                ViewData["Series"] = "None";
-                ViewData["Rating"] = 4.9;
-                ViewData["AddedDate"] = "June 15, 2025";
-                ViewData["Description"] = "A bold and subversive retelling of the goddess Circe's story...";
-                ViewData["ImagePath"] = "~/img/circe.jpg";
-                ViewData["Reviews"] = new List<dynamic>
-        {
-            new { Reviewer = "John", Date = "July 2, 2025", Stars = 5, Comment = "Loved the mythology and character depth!" },
-            new { Reviewer = "Sophie", Date = "July 1, 2025", Stars = 4, Comment = "Beautifully written, but slow in parts." }
-        };
-            }
-            else // Default to Dune
-            {
-                ViewData["Title"] = "Dune";
-                ViewData["Author"] = "Frank Herbert";
-                ViewData["Genre"] = "Science Fiction";
-                ViewData["Series"] = "Dune Series";
-                ViewData["Rating"] = 4.7;
-                ViewData["AddedDate"] = "July 1, 2025";
-                ViewData["Description"] = "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides...";
-                ViewData["ImagePath"] = "~/img/dune.jpg";
-                ViewData["Reviews"] = new List<dynamic>
-        {
-            new { Reviewer = "Alice", Date = "June 30, 2025", Stars = 5, Comment = "Amazing book with rich world building!" },
-            new { Reviewer = "Bob", Date = "June 28, 2025", Stars = 4, Comment = "Classic sci-fi that everyone should read." }
-        };
-            }
-
 
             return View();
         }
 
+        public IActionResult ViewTopBooks(int page = 1)
+        {
+            return View();
+        }
+
+        public IActionResult ViewNewBooks(int page = 1)
+        {
+            return View();
+        }
+
+        public IActionResult GuestView(string section)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userId = HttpContext.Session.GetString("UserId");
+
+            // If Admin, redirect elsewhere
+            if (!string.IsNullOrEmpty(userRole) && userRole == "Admin")
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            // If logged in Reviewer, do NOT set modal
+            if (!string.IsNullOrEmpty(userRole) && userRole == "Reviewer")
+            {
+                ViewBag.Modal = null;
+            }
+            else
+            {
+                // Only set modal for guest
+                if (section == "login")
+                    ViewBag.Modal = "login";
+                else if (section == "register")
+                    ViewBag.Modal = "register";
+                else
+                    ViewBag.Modal = null;
+            }
+
+            // Load data for GuestViewModel
+            var model = _guestViewService.LoadGuestViewModel();
+
+            return View(model);
+        }
 
 
     }

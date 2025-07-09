@@ -18,9 +18,11 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : ControllerBase<UserController>
     {
         private readonly IUserService _userService;
+
 
         public UserController(
             IHttpContextAccessor httpContextAccessor,
@@ -149,7 +151,5 @@ namespace Readiculous.WebApp.Controllers
         }
 
        
-
-
     }
 }

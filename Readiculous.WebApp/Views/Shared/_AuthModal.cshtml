@@ -1,33 +1,53 @@
 ﻿@model dynamic
+@{
+    var modal = ViewBag.Modal as string;
+}
 
-<div id="authModal" class="custom-modal">
-    <div class="modal-content">
+<div id="authModal" class="custom-modal @(modal != null ? "show" : "hidden")">
+    <div>
+        <!-- Login Modal -->
+        <div class="auth-box @(modal == "login" ? "" : "hidden")" data-id="login">
+            @Html.Partial("~/Views/Shared/Modals/_LoginModal.cshtml", new Readiculous.WebApp.Models.LoginViewModel())
+        </div>
 
-        <div class="auth-columns">
-            <div class="auth-box hidden" data-id="login">
-                @Html.Partial("~/Views/Shared/Modals/LoginModal.cshtml", new Readiculous.WebApp.Models.LoginViewModel())
-            </div>
-            <div class="auth-box hidden" data-id="register">
-                @Html.Partial("~/Views/Shared/Modals/RegisterModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
-            </div>
-            <div class="auth-box hidden" data-id="forgot">
-                @Html.Partial("~/Views/Shared/Modals/ForgotPassModal.cshtml", new Readiculous.WebApp.Models.ForgotPasswordViewModel())
-            </div>
-            <div class="auth-box hidden" data-id="otp">
-                @Html.Partial("~/Views/Shared/Modals/OTPModal.cshtml", new Readiculous.WebApp.Models.OTPViewModel())
-            </div>
-            <div class="auth-box hidden" data-id="newpass">
-                @Html.Partial("~/Views/Shared/Modals/NewPassModal.cshtml", new Readiculous.WebApp.Models.NewPasswordViewModel())
-            </div>
-            <div class="auth-box hidden" data-id="successpass">
-                @Html.Partial("~/Views/Shared/Modals/SuccessfullyNewPassModal.cshtml")
-            </div>
-            <div class="auth-box hidden" data-id="registersuccess">
-                @Html.Partial("~/Views/Shared/Modals/RegistrationSuccessModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
-            </div>
-            <div class="auth-box hidden" data-id="required">
-                @Html.Partial("~/Views/Shared/Modals/RequiredModal.cshtml")
-            </div>
+        <!-- Register Modal -->
+        <div class="auth-box @(modal == "register" ? "" : "hidden")" data-id="register">
+            @Html.Partial("~/Views/Shared/Modals/_RegisterModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div class="auth-box @(modal == "forgot" ? "" : "hidden")" data-id="forgot">
+            @Html.Partial("~/Views/Shared/Modals/_ForgotPassModal.cshtml", new Readiculous.WebApp.Models.ForgotPasswordViewModel())
+        </div>
+
+        <!-- OTP Modal -->
+        <div class="auth-box @(modal == "otp" ? "" : "hidden")" data-id="otp">
+            @Html.Partial("~/Views/Shared/Modals/_OTPModal.cshtml", new Readiculous.WebApp.Models.OTPViewModel())
+        </div>
+
+        <!-- New Password Modal -->
+        <div class="auth-box @(modal == "newpass" ? "" : "hidden")" data-id="newpass">
+            @Html.Partial("~/Views/Shared/Modals/_NewPassModal.cshtml", new Readiculous.WebApp.Models.NewPasswordViewModel())
+        </div>
+
+        <!-- Successfully Changed Password Modal -->
+        <div class="auth-box @(modal == "successpass" ? "" : "hidden")" data-id="successpass">
+            @Html.Partial("~/Views/Shared/Modals/_SuccessfullyNewPassModal.cshtml")
+        </div>
+
+        <!-- Registration Success (Legacy) -->
+        <div class="auth-box @(modal == "registersuccess" ? "" : "hidden")" data-id="registersuccess">
+            @Html.Partial("~/Views/Shared/Modals/_RegistrationSuccessModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
+        </div>
+
+        <!-- Required Modal -->
+        <div class="auth-box @(modal == "required" ? "" : "hidden")" data-id="required">
+            @Html.Partial("~/Views/Shared/Modals/_RequiredModal.cshtml")
+        </div>
+
+        <!-- ✅ Sign Up Success Modal (New) -->
+        <div class="auth-box @(modal == "signupsuccess" ? "" : "hidden")" data-id="signupsuccess">
+            @Html.Partial("~/Views/Shared/Modals/_SignUpSuccessModal.cshtml", new Readiculous.WebApp.Models.RegisterViewModel())
         </div>
     </div>
 </div>

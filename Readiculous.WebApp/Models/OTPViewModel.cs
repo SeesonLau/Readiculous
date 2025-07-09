@@ -4,8 +4,12 @@ namespace Readiculous.WebApp.Models
 {
     public class OTPViewModel
     {
-        [Required(ErrorMessage = "OTP Code is required.")]
-        [StringLength(6, ErrorMessage = "OTP must be 6 digits.")]
-        public string Code { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        [Display(Name = "Verification Code")]
+        public string OTP { get; set; }
     }
 }

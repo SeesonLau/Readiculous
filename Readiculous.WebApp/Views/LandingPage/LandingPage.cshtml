@@ -1,18 +1,5 @@
 ﻿@{
-    Layout = "_Layout"; 
-    /* Loads the layout file, however it also loads its built in header. making it appear twice. It essentially displays two screen where one screen is inside the other. 
-     TODO:
-     1. Find a way to handle these multiple headers
-     2. Remember to test your css code since basin naguba sha?
-
-     DONE:
-     1. The current openLoginModal() function is now working. 
-      - One of its requirements is that it must be found within the same contorller.
-      - The way it didnt work before was that the Modal was in Layout and the implementation is also in layout but the element where the onlcick should happen is in this file. ALthough it works if connected, since Layout was null at that time, there was no connection thus cannot work.
-    
-    PS:
-        - if ganahan ka marevert ang change, like mawa na ang kanang two screen display thing, just initialise Layout to null
-     */
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -20,26 +7,26 @@
 <head>
     <meta charset="UTF-8" />
     <title>Readiculous - Landing Page</title>
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="@Url.Content("~/css/landing.css")" />
 
-    <!-- Add validation script references -->
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- jQuery & Validation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
 </head>
 <body>
-    <!-- Navigation Bar -->
+
+    <!-- Header with Logo only -->
     <header class="navbar">
-        <div class="logo-group" onclick="location.href='@Url.Action("GuestView", "UserView")'">
+        <div class="logo-group">
             <img src="@Url.Content("~/img/png-logo.png")" alt="Logo" class="logo-icon" />
             <h1 class="team-name">Readiculous</h1>
         </div>
-        <nav class="nav-links">
-            <a href="@Url.Action("GuestView", "UserView")#new-books"><span>📖</span> New Books</a>
-            <a href="@Url.Action("GuestView", "UserView")#top-books"><span>🏆</span> Top Books</a>
-            <a href="@Url.Action("GenreBooks", "UserView")"><span>🏷️</span> Genre</a>
-            <a href="javascript:void(0)" onclick="showLoginModal()">Login</a>
-        </nav>
     </header>
 
     <!-- Hero Section -->
@@ -60,48 +47,7 @@
         </div>
     </section>
 
-
-    
-    @*
-    <script>
-
-        function closeModal() {
-            const modal = document.getElementById("authModal");
-            modal.classList.remove("show");
-
-            document.querySelectorAll(".auth-box").forEach(div => {
-                div.classList.add("hidden");
-                div.classList.remove("active");
-            });
-
-            const url = new URL(window.location);
-            url.searchParams.delete("modal");
-            window.history.pushState({}, '', url);
-        }
-
-        window.onload = function () {
-            const modalFromServer = '@TempData["ModalToShow"]';
-            const params = new URLSearchParams(window.location.search);
-            const modalFromUrl = params.get("modal");
-
-            if (modalFromServer && modalFromServer !== "null" && modalFromServer !== "") {
-                showModal(modalFromServer);
-            } else if (modalFromUrl) {
-                showModal(modalFromUrl);
-            }
-        };
-    </script> *@
-
-    <script>
-        function showLoginModal() {
-            fetch('/LandingPage/Login')
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('loginModalBody').innerHTML = html;
-                    const modal = new bootstrap.Modal(document.getElementById('loginModal'));
-                    modal.show();
-                });
-        }
-    </script>
+    <!-- Bootstrap JS Bundle (with Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

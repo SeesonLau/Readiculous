@@ -43,8 +43,8 @@ namespace Readiculous.Services.Services
         public List<BookViewModel> GetNewBooks()
         {
             var recentBooks = _bookRepository.GetAllActiveBooks()
-                .Where(b => b.CreatedTime >= DateTime.UtcNow.AddDays(-14))
                 .OrderByDescending(b => b.CreatedTime)
+                .Take(6)
                 .ToList();
 
             return recentBooks.Select(book => _mapper.Map<BookViewModel>(book)).ToList();
@@ -55,9 +55,27 @@ namespace Readiculous.Services.Services
             var books = _bookRepository.GetAllActiveBooks()
                 .Where(b => b.BookReviews.Any())
                 .OrderByDescending(b => b.BookReviews.Average(r => r.Rating))
+                .Take(6)
                 .ToList();
 
             return books.Select(book => _mapper.Map<BookViewModel>(book)).ToList();
+        }
+
+        public IEnumerable<Book> GetLatestBooks()
+        {
+            return _bookRepository.GetAllActiveBooks()
+                .OrderByDescending(b => b.CreatedTime)
+                .Take(10)
+                .ToList();
+        }
+
+        public IEnumerable<Book> GetTopRatedBooks()
+        {
+            return _bookRepository.GetAllActiveBooks()
+                .Where(b => b.BookReviews.Any())
+                .OrderByDescending(b => b.BookReviews.Average(r => r.Rating))
+                .Take(10)
+                .ToList();
         }
 
         public void AddBookToFavorites(string bookId, string userId)
@@ -121,8 +139,8 @@ namespace Readiculous.Services.Services
                     return vm;
                 }).ToList();
 
-            model.CreatedByUserName = book.CreatedByUser.Username;
-            model.UpdatedByUserName = book.UpdatedByUser.Username;
+            model.CreatedByUserName = book.CreatedByUser?.Username;
+            model.UpdatedByUserName = book.UpdatedByUser?.Username;
 
             return model;
         }
@@ -190,18 +208,39 @@ namespace Readiculous.Services.Services
 
         public List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
         {
-            // For brevity, implement your preferred logic here
-            return new List<BookListItemViewModel>(); // Placeholder
+            // Placeholder logic (you can enhance this)
+            return new List<BookListItemViewModel>();
         }
 
         public async Task AddBook(BookViewModel model, string creatorId)
         {
-          
+            // Implement this as needed
         }
 
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-           
+            // Implement this as needed
+        }
+
+        public List<BookViewModel> GetBooksForGuest(string section)
+        {
+            var query = _bookRepository.GetAllActiveBooks();
+
+            if (section == "top-books")
+            {
+                query = query
+                    .Where(b => b.BookReviews.Any())
+                    .OrderByDescending(b => b.BookReviews.Average(r => r.Rating));
+            }
+            else
+            {
+                query = query.OrderByDescending(b => b.CreatedTime);
+            }
+
+            return query
+                .Take(5)
+                .Select(book => _mapper.Map<BookViewModel>(book))
+                .ToList();
         }
     }
 }

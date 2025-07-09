@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Data;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Resources.Constants;
@@ -27,8 +28,8 @@ namespace Readiculous.Services.Services
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
-
-        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
+        private readonly ReadiculousDbContext _context;
+        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client, ReadiculousDbContext context)
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
@@ -36,7 +37,9 @@ namespace Readiculous.Services.Services
             _reviewRepository = reviewRepository;
             _mapper = mapper;
             _client = client;
+            _context = context;
         }
+       
 
         // Authentication Method
         public LoginResult AuthenticateUserByEmail(string email, string password, ref User user)
@@ -407,6 +410,27 @@ namespace Readiculous.Services.Services
             }
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
+        public bool IsEmailRegistered(string email)
+        {
+            var user = _userRepository.GetUserByEmail(email);
+            return user != null;
+        }
+        public User GetUserByEmailAndPassword(string email, string password)
+        {
+            return _userRepository.GetUserByEmailAndPassword(email, password);
+        }
+
+
+        public bool IsEmailTaken(string email)
+        {
+            return _context.Users.Any(u => u.Email == email);
+        }
+
+        public void CreateUser(User user)
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
         }
     }
 }

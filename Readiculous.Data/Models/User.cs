@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Data.Models
@@ -10,6 +11,7 @@ namespace Readiculous.Data.Models
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+
         public RoleType Role { get; set; } 
         public string ProfilePictureUrl { get; set; }
         public string? CreatedBy { get; set; }
@@ -20,13 +22,18 @@ namespace Readiculous.Data.Models
         public DateTime? DeletedTime { get; set; }
         public AccessStatus AccessStatus { get; set; }
 
+        public string ResetCode { get; set; }
+
         // Navigation properties
         public virtual User CreatedByUser { get; set; }
         public virtual User UpdatedByUser { get; set; }
         public virtual User DeletedByUser { get; set; }
 
+
         // Collection navigation properties
         public virtual ICollection<FavoriteBook> UserFavoriteBooks { get; set; } = [];
         public virtual ICollection<Review> UserReviews { get; set; } = [];
+
+
     }
 }

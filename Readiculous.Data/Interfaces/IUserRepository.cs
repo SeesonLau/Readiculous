@@ -22,5 +22,6 @@ namespace Readiculous.Data.Interfaces
         IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username);
         User GetUserById(string id);
         User GetUserByEmailAndPassword(string email, string password);
+        User GetUserByEmail(string email);
     }
 }

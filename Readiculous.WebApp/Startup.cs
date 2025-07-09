@@ -18,6 +18,8 @@ using Supabase;
 using System;
 using System.IO;
 using System.Text;
+using Readiculous.Services.Interfaces;
+using Readiculous.Services.Services;
 
 namespace Readiculous.WebApp
 {
@@ -93,6 +95,7 @@ namespace Readiculous.WebApp
 
             services.AddControllersWithViews();
             services.AddRazorPages().AddRazorRuntimeCompilation();
+            services.AddScoped<IGuestViewService, GuestViewService>();
 
             //Configuration
             services.Configure<TokenAuthentication>(Configuration.GetSection("TokenAuthentication"));
@@ -100,8 +103,17 @@ namespace Readiculous.WebApp
             // Session
             services.AddSession(options =>
             {
+                options.IdleTimeout = TimeSpan.FromHours(1);
                 options.Cookie.Name = Const.Issuer;
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
             });
+            services.AddAuthentication("Cookies")
+               .AddCookie("Cookies", options =>
+               {
+                 options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/AccessDenied"; 
+               });
 
             // DI Services AutoMapper(Add Profile)
             this.ConfigureAutoMapper();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
@@ -23,9 +24,14 @@ namespace Readiculous.Services.Interfaces
 
         List<BookViewModel> GetNewBooks();
         List<BookViewModel> GetTopBooks();
+        List<BookViewModel> GetBooksForGuest(string section);
 
-
+        IEnumerable<Book> GetTopRatedBooks();
+        IEnumerable<Book> GetLatestBooks();
         void AddBookToFavorites(string bookId, string userId);
         void RemoveBookFromFavorites(string bookId, string userId);
+
+      
+
     }
 }

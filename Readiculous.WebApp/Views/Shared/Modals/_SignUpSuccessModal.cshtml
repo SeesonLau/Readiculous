@@ -1,0 +1,17 @@
+﻿@model Readiculous.WebApp.Models.RegisterViewModel
+
+<div class="signup-success-modal text-center p-4">
+    <h4 class="mb-3 text-success"> Successfully Signed Up!</h4>
+
+    <img src="~/img/mewmewhap.png" alt="Success Icon" class="auth-icon mb-3" />
+
+    <p>Welcome to Readiculous! You may now log in using your credentials.</p>
+
+    <button class="btn btn-primary mt-3" onclick="showModal('login')">Go to Login</button>
+</div>
+<script>
+    function showLogin() {
+        document.querySelectorAll(".auth-box").forEach(modal => modal.classList.add("hidden"));
+        document.querySelector('[data-id="login"]').classList.remove("hidden");
+    }
+</script>

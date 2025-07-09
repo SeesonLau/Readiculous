@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,6 +16,7 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class GenreController : ControllerBase<GenreController>
     {
         private readonly IGenreService _genreService;
@@ -192,5 +194,7 @@ namespace Readiculous.WebApp.Controllers
             };
             return View(viewModel);
         }
+
+        
     }
 }

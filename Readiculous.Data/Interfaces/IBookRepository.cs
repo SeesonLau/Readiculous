@@ -23,6 +23,9 @@ namespace Readiculous.Data.Interfaces
         IQueryable<Book> GetBooksByTitleAndGenres(string bookTitle, List<Genre> genres);
         Book GetBookById(string id);
 
+        IEnumerable<Book> GetLatestBooks();
+        IEnumerable<Book> GetTopRatedBooks();
+
         // Book GetBookByTitle(string title); //NOT USED AT THE MOMENT
         // Book GetBookByAuthor(string authorName); //NOT USED AT THE MOMENT
     }

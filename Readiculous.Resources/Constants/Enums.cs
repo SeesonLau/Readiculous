@@ -25,6 +25,10 @@ namespace Readiculous.Resources.Constants
             Success = 0,
             Failed = 1,
             InvalidRole = 2,
+            InvalidEmailOrPassword = 3,
+            AccountNotFound = 4,
+            AccountAlreadyExists = 5,
+
         }
 
         public enum RoleType

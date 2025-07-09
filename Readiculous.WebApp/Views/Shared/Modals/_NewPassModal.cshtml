@@ -1,16 +1,20 @@
 ﻿@model Readiculous.WebApp.Models.NewPasswordViewModel
 
-<form novalidate>
+<form asp-action="ResetPassword" asp-controller="LandingPage" method="post">
     <button type="button" class="modal-close" onclick="closeModal()">×</button>
+
     <img src="~/img/typing-icon.png" class="auth-icon" />
     <h2>Create New Password</h2>
-
+    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+    <input asp-for="Email" type="hidden" />
     <input asp-for="NewPassword" class="form-input" placeholder="New Password" type="password" />
-    <span asp-validation-for="NewPassword" class="text-danger"></span>
-
+    <span asp-validation-for="NewPassword" class="text-danger small"></span>
     <input asp-for="ConfirmPassword" class="form-input" placeholder="Confirm Password" type="password" />
-    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-
-    <button type="button"class="auth-btn"onclick="showModal('successpass')">Submit</button>
+    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+    <button type="button" class="auth-btn" onclick="showModal('successpass')">Submit</button>
     <a href="javascript:void(0);" onclick="showModal('otp')" class="auth-btn back-btn">Back</a>
 </form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
