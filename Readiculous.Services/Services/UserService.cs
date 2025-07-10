@@ -11,6 +11,7 @@ using Supabase;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -98,7 +99,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.UserExists);
             }
         }
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
@@ -146,14 +147,14 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
             if(!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
 
             var user = _userRepository.GetUserById(editProfileViewModel.UserId);
@@ -171,11 +172,11 @@ namespace Readiculous.Services.Services
         {
             if (await Task.Run(() => !_userRepository.UserExists(userId)))
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
             if(userId == deleterId)
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserCannotDeleteSelf);
+                throw new InvalidOperationException(Resources.Messages.Errors.UserCannotDeleteSelf);
             }
 
             var user = _userRepository.GetUserById(userId); 
@@ -234,7 +235,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public EditProfileViewModel GetEditProfileById(string userId)
@@ -251,7 +252,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public UserDetailsViewModel GetUserDetailsById(string userId)
@@ -302,7 +303,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public User GetUserById(string userId)
@@ -345,6 +346,12 @@ namespace Readiculous.Services.Services
         public string GetEmailByUserId(string userId)
         {
             var user = _userRepository.GetUserById(userId);
+
+            if(user == null)
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+            }
+
             return user.Email;
         }
         

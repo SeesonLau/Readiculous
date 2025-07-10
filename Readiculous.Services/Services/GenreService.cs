@@ -241,6 +241,7 @@ namespace Readiculous.Services.Services
                     bga.Book.DeletedTime == null)
                 .Select(bga => bga.Book)
                 .ToList();
+
             return books.Select(book =>
             {
                 var model = new BookListItemViewModel();
