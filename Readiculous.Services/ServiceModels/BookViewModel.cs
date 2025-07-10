@@ -45,5 +45,7 @@ namespace Readiculous.Services.ServiceModels
         public DateTime CreatedTime { get; set; }
         public string UpdatedBy { get; set; }
         public DateTime UpdatedTime { get; set; }
+
+        public decimal Rating { get; set; }
     }
 }

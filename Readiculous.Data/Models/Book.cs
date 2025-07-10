@@ -32,5 +32,7 @@ namespace Readiculous.Data.Models
         public virtual ICollection<BookGenreAssignment> GenreAssociations { get; set; } = [];
         public virtual ICollection<FavoriteBook> FavoritedbyUsers { get; set; } = [];
         public virtual ICollection<Review> BookReviews { get; set; } = [];
+
+        public decimal Rating { get; set; }
     }
 }

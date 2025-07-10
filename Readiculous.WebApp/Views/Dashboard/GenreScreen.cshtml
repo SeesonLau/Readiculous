@@ -1,0 +1,111 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Genres";
+    ViewBag.ShowReviewerNav = true;
+    var allGenres = new[]
+    {
+        "Fiction", "Sci-Fi", "Romance",
+        "Mystery", "Drama", "Fantasy"
+    };
+}
+
+<section class="container py-4">
+    <h2 class="mb-3">Explore by Genre</h2>
+
+    <form id="genreForm">
+        <div class="border rounded p-3 bg-light shadow-sm mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 position-relative">
+                    <label class="fw-bold">Genres</label>
+                    <button type="button" class="form-select text-start" id="genreToggle">Select genres…</button>
+                    <div class="dropdown-menu p-3" id="genreMenu" style="width:100%; max-width:500px;">
+                        <div class="row">
+                            @for (int i = 0; i < allGenres.Length; i++)
+                            {
+                                <div class="col-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input genre-checkbox" type="checkbox" id="chk_@allGenres[i]" value="@allGenres[i]" />
+                                        <label class="form-check-label" for="chk_@allGenres[i]">@allGenres[i]</label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div id="selectedGenresDisplay" class="mt-2"></div>
+                </div>
+
+                <div class="col-md-6 d-flex justify-content-end">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary" onclick="submitGenre('Top')">Top</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="submitGenre('New')">New</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="selectedGenres" id="selectedGenresInput" />
+        <input type="hidden" name="filterType" id="filterType" />
+    </form>
+
+    <div class="text-center mt-3 mb-4">
+        <h4 id="displayTitle" class="display-title-highlight"></h4>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-5 g-4">
+        @for (int i = 1; i <= 5; i++)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="~/img/placeholder.png" class="card-img-top" alt="Book @i" />
+                    <div class="card-body">
+                        <h5 class="card-title">Example Book @i</h5>
+                        <p class="card-text">Author Name</p>
+                        <p class="card-text">⭐ 4.@i</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    const toggle = document.getElementById("genreToggle"),
+          menu = document.getElementById("genreMenu"),
+          checkboxes = document.querySelectorAll(".genre-checkbox"),
+          hiddenInput = document.getElementById("selectedGenresInput"),
+          display = document.getElementById("selectedGenresDisplay");
+
+    toggle.addEventListener("click", e => {
+        e.stopPropagation();
+        menu.classList.toggle("show");
+    });
+
+    document.addEventListener("click", e => {
+        if (!toggle.contains(e.target)) {
+            menu.classList.remove("show");
+        }
+    });
+
+    checkboxes.forEach(cb => cb.addEventListener("change", () => {
+        const selected = Array.from(checkboxes)
+            .filter(c => c.checked)
+            .map(c => c.value);
+
+        hiddenInput.value = selected.join(",");
+        display.innerHTML = selected.map(g => `<span class="badge bg-secondary me-1">${g}</span>`).join("");
+    }));
+
+    function submitGenre(filterType) {
+        const selected = Array.from(checkboxes)
+            .filter(c => c.checked)
+            .map(c => c.value);
+
+        if (selected.length === 0) {
+            alert("Please select at least one genre.");
+            return;
+        }
+
+        document.getElementById("filterType").value = filterType;
+        document.getElementById("displayTitle").innerText = `${filterType} ${selected.join(", ")}`;
+    }
+</script>

@@ -1,0 +1,56 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
+    ViewData["Title"] = "Dashboard";
+}
+
+
+<main class="container py-4">
+    <!-- Search bar -->
+    <input type="text" class="form-control mb-4" placeholder="🔍 Search Books..." />
+
+    <!-- New Books Section -->
+    <section id="new-books" class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 mb-0">New Books</h2>
+            <a class="btn btn-link" href="@Url.Action("ViewNewBooks", "Dashboard")">View More</a>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
+            @for (int i = 1; i <= 5; i++)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="~/img/placeholder.png" class="card-img-top" alt="New Book @i" />
+                        <div class="card-body">
+                            <h6 class="card-title">New Book Title @i</h6>
+                            <p class="card-text small">Author @i</p>
+                            <p class="card-text text-muted">⭐ 4.@i</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Top Books Section -->
+    <section id="top-books" class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 mb-0">Top Books</h2>
+            <a class="btn btn-link" href="@Url.Action("ViewTopBooks", "Dashboard")">View More</a>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
+            @for (int i = 1; i <= 5; i++)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="~/img/placeholder.png" class="card-img-top" alt="Top Book @i" />
+                        <div class="card-body">
+                            <h6 class="card-title">Top Book Title @i</h6>
+                            <p class="card-text small">Top Author @i</p>
+                            <p class="card-text text-muted">⭐ 5.@i</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</main>

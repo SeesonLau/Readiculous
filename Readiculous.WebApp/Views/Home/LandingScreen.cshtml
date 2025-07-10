@@ -1,0 +1,82 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Readiculous - Landing Page</title>
+
+    <!-- Bring in same CSS as your _Layout -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
+    <style>
+        :root {
+            --color-text: #2C2133;
+            --color-header: #B089A5;
+            --color-btn: #EDAEC0;
+            --color-modal: #F8ECE9;
+            --color-background: #F2EFF1;
+            --font-primary: 'Gentium Book Plus', serif;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-primary);
+            background: var(--color-background);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hardcoded navbar with logo and text side by side -->
+    <header style="
+        background-color: var(--color-header);
+        color: var(--color-text);
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;">
+        <div style="display: flex; align-items: center; gap: 10px;"
+             onclick="window.location.href='@Url.Action("LandingScreen", "Home")'">
+            <img src="@Url.Content("~/img/readiculous-logo.svg")"
+                 style="width: 40px; height: 40px;"
+                 alt="Logo">
+            <span style="font-weight: bold; font-size: 1.2rem;">
+                Readiculous
+            </span>
+        </div>
+    </header>
+
+    <!-- Hero section -->
+    <section class="hero" style="padding: 10px 20px; text-align: center;">
+        <div class="hero-text">
+            <div class="hero-image" style="margin-bottom: 20px;">
+                <img src="@Url.Content("~/img/download.png")"
+                     alt="Reading Illustration"
+                     style="max-width: 100%; height: auto;" />
+            </div>
+       
+            <h2>Where Book Reviews are Seriously Readiculous!</h2>
+            <p>
+                Discover new books worth reading, share your honest thoughts, and explore what others are saying.<br>
+                Whether you're a casual reader or a dedicated bookworm,
+                join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
+            </p>
+            <div class="button-wrapper" style="margin-top: 10px;">
+                <a href="@Url.Action("DashboardScreen", "Dashboard")"
+                   class="btn btn-primary cta-btn">
+                    Get Started
+                </a>
+            </div>
+
+
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

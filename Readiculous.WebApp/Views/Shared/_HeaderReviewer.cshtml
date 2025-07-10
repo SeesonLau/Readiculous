@@ -1,0 +1,88 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")"
+        style="background-color: var(--color-header); color: var(--color-text); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 60px;">
+
+    <!-- Logo Section -->
+    <div class="logosec hover-pointer" style="display: flex; align-items: center; gap: 10px;">
+        <img src="~/img/readiculous-logo.svg"
+             style="width: 40px; height: 40px;"
+             alt="logo"
+             onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';" />
+        <span style="font-weight: bold; font-size: 1.2rem; cursor: pointer;"
+              onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">
+            Readiculous
+        </span>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <nav style="display: flex; gap: 15px;">
+        <button type="button"
+                class="btn btn-link"
+                style="color: var(--color-text); text-decoration: none;"
+                onclick="window.location.href = '@Url.Action("ViewNewBooks", "Dashboard")';">
+            New Books
+        </button>
+        <button type="button"
+                class="btn btn-link"
+                style="color: var(--color-text); text-decoration: none;"
+                onclick="window.location.href = '@Url.Action("ViewTopBooks", "Dashboard")';">
+            Top Books
+        </button>
+        <button type="button"
+                class="btn btn-link"
+                style="color: var(--color-text); text-decoration: none;"
+                onclick="window.location.href = '@Url.Action("Genres", "Dashboard")';">
+            Genre
+        </button>
+    </nav>
+
+    <!-- Profile + Dropdown -->
+    <div class="logosec" style="display: flex; align-items: center; gap: 10px; position: relative;">
+        <span>
+            @HttpContextAccessor.HttpContext.Session.GetString("UserName")
+        </span>
+        <div class="mr-20 hover-pointer" style="position: relative;">
+            <div class="dp">
+                <img src="~/img/profile-logo.png"
+                     class="dpicn hover-pointer"
+                     alt="dp"
+                     style="width: 32px; height: 32px; border-radius: 50%;" />
+            </div>
+            <div class="dropdown" style="position: absolute; top: 40px; right: 0; background-color: var(--color-modal); padding: 10px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: none;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 8px;">
+                        <i class="fa-solid fa-gear"></i>
+                        <a class="open-edit-profile" style="cursor: pointer; margin-left: 6px;">Edit Profile</a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <a asp-action="SignOutUser" asp-controller="Account" style="margin-left: 6px;">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+    // Simple dropdown toggle
+    document.addEventListener("DOMContentLoaded", function () {
+        const profileIcon = document.querySelector(".dpicn");
+        const dropdown = document.querySelector(".dropdown");
+
+        if (profileIcon && dropdown) {
+            profileIcon.addEventListener("click", function () {
+                dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener("click", function (event) {
+                if (!event.target.closest(".mr-20")) {
+                    dropdown.style.display = "none";
+                }
+            });
+        }
+    });
+</script>

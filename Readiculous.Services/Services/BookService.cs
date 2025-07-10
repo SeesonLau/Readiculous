@@ -429,7 +429,7 @@ namespace Readiculous.Services.Services
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
                     model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username; 
+                    model.UpdatedByUserName = book.UpdatedByUser.Username;
                     model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
                         ? book.BookReviews.Average(r => r.Rating)
                         : 0);
@@ -475,7 +475,7 @@ namespace Readiculous.Services.Services
             return SearchAndSortBook(books, searchType, sortType, genreFilter)
                 .ToList();
         }
-        
+
         // Search And Sort Book Helper Function
         private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> books, BookSearchType searchType, BookSortType sortType, string? genreFilter)
         {
@@ -528,8 +528,8 @@ namespace Readiculous.Services.Services
                 BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
                 BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
                 BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
-               // BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
-               // BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
+                // BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
+                // BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
                 BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
                 BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
                 _ => books, // Default case

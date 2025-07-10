@@ -15,6 +15,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using System.Linq;
+using Readiculous.Data;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -26,6 +28,7 @@ namespace Readiculous.WebApp.Controllers
         private readonly TokenProviderOptionsFactory _tokenProviderOptionsFactory;
         private readonly IConfiguration _appConfiguration;
         private readonly IUserService _userService;
+        private readonly ReadiculousDbContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountController"/> class.
@@ -45,6 +48,7 @@ namespace Readiculous.WebApp.Controllers
                             ILoggerFactory loggerFactory,
                             IConfiguration configuration,
                             IMapper mapper,
+                             ReadiculousDbContext context,
                             IUserService userService,
                             TokenValidationParametersFactory tokenValidationParametersFactory,
                             TokenProviderOptionsFactory tokenProviderOptionsFactory) : base(httpContextAccessor, loggerFactory, configuration, mapper)
@@ -55,6 +59,7 @@ namespace Readiculous.WebApp.Controllers
             this._tokenValidationParametersFactory = tokenValidationParametersFactory;
             this._appConfiguration = configuration;
             this._userService = userService;
+            this._context = context;
         }
 
         /// <summary>
@@ -83,7 +88,7 @@ namespace Readiculous.WebApp.Controllers
         {
             this._session.SetString("HasSession", "Exist");
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
@@ -97,9 +102,9 @@ namespace Readiculous.WebApp.Controllers
 
             return RedirectToAction("Index", "Home");
             */
-            
+
             User user = null;
-            
+
             var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
             if (loginResult == LoginResult.Success)
             {
@@ -213,7 +218,7 @@ namespace Readiculous.WebApp.Controllers
             {
                 TempData["ErrorMessage"] = "Failed to resend OTP. Please try again.";
             }
-            
+
             var model = new OtpVerificationModel { Email = email };
             return View("VerifyOtp", model);
         }
@@ -223,30 +228,98 @@ namespace Readiculous.WebApp.Controllers
         /// </summary>
         /// <returns>Created response view</returns>
         [AllowAnonymous]
+        [HttpPost]
         public async Task<IActionResult> SignOutUser()
         {
+            // Sign out from ASP.NET Identity
             await this._signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+
+            // Clear session variables
+            HttpContext.Session.Clear();
+
+            // Redirect to landing page (adjust as needed)
+            return RedirectToAction("LandingScreen", "Home");
         }
 
         [HttpPost]
-        public async Task<IActionResult> CompleteFirstTimeProfile([FromForm] string Username, [FromForm] string Password, [FromForm] string ConfirmPassword, [FromForm] IFormFile ProfilePicture)
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginAjax([FromForm] string Email, [FromForm] string Password)
         {
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || Password != ConfirmPassword)
+            var user = new User();
+            var result = _userService.AuthenticateUserByEmail(Email, Password, ref user);
+
+            if (result == LoginResult.Failed)
             {
-                return BadRequest();
+                return Json(new { success = false, message = "Invalid email or password." });
             }
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-            var user = _userService.SearchUserEditById(userId);
-            user.Username = Username;
-            user.Password = Password;
-            if (ProfilePicture != null && ProfilePicture.Length > 0)
-                user.ProfilePicture = ProfilePicture;
-            user.AccessStatus = AccessStatus.Verified;
-            await _userService.UpdateUserAsync(user, userId);
-            return Ok();
+
+            // Additional access status check
+            if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Your account is not allowed to log in. Please contact support."
+                });
+            }
+
+            // Sign in and set session
+            await _signInManager.SignInAsync(user);
+
+            HttpContext.Session.SetString("UserId", user.UserId);
+            HttpContext.Session.SetString("UserName", user.Username);
+            HttpContext.Session.SetString("UserRole", user.Role.ToString());
+
+            return Json(new
+            {
+                success = true,
+                role = user.Role.ToString(),
+                redirectUrl = Url.Action("DashboardScreen", "Dashboard")
+            });
         }
+
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterAjax([FromForm] RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToArray();
+
+                return Json(new
+                {
+                    success = false,
+                    message = errors.Any() ? string.Join(" ", errors) : "Please complete all fields correctly."
+                });
+            }
+
+            if (_context.Users.Any(u => u.Email == model.Email))
+            {
+                return Json(new { success = false, message = "Email is already registered." });
+            }
+
+            var encryptedPassword = PasswordManager.EncryptPassword(model.Password);
+
+            var newUser = new User
+            {
+                UserId = Guid.NewGuid().ToString(),
+                Username = model.Email.Split('@')[0],
+                Email = model.Email,
+                Password = encryptedPassword,
+                Role = RoleType.Reviewer,
+                CreatedTime = DateTime.Now
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync(); // use await
+
+            return Json(new { success = true });
+        }
+
     }
 }
