@@ -6,6 +6,7 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -32,7 +33,7 @@ namespace Readiculous.Services.Services
         {
             if (_genreRepository.GenreNameExists(model.Name))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.GenreExists);
             }
 
             var genre = new Genre();
@@ -54,7 +55,7 @@ namespace Readiculous.Services.Services
         {
             if (!_genreRepository.GenreNameExists(model.Name))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var genre = new Genre();
@@ -73,7 +74,7 @@ namespace Readiculous.Services.Services
         {
             if (!_genreRepository.GenreIdExists(genreId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var genre = _genreRepository.GetGenreById(genreId);
@@ -108,7 +109,7 @@ namespace Readiculous.Services.Services
             var genre = _genreRepository.GetGenreById(id);
             if (genre == null || genre.DeletedTime != null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var model = new GenreViewModel();
@@ -120,7 +121,7 @@ namespace Readiculous.Services.Services
             var genre = _genreRepository.GetGenreById(id);
             if (genre == null || genre.DeletedTime != null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var model = new GenreDetailsViewModel();

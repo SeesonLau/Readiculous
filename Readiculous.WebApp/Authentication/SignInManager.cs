@@ -85,6 +85,8 @@ namespace Readiculous.WebApp.Authentication
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId, ClaimValueTypes.String, Const.Issuer),
                 new Claim(ClaimTypes.Name, user.Username, ClaimValueTypes.String, Const.Issuer),
+                new Claim(ClaimTypes.Role, user.Role.ToString(), ClaimValueTypes.String, Const.Issuer),
+
 
                 new Claim("UserId", user.UserId, ClaimValueTypes.String, Const.Issuer),
                 new Claim("UserName", user.Username, ClaimValueTypes.String, Const.Issuer),

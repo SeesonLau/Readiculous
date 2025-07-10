@@ -18,6 +18,7 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : ControllerBase<AccountController>
     {
         private readonly SessionManager _sessionManager;
@@ -62,7 +63,6 @@ namespace Readiculous.WebApp.Controllers
         /// </summary>
         /// <returns>Created response view</returns>
         [HttpGet]
-        [AllowAnonymous]
         public ActionResult Login()
         {
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
@@ -78,7 +78,6 @@ namespace Readiculous.WebApp.Controllers
         /// <param name="returnUrl">The return URL.</param>
         /// <returns> Created response view </returns>
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
             this._session.SetString("HasSession", "Exist");
@@ -119,20 +118,16 @@ namespace Readiculous.WebApp.Controllers
 
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Register()
         {
             return View();
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> RegisterAsync(UserViewModel model)
         {
             try
             {
-                model.UserId = Guid.NewGuid().ToString();
-                model.Role = RoleType.Reviewer;
                 await _userService.AddUserAsync(model, model.UserId);
                 return RedirectToAction("Login", "Account");
             }
@@ -151,7 +146,6 @@ namespace Readiculous.WebApp.Controllers
         /// Sign Out current account and return login view.
         /// </summary>
         /// <returns>Created response view</returns>
-        [AllowAnonymous]
         public async Task<IActionResult> SignOutUser()
         {
             await this._signInManager.SignOutAsync();

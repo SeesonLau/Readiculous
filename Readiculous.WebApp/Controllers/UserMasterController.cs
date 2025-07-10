@@ -20,6 +20,7 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserMasterController : ControllerBase<UserController>
     {
         private readonly IUserService _userService;
@@ -63,10 +64,18 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserAddModal()
         {
-            return PartialView(new UserViewModel());
+            try
+            {
+                UserViewModel userViewModel = new();
+                return PartialView(userViewModel);
+            }
+            catch (Keyn
+                
+            }
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserViewModel model)
         {
             if (ModelState.IsValid)
@@ -78,7 +87,11 @@ namespace Readiculous.WebApp.Controllers
                 }
                 catch (InvalidDataException ex)
                 {
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                    TempData["ErrorMessage"] = ex.Message;
+                }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 }
             }
             return PartialView("UserAddModal", model);
@@ -99,6 +112,7 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserViewModel model)
         {
             if (ModelState.IsValid)
@@ -133,11 +147,12 @@ namespace Readiculous.WebApp.Controllers
             }
             catch (InvalidDataException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound();
             }
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string userId)
         {
             try
