@@ -93,8 +93,16 @@ namespace Readiculous.WebApp.Controllers
                 var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
                 if (loginResult == LoginResult.Success)
                 {
+                    if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+                    {
+                        TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
+                        return View();
+                    }
+
                     await this._signInManager.SignInAsync(user);
                     this._session.SetString("UserName", user.Username);
+                    // Pass AccessStatus to the view for modal logic
+                    TempData["AccessStatus"] = user.AccessStatus.ToString();
                     return RedirectToAction("Index", "Home");
                 }
                 else
