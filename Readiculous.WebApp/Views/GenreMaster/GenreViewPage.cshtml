@@ -5,16 +5,24 @@
     var books = Model.Books ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
 }
 
-<div class="container-fluid genre-view-container">
+@section Styles {
+    <link rel="stylesheet" href="~/css/genre-master-view.css" />
+}
+
+<div class="genre-view-container">
+    <!-- Genre Details Sidebar -->
     <div class="genre-details-container">
         <div class="genre-info-card">
             <div class="genre-header-section">
                 <h1 class="genre-name">@Model.Genre.Name</h1>
-                <div class="genre-description">@Model.Genre.Description</div>
+                @if (!string.IsNullOrEmpty(Model.Genre.Description))
+                {
+                    <div class="genre-description">@Model.Genre.Description</div>
+                }
             </div>
-            
+
             <div class="genre-divider"></div>
-            
+
             <div class="genre-meta-section">
                 <div class="genre-meta-item">
                     <span class="meta-label">Total Books:</span>
@@ -22,7 +30,7 @@
                 </div>
                 <div class="genre-meta-item">
                     <span class="meta-label">Last Updated:</span>
-                    <span class="meta-value">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+                    <span class="meta-value">@Model.Genre.UpdatedTime</span>
                 </div>
             </div>
 
@@ -35,7 +43,8 @@
                         {
                             <li class="genre-list-item">
                                 <a href="@Url.Action("GenreViewPage", "GenreMaster", new { id = genre.GenreId })"
-                                   class="@(genre.GenreId == Model.Genre.GenreId ? "active" : "")">
+                                   class="@(genre.GenreId == Model.Genre.GenreId ? "active" : "")"
+                                   title="@genre.Name">
                                     @genre.Name
                                 </a>
                             </li>
@@ -45,7 +54,8 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Books Main Content -->
     <div class="genre-books-container">
         <div class="books-header-section">
             <div class="books-header-row">
@@ -63,14 +73,14 @@
                         </form>
                     </div>
                     <a href="@Url.Action("GenreMasterScreen", "GenreMaster")" class="btn btn-secondary genre-back-btn">
-                        <i class="fas fa-arrow-left"></i> Back to Genres
+                        <i class="fas fa-arrow-left me-1"></i> Back to Genres
                     </a>
                 </div>
             </div>
         </div>
-        
+
         <div class="books-grid-container">
-            @if (Model.Books.Any())
+            @if (books.Any())
             {
                 <div class="books-grid">
                     @foreach (var book in books)
@@ -79,7 +89,7 @@
                             <div class="book-cover">
                                 @if (!string.IsNullOrEmpty(book.CoverImageUrl))
                                 {
-                                    <img src="@book.CoverImageUrl" alt="@book.Title" />
+                                    <img src="@book.CoverImageUrl" alt="Cover of @book.Title" class="book-cover-img" />
                                 }
                                 else
                                 {
@@ -89,9 +99,9 @@
                                 }
                             </div>
                             <div class="book-info">
-                                <h3 class="book-title">@book.Title</h3>
+                                <h3 class="book-title" title="@book.Title">@book.Title</h3>
                                 <div class="book-author">@book.Author</div>
-                                <div class="book-year">@book.PublicationYear</div>
+                                <div class="book-year">@(book.PublicationYear?.ToString() ?? "Unknown year")</div>
                             </div>
                         </div>
                     }
@@ -102,26 +112,30 @@
                 <div class="no-books-message">
                     <i class="fas fa-book-open"></i>
                     <p>No books found in this genre</p>
+                    @if (!string.IsNullOrEmpty(ViewData["BookSearch"]?.ToString()))
+                    {
+                        <p class="search-tip">Try a different search term</p>
+                    }
                 </div>
             }
         </div>
-        
-        @if (Model.TotalBooksCount > 0 || Model.TotalPages > 0)
+
+        @if (Model.TotalBooksCount > 0 && Model.TotalPages > 1)
         {
             <div class="pagination-container">
                 @await Component.InvokeAsync("Pagination", new
                 {
                     currentPage = Model.CurrentPage,
-                    totalPages = Model.TotalPages,
-                    pageSize = Model.PageSize,
-                    totalItems = Model.TotalBooksCount,
-                    action = "GenreViewPage",
-                    controller = "GenreMaster",
-                    routeId = Model.Genre.GenreId,
-                    routeBookSearch = ViewData["BookSearch"]
-                })
-            </div>
-        }
+                        totalPages = Model.TotalPages,
+                        pageSize = Model.PageSize,
+                        totalItems = Model.TotalBooksCount,
+                        action = "GenreViewPage",
+                        controller = "GenreMaster",
+                        routeId = Model.Genre.GenreId,
+                        routeBookSearch = ViewData["BookSearch"]
+                        })
+        </div>
+                }
     </div>
 </div>
 
@@ -135,4 +149,3 @@
     </script>
     <script src="~/js/adminGenreMaster/genreViewPage.js"></script>
 }
-

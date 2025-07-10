@@ -1,134 +1,339 @@
-﻿/* genre-master.css - CoreUI compatible version */
-:root {
-    /* CoreUI compatible variables */
-    --cui-body-color: #2C2133;
-    --cui-body-bg: #F2EFF1;
-    --cui-border-color: #d9c7d0;
-    --cui-primary: #B089A5;
-    --cui-secondary: #6c757d;
-    --cui-success: #EDAEC0;
-    --cui-info: #0dcaf0;
-    --cui-warning: #ffc107;
-    --cui-danger: #dc3545;
-    --cui-light: #F8ECE9;
-    --cui-dark: #2C2133;
+﻿/* Main Container Styles */
+.genre-master-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 /* Header Styles */
 .genre-header {
-    color: var(--cui-primary);
-    font-weight: 700;
-    font-size: 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-/* Table Styles - CoreUI compatible */
-.genre-table .table {
-    --cui-table-color: var(--cui-body-color);
-    --cui-table-bg: transparent;
-    --cui-table-border-color: var(--cui-border-color);
-    --cui-table-striped-bg: #f9f5f7;
-    --cui-table-hover-bg: rgba(237, 174, 192, 0.1);
+    .genre-header h1 {
+        font-family: var(--font-secondary);
+        color: var(--color-secondary);
+        font-size: 2rem;
+        margin: 0;
+    }
+
+/* Search and Filter Section */
+.genre-search-container {
+    background-color: var(--color-modal);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.genre-table .table-hover tbody tr:hover {
-    --cui-table-hover-bg: rgba(237, 174, 192, 0.2);
+.genre-search-form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
 }
 
-/* Custom button hover states */
-.btn-success:hover {
-    --cui-btn-hover-bg: #d89cb1;
-    --cui-btn-hover-border-color: #d89cb1;
-}
-
-.btn-warning:hover {
-    --cui-btn-hover-bg: #e0a800;
-    --cui-btn-hover-border-color: #e0a800;
-}
-
-/* Search bar adjustments */
-.genre-search-bar {
-    padding-left: 2.5rem;
-    background-color: var(--cui-light);
-    border-color: var(--cui-border-color);
+.genre-search-group {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
 }
 
 .genre-search-icon {
-    color: var(--cui-secondary);
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-secondary);
 }
 
-/* Card styling */
-.genre-card.sleek-filter {
-    background-color: var(--cui-light);
-    border-color: var(--cui-border-color);
+.genre-search-bar {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    background-color: var(--color-background);
+    transition: all 0.3s ease;
 }
 
-/* Ensure consistent row heights */
-.genre-table tbody tr {
-    height: 70px;
+    .genre-search-bar:focus {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 0.25rem rgba(37, 140, 251, 0.25);
+        outline: none;
+    }
+
+.genre-filter-group {
+    min-width: 180px;
 }
 
-/* Text truncation */
-.genre-table td {
-    max-width: 200px;
+.genre-search-btn {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-family: var(--font-secondary);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .genre-search-btn:hover {
+        background-color: var(--color-header);
+    }
+
+/* Table Styles */
+.genre-table-container {
+    background-color: var(--color-modal);
+    border-radius: 12px;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-    /* Hover states for truncated cells */
-    .genre-table td:nth-child(1):hover,
-    .genre-table td:nth-child(2):hover {
-        white-space: normal;
-        overflow: visible;
-        z-index: 10;
-        background-color: var(--cui-table-striped-bg);
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .genre-form-row {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .genre-search-bar {
-        width: 100%;
-    }
+.genre-table {
+    width: 100%;
+    margin-bottom: 0;
+    color: var(--color-text);
+    font-family: var(--font-primary);
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-/* Table cell styling */
-.genre-table td {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-    /* Description column specific styling */
-    .genre-table td:nth-child(2) { /* Description column */
-        max-width: 300px; /* Wider for descriptions */
-        position: relative;
+    .genre-table thead th {
+        background-color: var(--color-secondary);
+        color: var(--color-modal);
+        font-family: var(--font-secondary);
+        font-weight: 600;
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+        position: sticky;
+        top: 0;
     }
 
-        .genre-table td:nth-child(2):hover {
-            white-space: normal;
-            overflow: visible;
-            z-index: 10;
-            background-color: var(--cui-table-striped-bg);
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    .genre-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .genre-table tbody tr:nth-child(even) {
+            background-color: var(--color-background);
         }
 
-    /* Date/Time columns - prevent wrapping and ensure full width */
-    .genre-table td:nth-child(4), /* Modified Date */
-    .genre-table td:nth-child(5) { /* Modified Time */
-        white-space: nowrap;
-        width: 1%; /* Makes the column take only the space it needs */
-        min-width: 120px; /* Minimum width for date/time columns */
+        .genre-table tbody tr:hover {
+            background-color: var(--color-highlight);
+        }
+
+    .genre-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-top: 1px solid var(--color-border);
     }
 
-    /* Ensure action buttons column stays compact */
-    .genre-table td:nth-child(6) { /* Actions column */
-        width: 180px;
-        white-space: nowrap;
+/* Text truncation */
+.genre-name-cell,
+.genre-description-cell {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    cursor: pointer;
+}
+
+    .genre-name-cell:hover::after,
+    .genre-description-cell:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background-color: var(--color-text);
+        color: var(--color-modal);
+        padding: 0.5rem;
+        border-radius: 4px;
+        z-index: 100;
+        white-space: normal;
+        width: auto;
+        min-width: 200px;
+        font-family: var(--font-primary);
+        font-size: 0.875rem;
+    }
+
+/* Badge Styles */
+.genre-book-count {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+}
+
+/* Action Buttons */
+.genre-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.genre-action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.genre-view-btn {
+    background-color: var(--color-btn);
+    color: var(--color-text);
+}
+
+.genre-edit-btn {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.genre-delete-btn {
+    background-color: var(--color-danger);
+    color: var(--color-modal);
+}
+
+.genre-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Pagination and Page Size */
+.genre-pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Empty State */
+.genre-empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: var(--color-text);
+}
+
+    .genre-empty-state i {
+        font-size: 2rem;
+        color: var(--color-secondary);
+        margin-bottom: 1rem;
+    }
+
+/* Modal Styles */
+.genre-modal .modal-header {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.genre-modal .modal-title {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+}
+
+.genre-modal .modal-body {
+    padding: 1.5rem;
+    background-color: var(--color-background);
+}
+
+.genre-modal .modal-footer {
+    background-color: var(--color-background);
+    border-top: 1px solid var(--color-border);
+    padding: 1rem 1.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .genre-search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .genre-search-group,
+    .genre-filter-group {
+        min-width: 100%;
+    }
+
+    .genre-table thead {
+        display: none;
+    }
+
+    .genre-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+    }
+
+    .genre-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-top: none;
+    }
+
+        .genre-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            margin-right: 1rem;
+            color: var(--color-secondary);
+            font-family: var(--font-secondary);
+        }
+
+    .genre-actions {
+        justify-content: flex-end;
+    }
+
+    .genre-name-cell,
+    .genre-description-cell {
+        max-width: none;
+        white-space: normal;
+    }
+
+        .genre-name-cell:hover::after,
+        .genre-description-cell:hover::after {
+            display: none;
+        }
+}
+
+/* Add New Genre Button */
+.add-genre-btn {
+    background-color: var(--color-success);
+    color: var(--color-text);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-family: var(--font-secondary);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .add-genre-btn:hover {
+        background-color: var(--color-accent);
+        color: var(--color-text);
+    }
+
+    .add-genre-btn i {
+        font-size: 1rem;
     }
