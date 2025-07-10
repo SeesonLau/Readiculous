@@ -268,12 +268,12 @@ namespace Readiculous.Services.Services
                 _mapper.Map(user, userViewModel);
                 userViewModel.ProfileImageUrl = user.ProfilePictureUrl;
                 userViewModel.Role = user.Role.ToString();
-                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId)
+                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId) 
                     .ToList()
                     .Select(fb =>
                     {
                         var favoriteBookModel = new FavoriteBookModel();
-                        var book = _bookRepository.GetBookById(fb.BookId);
+                        var book = _bookRepository.GetBookById(fb.BookId); 
 
                         _mapper.Map(book, favoriteBookModel);
                         favoriteBookModel.BookGenres = book.GenreAssociations.Select(bg => bg.Genre.Name)
@@ -339,7 +339,6 @@ namespace Readiculous.Services.Services
                     };
                 }).ToList();
         }
-
         // String Helper
         public string GetEmailByUserId(string userId)
         {
@@ -454,7 +453,6 @@ namespace Readiculous.Services.Services
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
-
         // OTP Methods
         public async Task<bool> SendOtpForRegistrationAsync(string email)
         {
@@ -478,7 +476,6 @@ namespace Readiculous.Services.Services
                 return false;
             }
         }
-
         public async Task<bool> ResendOtpForRegistrationAsync(string email)
         {
             try
@@ -501,7 +498,6 @@ namespace Readiculous.Services.Services
                 return false;
             }
         }
-
         // New method to send temp password after OTP is confirmed
         public async Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword)
         {

@@ -239,7 +239,7 @@ namespace Readiculous.WebApp.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
-            var user = _userService.SearchUserEditById(userId);
+            var user = _userService.GetUserEditById(userId);
             user.Username = Username;
             user.Password = Password;
             if (ProfilePicture != null && ProfilePicture.Length > 0)
