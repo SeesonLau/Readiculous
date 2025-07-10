@@ -29,7 +29,7 @@ namespace Readiculous.WebApp.Controllers
             _reviewService = reviewService;
         }
 
-        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder, string? genreFilter = null, int page = 1, int pageSize = 10)
+        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;

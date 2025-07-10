@@ -182,7 +182,7 @@ namespace Readiculous.WebApp.Controllers
                 TotalPages = paginationModel.TotalPages,
                 PageSize = pageSize,
                 TotalBooksCount = totalBooks,
-                AllGenres = _genreService.GetGenreList("", GenreSortType.NameAscending)
+                AllGenres = _genreService.GetGenreList("", GenreSortType.Latest)
             };
 
             return View(viewModel);

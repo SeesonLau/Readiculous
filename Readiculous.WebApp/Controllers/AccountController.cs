@@ -284,6 +284,7 @@ namespace Readiculous.WebApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RegisterAjax([FromForm] RegisterViewModel model)
         {
+
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values
@@ -319,6 +320,23 @@ namespace Readiculous.WebApp.Controllers
             await _context.SaveChangesAsync(); // use await
 
             return Json(new { success = true });
+
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || Password != ConfirmPassword)
+            {
+                return BadRequest();
+            }
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var user = _userService.GetUserEditById(userId);
+            user.Username = Username;
+            user.Password = Password;
+            if (ProfilePicture != null && ProfilePicture.Length > 0)
+                user.ProfilePicture = ProfilePicture;
+            user.AccessStatus = AccessStatus.Verified;
+            await _userService.UpdateUserAsync(user, userId);
+            return Ok();
+
         }
 
     }
