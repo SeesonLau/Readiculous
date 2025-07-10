@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -17,6 +18,7 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class BookMasterController : ControllerBase<BookController>
     {
         private readonly IBookService _bookService;
@@ -61,20 +63,13 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookAddModal()
         {
-            try
-            {
-                var model = new BookViewModel();
-                var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-                model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
-                return PartialView(model);
-            }
-            catch (Exception)
-            {
-                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
+            var model = new BookViewModel();
+            var allGenres = _genreService.GetGenreList(genreName: string.Empty);
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            return PartialView(model);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(BookViewModel model)
         {
             if (ModelState.IsValid)
@@ -102,22 +97,15 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookEditModal(string id)
         {
-            try
-            {
-                var model = _bookService.GetBookEditById(id);
-                var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-                model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
-                model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
-                return PartialView(model);
-            }
-            catch (Exception)
-            {
-                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
+            var model = _bookService.GetBookEditById(id);
+            var allGenres = _genreService.GetGenreList(genreName: string.Empty);
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
+            return PartialView(model);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(BookViewModel model)
         {
             if (ModelState.IsValid)
@@ -141,68 +129,37 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookViewModal(string id)
         {
-            try
-            {
-                var model = _bookService.GetBookDetailsById(id);
-                return PartialView(model);
-            }
-            catch (Exception)
-            {
-                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
+            var model = _bookService.GetBookDetailsById(id);
+            return PartialView(model);
         }
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
-            try
-            {
-                await _bookService.DeleteBook(id, this.UserId);
-                return Json(new { success = true });
-            }
-            catch (InvalidOperationException ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-                return  RedirectToAction("BookMasterScreen", "BookMaster");
-            }
+            await _bookService.DeleteBook(id, this.UserId);
+            return Json(new { success = true });
         }
 
         // Favorite Book Methods
         public IActionResult AddToFavorites(string id)
         {
-            try
-            {
-                _bookService.AddBookToFavorites(id, this.UserId);
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
+            _bookService.AddBookToFavorites(id, this.UserId);
+            return RedirectToAction("BookMasterScreen", "BookMaster");
         }
         public IActionResult RemoveFromFavorites(string id)
         {
-            try
-            {
-                _bookService.RemoveBookFromFavorites(id, this.UserId);
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return RedirectToAction("BookMasterScreen", "BookMaster");
-            }
+            _bookService.RemoveBookFromFavorites(id, this.UserId);
+            return RedirectToAction("BookMasterScreen", "BookMaster");
         }
 
         // Review Methods
         [HttpGet]
         public IActionResult CreateReview(string id)
         {
-            var model = new ReviewViewModel { BookId = id, UserId = this.UserId, UserName = this.UserName };
+            var model = _reviewService.GenerateInitialReviewViewModel(id, this.UserId, this.UserName);
             return View(model);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult CreateReview(ReviewViewModel model)
         {
             if (!@ModelState.IsValid)
@@ -232,6 +189,7 @@ namespace Readiculous.WebApp.Controllers
             return View(model);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditReview(ReviewViewModel model)
         {
             if (!ModelState.IsValid)

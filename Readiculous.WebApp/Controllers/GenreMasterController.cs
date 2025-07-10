@@ -11,6 +11,7 @@ using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -69,7 +70,7 @@ namespace Readiculous.WebApp.Controllers
                     }
                     return RedirectToAction("Index");
                 }
-                catch (InvalidOperationException ex)
+                catch (DuplicateNameException ex)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {

@@ -12,6 +12,7 @@ using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
@@ -64,14 +65,8 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserAddModal()
         {
-            try
-            {
-                UserViewModel userViewModel = new();
-                return PartialView(userViewModel);
-            }
-            catch (Keyn
-                
-            }
+            UserViewModel userViewModel = new();
+            return PartialView(userViewModel);
         }
 
         [HttpPost]
@@ -84,6 +79,10 @@ namespace Readiculous.WebApp.Controllers
                 {
                     await _userService.AddUserAsync(model, this.UserId);
                     return Json(new { success = true });
+                }
+                catch (DuplicateNameException ex)
+                {
+                    TempData["ErrorMessage"] = ex.Message;
                 }
                 catch (InvalidDataException ex)
                 {
@@ -100,15 +99,8 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserEditModal(string userId)
         {
-            try
-            {
-                var user = _userService.GetUserEditById(userId);
-                return PartialView(user);
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var user = _userService.GetUserEditById(userId);
+            return PartialView(user);
         }
 
         [HttpPost]
@@ -129,9 +121,17 @@ namespace Readiculous.WebApp.Controllers
 
                     return Json(new { success = true });
                 }
+                catch (KeyNotFoundException)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.UserNotFound;
+                }
                 catch (InvalidDataException ex)
                 {
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                    TempData["ErrorMessage"] = ex.Message;
+                }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 }
             }
             return PartialView("UserEditModal", model);
@@ -140,30 +140,16 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserViewModal(string userId)
         {
-            try
-            {
-                var user = _userService.GetUserDetailsById(userId);
-                return PartialView(user);
-            }
-            catch (InvalidDataException ex)
-            {
-                return NotFound();
-            }
+            var user = _userService.GetUserDetailsById(userId);
+            return PartialView(user);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string userId)
         {
-            try
-            {
-                await _userService.DeleteUserAsync(userId, this.UserId);
-                return Json(new { success = true });
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _userService.DeleteUserAsync(userId, this.UserId);
+            return Json(new { success = true });
         }
     }
 }

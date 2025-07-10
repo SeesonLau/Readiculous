@@ -137,5 +137,9 @@ namespace Readiculous.Services.Services
 
             return reviewViewModel;
         }
+        public ReviewViewModel GenerateInitialReviewViewModel(string bookId, string userId, string userName)
+        {
+            return new ReviewViewModel { BookId = bookId, UserId = userId, UserName = userName };
+        }
     }
 }
