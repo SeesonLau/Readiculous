@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
@@ -9,7 +10,7 @@ using Supabase;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,11 +44,11 @@ namespace Readiculous.Services.Services
             // Books can only be added if the title and author combination does not already exist.
             if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
             if (_bookRepository.ISBNExists(model.BookId, model.ISBN))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.ISBNExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.ISBNExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -93,7 +94,7 @@ namespace Readiculous.Services.Services
                     }
                     else
                     {
-                        throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
+                        throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
                     }
                 }
             }
@@ -121,7 +122,7 @@ namespace Readiculous.Services.Services
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
-            if(_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.ISBNExists);
             }
@@ -143,45 +144,9 @@ namespace Readiculous.Services.Services
 
             if (model.CoverImage != null && model.CoverImage.Length > 0)
             {
-                var uri = new Uri(book.CoverImageUrl);
-                var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+                await DeleteCoverImage(book.CoverImageUrl);
 
-                var result = await _client.Storage
-                    .From(Const.BucketName)
-                    .Remove(new List<string> { relativePath });
-
-                if (result == null)
-                {
-                    throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
-                }
-
-                var extension = Path.GetExtension(model.CoverImage.FileName);
-                var fileName = Path.Combine(Const.BookDirectory, $"{book.BookId}-{Guid.NewGuid():N}{extension}");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await model.CoverImage.CopyToAsync(memoryStream);
-                    var fileBytes = memoryStream.ToArray();
-
-                    var uploadResult = await _client.Storage
-                        .From(Const.BucketName)
-                        .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                        {
-                            ContentType = model.CoverImage.ContentType,
-                            Upsert = true
-                        });
-
-                    if (!string.IsNullOrEmpty(uploadResult))
-                    {
-                        book.CoverImageUrl = _client.Storage
-                            .From(Const.BucketName)
-                            .GetPublicUrl(fileName);
-                    }
-                    else
-                    {
-                        throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
-                    }
-                }
+                book.CoverImageUrl = await UploadCoverImage(model.CoverImage, book.BookId);
             }
 
             var assignmentsToRemove = book.GenreAssociations
@@ -484,7 +449,7 @@ namespace Readiculous.Services.Services
             return SearchAndSortBook(books, searchType, sortType, genreFilter)
                 .ToList();
         }
-        
+
         // Search And Sort Book Helper Function
         private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> books, BookSearchType searchType, BookSortType sortType, string? genreFilter)
         {
@@ -523,22 +488,12 @@ namespace Readiculous.Services.Services
 
             return sortType switch
             {
-                /*BookSortType.GenreAscending => books.OrderBy(b => b.Genres
-                    .Select(name => name)
-                    .OrderBy(name => name)
-                    .FirstOrDefault()),
-                BookSortType.GenreDescending => books.OrderBy(b => b.Genres
-                    .Select(name => name)
-                    .OrderByDescending(name => name)
-                    .FirstOrDefault()),*/
                 BookSortType.TitleAscending => books.OrderBy(b => b.Title),
                 BookSortType.TitleDescending => books.OrderByDescending(b => b.Title),
                 BookSortType.AuthorAscending => books.OrderBy(b => b.Author),
                 BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
                 BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
                 BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
-               // BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
-               // BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
                 BookSortType.Oldest => books.OrderBy(b => b.CreatedTime),
                 BookSortType.Latest => books.OrderByDescending(b => b.CreatedTime),
                 _ => books, // Default case
@@ -580,6 +535,49 @@ namespace Readiculous.Services.Services
             var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
 
             _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
+        }
+
+        private async Task DeleteCoverImage(string pictureUrl)
+        {
+            var uri = new Uri(pictureUrl);
+            var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+
+            var result = await _client.Storage
+                .From(Const.BucketName)
+                .Remove(new List<string> { relativePath });
+
+            if (result == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+            }
+        }
+        private async Task<string> UploadCoverImage(IFormFile file, string bookId)
+        {
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = Path.Combine(Const.BookDirectory, $"{bookId}-{Guid.NewGuid():N}{extension}");
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                var uploadResult = await _client.Storage
+                    .From(Const.BucketName)
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                    {
+                        ContentType = file.ContentType,
+                        Upsert = true
+                    });
+
+                if (!string.IsNullOrEmpty(uploadResult))
+                {
+                    return _client.Storage
+                        .From(Const.BucketName)
+                        .GetPublicUrl(fileName);
+                }
+            }
+
+            throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
     }
 }
