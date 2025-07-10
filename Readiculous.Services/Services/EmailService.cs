@@ -153,5 +153,58 @@ namespace Readiculous.Services.Services
                 return false; 
             }
         }
+
+        public async Task<bool> SendOtpForForgotPasswordEmailAsync(string email, string otp)
+        {
+            try
+            {
+                var smtpSettings = _configuration.GetSection("SmtpSettings");
+                var resolvedPassword = ResolveSmtpPassword(smtpSettings);
+                
+                var smtpClient = new SmtpClient
+                {
+                    Host = smtpSettings["Host"],
+                    Port = int.Parse(smtpSettings["Port"]),
+                    EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(smtpSettings["Username"], resolvedPassword),
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Timeout = 10000 
+                };
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
+                    Subject = "Password Reset OTP - Readiculous",
+                    Body = $@"
+                        <html>
+                        <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                            <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
+                                <h2 style='color: #007bff; margin-bottom: 20px;'>Password Reset Request</h2>
+                                <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                                    <p style='margin-bottom: 10px;'>Your password reset verification code is:</p>
+                                    <div style='font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 5px; padding: 15px; background-color: #e9ecef; border-radius: 5px;'>
+                                        {otp}
+                                    </div>
+                                </div>
+                                <p style='color: #6c757d; font-size: 14px;'>This code will expire in 10 minutes.</p>
+                                <p style='color: #6c757d; font-size: 14px;'>If you didn't request this password reset, please ignore this email.</p>
+                                <hr style='margin: 30px 0; border: none; border-top: 1px solid #dee2e6;'>
+                                <p style='color: #6c757d; font-size: 14px;'>Best regards,<br>The Readiculous Team</p>
+                            </div>
+                        </body>
+                        </html>",
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(email);
+
+                await smtpClient.SendMailAsync(mailMessage);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false; 
+            }
+        }
     }
 } 

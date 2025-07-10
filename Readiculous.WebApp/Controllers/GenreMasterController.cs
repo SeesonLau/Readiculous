@@ -14,15 +14,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
     public class GenreMasterController : ControllerBase<GenreMasterController>
     {
         private readonly IGenreService _genreService;
-        public GenreMasterController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IGenreService genreService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+        private readonly IUserService _userService;
+        public GenreMasterController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IGenreService genreService, IUserService userService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _genreService = genreService;
+            _userService = userService;
         }
 
         //GenreListItemViewModel

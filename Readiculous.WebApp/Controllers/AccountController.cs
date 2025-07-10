@@ -15,6 +15,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using Readiculous.Resources.Messages;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -247,6 +248,117 @@ namespace Readiculous.WebApp.Controllers
             user.AccessStatus = AccessStatus.Verified;
             await _userService.UpdateUserAsync(user, userId);
             return Ok();
+        }
+
+        // Forgot Password Methods
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View(new EmailRequestModel());
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> RequestForgotPasswordOtp(EmailRequestModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("ForgotPassword", model);
+            }
+
+            var success = await _userService.SendOtpForForgotPasswordAsync(model.Email);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "OTP has been sent to your email address.";
+                TempData["EmailForForgotPasswordOtp"] = model.Email;
+                return RedirectToAction("ForgotPasswordOtp");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = Errors.ForgotPasswordEmailFailed;
+                return View("ForgotPassword", model);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordOtp()
+        {
+            var email = TempData["EmailForForgotPasswordOtp"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new OtpVerificationModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyForgotPasswordOtp(OtpVerificationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("ForgotPasswordOtp", model);
+            }
+
+            var isValid = _userService.ValidateOtpForForgotPassword(model.Email, model.Otp);
+            if (isValid)
+            {
+                TempData["EmailForPasswordReset"] = model.Email;
+                return RedirectToAction("ResetPassword");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
+                return View("ForgotPasswordOtp", model);
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendForgotPasswordOtp([FromBody] EmailRequestModel model)
+        {
+            var success = await _userService.ResendOtpForForgotPasswordAsync(model.Email);
+            return Json(new { success = success });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword()
+        {
+            var email = TempData["EmailForPasswordReset"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new ForgotPasswordModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(ForgotPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var success = await _userService.UpdatePasswordAsync(model.Email, model.NewPassword);
+            if (success)
+            {
+                // Use the registration success screen for "All done"
+                return View("RegisterSuccess");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to update password. Please try again.";
+                return View(model);
+            }
         }
     }
 }

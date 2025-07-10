@@ -6,5 +6,6 @@ namespace Readiculous.Services.Interfaces
     {
         Task<bool> SendOtpEmailAsync(string email, string otp, string tempPassword);
         Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword);
+        Task<bool> SendOtpForForgotPasswordEmailAsync(string email, string otp);
     }
 } 
