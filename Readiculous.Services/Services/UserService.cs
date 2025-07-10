@@ -80,11 +80,10 @@ namespace Readiculous.Services.Services
                     model.UserId = Guid.NewGuid().ToString();
                 }
 
-                // Map properties for Username, Email, Password, CreatedTime and UpdatedTime
+                // Map properties for Username, Email, CreatedTime and UpdatedTime
                 _mapper.Map(model, user);
                 user.Username = user.Username.Trim();
                 user.Email = user.Email.Trim();
-                user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
                 user.AccessStatus = AccessStatus.FirstTime;
@@ -96,8 +95,27 @@ namespace Readiculous.Services.Services
                     user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
                 }
 
+                // If the creator is not the same as the new user (admin creation), generate a temp password
+                bool isAdminCreated = creatorId != model.UserId;
+                string tempPassword = null;
+                if (isAdminCreated)
+                {
+                    tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
+                    user.Password = PasswordManager.EncryptPassword(tempPassword);
+                }
+                else
+                {
+                    user.Password = PasswordManager.EncryptPassword(model.Password);
+                }
+
                 // Add User
                 _userRepository.AddUser(user, creatorId);
+
+                // Send temp password email if admin created
+                if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
+                {
+                    await _emailService.SendTempPasswordEmailAsync(user.Email, tempPassword);
+                }
             }
             else
             {
@@ -518,6 +536,80 @@ namespace Readiculous.Services.Services
         public string GetTempPasswordForEmail(string email)
         {
             return OtpManager.GetTempPassword(email);
+        }
+
+        // Forgot Password Methods
+        public async Task<bool> SendOtpForForgotPasswordAsync(string email)
+        {
+            try
+            {
+                // Check if email exists
+                if (!_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store OTP for forgot password
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service
+                return await _emailService.SendOtpForForgotPasswordEmailAsync(email, otp);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ResendOtpForForgotPasswordAsync(string email)
+        {
+            try
+            {
+                // Check if email exists
+                if (!_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store new OTP
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service
+                return await _emailService.SendOtpForForgotPasswordEmailAsync(email, otp);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool ValidateOtpForForgotPassword(string email, string otp)
+        {
+            return OtpManager.ValidateOtp(email, otp);
+        }
+
+        public async Task<bool> UpdatePasswordAsync(string email, string newPassword)
+        {
+            try
+            {
+                var user = _userRepository.GetUserByEmail(email);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                user.Password = PasswordManager.EncryptPassword(newPassword);
+                user.UpdatedTime = DateTime.UtcNow;
+                _userRepository.UpdateUser(user);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

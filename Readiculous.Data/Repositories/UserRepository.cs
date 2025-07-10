@@ -106,5 +106,12 @@ namespace Readiculous.Data.Repositories
                                     && u.Password == password
                                     && u.DeletedTime == null);
         }
+
+        public User GetUserByEmail(string email)
+        {
+            return this.GetDbSet<User>()
+                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
+                                    && u.DeletedTime == null);
+        }
     }
 }
