@@ -15,6 +15,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using Readiculous.Resources.Messages;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -275,7 +276,7 @@ namespace Readiculous.WebApp.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = "Email not found or failed to send OTP.";
+                TempData["ErrorMessage"] = Errors.ForgotPasswordEmailFailed;
                 return View("ForgotPassword", model);
             }
         }

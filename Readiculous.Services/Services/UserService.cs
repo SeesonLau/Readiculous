@@ -100,7 +100,7 @@ namespace Readiculous.Services.Services
                 string tempPassword = null;
                 if (isAdminCreated)
                 {
-                    tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
+                    tempPassword = OtpManager.GenerateTempPassword();
                     user.Password = PasswordManager.EncryptPassword(tempPassword);
                 }
                 else

@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -31,16 +32,8 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        private bool IsReviewer()
-        {
-            var user = _userService.GetUserEditById(this.UserId);
-            return user.Role == Readiculous.Resources.Constants.Enums.RoleType.Reviewer;
-        }
-
         public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder, string? genreFilter = null, int page = 1, int pageSize = 10)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;
 
@@ -77,8 +70,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookAddModal()
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             var model = new BookViewModel();
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
             model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
@@ -87,8 +78,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(BookViewModel model)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             if (ModelState.IsValid)
             {
                 try
@@ -110,8 +99,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookEditModal(string id)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 var model = _bookService.GetBookEditById(id);
@@ -129,8 +116,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(BookViewModel model)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             if (ModelState.IsValid)
             {
                 try
@@ -152,8 +137,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult BookViewModal(string id)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 var model = _bookService.GetBookDetailsById(id);
@@ -167,8 +150,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 await _bookService.DeleteBook(id, this.UserId);

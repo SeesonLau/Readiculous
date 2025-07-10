@@ -199,12 +199,10 @@ namespace Readiculous.Services.Services
                 mailMessage.To.Add(email);
 
                 await smtpClient.SendMailAsync(mailMessage);
-                Console.WriteLine($"✅ Forgot password OTP email sent successfully to {email}");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Failed to send forgot password OTP email: {ex.Message}");
                 return false; 
             }
         }

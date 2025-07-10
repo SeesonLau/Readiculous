@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -31,16 +32,8 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        private bool IsReviewer()
-        {
-            var user = _userService.GetUserEditById(this.UserId);
-            return user.Role == Readiculous.Resources.Constants.Enums.RoleType.Reviewer;
-        }
-
         public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType, int page = 1, int pageSize = 10)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
             ViewData["CurrentUserSearchType"] = searchType.ToString();
@@ -65,16 +58,12 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserAddModal()
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             return PartialView(new UserViewModel());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(UserViewModel model)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             if (ModelState.IsValid)
             {
                 try
@@ -93,8 +82,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserEditModal(string userId)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 var user = _userService.GetUserEditById(userId);
@@ -109,8 +96,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(UserViewModel model)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             if (ModelState.IsValid)
             {
                 try
@@ -129,8 +114,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserViewModal(string userId)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 var user = _userService.GetUserDetailsById(userId);
@@ -145,8 +128,6 @@ namespace Readiculous.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string userId)
         {
-            if (IsReviewer())
-                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 await _userService.DeleteUserAsync(userId, this.UserId);

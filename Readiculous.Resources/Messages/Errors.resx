@@ -153,4 +153,7 @@
   <data name="UserNotFound" xml:space="preserve">
     <value>User is not found!</value>
   </data>
+  <data name="ForgotPasswordEmailFailed" xml:space="preserve">
+    <value>Email not found or failed to send OTP.</value>
+  </data>
 </root>
