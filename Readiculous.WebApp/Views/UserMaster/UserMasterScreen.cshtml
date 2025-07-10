@@ -3,8 +3,8 @@
 @using static Readiculous.Resources.Constants.Enums
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/user-master.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/user-master-modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/adminUserMaster/user-master.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/adminUserMaster/user-master-modal.css" asp-append-version="true" />
 }
 
 @{
@@ -27,7 +27,7 @@
         <div class="filter-group col-md-4 px-0 pe-md-2">
             <label for="searchString" class="filter-label">Search Username</label>
             <input type="text" id="searchString" name="searchString" class="filter-input"
-                   placeholder="Enter username or email" value="@ViewData["CurrentFilter"]" />
+                   placeholder="Enter username" value="@ViewData["CurrentFilter"]" />
         </div>
 
         <div class="filter-group col-md-4 px-0 pe-md-2">

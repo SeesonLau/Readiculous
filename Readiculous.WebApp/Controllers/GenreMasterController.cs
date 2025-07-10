@@ -26,7 +26,7 @@ namespace Readiculous.WebApp.Controllers
         }
 
         //GenreListItemViewModel
-        public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType = GenreSortType.Latest, int page = 1, int pageSize = 10)
+        public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentGenreSearchType"] = searchType.ToString();
@@ -182,7 +182,7 @@ namespace Readiculous.WebApp.Controllers
                 TotalPages = paginationModel.TotalPages,
                 PageSize = pageSize,
                 TotalBooksCount = totalBooks,
-                AllGenres = _genreService.GetGenreList("", GenreSortType.NameAscending)
+                AllGenres = _genreService.GetGenreList("", GenreSortType.Latest)
             };
 
             return View(viewModel);

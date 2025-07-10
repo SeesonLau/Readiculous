@@ -3,11 +3,10 @@
     display: grid;
     grid-template-columns: 250px 1fr;
     gap: 1.5rem;
-    padding: 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
     align-items: start;
-    min-height: calc(100vh - 120px);
+    min-height: calc(94vh - 120px);
 }
 
 /* Genre Details Sidebar */
@@ -89,7 +88,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 150px;
+ 
 }
 
 .genre-list-title {
@@ -101,12 +100,12 @@
 }
 
 .genre-list-container {
-    flex: 1;
-    max-height: 220px;
+    max-height: 340px;
     overflow-y: auto;
     padding-right: 0.25rem;
     scrollbar-width: thin;
     scrollbar-color: var(--color-secondary) var(--color-background);
+
 }
 
 .genre-list {
@@ -120,7 +119,7 @@
 
 .genre-list-item a {
     display: block;
-    padding: 0.4rem 0.6rem;
+    padding: 0.2rem 0.2rem;
     font-family: var(--font-primary);
     color: var(--color-text);
     text-decoration: none;
@@ -161,7 +160,7 @@
 }
 
 .books-header-section {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0rem;
 }
 
 .books-header-row {
@@ -273,7 +272,6 @@
     grid-template-columns: repeat(5, 1fr);
     grid-auto-rows: minmax(220px, auto);
     gap: 1rem;
-    height: 100%;
 }
 
 .book-card {
@@ -293,7 +291,7 @@
 
 .book-cover {
     position: relative;
-    padding-bottom: 150%; /* 2:3 aspect ratio */
+    padding-bottom: 125%; /* 2:3 aspect ratio */
     background-color: var(--color-highlight);
 }
 
@@ -395,7 +393,7 @@
 
 /* Pagination */
 .pagination-container {
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
     display: flex;
     justify-content: center;
     grid-column: 1 / -1;
