@@ -2,10 +2,10 @@
 
 <table class="genre-table">
     <thead>
-        <tr>
-            <th rowspan="2" class="text-center align-middle">Genre</th>
-            <th rowspan="2" class="text-center align-middle">Description</th>
-            <th rowspan="2" class="text-center align-middle">Book Count</th>
+        <tr class="text-center">
+            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Name)</th>
+            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Description)</th>
+            <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().BookCount)</th>
             <th colspan="2" class="text-center align-middle">Modified</th>
             <th rowspan="2" class="text-center align-middle">Actions</th>
         </tr>
@@ -20,27 +20,29 @@
             @foreach (var item in Model)
             {
                 <tr id="genre-row-@item.GenreId">
-                    <td class="genre-name-cell" title="@item.Name">@item.Name</td>
-                    <td class="genre-description-cell" title="@item.Description">@item.Description</td>
-                    <td class="text-center">
-                        <span class="genre-book-count">@item.BookCount</span>
+                    <td class="align-middle" title="@item.Name">@item.Name</td>
+                    <td class="align-middle" title="@item.Description">@item.Description</td>
+                    <td class="text-center align-middle">
+                        <span class="badge bg-secondary">@item.BookCount</span>
                     </td>
-                    <td class="text-center" data-label="Updated Date">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
-                    <td class="text-center" data-label="Updated Time">@item.UpdatedTime.ToString("h:mm tt")</td>
-                    <td class="genre-actions">
-                        <a asp-action="GenreViewPage" asp-route-id="@item.GenreId" 
-                           class="genre-action-btn genre-view-btn" title="View">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <button class="genre-action-btn genre-edit-btn edit-genre-btn"
-                                data-genre-id="@item.GenreId" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="genre-action-btn genre-delete-btn btn-delete-genre"
-                                data-genre-id="@item.GenreId"
-                                data-genre-name="@item.Name" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
+                    <td class="text-center align-middle">@item.UpdatedTime.ToString("h:mm tt")</td>
+                    <td class="text-center align-middle">
+                        <div class="action-buttons">
+                            <a asp-action="GenreViewPage" asp-route-id="@item.GenreId"
+                               class="genre-action-btn btn-view" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="genre-action-btn btn-edit edit-genre-btn"
+                                    data-genre-id="@item.GenreId" title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="genre-action-btn btn-delete btn-delete-genre"
+                                    data-genre-id="@item.GenreId"
+                                    data-genre-name="@item.Name" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             }
@@ -48,9 +50,8 @@
         else
         {
             <tr>
-                <td colspan="6" class="genre-empty-state">
-                    <i class="fas fa-search"></i>
-                    <p>No genres found matching your criteria.</p>
+                <td colspan="6" class="text-center empty-state">
+                    <i class="fas fa-search me-2"></i>No genres found matching your criteria.
                 </td>
             </tr>
         }
