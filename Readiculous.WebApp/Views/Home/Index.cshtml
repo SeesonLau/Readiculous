@@ -31,11 +31,15 @@
                 <div style="margin-bottom:1rem;">
                     <input type="file" name="ProfilePicture" accept="image/*" style="width:100%;" />
                 </div>
-                <button type="submit" style="background:#b993b2;color:#fff;font-weight:700;padding:0.8rem 2.5rem;border:none;border-radius:8px;">Save</button>
+                <div style="display:flex; justify-content:center; gap: 10px; margin-top: 1rem;">
+                    <button type="submit" style="background:#b993b2;color:#fff;font-weight:700;padding:0.8rem 2.5rem;border:none;border-radius:8px;">Save</button>
+                    <button type="button" onclick="document.getElementById('firstTimeModal').style.display='none';" style="background:#ccc;color:#333;font-weight:700;padding:0.8rem 2.5rem;border:none;border-radius:8px;">Close</button>
+                </div>
             </form>
         </div>
     </div>
 }
+
 @section scripts {
     <script>
         if (@(showFirstTimeModal.ToString().ToLower())) {
@@ -59,6 +63,7 @@
             });
         }
     </script>
-}
+    }
+
 
 

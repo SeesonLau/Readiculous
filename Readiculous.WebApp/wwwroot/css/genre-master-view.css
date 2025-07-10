@@ -1,0 +1,497 @@
+﻿/* Main Container */
+.genre-view-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: start;
+    min-height: calc(100vh - 120px);
+}
+
+/* Genre Details Sidebar */
+.genre-details-container {
+    position: sticky;
+    top: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.genre-info-card {
+    background-color: var(--color-modal);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 15px rgba(139, 94, 131, 0.1);
+    border: 1px solid var(--color-border);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.genre-header-section {
+    margin-bottom: 1rem;
+}
+
+.genre-name {
+    font-family: var(--font-secondary);
+    color: var(--color-secondary);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.genre-description {
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    line-height: 1.5;
+    font-size: 0.85rem;
+}
+
+.genre-divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 1rem 0;
+    opacity: 0.5;
+}
+
+.genre-meta-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.genre-meta-item {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-primary);
+    align-items: center;
+}
+
+.meta-label {
+    color: var(--color-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.meta-value {
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Genre List - Compact Badge Style */
+.genre-list-section {
+    margin-top: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 150px;
+}
+
+.genre-list-title {
+    font-family: var(--font-secondary);
+    color: var(--color-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.genre-list-container {
+    flex: 1;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-secondary) var(--color-background);
+}
+
+.genre-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+}
+
+.genre-list-item a {
+    display: block;
+    padding: 0.4rem 0.6rem;
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    text-align: center;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+    .genre-list-item a:hover {
+        background-color: var(--color-highlight);
+        transform: translateY(-1px);
+    }
+
+    .genre-list-item a.active {
+        background-color: var(--color-secondary);
+        color: var(--color-modal);
+        font-weight: 600;
+        border-color: var(--color-secondary);
+        box-shadow: 0 2px 5px rgba(139, 94, 131, 0.2);
+    }
+
+/* Books Grid - Compact 2:3 Ratio Cards */
+.genre-books-container {
+    background-color: var(--color-background);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.books-header-section {
+    margin-bottom: 1.25rem;
+}
+
+.books-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.books-header {
+    font-family: var(--font-secondary);
+    color: var(--color-secondary);
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+.header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.book-search-container {
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 50px;
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    background-color: var(--color-modal);
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+    .search-input:focus {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 0.15rem rgba(139, 94, 131, 0.1);
+        outline: none;
+    }
+
+.search-btn {
+    margin-left: 0.5rem;
+    background-color: var(--color-secondary);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-secondary);
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+    .search-btn:hover {
+        background-color: var(--color-header);
+        transform: translateY(-1px);
+    }
+
+.genre-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-secondary);
+    background-color: var(--color-btn);
+    color: var(--color-text);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+    .genre-back-btn:hover {
+        background-color: var(--color-accent);
+        transform: translateY(-1px);
+    }
+
+.books-grid-container {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: minmax(220px, auto);
+    gap: 1rem;
+    height: 100%;
+}
+
+.book-card {
+    background-color: var(--color-modal);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(139, 94, 131, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+    .book-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(139, 94, 131, 0.15);
+    }
+
+.book-cover {
+    position: relative;
+    padding-bottom: 150%; /* 2:3 aspect ratio */
+    background-color: var(--color-highlight);
+}
+
+.book-cover-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover .book-cover-img {
+    transform: scale(1.02);
+}
+
+.cover-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    font-size: 2rem;
+    opacity: 0.6;
+}
+
+.book-info {
+    padding: 0.75rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-title {
+    font-family: var(--font-secondary);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    margin: 0 0 0.25rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.book-author {
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    font-size: 0.8rem;
+    margin: 0.15rem 0;
+    font-style: italic;
+}
+
+.book-year {
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    font-size: 0.75rem;
+    margin: 0.15rem 0 0 0;
+    opacity: 0.7;
+}
+
+/* Empty State */
+.no-books-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-text);
+    grid-column: 1 / -1;
+    height: 100%;
+}
+
+    .no-books-message i {
+        font-size: 2.5rem;
+        color: var(--color-secondary);
+        opacity: 0.6;
+    }
+
+    .no-books-message p {
+        font-family: var(--font-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 600;
+    }
+
+.search-tip {
+    font-family: var(--font-primary);
+    font-size: 0.8rem;
+    color: var(--color-secondary);
+    margin-top: 0.25rem !important;
+}
+
+/* Pagination */
+.pagination-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    grid-column: 1 / -1;
+}
+
+/* Scrollbar Styling */
+.genre-list-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.genre-list-container::-webkit-scrollbar-track {
+    background: var(--color-background);
+    border-radius: 3px;
+}
+
+.genre-list-container::-webkit-scrollbar-thumb {
+    background-color: var(--color-secondary);
+    border-radius: 3px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .books-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .genre-view-container {
+        grid-template-columns: 1fr;
+    }
+
+    .genre-details-container {
+        position: static;
+        height: auto;
+    }
+
+    .genre-list-container {
+        max-height: 180px;
+    }
+
+    .books-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .genre-view-container {
+        padding: 1rem;
+    }
+
+    .genre-info-card,
+    .genre-books-container {
+        padding: 1rem;
+    }
+
+    .books-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .genre-list {
+        grid-template-columns: 1fr;
+    }
+
+    .header-controls {
+        width: 100%;
+    }
+
+    .book-search-container {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .books-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-input-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .search-btn {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .genre-back-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .genre-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
