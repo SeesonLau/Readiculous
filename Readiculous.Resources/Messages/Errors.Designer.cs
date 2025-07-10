@@ -104,6 +104,15 @@ namespace Readiculous.Resources.Messages {
                 return ResourceManager.GetString("FavoritedBookNotExists", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Email not found or failed to send OTP..
+        /// </summary>
+        public static string ForgotPasswordEmailFailed {
+            get {
+                return ResourceManager.GetString("ForgotPasswordEmailFailed", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Genre Name already exists!.

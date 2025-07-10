@@ -23,5 +23,6 @@ namespace Readiculous.Data.Interfaces
         User GetUserById(string id);
         User GetUserWithNavigationPropertiesById(string id);
         User GetUserByEmailAndPassword(string email, string password);
+        User GetUserByEmail(string email);
     }
 }
