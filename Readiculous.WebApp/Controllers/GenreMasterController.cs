@@ -20,14 +20,24 @@ namespace Readiculous.WebApp.Controllers
     public class GenreMasterController : ControllerBase<GenreMasterController>
     {
         private readonly IGenreService _genreService;
-        public GenreMasterController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IGenreService genreService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
+        private readonly IUserService _userService;
+        public GenreMasterController(IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IConfiguration configuration, IGenreService genreService, IUserService userService, IMapper mapper = null) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _genreService = genreService;
+            _userService = userService;
+        }
+
+        private bool IsReviewer()
+        {
+            var user = _userService.GetUserEditById(this.UserId);
+            return user.Role == Readiculous.Resources.Constants.Enums.RoleType.Reviewer;
         }
 
         //GenreListItemViewModel
         public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType = GenreSortType.Latest, int page = 1, int pageSize = 10)
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentGenreSearchType"] = searchType.ToString();
 
@@ -51,12 +61,16 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult GenreAddModal()
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             return PartialView(new GenreViewModel());
         }
 
         [HttpPost]
         public IActionResult Create(GenreViewModel model)
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             if (ModelState.IsValid)
             {
                 try
@@ -93,6 +107,8 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult GenreEditModal(string id)
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 var genre = _genreService.GetGenreEditById(id);
@@ -106,6 +122,8 @@ namespace Readiculous.WebApp.Controllers
         [HttpPost]
         public IActionResult Edit(GenreViewModel model)
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             if (ModelState.IsValid)
             {
                 try
@@ -139,6 +157,8 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             try
             {
                 await _genreService.DeleteGenre(id, this.UserId);
@@ -152,6 +172,8 @@ namespace Readiculous.WebApp.Controllers
 
         public IActionResult GenreViewPage(string id, int page = 1, string bookSearch = null)
         {
+            if (IsReviewer())
+                return View("~/Views/Shared/Forbidden.cshtml");
             var genre = _genreService.GetGenreEditById(id);
             if (genre == null)
             {
