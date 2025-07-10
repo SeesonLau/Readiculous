@@ -1,0 +1,392 @@
+﻿.book-modal .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 4px 20px rgba(139, 94, 131, 0.2);
+}
+
+.book-modal .modal-header {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    padding: 1.5rem;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.book-modal .modal-title {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.book-modal .modal-body {
+    padding: 2rem;
+    background-color: var(--color-modal);
+    color: var(--color-text);
+    font-family: var(--font-primary);
+}
+
+.book-modal .modal-footer {
+    background-color: var(--color-modal);
+    border-top: 1px solid var(--color-border);
+    padding: 1rem 1.5rem;
+}
+
+.book-modal .btn {
+    font-family: var(--font-secondary);
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.book-modal .btn-secondary {
+    background-color: var(--color-header);
+    border-color: var(--color-header);
+    color: var(--color-modal);
+}
+
+.book-modal .btn-primary {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-modal);
+}
+
+.book-modal .btn-secondary:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.book-modal .btn-primary:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+/* Form Elements */
+.book-modal .form-label {
+    font-family: var(--font-secondary);
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+}
+
+.book-modal .form-control {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: var(--font-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+    .book-modal .form-control:focus {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+        background-color: var(--color-modal);
+    }
+
+.book-modal textarea.form-control {
+    min-height: 100px;
+}
+
+.book-modal .text-danger {
+    color: var(--color-danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* Checkbox Styles */
+.book-modal .form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.1em;
+    border: 2px solid var(--color-border);
+}
+
+    .book-modal .form-check-input:checked {
+        background-color: var(--color-secondary);
+        border-color: var(--color-secondary);
+    }
+
+    .book-modal .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(139, 94, 131, 0.25);
+    }
+
+.book-modal .form-check-label {
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    margin-left: 0.5rem;
+}
+
+/* ADD/EDIT MODAL SPECIFICS */
+
+/* Genre Checkbox Grid */
+.genre-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.genre-checkbox-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Image Preview */
+.image-preview-container {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.image-preview {
+    max-width: 200px;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    object-fit: contain;
+    background-color: var(--color-background);
+}
+
+/* File Input */
+.file-input-label {
+    display: block;
+    padding: 0.75rem;
+    background-color: var(--color-background);
+    border: 2px dashed var(--color-border);
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .file-input-label:hover {
+        background-color: var(--color-highlight);
+        border-color: var(--color-secondary);
+    }
+
+/* VIEW MODAL SPECIFICS */
+
+.book-view-modal .cover-image-container {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    background-color: var(--color-background);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.book-view-modal .cover-image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+}
+
+.book-view-modal .cover-image-placeholder {
+    padding: 2rem;
+    color: var(--color-text);
+    font-size: 3rem;
+}
+
+.book-view-modal .book-title {
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    color: var(--color-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.book-view-modal .book-author {
+    font-family: var(--font-primary);
+    font-style: italic;
+    color: var(--color-header);
+    margin-bottom: 1.5rem;
+}
+
+.book-view-modal .section-title {
+    font-family: var(--font-secondary);
+    color: var(--color-secondary);
+    font-size: 1.25rem;
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.book-view-modal .book-description {
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+.book-view-modal .metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.book-view-modal .metadata-item {
+    margin-bottom: 0.5rem;
+}
+
+.book-view-modal .metadata-label {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+    color: var(--color-header);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.book-view-modal .metadata-value {
+    font-family: var(--font-primary);
+    color: var(--color-text);
+}
+
+/* Genre Tags */
+.book-view-modal .genre-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.book-view-modal .genre-tag {
+    background-color: var(--color-btn);
+    color: var(--color-text);
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+}
+
+/* Rating Styles */
+.book-view-modal .star-rating {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    letter-spacing: 0.1rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.book-view-modal .average-rating {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+    margin-left: 0.5rem;
+    color: var(--color-text);
+}
+
+/* Reviews Section */
+.book-view-modal .reviews-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    margin-top: 1rem;
+}
+
+    .book-view-modal .reviews-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .book-view-modal .reviews-container::-webkit-scrollbar-track {
+        background: var(--color-border);
+        border-radius: 3px;
+    }
+
+    .book-view-modal .reviews-container::-webkit-scrollbar-thumb {
+        background: var(--color-secondary);
+        border-radius: 3px;
+    }
+
+.book-view-modal .review-item {
+    background-color: var(--color-background);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--color-secondary);
+}
+
+.book-view-modal .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.book-view-modal .review-date {
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    color: var(--color-header);
+}
+
+.book-view-modal .review-comment {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* No Reviews State */
+.book-view-modal .no-reviews {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--color-header);
+    font-family: var(--font-primary);
+    font-style: italic;
+    background-color: var(--color-background);
+    border-radius: 8px;
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media (max-width: 992px) {
+    .book-modal .modal-body {
+        padding: 1.5rem;
+    }
+
+    .genre-checkbox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .book-view-modal .metadata-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .book-modal .modal-body {
+        padding: 1.25rem;
+    }
+
+    .book-view-modal .cover-image-container {
+        max-height: 300px;
+    }
+
+    .book-view-modal .reviews-container {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .book-modal .modal-header {
+        padding: 1rem;
+    }
+
+    .book-modal .modal-body {
+        padding: 1rem;
+    }
+
+    .book-view-modal .cover-image-container {
+        max-height: 250px;
+    }
+
+    .book-view-modal .metadata-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .book-view-modal .reviews-container {
+        max-height: 200px;
+    }
+}

@@ -2,14 +2,19 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using static Readiculous.Resources.Constants.Enums
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/adminUserMaster/user-master.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/adminUserMaster/user-master-modal.css" asp-append-version="true" />
+}
+
 @{
     ViewData["Title"] = "User Management";
 }
 
-<div class="container-fluid px-0">
-    <div class="row mb-4 mx-0 align-items-center">
+<div class="container-fluid user-management-container px-0">
+    <div class="user-management-header row mb-4 mx-0 align-items-center">
         <div class="col-md-6 px-0">
-            <h1 class="mb-0">User Management</h1>
+            <h1 class="user-management-title mb-0">User Management</h1>
         </div>
         <div class="col-md-6 px-0 text-md-end">
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
@@ -18,18 +23,16 @@
         </div>
     </div>
 
-   
-
-    <div class="row g-3 align-items-end mx-0 mb-4">
-        <div class="col-md-4 px-0 pe-md-2">
-            <label for="searchString" class="form-label">Search Username/Email</label>
-            <input type="text" id="searchString" name="searchString" class="form-control"
-                   placeholder="Enter username or email" value="@ViewData["CurrentFilter"]" />
+    <div class="user-filter-controls row g-3 align-items-end mx-0 mb-4">
+        <div class="filter-group col-md-4 px-0 pe-md-2">
+            <label for="searchString" class="filter-label">Search Username</label>
+            <input type="text" id="searchString" name="searchString" class="filter-input"
+                   placeholder="Enter username" value="@ViewData["CurrentFilter"]" />
         </div>
 
-        <div class="col-md-4 px-0 pe-md-2">
-            <label for="roleType" class="form-label">Filter Role</label>
-            <select id="roleType" name="roleType" class="form-select">
+        <div class="filter-group col-md-4 px-0 pe-md-2">
+            <label for="roleType" class="filter-label">Filter Role</label>
+            <select id="roleType" name="roleType" class="filter-input">
                 <option value="">All Roles</option>
                 @foreach (var role in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.RoleTypes)
                 {
@@ -41,9 +44,9 @@
             </select>
         </div>
 
-        <div class="col-md-4 px-0">
-            <label for="searchType" class="form-label">Sort By</label>
-            <select id="searchType" name="searchType" class="form-select">
+        <div class="filter-group col-md-4 px-0">
+            <label for="searchType" class="filter-label">Sort By</label>
+            <select id="searchType" name="searchType" class="filter-input">
                 @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
                 {
                     <option value="@type.Value" selected="@(type.Selected ? "selected" : null)">
@@ -56,13 +59,13 @@
 
     <div class="row mx-0">
         <div class="col px-0">
-            <div id="userListContainer" class="table-responsive">
+            <div id="userListContainer" class="user-table-container">
                 @await Html.PartialAsync("_UserListPartial", Model.Users)
             </div>
         </div>
     </div>
 
-    <div class="row mb-4 mx-0 align-items-center">
+    <div class="pagination-controls row mb-4 mx-0 align-items-center">
         <div class="col-md-6 px-0">
             @await Component.InvokeAsync("Pagination", Model.Pagination)
         </div>
@@ -70,17 +73,14 @@
             @await Component.InvokeAsync("PageSize", new { currentPageSize = Model.Pagination.PageSize })
         </div>
     </div>
-
 </div>
 
 <!-- Add User Modal -->
-
-<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade user-modal" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
             </div>
             <div class="modal-body" id="addUserModalBody">
                 <!-- Content loaded via AJAX -->
@@ -90,12 +90,11 @@
 </div>
 
 <!-- Edit User Modal -->
-<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade user-modal" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header">
                 <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="editUserModalBody">
                 <!-- Content loaded via AJAX -->
@@ -105,12 +104,11 @@
 </div>
 
 <!-- View User Modal -->
-<div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+<div class="modal fade user-modal" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header">
                 <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="viewUserModalBody">
                 <!-- Content loaded via AJAX -->
@@ -133,7 +131,6 @@
             userMasterScreenUrl: '@Url.Action("UserMasterScreen", "UserMaster")',
             deleteUserUrl: '@Url.Action("Delete", "UserMaster")'
         };
-
     </script>
     <script src="~/js/pagination.js"></script>
     <script src="~/js/pageSize.js"></script>

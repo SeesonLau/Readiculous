@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
+using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
@@ -114,7 +115,7 @@ namespace Readiculous.Services.Services
                 });
             }
 
-            _bookRepository.AddBook(book);
+            await Task.Run(() => _bookRepository.AddBook(book));
         }
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
@@ -172,9 +173,9 @@ namespace Readiculous.Services.Services
                 });
             }
 
-            _bookRepository.UpdateBook(book);
+            await Task.Run(() => _bookRepository.UpdateBook(book));
         }
-        public Task DeleteBook(string bookId, string deleterId)
+        public async Task DeleteBook(string bookId, string deleterId)
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
@@ -198,9 +199,8 @@ namespace Readiculous.Services.Services
 
             book.DeletedBy = deleterId;
             book.DeletedTime = DateTime.UtcNow;
-            _bookRepository.UpdateBook(book);
 
-            return Task.CompletedTask;
+            await Task.Run(() => _bookRepository.UpdateBook(book));
         }
 
         // Multiple Book Listing Methods, ADD USEREID FOR FAVORITES
@@ -536,7 +536,6 @@ namespace Readiculous.Services.Services
 
             _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
         }
-
         private async Task DeleteCoverImage(string pictureUrl)
         {
             var uri = new Uri(pictureUrl);

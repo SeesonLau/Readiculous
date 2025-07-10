@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
+<table class="user-table">
+    <thead>
         <tr class="text-center">
-            <th rowspan="2" class="text-center align-middle">Profile Picture</th>
+            <th rowspan="2" class="text-center align-middle profile-picture-cell">Portrait</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().UserName)</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Email)</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Role)</th>
-            <th colspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().UpdatedTime)</th>
+            <th colspan="2" class="text-center align-middle">Modified</th>
             <th rowspan="2" class="text-center align-middle">Actions</th>
         </tr>
         <tr class="text-center">
@@ -24,11 +24,11 @@
                     <td class="text-center align-middle">
                         @if (!string.IsNullOrEmpty(item.ProfilePictureUrl))
                         {
-                            <img src="@item.ProfilePictureUrl" alt="Profile" class="mx-auto d-block" style="width: 50px; height: 50px; object-fit: cover;" />
+                            <img src="@item.ProfilePictureUrl" alt="Profile" class="profile-picture" />
                         }
                         else
                         {
-                            <span class="text-muted">No Image</span>
+                            <div class="profile-picture-placeholder">No Image</div>
                         }
                     </td>
                     <td class="align-middle">@item.UserName</td>
@@ -37,15 +37,17 @@
                     <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
                     <td class="text-center align-middle">@item.UpdatedTime.ToString("h:mm tt")</td>
                     <td class="text-center align-middle">
-                        <button type="button" class="btn btn-sm btn-info edit-user" data-userid="@item.UserId">
-                            <i class="fas fa-pen"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-secondary view-user" data-userid="@item.UserId">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger delete-user" data-userid="@item.UserId" data-username="@item.UserName">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="action-buttons">
+                            <button type="button" class="btn-action btn-view view-user" data-userid="@item.UserId">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn-action btn-edit edit-user" data-userid="@item.UserId">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn-action btn-delete delete-user" data-userid="@item.UserId" data-username="@item.UserName">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             }
@@ -53,7 +55,7 @@
         else
         {
             <tr>
-                <td colspan="10" class="text-center">No users found matching your criteria.</td>
+                <td colspan="10" class="text-center empty-state">No users found matching your criteria.</td>
             </tr>
         }
     </tbody>

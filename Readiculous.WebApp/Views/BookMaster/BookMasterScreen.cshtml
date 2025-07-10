@@ -4,10 +4,15 @@
     var selectedGenres = ViewBag.Genres as List<Readiculous.Services.ServiceModels.GenreViewModel>;
 }
 
-<div class="container-fluid px-0">
-    <div class="row mb-4 mx-0 align-items-center">
+@section Styles {
+    <link href="~/css/adminBookMaster/book-master.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/adminBookMaster/book-master-modal.css" rel="stylesheet" />
+}
+
+<div class="container-fluid px-0 book-management-container">
+    <div class="row mb-4 mx-0 align-items-center book-management-header">
         <div class="col-md-6 px-0">
-            <h1 class="mb-0">Book Management</h1>
+            <h1 class="mb-0 book-management-title">Book Management</h1>
         </div>
         <div class="col-md-6 px-0 text-md-end">
             <button type="button" class="btn btn-success btn-add-book">
@@ -17,33 +22,33 @@
     </div>
 
     <!-- Search and Filter Form -->
-    <form asp-action="BookMasterScreen" method="get" class="mb-4" id="bookFilterForm">
+    <form asp-action="BookMasterScreen" method="get" class="mb-4 book-filter-controls" id="bookFilterForm">
         <div class="row g-3 align-items-end mx-0">
             <!-- Search Book Title -->
-            <div class="col-md-3 px-0 pe-md-2">
-                <label for="searchString" class="form-label">Search Book Title:</label>
-                <input type="text" name="searchString" class="form-control" placeholder="Enter book title"
+            <div class="col-md-3 px-0 pe-md-2 filter-group">
+                <label for="searchString" class="form-label filter-label">Search Book Title:</label>
+                <input type="text" name="searchString" class="form-control filter-input" placeholder="Enter book title"
                        value="@ViewData["CurrentFilter"]" />
             </div>
 
             <!-- Search Type -->
-            <div class="col-md-3 px-0 pe-md-2">
-                <label for="searchType" class="form-label">Search Type:</label>
-                <select name="searchType" class="form-select" asp-items="@ViewBag.BookSearchTypes"></select>
+            <div class="col-md-3 px-0 pe-md-2 filter-group">
+                <label for="searchType" class="form-label filter-label">Search Type:</label>
+                <select name="searchType" class="form-select filter-input" asp-items="@ViewBag.BookSearchTypes"></select>
             </div>
 
             <!-- Filter by Genre -->
-            <div class="col-md-3 px-0 pe-md-2">
-                <label for="genreFilter" class="form-label">Filter by Genre:</label>
-                <select name="genreFilter" class="form-select" asp-items="@ViewBag.GenreList">
+            <div class="col-md-3 px-0 pe-md-2 filter-group">
+                <label for="genreFilter" class="form-label filter-label">Filter by Genre:</label>
+                <select name="genreFilter" class="form-select filter-input" asp-items="@ViewBag.GenreList">
                     <option value="">All Genres</option>
                 </select>
             </div>
 
             <!-- Sort By -->
-            <div class="col-md-3 px-0 pe-md-2">
-                <label for="sortOrder" class="form-label">Sort By:</label>
-                <select name="sortOrder" class="form-select" asp-items="@ViewBag.BookSortTypes"></select>
+            <div class="col-md-3 px-0 pe-md-2 filter-group">
+                <label for="sortOrder" class="form-label filter-label">Sort By:</label>
+                <select name="sortOrder" class="form-select filter-input" asp-items="@ViewBag.BookSortTypes"></select>
             </div>
         </div>
 
@@ -53,7 +58,7 @@
             var selectedGenreIds = ViewBag.SelectedGenreIds as List<string> ?? new List<string>();
 
             <div class="mb-3 mt-3">
-                <label class="form-label">Filter by Genre:</label>
+                <label class="form-label filter-label">Filter by Genre:</label>
                 <div class="row">
                     @for (int i = 0; i < allGenres.Count; i++)
                     {
@@ -74,14 +79,14 @@
     </form>
 
     <div class="row mx-0">
-        <div class="col px-0">
+        <div class="col px-0 book-table-container">
             <div id="bookListContainer" class="table-responsive">
                 @await Html.PartialAsync("_BookListPartial", Model)
             </div>
         </div>
     </div>
 
-    <div class="row mx-0 mt-3">
+    <div class="row mx-0 mt-3 pagination-controls">
         <div class="col-md-6 px-0 text-md-end">
             @if (ViewBag.PaginationModel != null)
             {
@@ -92,47 +97,36 @@
             @await Component.InvokeAsync("PageSize", new { currentPageSize = ViewBag.PageSize ?? 10 })
         </div>
     </div>
-
 </div>
 
-<!-- Modal Containers -->
-<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+<!-- Add Modal -->
+<div class="modal fade book-modal" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
             <div class="modal-body" id="addBookModalBody">
-                <!-- Content will be loaded here via AJAX -->
+                <!-- Content loaded via AJAX -->
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+<!-- Edit Modal -->
+<div class="modal fade book-modal" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title" id="editBookModalLabel">Edit Book</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
             <div class="modal-body" id="editBookModalBody">
-                <!-- Content will be loaded here via AJAX -->
+                <!-- Content loaded via AJAX -->
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="viewBookModal" tabindex="-1" aria-labelledby="viewBookModalLabel" aria-hidden="true">
+<!-- View Modal -->
+<div class="modal fade book-modal" id="viewBookModal" tabindex="-1" aria-labelledby="viewBookModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title" id="viewBookModalLabel">Book Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
             <div class="modal-body" id="viewBookModalBody">
-                <!-- Content will be loaded here via AJAX -->
+                <!-- Content loaded via AJAX -->
             </div>
         </div>
     </div>

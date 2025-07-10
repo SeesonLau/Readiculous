@@ -9,27 +9,85 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/css/coreui.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/main.css" />
-    <link rel="stylesheet" href="~/css/style.css" />
-    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
-  
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     
+    <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
+   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+
     @RenderSection("Styles", required: false)
+
+    <style>
+        :root {
+            --color-text: #2C2133;
+            --color-header: #B089A5;
+            --color-btn: #EDAEC0;
+            --color-modal: #F8ECE9;
+            --color-background: #F2EFF1;
+            --font-primary: 'Gentium Book Plus', serif;
+            --color-text-placeholder: rgba(39, 39, 42, 0.6);
+        }
+
+        /* Reset defaults */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: var(--font-primary);
+            background: var(--color-background);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-background);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-header);
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--color-btn);
+            }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-header) var(--color-background);
+        }
+
+        /* Layout */
+        .flex-column {
+            height: 100vh;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px - 60px); /* Adjust heights */
+        }
+    </style>
 </head>
-<body>
-    <partial name="_HeaderTest" />
-    <main role="main" class="container-xxl py-4 px-3 px-sm-4 px-xxl-0 mx-auto">
-        @RenderBody()
-    </main>
+<body class="d-flex flex-column" style="height: 100vh; margin: 0; padding: 0;">
+    <div class="d-flex flex-column" style="height: 100vh;">
+        <partial name="_HeaderTest" />
+        <main role="main" class="container-xxl py-4 px-3 px-sm-4 px-xxl-0 mx-auto">
+            @RenderBody()
+        </main>
+        <partial name="_Footer" />
+    </div>
 
     <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -45,22 +103,20 @@
         </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            @Copyright
-        </div>
-    </footer>
- 
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/js/coreui.bundle.min.js"></script>
+
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.js"></script>
     <script src="https://kit.fontawesome.com/7a7c645416.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -75,8 +131,11 @@
             progressBar: true
         };
     </script>
-    
+
     <script>
+        //For Header, Footer, and Main to take full height of the viewport
+        document.querySelector('main').style.maxHeight = `calc(100vh - ${document.querySelector('header').offsetHeight}px - ${document.querySelector('footer').offsetHeight}px)`;
+        // DO NOT REMOVE
         $(document).on('click', '.open-edit-profile', function (e) {
             e.preventDefault();
 
@@ -97,7 +156,7 @@
             e.preventDefault();
 
             const form = $(this)[0];
-            const formData = new FormData(form); 
+            const formData = new FormData(form);
 
             $.ajax({
                 url: $(this).attr('action'),
@@ -108,9 +167,9 @@
                 success: function (result) {
                         if (result.success) {
                     $('#editProfileModal').modal('hide');
-                    location.reload(); 
+                    location.reload();
                 } else {
-                    $('#editProfileModalContent').html(result); 
+                    $('#editProfileModalContent').html(result);
                 }},
                 error: function () {
                     toastr.error("An error occurred while saving the profile.");
@@ -121,3 +180,42 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    /* Reset default margins/paddings */
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden; /* Prevent scrollbar */
+    }
+
+    /* Ensure flex container takes full height */
+    .flex-column {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Prevent <main> from overflowing */
+    main {
+        flex: 1;
+        overflow: auto; /* Only scrolls internally if needed */
+    }
+
+    /* Tight footer with centered content */
+    footer {
+        flex-shrink: 0; /* Prevents footer from shrinking */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 60px; /* Adjust as needed */
+        border-top: 1px solid #dee2e6; /* Bootstrap's border color */
+    }
+
+        /* Remove extra spacing in footer links */
+        footer a {
+            margin: 0 5px;
+        }
+</style>

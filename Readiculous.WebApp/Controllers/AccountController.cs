@@ -120,26 +120,96 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            return View(new EmailRequestModel());
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterAsync(UserViewModel model)
+        [AllowAnonymous]
+        public async Task<IActionResult> RequestOtp(EmailRequestModel model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                await _userService.AddUserAsync(model, model.UserId);
-                return RedirectToAction("Login", "Account");
+                return View("Register", model);
             }
-            catch(InvalidDataException ex)
+
+            var success = await _userService.SendOtpForRegistrationAsync(model.Email);
+            if (success)
             {
-                TempData["ErrorMessage"] = ex.Message;
+                TempData["SuccessMessage"] = "OTP has been sent to your email address.";
+                TempData["EmailForOtp"] = model.Email;
+                return RedirectToAction("VerifyOtp");
             }
-            catch(Exception)
+            else
             {
-                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                TempData["ErrorMessage"] = "Email already exists or failed to send OTP.";
+                return View("Register", model);
             }
-            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult VerifyOtp()
+        {
+            var email = TempData["EmailForOtp"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Register");
+            }
+
+            var model = new OtpVerificationModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyOtp(OtpVerificationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var isValid = _userService.ValidateOtpForRegistration(model.Email, model.Otp);
+            if (isValid)
+            {
+                // Generate temp password, create user, and send temp password email
+                var tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
+                var userModel = new UserViewModel
+                {
+                    UserId = Guid.NewGuid().ToString(),
+                    Email = model.Email,
+                    Username = model.Email,
+                    Password = tempPassword,
+                    Role = RoleType.Reviewer
+                };
+                await _userService.AddUserAsync(userModel, userModel.UserId);
+                await _userService.SendTempPasswordEmailAsync(model.Email, tempPassword);
+                // Show the registration success screen
+                return View("RegisterSuccess");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendOtp(string email)
+        {
+            var success = await _userService.ResendOtpForRegistrationAsync(email);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "New OTP has been sent to your email address.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to resend OTP. Please try again.";
+            }
+            
+            var model = new OtpVerificationModel { Email = email };
+            return View("VerifyOtp", model);
         }
 
         /// <summary>
@@ -150,6 +220,26 @@ namespace Readiculous.WebApp.Controllers
         {
             await this._signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CompleteFirstTimeProfile([FromForm] string Username, [FromForm] string Password, [FromForm] string ConfirmPassword, [FromForm] IFormFile ProfilePicture)
+        {
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || Password != ConfirmPassword)
+            {
+                return BadRequest();
+            }
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var user = _userService.GetUserEditById(userId);
+            user.Username = Username;
+            user.Password = Password;
+            if (ProfilePicture != null && ProfilePicture.Length > 0)
+                user.ProfilePicture = ProfilePicture;
+            user.AccessStatus = AccessStatus.Verified;
+            await _userService.UpdateUserAsync(user, userId);
+            return Ok();
         }
     }
 }

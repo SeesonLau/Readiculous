@@ -28,8 +28,9 @@ namespace Readiculous.Services.Services
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
+        private readonly IEmailService _emailService;
 
-        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
+        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client, IEmailService emailService)
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
@@ -37,6 +38,7 @@ namespace Readiculous.Services.Services
             _reviewRepository = reviewRepository;
             _mapper = mapper;
             _client = client;
+            _emailService = emailService;
         }
 
         // Authentication Method
@@ -65,7 +67,7 @@ namespace Readiculous.Services.Services
                 !string.IsNullOrWhiteSpace(editProfileViewModel.NewPassword) ||
                 !string.IsNullOrWhiteSpace(editProfileViewModel.ConfirmPassword);
         }
-        
+
         // CRUD Operations
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
@@ -86,6 +88,7 @@ namespace Readiculous.Services.Services
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
+                user.AccessStatus = AccessStatus.FirstTime;
 
                 // If a picture was uploaded
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
@@ -109,7 +112,7 @@ namespace Readiculous.Services.Services
                 var user = _userRepository.GetUserById(model.UserId);
 
                 // Map properties for Username, Email, Updated Time, and UpdatedBy
-                
+
                 _mapper.Map(model, user);
                 user.Username = model.Username.Trim();
                 user.Email = model.Email.Trim();
@@ -132,7 +135,7 @@ namespace Readiculous.Services.Services
                     }
                 }
                 // If a new picture was uploaded
-                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0) 
+                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
                 {
                     // Upload new picture
                     if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
@@ -152,7 +155,7 @@ namespace Readiculous.Services.Services
         }
         public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
-            if(!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
+            if (!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
@@ -165,7 +168,7 @@ namespace Readiculous.Services.Services
             {
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
             }
-            
+
             await UpdateUserAsync(userViewModel, editorId);
         }
         public async Task DeleteUserAsync(string userId, string deleterId)
@@ -174,7 +177,7 @@ namespace Readiculous.Services.Services
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
-            if(userId == deleterId)
+            if (userId == deleterId)
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.UserCannotDeleteSelf);
             }
@@ -266,12 +269,12 @@ namespace Readiculous.Services.Services
                 _mapper.Map(user, userViewModel);
                 userViewModel.ProfileImageUrl = user.ProfilePictureUrl;
                 userViewModel.Role = user.Role.ToString();
-                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId)
+                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId) 
                     .ToList()
                     .Select(fb =>
                     {
                         var favoriteBookModel = new FavoriteBookModel();
-                        var book = _bookRepository.GetBookById(fb.BookId);
+                        var book = _bookRepository.GetBookById(fb.BookId); 
 
                         _mapper.Map(book, favoriteBookModel);
                         favoriteBookModel.BookGenres = book.GenreAssociations.Select(bg => bg.Genre.Name)
@@ -310,7 +313,7 @@ namespace Readiculous.Services.Services
         {
             return _userRepository.GetUserById(userId);
         }
-        
+
         //Populating Dropdown Lists
         public List<SelectListItem> GetUserRoles()
         {
@@ -337,11 +340,10 @@ namespace Readiculous.Services.Services
                     {
                         Value = ((int)r).ToString(),
                         Text = displayName,
-                        Selected = r == UserSortType.Latest 
+                        Selected = r == UserSortType.Latest
                     };
                 }).ToList();
         }
-        
         // String Helper
         public string GetEmailByUserId(string userId)
         {
@@ -354,7 +356,7 @@ namespace Readiculous.Services.Services
 
             return user.Email;
         }
-        
+
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
@@ -466,6 +468,68 @@ namespace Readiculous.Services.Services
             }
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
+        // OTP Methods
+        public async Task<bool> SendOtpForRegistrationAsync(string email)
+        {
+            try
+            {
+                // Check if email already exists
+                if (_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store OTP only
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null); // Store null for temp password for now
+
+                // Send OTP via email service (no temp password)
+                return await _emailService.SendOtpEmailAsync(email, otp, null);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        public async Task<bool> ResendOtpForRegistrationAsync(string email)
+        {
+            try
+            {
+                // Check if email already exists
+                if (_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store new OTP only
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service (no temp password)
+                return await _emailService.SendOtpEmailAsync(email, otp, null);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        // New method to send temp password after OTP is confirmed
+        public async Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword)
+        {
+            // Compose and send a new email with only the temp password
+            return await _emailService.SendTempPasswordEmailAsync(email, tempPassword);
+        }
+
+        public bool ValidateOtpForRegistration(string email, string otp)
+        {
+            // Only validate OTP, do not remove temp password yet
+            return OtpManager.ValidateOtp(email, otp);
+        }
+
+        public string GetTempPasswordForEmail(string email)
+        {
+            return OtpManager.GetTempPassword(email);
         }
     }
 }

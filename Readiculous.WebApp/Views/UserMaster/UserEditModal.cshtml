@@ -7,89 +7,83 @@
     <input type="hidden" asp-for="UserId" />
     <input type="hidden" asp-for="CreatedBy" />
     <input type="hidden" asp-for="CreatedTime" />
-    <input type="hidden" asp-for="Password" id="originalPassword" /> 
-    <input type="hidden" asp-for="ProfilePictureUrl" /> 
+    <input type="hidden" asp-for="Password" id="originalPassword" />
+    <input type="hidden" asp-for="ProfilePictureUrl" />
 
-    <div class="form-group mb-3">
-        <label asp-for="Username" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="Username" class="form-label">Username</label>
         <input asp-for="Username" class="form-control" />
         <span asp-validation-for="Username" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" readonly/>
+    <div class="form-group">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" readonly />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Password" class="form-label">New Password (leave blank to keep current)</label>
-        <input asp-for="Password" class="form-control" type="password" value="" placeholder="Leave blank to keep current password" />
+    <div class="form-group">
+        <label asp-for="Password" class="form-label">New Password</label>
+        <div class="password-input-group">
+            <input asp-for="Password"
+                   class="form-control"
+                   type="password"
+                   autocomplete="new-password"
+                   placeholder="Leave blank to keep current password"
+                   id="editPassword" />
+            <button type="button"
+                    class="password-toggle"
+                    onclick="togglePassword('editPassword', this)"
+                    aria-label="Toggle password visibility"
+                    aria-pressed="false">
+                <i class="fas fa-eye-slash"></i>
+            </button>
+        </div>
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Role" class="form-label"></label>
-        <select asp-for="Role" class="form-control">
+    <div class="form-group">
+        <label asp-for="Role" class="form-label">Role</label>
+        <select asp-for="Role" class="form-select">
             <option value="@RoleType.Admin">Admin</option>
             <option value="@RoleType.Reviewer">Reviewer</option>
         </select>
         <span asp-validation-for="Role" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
-        <label class="form-label">Current Profile Picture</label>
-        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
-        {
-            <div class="mb-2">
-                <img src="@Model.ProfilePictureUrl" alt="Profile Picture" style="max-width: 200px; max-height: 200px;" class="img-thumbnail" id="currentProfilePicture" />
+    <div class="form-group">
+        <label class="form-label">Profile Picture</label>
+        <div class="profile-picture-container">
+            <div class="profile-picture-preview">
+                @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                {
+                    <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="profile-picture-preview" id="currentProfilePicture" />
+                }
+                else
+                {
+                    <div class="profile-picture-placeholder">No image available</div>
+                }
             </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" asp-for="RemoveProfilePicture" id="removeProfilePicture">
-                <label class="form-check-label" for="removeProfilePicture">
-                    Remove profile picture
-                </label>
-            </div>
-        }
-        else
-        {
-            <p class="text-muted">No profile picture available</p>
-        }
-    </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="ProfilePicture" class="form-label">Upload New Profile Picture (leave blank to keep current)</label>
-        <input asp-for="ProfilePicture" type="file" class="form-control" accept=".png,.jpg,.jpeg" id="newProfilePicture" />
+            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" asp-for="RemoveProfilePicture" id="removeProfilePicture">
+                    <label class="form-check-label" for="removeProfilePicture">
+                        Remove profile picture
+                    </label>
+                </div>
+            }
+
+            <input asp-for="ProfilePicture" type="file" class="form-control" accept=".png,.jpg,.jpeg" id="newProfilePicture" />
+        </div>
         <span asp-validation-for="ProfilePicture" class="text-danger"></span>
     </div>
 
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="submit" class="btn btn-primary">Save</button>
     </div>
 </form>
-<script src="~/js/adminUserMaster/usermasterEdit.js" asp-append-version="true"></script>
-<!--
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const removeCheckbox = document.getElementById('removeProfilePicture');
-        const fileInput = document.getElementById('newProfilePicture');
 
-        if (removeCheckbox && fileInput) {
-            // When a new file is selected, uncheck the remove checkbox
-            fileInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    removeCheckbox.checked = false;
-                }
-            });
-
-            // When remove is checked, clear the file input
-            removeCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    fileInput.value = '';
-                }
-            });
-        }
-    });
-</script>
--->
+<script src="~/js/adminUserMaster/usermasterModal.js" asp-append-version="true"></script>

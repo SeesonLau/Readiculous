@@ -1,15 +1,51 @@
-﻿@model PaginationModel
+﻿@using Microsoft.AspNetCore.Routing
+@model Readiculous.WebApp.Models.PaginationModel // Ensure this namespace is correct
+
+@{
+    // Retrieve action and controller from parameters or current context
+    var action = ViewData["action"]?.ToString() ?? Context.Request.RouteValues["action"]?.ToString() ?? "Index";
+    var controller = ViewData["controller"]?.ToString() ?? Context.Request.RouteValues["controller"]?.ToString() ?? "Home";
+
+    var routeValues = new RouteValueDictionary();
+    routeValues.Add("page", 1); // Default page
+    routeValues.Add("pageSize", Model.PageSize); // Always include pageSize from the model
+
+    // Add specific route values passed from the invoking page
+    if (ViewData.ContainsKey("routeId") && ViewData["routeId"] != null)
+    {
+        routeValues.Add("id", ViewData["routeId"].ToString());
+    }
+    if (ViewData.ContainsKey("routeBookSearch") && ViewData["routeBookSearch"] != null)
+    {
+        routeValues.Add("bookSearch", ViewData["routeBookSearch"].ToString());
+    }
+    if (ViewData.ContainsKey("searchString") && ViewData["searchString"] != null)
+    {
+        routeValues.Add("searchString", ViewData["searchString"].ToString());
+    }
+    if (ViewData.ContainsKey("searchType") && ViewData["searchType"] != null)
+    {
+        routeValues.Add("searchType", ViewData["searchType"].ToString());
+    }
+    // Add any other specific route values you might need for other pages
+}
 
 <div class="pagination-container">
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mb-0">
             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                <a class="page-link" href="#" data-page="1" aria-label="First">
+                @{
+                    routeValues["page"] = 1;
+                }
+                <a class="page-link" href="@Url.Action(action, controller, routeValues)" data-page="1" aria-label="First">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                <a class="page-link" href="#" data-page="@(Model.CurrentPage - 1)" aria-label="Previous">
+                @{
+                    routeValues["page"] = Model.CurrentPage - 1;
+                }
+                <a class="page-link" href="@Url.Action(action, controller, routeValues)" data-page="@(Model.CurrentPage - 1)" aria-label="Previous">
                     <span aria-hidden="true">&lsaquo;</span>
                 </a>
             </li>
@@ -21,12 +57,18 @@
             </li>
 
             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                <a class="page-link" href="#" data-page="@(Model.CurrentPage + 1)" aria-label="Next">
+                @{
+                    routeValues["page"] = Model.CurrentPage + 1;
+                }
+                <a class="page-link" href="@Url.Action(action, controller, routeValues)" data-page="@(Model.CurrentPage + 1)" aria-label="Next">
                     <span aria-hidden="true">&rsaquo;</span>
                 </a>
             </li>
             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                <a class="page-link" href="#" data-page="@Model.TotalPages" aria-label="Last">
+                @{
+                    routeValues["page"] = Model.TotalPages;
+                }
+                <a class="page-link" href="@Url.Action(action, controller, routeValues)" data-page="@Model.TotalPages" aria-label="Last">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -34,7 +76,6 @@
     </nav>
 </div>
 
-<!-- Jump to Page Modal -->
 <div class="modal fade" id="jumpToPageModal" tabindex="-1" aria-labelledby="jumpToPageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content" style="width: 250px; margin: 0 auto;">
