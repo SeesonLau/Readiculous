@@ -15,11 +15,16 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
+
 using System.Linq;
 using Readiculous.Data;
 
+using Readiculous.Resources.Messages;
+
+
 namespace Readiculous.WebApp.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : ControllerBase<AccountController>
     {
         private readonly SessionManager _sessionManager;
@@ -67,7 +72,6 @@ namespace Readiculous.WebApp.Controllers
         /// </summary>
         /// <returns>Created response view</returns>
         [HttpGet]
-        [AllowAnonymous]
         public ActionResult Login()
         {
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
@@ -83,7 +87,6 @@ namespace Readiculous.WebApp.Controllers
         /// <param name="returnUrl">The return URL.</param>
         /// <returns> Created response view </returns>
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
             this._session.SetString("HasSession", "Exist");
@@ -107,28 +110,47 @@ namespace Readiculous.WebApp.Controllers
 
             var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
             if (loginResult == LoginResult.Success)
+
+            try
+
             {
-                if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+                User user = null;
+                var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
+                if (loginResult == LoginResult.Success)
                 {
-                    TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
-                    return View();
+                    if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+                    {
+                        TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
+                        return View();
+                    }
+
+                    await this._signInManager.SignInAsync(user);
+                    this._session.SetString("UserName", user.Username);
+                    // Pass AccessStatus to the view for modal logic
+                    TempData["AccessStatus"] = user.AccessStatus.ToString();
+                    return RedirectToAction("Index", "Home");
                 }
-                await this._signInManager.SignInAsync(user);
-                this._session.SetString("UserName", user.Username);
-                // Pass AccessStatus to the view for modal logic
-                TempData["AccessStatus"] = user.AccessStatus.ToString();
-                return RedirectToAction("Index", "Home");
+                else
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.IncorrectLoginCredentials;
+                    return View(model);
+                }
             }
-            else
+            catch (InvalidDataException ex)
             {
-                // 認証NG
-                TempData["ErrorMessage"] = "Incorrect UserId or Password";
-                return View();
+                TempData["ErrorMessage"] = ex.Message;
+                return View(model);
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                // Optionally log ex.Message
+                return View(model);
             }
         }
 
+
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Register()
         {
             return View(new EmailRequestModel());
@@ -227,8 +249,11 @@ namespace Readiculous.WebApp.Controllers
         /// Sign Out current account and return login view.
         /// </summary>
         /// <returns>Created response view</returns>
+
         [AllowAnonymous]
         [HttpPost]
+
+
         public async Task<IActionResult> SignOutUser()
         {
             // Sign out from ASP.NET Identity
@@ -337,6 +362,119 @@ namespace Readiculous.WebApp.Controllers
             await _userService.UpdateUserAsync(user, userId);
             return Ok();
 
+        }
+
+
+
+        // Forgot Password Methods
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View(new EmailRequestModel());
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> RequestForgotPasswordOtp(EmailRequestModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("ForgotPassword", model);
+            }
+
+            var success = await _userService.SendOtpForForgotPasswordAsync(model.Email);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "OTP has been sent to your email address.";
+                TempData["EmailForForgotPasswordOtp"] = model.Email;
+                return RedirectToAction("ForgotPasswordOtp");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = Errors.ForgotPasswordEmailFailed;
+                return View("ForgotPassword", model);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordOtp()
+        {
+            var email = TempData["EmailForForgotPasswordOtp"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new OtpVerificationModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyForgotPasswordOtp(OtpVerificationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("ForgotPasswordOtp", model);
+            }
+
+            var isValid = _userService.ValidateOtpForForgotPassword(model.Email, model.Otp);
+            if (isValid)
+            {
+                TempData["EmailForPasswordReset"] = model.Email;
+                return RedirectToAction("ResetPassword");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
+                return View("ForgotPasswordOtp", model);
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendForgotPasswordOtp([FromBody] EmailRequestModel model)
+        {
+            var success = await _userService.ResendOtpForForgotPasswordAsync(model.Email);
+            return Json(new { success = success });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword()
+        {
+            var email = TempData["EmailForPasswordReset"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new ForgotPasswordModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(ForgotPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var success = await _userService.UpdatePasswordAsync(model.Email, model.NewPassword);
+            if (success)
+            {
+                // Use the registration success screen for "All done"
+                return View("RegisterSuccess");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to update password. Please try again.";
+                return View(model);
+            }
         }
 
     }

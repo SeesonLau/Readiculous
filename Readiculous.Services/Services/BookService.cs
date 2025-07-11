@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
@@ -10,7 +11,7 @@ using Supabase;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -42,9 +43,13 @@ namespace Readiculous.Services.Services
         public async Task AddBook(BookViewModel model, string creatorId)
         {
             // Books can only be added if the title and author combination does not already exist.
-            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+            }
+            if (_bookRepository.ISBNExists(model.BookId, model.ISBN))
+            {
+                throw new DuplicateNameException(Resources.Messages.Errors.ISBNExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -90,7 +95,7 @@ namespace Readiculous.Services.Services
                     }
                     else
                     {
-                        throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
+                        throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
                     }
                 }
             }
@@ -114,15 +119,19 @@ namespace Readiculous.Services.Services
         }
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim()))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+            }
+            if (_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ISBNExists);
             }
 
             var book = _bookRepository.GetBookById(model.BookId);
             if (book == null)
             {
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -136,45 +145,9 @@ namespace Readiculous.Services.Services
 
             if (model.CoverImage != null && model.CoverImage.Length > 0)
             {
-                var uri = new Uri(book.CoverImageUrl);
-                var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+                await DeleteCoverImage(book.CoverImageUrl);
 
-                var result = await _client.Storage
-                    .From(Const.BucketName)
-                    .Remove(new List<string> { relativePath });
-
-                if (result == null)
-                {
-                    throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
-                }
-
-                var extension = Path.GetExtension(model.CoverImage.FileName);
-                var fileName = Path.Combine(Const.BookDirectory, $"{book.BookId}-{Guid.NewGuid():N}{extension}");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await model.CoverImage.CopyToAsync(memoryStream);
-                    var fileBytes = memoryStream.ToArray();
-
-                    var uploadResult = await _client.Storage
-                        .From(Const.BucketName)
-                        .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                        {
-                            ContentType = model.CoverImage.ContentType,
-                            Upsert = true
-                        });
-
-                    if (!string.IsNullOrEmpty(uploadResult))
-                    {
-                        book.CoverImageUrl = _client.Storage
-                            .From(Const.BucketName)
-                            .GetPublicUrl(fileName);
-                    }
-                    else
-                    {
-                        throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
-                    }
-                }
+                book.CoverImageUrl = await UploadCoverImage(model.CoverImage, book.BookId);
             }
 
             var assignmentsToRemove = book.GenreAssociations
@@ -206,7 +179,7 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ServerError);
             }
 
             var book = _bookRepository.GetBookById(bookId);
@@ -257,21 +230,14 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(id);
             if (book == null)
             {
-                return null;
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
 
             var model = new BookDetailsViewModel();
 
-
-            //TO ADD: REVIEW COUNT AND RATING AVERAGE
             _mapper.Map(book, model);
-            model.Genres = book.GenreAssociations
-                .Where(ga => ga.Genre.DeletedTime == null)
-                .Select(ga => ga.Genre.Name)
+            model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                 .ToList();
-            model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
             model.Reviews = _reviewRepository.GetReviewsByBookId(book.BookId)
                 .ToList()
                 .Select(r =>
@@ -288,6 +254,10 @@ namespace Readiculous.Services.Services
                     return reviewViewModel;
                 })
                 .ToList();
+
+            model.AverageRating = model.Reviews.Count != 0
+                        ? (decimal)book.BookReviews.Average(r => r.Rating)
+                        : 0;
             model.CreatedByUserName = book.CreatedByUser.Username;
             model.UpdatedByUserName = book.UpdatedByUser.Username;
             return model;
@@ -297,7 +267,7 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(id);
             if (book == null)
             {
-                return null;
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
 
             var model = new BookViewModel();
@@ -347,6 +317,18 @@ namespace Readiculous.Services.Services
                 }).ToList();
         }
 
+        // String Helper Functions
+        public string GetTitleByBookId(string bookId)
+        {
+            var book = _bookRepository.GetBookById(bookId);
+            if (book == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
+            }
+
+            return book.Title;
+        }
+
         // Private Helper Methods for Book Listing
         private List<BookListItemViewModel> ListAllActiveBooks(string userID)
         {
@@ -356,11 +338,8 @@ namespace Readiculous.Services.Services
                 {
                     var model = new BookListItemViewModel();
 
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
@@ -385,11 +364,8 @@ namespace Readiculous.Services.Services
                 {
                     var model = new BookListItemViewModel();
 
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
@@ -409,29 +385,35 @@ namespace Readiculous.Services.Services
         {
             var bookGenres = genres.Select(g =>
             {
-                var genre = _genreRepository.GetGenreById(g.GenreId);
+                Genre genre = new();
+                _mapper.Map(g, genre);
+
                 return genre;
             })
                 .ToList();
 
             var books = _bookRepository.GetBooksByGenreList(bookGenres)
-                .Where(b => b.DeletedTime == null)
                 .ToList()
                 .Select(book =>
                 {
                     var model = new BookListItemViewModel();
 
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
+
                     model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
                         ? book.BookReviews.Average(r => r.Rating)
+
+
+                    var bookReviews = _reviewRepository.GetReviewsByBookId(book.BookId).ToList();
+                    model.AverageRating = (decimal)(bookReviews.Count != 0
+                        ? bookReviews.Average(r => r.Rating)
+
                         : 0);
 
                     return model;
@@ -450,16 +432,13 @@ namespace Readiculous.Services.Services
                 .ToList();
 
             var books = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres)
-                .Where(b => b.DeletedTime == null)
                 .ToList()
                 .Select(book =>
                 {
                     var model = new BookListItemViewModel();
 
                     _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
+                    model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
@@ -514,24 +493,21 @@ namespace Readiculous.Services.Services
 
             return sortType switch
             {
-                /*BookSortType.GenreAscending => books.OrderBy(b => b.Genres
-                    .Select(name => name)
-                    .OrderBy(name => name)
-                    .FirstOrDefault()),
-                BookSortType.GenreDescending => books.OrderBy(b => b.Genres
-                    .Select(name => name)
-                    .OrderByDescending(name => name)
-                    .FirstOrDefault()),*/
                 BookSortType.TitleAscending => books.OrderBy(b => b.Title),
                 BookSortType.TitleDescending => books.OrderByDescending(b => b.Title),
                 BookSortType.AuthorAscending => books.OrderBy(b => b.Author),
                 BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
                 BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
                 BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
+
                 // BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
                 // BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
                 BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
                 BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
+
+                BookSortType.Oldest => books.OrderBy(b => b.CreatedTime),
+                BookSortType.Latest => books.OrderByDescending(b => b.CreatedTime),
+
                 _ => books, // Default case
             };
         }
@@ -541,13 +517,11 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book is already in favorites.");
+                throw new InvalidOperationException(Resources.Messages.Errors.FavoriteBookExists);
             }
 
             var favoriteBook = new FavoriteBook
@@ -563,26 +537,58 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (!_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book is not in favorites.");
+                throw new InvalidOperationException(Resources.Messages.Errors.FavoritedBookNotExists);
             }
 
             var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
 
             _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
         }
-
-        // String Helper Functions
-        public string GetTitleByBookId(string bookId)
+        private async Task DeleteCoverImage(string pictureUrl)
         {
-            var book = _bookRepository.GetBookById(bookId);
-            return book.Title;
-        }
+            var uri = new Uri(pictureUrl);
+            var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
 
+            var result = await _client.Storage
+                .From(Const.BucketName)
+                .Remove(new List<string> { relativePath });
+
+            if (result == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+            }
+        }
+        private async Task<string> UploadCoverImage(IFormFile file, string bookId)
+        {
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = Path.Combine(Const.BookDirectory, $"{bookId}-{Guid.NewGuid():N}{extension}");
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                var uploadResult = await _client.Storage
+                    .From(Const.BucketName)
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                    {
+                        ContentType = file.ContentType,
+                        Upsert = true
+                    });
+
+                if (!string.IsNullOrEmpty(uploadResult))
+                {
+                    return _client.Storage
+                        .From(Const.BucketName)
+                        .GetPublicUrl(fileName);
+                }
+            }
+
+            throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
     }
 }

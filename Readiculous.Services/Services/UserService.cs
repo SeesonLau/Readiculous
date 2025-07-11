@@ -11,6 +11,7 @@ using Supabase;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -80,11 +81,10 @@ namespace Readiculous.Services.Services
                     model.UserId = Guid.NewGuid().ToString();
                 }
 
-                // Map properties for Username, Email, Password, CreatedTime and UpdatedTime
+                // Map properties for Username, Email, CreatedTime and UpdatedTime
                 _mapper.Map(model, user);
                 user.Username = user.Username.Trim();
                 user.Email = user.Email.Trim();
-                user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
                 user.AccessStatus = AccessStatus.FirstTime;
@@ -96,12 +96,31 @@ namespace Readiculous.Services.Services
                     user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
                 }
 
+                // If the creator is not the same as the new user (admin creation), generate a temp password
+                bool isAdminCreated = creatorId != model.UserId;
+                string tempPassword = null;
+                if (isAdminCreated)
+                {
+                    tempPassword = OtpManager.GenerateTempPassword();
+                    user.Password = PasswordManager.EncryptPassword(tempPassword);
+                }
+                else
+                {
+                    user.Password = PasswordManager.EncryptPassword(model.Password);
+                }
+
                 // Add User
                 _userRepository.AddUser(user, creatorId);
+
+                // Send temp password email if admin created
+                if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
+                {
+                    await _emailService.SendTempPasswordEmailAsync(user.Email, tempPassword);
+                }
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.UserExists);
             }
         }
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
@@ -149,14 +168,14 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
             if (!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
 
             var user = _userRepository.GetUserById(editProfileViewModel.UserId);
@@ -174,14 +193,14 @@ namespace Readiculous.Services.Services
         {
             if (await Task.Run(() => !_userRepository.UserExists(userId)))
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
             if (userId == deleterId)
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserCannotDeleteSelf);
+                throw new InvalidOperationException(Resources.Messages.Errors.UserCannotDeleteSelf);
             }
 
-            var user = await Task.Run(() => _userRepository.GetUserById(userId)); // you can use the _userRepository directly here
+            var user = _userRepository.GetUserById(userId); 
 
             user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
             foreach (var review in user.UserReviews)
@@ -194,7 +213,7 @@ namespace Readiculous.Services.Services
             user.DeletedBy = deleterId;
             user.DeletedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _userRepository.UpdateUser(user)); // you can use the _userRepository directly here
+            await Task.Run(() => _userRepository.UpdateUser(user)); 
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
@@ -237,7 +256,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public EditProfileViewModel GetEditProfileById(string userId)
@@ -254,7 +273,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
         }
         public UserDetailsViewModel GetUserDetailsById(string userId)
@@ -282,7 +301,7 @@ namespace Readiculous.Services.Services
                         return favoriteBookModel;
                     })
                     .ToList();
-                userViewModel.UserReviewModels = _reviewRepository.GetReviewsByUserId(userId)
+                userViewModel.UserReviewModels = _reviewRepository.GetReviewsWithNavigationPropertiesByUserId(userId)
                     .ToList()
                     .Select(r =>
                     {
@@ -305,8 +324,12 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
+        }
+        public User GetUserById(string userId)
+        {
+            return _userRepository.GetUserById(userId);
         }
 
         //Populating Dropdown Lists
@@ -343,6 +366,12 @@ namespace Readiculous.Services.Services
         public string GetEmailByUserId(string userId)
         {
             var user = _userRepository.GetUserById(userId);
+
+            if(user == null)
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+            }
+
             return user.Email;
         }
 
@@ -372,7 +401,12 @@ namespace Readiculous.Services.Services
                 .Select(user =>
                 {
                     UserListItemViewModel userViewModel = new();
+
                     _mapper.Map(user, userViewModel);
+                    userViewModel.Role = user.Role.ToString();
+                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
+                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
+                    
                     return userViewModel;
                 });
 
@@ -514,6 +548,80 @@ namespace Readiculous.Services.Services
         public string GetTempPasswordForEmail(string email)
         {
             return OtpManager.GetTempPassword(email);
+        }
+
+        // Forgot Password Methods
+        public async Task<bool> SendOtpForForgotPasswordAsync(string email)
+        {
+            try
+            {
+                // Check if email exists
+                if (!_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store OTP for forgot password
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service
+                return await _emailService.SendOtpForForgotPasswordEmailAsync(email, otp);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ResendOtpForForgotPasswordAsync(string email)
+        {
+            try
+            {
+                // Check if email exists
+                if (!_userRepository.EmailExists(email.Trim()))
+                {
+                    return false;
+                }
+
+                // Generate and store new OTP
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service
+                return await _emailService.SendOtpForForgotPasswordEmailAsync(email, otp);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool ValidateOtpForForgotPassword(string email, string otp)
+        {
+            return OtpManager.ValidateOtp(email, otp);
+        }
+
+        public async Task<bool> UpdatePasswordAsync(string email, string newPassword)
+        {
+            try
+            {
+                var user = _userRepository.GetUserByEmail(email);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                user.Password = PasswordManager.EncryptPassword(newPassword);
+                user.UpdatedTime = DateTime.UtcNow;
+                _userRepository.UpdateUser(user);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

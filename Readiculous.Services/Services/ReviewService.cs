@@ -28,7 +28,7 @@ namespace Readiculous.Services.Services
         {
             if (_reviewRepository.ReviewExists(model.BookId, model.UserId))
             {
-                throw new InvalidOperationException("Review already exists for this book by the user.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ReviewExists);
             }
 
             var review = new Review();
@@ -45,7 +45,7 @@ namespace Readiculous.Services.Services
         {
             if (!_reviewRepository.ReviewExists(model.BookId, model.UserId))
             {
-                throw new InvalidOperationException("Review does not exist for this book by the user.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ReviewNotExist);
             }
             var review = _reviewRepository.GetReviewByBookIdAndUserId(model.BookId, model.UserId);
             if (review == null)
@@ -63,7 +63,7 @@ namespace Readiculous.Services.Services
         {
             if (!_reviewRepository.ReviewExists(bookId, userId))
             {
-                throw new InvalidOperationException("Review does not exist for this book by the user.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ReviewNotExist);
             }
 
             var review = _reviewRepository.GetReviewByBookIdAndUserId(bookId, userId);
@@ -101,7 +101,7 @@ namespace Readiculous.Services.Services
         }
         public List<ReviewListItemViewModel> GetReviewListFromUserId(string userId)
         {
-            var reviews = _reviewRepository.GetReviewsByUserId(userId)
+            var reviews = _reviewRepository.GetReviewsWithNavigationPropertiesByUserId(userId)
                 .ToList()
                 .Select(r =>
                 {
@@ -136,6 +136,10 @@ namespace Readiculous.Services.Services
             reviewViewModel.BookTitle = review.Book.Title;
 
             return reviewViewModel;
+        }
+        public ReviewViewModel GenerateInitialReviewViewModel(string bookId, string userId, string userName)
+        {
+            return new ReviewViewModel { BookId = bookId, UserId = userId, UserName = userName };
         }
     }
 }

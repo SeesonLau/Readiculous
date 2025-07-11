@@ -43,8 +43,6 @@ namespace Readiculous.Data.Repositories
         public IQueryable<Genre> GetAllActiveGenres()
         {
             return this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(bga => bga.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .Where(g => g.DeletedTime == null);
@@ -52,8 +50,6 @@ namespace Readiculous.Data.Repositories
         public IQueryable<Genre> GetGenresByName(string genreName)
         {
             var queryReturn = this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(bga => bga.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .Where(g => g.Name.ToLower().Contains(genreName.ToLower()) &&
@@ -65,22 +61,17 @@ namespace Readiculous.Data.Repositories
         public Genre GetGenreById(string id)
         {
             return this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(bga => bga.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .FirstOrDefault(g => g.GenreId == id &&
                                     g.DeletedTime == null);
         }
-
-        public Genre GetGenreByName(string name)
+        public IQueryable<string> GetGenreNamesByBookId(string bookId)
         {
-            return this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                .Include(g => g.CreatedByUser)
-                .Include(g => g.UpdatedByUser)
-                .FirstOrDefault(g => g.Name == name &&
-                                    g.DeletedTime == null);
-        }
+            return this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => bga.BookId == bookId &&
+                                bga.Genre.DeletedTime == null)
+                .Select(bga => bga.Genre.Name);
+        }        
     }
 }
