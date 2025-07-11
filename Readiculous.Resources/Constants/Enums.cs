@@ -30,8 +30,8 @@ namespace Readiculous.Resources.Constants
 
         public enum RoleType
         {
-            Admin = 0,
-            Reviewer = 1,
+            Reviewer = 0,
+            Admin = 1,
         }
 
         public enum UserSortType

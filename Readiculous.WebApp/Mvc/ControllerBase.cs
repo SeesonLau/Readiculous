@@ -106,7 +106,12 @@ namespace Readiculous.WebApp.Mvc
         /// </summary>
         public string ClientUserRole
         {
-            get { return User.FindFirst("ClientUserRole").Value; }
+            get { return User.FindFirst("UserRole").Value; }
+        }
+
+        public string UserProfilePicture
+        {
+            get { return User.FindFirst("UserProfilePictureUrl").Value; }
         }
 
         /// <summary>

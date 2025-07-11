@@ -6,6 +6,7 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -16,12 +17,14 @@ namespace Readiculous.Services.Services
     {
         private readonly IGenreRepository _genreRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public GenreService(IGenreRepository genreRepository, IBookRepository bookRepository, IMapper mapper)
+        public GenreService(IGenreRepository genreRepository, IBookRepository bookRepository, IReviewRepository reviewRepository, IMapper mapper)
         {
             _genreRepository = genreRepository;
             _bookRepository = bookRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
@@ -30,7 +33,7 @@ namespace Readiculous.Services.Services
         {
             if (_genreRepository.GenreNameExists(model.Name))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.GenreExists);
             }
 
             var genre = new Genre();
@@ -50,7 +53,7 @@ namespace Readiculous.Services.Services
         {
             if (!_genreRepository.GenreNameExists(model.Name))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var genre = new Genre();
@@ -67,7 +70,7 @@ namespace Readiculous.Services.Services
         {
             if (!_genreRepository.GenreIdExists(genreId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var genre = _genreRepository.GetGenreById(genreId);
@@ -100,7 +103,7 @@ namespace Readiculous.Services.Services
             var genre = _genreRepository.GetGenreById(id);
             if (genre == null || genre.DeletedTime != null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var model = new GenreViewModel();
@@ -112,12 +115,12 @@ namespace Readiculous.Services.Services
             var genre = _genreRepository.GetGenreById(id);
             if (genre == null || genre.DeletedTime != null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.GenreNotExist);
+                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
             }
 
             var model = new GenreDetailsViewModel();
             _mapper.Map(genre, model);
-            model.BookCount = genre.Books.Count(bga => bga.Book.DeletedTime == null);
+            model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
             model.CreatedByUsername = genre.CreatedByUser.Username;
             model.UpdatedByUsername = genre.UpdatedByUser.Username;
 
@@ -144,7 +147,20 @@ namespace Readiculous.Services.Services
                     Text = t.ToString(),
                 }).ToList();
         }
-
+        public List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter)
+        {
+            var genres = _genreRepository.GetAllActiveGenres()
+                .Where(g => g.DeletedTime == null)
+                .OrderBy(g => g.Name)
+                .Select(g => new SelectListItem
+                {
+                    Value = g.GenreId,
+                    Text = g.Name,
+                    Selected = (genreFilter != null && g.Name.Equals(genreFilter, StringComparison.OrdinalIgnoreCase))
+                })
+                .ToList();
+            return genres;
+        }
         // Helper methods for Searching genres
         private List<GenreListItemViewModel> ListAllActiveGenres()
         {
@@ -157,7 +173,7 @@ namespace Readiculous.Services.Services
                     _mapper.Map(genre, model);
                     model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
                     model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
-                    model.BookCount = genre.Books != null ? genre.Books.Count(bga => bga.Book != null && bga.Book.DeletedTime == null) : 0;
+                    model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
 
                     return model;
                 })
@@ -175,7 +191,7 @@ namespace Readiculous.Services.Services
                 {
                     GenreListItemViewModel model = new GenreListItemViewModel();
                     _mapper.Map(genre, model);
-                    model.BookCount = genre.Books != null ? genre.Books.Count(bga => bga.Book != null && bga.Book.DeletedTime == null) : 0;
+                    model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
                     model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
                     model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
                     return model;
@@ -215,9 +231,11 @@ namespace Readiculous.Services.Services
                 return new List<BookListItemViewModel>();
             }
             var books = genre.Books
-                .Where(bga => bga.Book != null && bga.Book.DeletedTime == null)
+                .Where(bga => bga.Book != null && 
+                    bga.Book.DeletedTime == null)
                 .Select(bga => bga.Book)
                 .ToList();
+
             return books.Select(book =>
             {
                 var model = new BookListItemViewModel();

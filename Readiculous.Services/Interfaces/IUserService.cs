@@ -25,6 +25,7 @@ namespace Readiculous.Services.Interfaces
         UserViewModel GetUserEditById(string userId);
         EditProfileViewModel GetEditProfileById(string userId);
         UserDetailsViewModel GetUserDetailsById(string userId);
+        User GetUserById(string userId);
         string GetEmailByUserId(string userId);
 
         // Dropdown Filler Methods
@@ -38,5 +39,11 @@ namespace Readiculous.Services.Interfaces
         // Optionally, you may want to expose a method to get the temp password for testing, but not required for production.
         string GetTempPasswordForEmail(string email);
         Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword);
+        
+        // Forgot Password Methods
+        Task<bool> SendOtpForForgotPasswordAsync(string email);
+        bool ValidateOtpForForgotPassword(string email, string otp);
+        Task<bool> ResendOtpForForgotPasswordAsync(string email);
+        Task<bool> UpdatePasswordAsync(string email, string newPassword);
     }
 }

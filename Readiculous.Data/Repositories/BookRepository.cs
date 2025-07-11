@@ -52,8 +52,7 @@ namespace Readiculous.Data.Repositories
         public IQueryable<Book> GetAllActiveBooks()
         {
             return this.GetDbSet<Book>()
-                .Include(b => b.GenreAssociations)
-                    .ThenInclude(g => g.Genre)
+                .AsNoTracking()
                 .Include(b => b.CreatedByUser)
                 .Include(b => b.UpdatedByUser)
                 .Where(b => b.DeletedTime == null);
@@ -61,8 +60,7 @@ namespace Readiculous.Data.Repositories
         public IQueryable<Book> GetBooksByTitle(string bookTitle)
         {
             var books = this.GetDbSet<Book>()
-                .Include(book => book.GenreAssociations)
-                    .ThenInclude(genre => genre.Genre)
+                .AsNoTracking()
                 .Include(book => book.CreatedByUser)
                 .Include(book => book.UpdatedByUser)
                 .Where(b => b.Title.ToLower().Contains(bookTitle.ToLower()) && //Book title search is case-insensitive
@@ -76,8 +74,7 @@ namespace Readiculous.Data.Repositories
             if (genres == null || !genres.Any())
             {
                 books = this.GetDbSet<Book>()
-                    .Include(b => b.GenreAssociations)
-                        .ThenInclude(g => g.Genre)
+                    .AsNoTracking()
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null);
@@ -85,8 +82,7 @@ namespace Readiculous.Data.Repositories
             else
             {
                 books = this.GetDbSet<Book>()
-                    .Include(b => b.GenreAssociations)
-                        .ThenInclude(g => g.Genre)
+                    .AsNoTracking()
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
@@ -102,8 +98,7 @@ namespace Readiculous.Data.Repositories
             if (genres == null || !genres.Any())
             {
                 books = this.GetDbSet<Book>()
-                    .Include(b => b.GenreAssociations)
-                        .ThenInclude(g => g.Genre)
+                    .AsNoTracking()
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
@@ -112,8 +107,7 @@ namespace Readiculous.Data.Repositories
             else
             {
                 books = this.GetDbSet<Book>()
-                    .Include(b => b.GenreAssociations)
-                        .ThenInclude(g => g.Genre)
+                    .AsNoTracking()
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
@@ -132,6 +126,12 @@ namespace Readiculous.Data.Repositories
                 .Include(book => book.UpdatedByUser)
                 .FirstOrDefault(b => b.BookId == id && 
                                     b.DeletedTime == null);
+        }
+        public int GetBookCountByGenreId(string genreId)
+        {
+            return this.GetDbSet<BookGenreAssignment>()
+                .Count(bga => bga.GenreId == genreId &&
+                              bga.Book.DeletedTime == null);
         }
     }
 }
