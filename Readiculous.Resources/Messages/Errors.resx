@@ -177,4 +177,10 @@
   <data name="ForgotPasswordEmailFailed" xml:space="preserve">
     <value>Email not found or failed to send OTP.</value>
   </data>
+  <data name="EmailExists" xml:space="preserve">
+    <value>Email already exists!</value>
+  </data>
+  <data name="EmailNotExist" xml:space="preserve">
+    <value>Email does not exist!</value>
+  </data>
 </root>

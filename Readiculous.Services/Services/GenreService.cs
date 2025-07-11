@@ -225,11 +225,12 @@ namespace Readiculous.Services.Services
 
         public List<BookListItemViewModel> GetBooksByGenreId(string genreId)
         {
-            var genre = _genreRepository.GetGenreById(genreId);
+            var genre = _genreRepository.GetGenreWithBooksPropertiesById(genreId);
             if (genre == null || genre.DeletedTime != null)
             {
                 return new List<BookListItemViewModel>();
             }
+
             var books = genre.Books
                 .Where(bga => bga.Book != null && 
                     bga.Book.DeletedTime == null)
