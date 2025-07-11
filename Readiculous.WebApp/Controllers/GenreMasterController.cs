@@ -125,13 +125,19 @@ namespace Readiculous.WebApp.Controllers
                     }
                     // No redirect
                 }
-                catch (InvalidOperationException ex)
+                catch (DuplicateNameException ex)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         return Json(new { success = false, message = ex.Message });
                     }
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = ex.Message });
+                    }
                 }
             }
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")

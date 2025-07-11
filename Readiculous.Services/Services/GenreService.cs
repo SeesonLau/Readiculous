@@ -31,7 +31,7 @@ namespace Readiculous.Services.Services
         // CRUD operations for Genre
         public void AddGenre(GenreViewModel model, string creatorId)
         {
-            if (_genreRepository.GenreNameExists(model.Name))
+            if (_genreRepository.GenreNameExists(model.Name, model.GenreId))
             {
                 throw new DuplicateNameException(Resources.Messages.Errors.GenreExists);
             }
@@ -51,9 +51,9 @@ namespace Readiculous.Services.Services
         }
         public void UpdateGenre(GenreViewModel model, string updaterId)
         {
-            if (!_genreRepository.GenreNameExists(model.Name))
+            if (_genreRepository.GenreNameExists(model.Name, model.GenreId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
+                throw new DuplicateNameException(Resources.Messages.Errors.GenreExists);
             }
 
             var genre = new Genre();

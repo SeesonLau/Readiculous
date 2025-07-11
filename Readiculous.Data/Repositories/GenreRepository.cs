@@ -19,13 +19,15 @@ namespace Readiculous.Data.Repositories
 
         public bool GenreIdExists(string genreId)
         {
-            return this.GetDbSet<Genre>().Any(g => g.GenreId == genreId &&
-                                                g.DeletedTime == null);
+            return this.GetDbSet<Genre>().Any(g => g.GenreId == genreId 
+                                                && g.DeletedTime == null);
         }
-        public bool GenreNameExists(string genreName)
+        public bool GenreNameExists(string genreName, string genreId)
         {
             return this.GetDbSet<Genre>()
-                .Any(g => g.Name == genreName && g.DeletedTime == null);
+                .Any(g => g.Name == genreName
+                        && g.GenreId != genreId
+                        && g.DeletedTime == null);
         }
 
         public void AddGenre(Genre genre)
