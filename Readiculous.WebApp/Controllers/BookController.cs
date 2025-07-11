@@ -36,10 +36,9 @@ namespace Readiculous.WebApp.Controllers
 
             ViewBag.AllGenres = _genreService.GetGenreList(genreName: string.Empty);
             ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
-            ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
-            var model = _bookService.GetBookList(searchString: searchString, genres: genres, userID: this.UserId, searchType: searchType, sortType: sortOrder);
+            var model = _bookService.GetBookList(searchString: searchString, genres: genres, userID: this.UserId, sortType: sortOrder);
 
             return View(model);
         }

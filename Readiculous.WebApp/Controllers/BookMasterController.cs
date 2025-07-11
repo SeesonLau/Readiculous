@@ -34,21 +34,19 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 10)
+        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;
 
             ViewBag.GenreList = _genreService.GetAllGenreSelectListItems(genreFilter);
-            ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
-            ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
+            ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);    
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
             var allBooks = _bookService.GetBookList(
                 searchString: searchString,
                 genres: genres,
-                userID: this.UserId,
-                searchType: searchType,
+                userID: this.UserId,       
                 sortType: sortOrder,
                 genreFilter: genreFilter);
 

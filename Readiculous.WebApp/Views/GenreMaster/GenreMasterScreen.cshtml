@@ -58,13 +58,13 @@
         </div>
     </div>
 </div>
-
 <!-- Add Genre Modal -->
 <div class="modal fade genre-modal" id="addGenreModal" tabindex="-1" aria-labelledby="addGenreModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addGenreModalLabel">Add New Genre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="addGenreModalBody">
                 <!-- Content loaded via AJAX -->
@@ -75,10 +75,11 @@
 
 <!-- Edit Genre Modal -->
 <div class="modal fade genre-modal" id="editGenreModal" tabindex="-1" aria-labelledby="editGenreModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editGenreModalLabel">Edit Genre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="editGenreModalBody">
                 <!-- Content loaded via AJAX -->
@@ -86,7 +87,6 @@
         </div>
     </div>
 </div>
-
 @await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
 
 @section Scripts {

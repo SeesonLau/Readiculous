@@ -332,12 +332,12 @@ namespace Readiculous.Services.Services
                     .OrderByDescending(g => g.Key)
                     .FirstOrDefault()?
                     .Select(g => g.Genre)
-                    .ToList() ?? new List<string>() { "No genres available." };
+                    .ToList() ?? new List<string>() { "No genres available" };
 
-                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ?
-                    (decimal)userViewModel.UserReviewModels
-                        .Select(u => u.Rating).Average() :
-                    0;
+                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0
+    ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2)
+    : 0;
+
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;
                 userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
 
@@ -364,22 +364,23 @@ namespace Readiculous.Services.Services
                     Text = r.ToString()
                 }).ToList();
         }
-        public List<SelectListItem> GetUserSortTypes()
+        public List<SelectListItem> GetUserSortTypes(UserSortType sortType)
         {
             return Enum.GetValues(typeof(UserSortType))
                 .Cast<UserSortType>()
-                .Select(r => {
-                    var displayName = r.GetType()
-                                     .GetMember(r.ToString())
+                .Select(t =>
+                {
+                    var displayName = t.GetType()
+                                     .GetMember(t.ToString())
                                      .First()
                                      .GetCustomAttribute<DisplayAttribute>()?
-                                     .Name ?? r.ToString();
+                                     .Name ?? t.ToString();
 
                     return new SelectListItem
                     {
-                        Value = ((int)r).ToString(),
+                        Value = ((int)t).ToString(),
                         Text = displayName,
-                        Selected = r == UserSortType.Latest
+                        Selected = t == sortType
                     };
                 }).ToList();
         }

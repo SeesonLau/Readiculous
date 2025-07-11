@@ -204,23 +204,23 @@ namespace Readiculous.Services.Services
         }
 
         // Multiple Book Listing Methods, ADD USEREID FOR FAVORITES
-        public List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        public List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
-            if (string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && searchType == BookSearchType.AllBooks && sortType == BookSortType.Latest)
+            if (string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && sortType == BookSortType.Latest)
             {
                 return ListAllActiveBooks(userID);
             }
             else if (string.IsNullOrEmpty(searchString))
             {
-                return ListBooksByGenreList(genres: genres, userID: userID, searchType: searchType, sortType: sortType, genreFilter: genreFilter);
+                return ListBooksByGenreList(genres: genres, userID: userID, sortType: sortType, genreFilter: genreFilter);
             }
             else if (genres == null || !genres.Any())
             {
-                return ListBooksByTitle(bookTitle: searchString, userID: userID, searchType: searchType, sortType: sortType, genreFilter: genreFilter);
+                return ListBooksByTitle(bookTitle: searchString, userID: userID, sortType: sortType, genreFilter: genreFilter);
             }
             else
             {
-                return ListBooksByTitleAndGenres(bookTitle: searchString, genres: genres, userID: userID, searchType: searchType, sortType: sortType, genreFilter: genreFilter);
+                return ListBooksByTitleAndGenres(bookTitle: searchString, genres: genres, userID: userID, sortType: sortType, genreFilter: genreFilter);
             }
         }
 
@@ -277,25 +277,6 @@ namespace Readiculous.Services.Services
         }
 
         // Book Dropdown Fillup Methods
-        public List<SelectListItem> GetBookSearchTypes(BookSearchType searchType)
-        {
-            return Enum.GetValues(typeof(BookSearchType))
-                .Cast<BookSearchType>()
-                .Select(t => {
-                    var displayName = t.GetType()
-                                     .GetMember(t.ToString())
-                                     .First()
-                                     .GetCustomAttribute<DisplayAttribute>()?
-                                     .Name ?? t.ToString();
-
-                    return new SelectListItem
-                    {
-                        Value = ((int)t).ToString(),
-                        Text = displayName,
-                        Selected = t == searchType
-                    };
-                }).ToList();
-        }
         public List<SelectListItem> GetBookSortTypes(BookSortType sortType)
         {
             return Enum.GetValues(typeof(BookSortType))
@@ -376,7 +357,7 @@ namespace Readiculous.Services.Services
                     return model;
                 });
 
-            return SearchAndSortBook(books, searchType, sortType, genreFilter)
+            return SearchAndSortBook(books, sortType, genreFilter)
                 .ToList();
         }
         private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
@@ -412,7 +393,7 @@ namespace Readiculous.Services.Services
                     return model;
                 });
 
-            return SearchAndSortBook(books, searchType, sortType, genreFilter)
+            return SearchAndSortBook(books, sortType, genreFilter)
                 .ToList();
         }
         private List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
@@ -444,46 +425,19 @@ namespace Readiculous.Services.Services
                     return model;
                 });
 
-            return SearchAndSortBook(books, searchType, sortType, genreFilter)
+            return SearchAndSortBook(books, sortType, genreFilter)
                 .ToList();
         }
 
         // Search And Sort Book Helper Function
-        private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> books, BookSearchType searchType, BookSortType sortType, string? genreFilter)
+        private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> books, BookSortType sortType, string? genreFilter)
         {
-            switch (searchType)
-            {
-                case BookSearchType.AllBooks:
-                    break;
-
-                case BookSearchType.TopBooks:
-                    books = books.OrderByDescending(b => b.AverageRating);
-
-                    switch (sortType)
-                    {
-                        case BookSortType.RatingAscending:
-                            return books.Reverse();
-                        case BookSortType.RatingDescending:
-                            return books;
-                        default:
-                            break;
-                    }
-                    break;
-
-                case BookSearchType.NewBooks:
-                    DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
-                    books = books.Where(b => b.CreatedTime >= twoWeeksAgo);
-                    break;
-                default:
-                    break;
-            }
-
             if (!string.IsNullOrWhiteSpace(genreFilter))
             {
                 books = books.Where(b => b.Genres.Any(g =>
                     string.Equals(g, genreFilter, StringComparison.OrdinalIgnoreCase)));
             }
-
+            DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
             return sortType switch
             {
                 BookSortType.TitleAscending => books.OrderBy(b => b.Title),
@@ -494,6 +448,14 @@ namespace Readiculous.Services.Services
                 BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
                 BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
                 BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
+                BookSortType.NewBooksAscending => books
+                    .Where(b => b.CreatedTime >= twoWeeksAgo)
+                    .OrderBy(b => b.CreatedTime),
+                BookSortType.NewBooksDescending => books
+                    .Where(b => b.CreatedTime >= twoWeeksAgo)
+                    .OrderByDescending(b => b.CreatedTime),
+
+
                 _ => books, // Default case
             };
         }
