@@ -146,7 +146,6 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string userId)
         {
             await _userService.DeleteUserAsync(userId, this.UserId);

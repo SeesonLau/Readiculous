@@ -28,9 +28,8 @@
                class="form-control"
                type="text"
                value="System Generated Password"
-               placeholder="System Generated Password"
                id="addPassword"
-               disabled />
+               />
         <small class="form-text text-muted">A temporary password will be sent to the user’s email address.</small>
     </div>
 
@@ -47,9 +46,6 @@
     <div class="form-group">
         <label asp-for="ProfilePicture" class="form-label">Profile Picture</label>
         <div class="profile-picture-container">
-            <div class="profile-picture-preview">
-                <div class="profile-picture-placeholder">No image selected</div>
-            </div>
             <input asp-for="ProfilePicture" type="file" class="form-control" accept=".png,.jpg,.jpeg" />
         </div>
         <span asp-validation-for="ProfilePicture" class="text-danger"></span>

@@ -20,14 +20,7 @@
     }
 
     function initializeEventHandlers() {
-        // View Modal
-        document.addEventListener('click', function (e) {
-            if (e.target.closest('.view-genre-btn')) {
-                e.preventDefault();
-                const genreId = e.target.closest('.view-genre-btn').dataset.genreId;
-                openGenreViewModal(genreId);
-            }
-        });
+  
         // Main screen pagination handlers
         $(document).on('click', '[data-page-size]', function (e) {
             e.preventDefault();
@@ -67,8 +60,8 @@
         });
 
         // Search and filter handlers
-        $(document).on('input', 'input[name="searchString"]', debounce(loadFilteredResults, 300));
-        $(document).on('change', 'select[name="searchType"]', loadFilteredResults);
+        $(document).on('input', '#searchString', debounce(loadFilteredResults, 300));
+        $(document).on('change', '#searchType', loadFilteredResults);
 
         // Modal handlers
         $(document).on('click', '#openAddGenreModalBtn', loadAddGenreModal);
@@ -121,6 +114,7 @@
                 $('#editGenreModalBody').html('<div class="alert alert-danger">Failed to load edit form</div>');
             });
     }
+
     function initializeAddGenreForm() {
         $('#addGenreForm').off('submit').on('submit', function (e) {
             e.preventDefault();
@@ -134,9 +128,8 @@
             `);
 
             // Clear previous errors
-            $('#addGenreValidationSummary').text('');
-            $('#addGenreNameError').text('');
-            $('#addGenreDescriptionError').text('');
+            $('.validation-summary').text('');
+            $('.field-validation-error').text('');
 
             $.ajax({
                 url: settings.createGenreUrl,
@@ -150,20 +143,26 @@
                     } else {
                         if (response.errors) {
                             Object.keys(response.errors).forEach(key => {
-                                $(`#addGenre${key}Error`).text(response.errors[key][0]);
+                                const errorElement = $(`[data-valmsg-for="${key}"]`);
+                                if (errorElement.length) {
+                                    errorElement.text(response.errors[key][0]);
+                                }
                             });
                         } else if (response.message) {
-                            $('#addGenreValidationSummary').text(response.message);
+                            $('.validation-summary').text(response.message);
                         }
                     }
                 },
                 error: function (xhr) {
                     if (xhr.responseJSON && xhr.responseJSON.errors) {
                         Object.keys(xhr.responseJSON.errors).forEach(key => {
-                            $(`#addGenre${key}Error`).text(xhr.responseJSON.errors[key][0]);
+                            const errorElement = $(`[data-valmsg-for="${key}"]`);
+                            if (errorElement.length) {
+                                errorElement.text(xhr.responseJSON.errors[key][0]);
+                            }
                         });
                     } else {
-                        $('#addGenreValidationSummary').text('An error occurred while saving.');
+                        $('.validation-summary').text('An error occurred while saving.');
                     }
                 },
                 complete: function () {
@@ -172,6 +171,7 @@
             });
         });
     }
+
     function initializeEditGenreForm() {
         $('#editGenreForm').off('submit').on('submit', function (e) {
             e.preventDefault();
@@ -185,9 +185,8 @@
             `);
 
             // Clear previous errors
-            $('#editGenreValidationSummary').text('');
-            $('#editGenreNameError').text('');
-            $('#editGenreDescriptionError').text('');
+            $('.validation-summary').text('');
+            $('.field-validation-error').text('');
 
             $.ajax({
                 url: settings.editGenreUrl,
@@ -201,20 +200,26 @@
                     } else {
                         if (response.errors) {
                             Object.keys(response.errors).forEach(key => {
-                                $(`#editGenre${key}Error`).text(response.errors[key][0]);
+                                const errorElement = $(`[data-valmsg-for="${key}"]`);
+                                if (errorElement.length) {
+                                    errorElement.text(response.errors[key][0]);
+                                }
                             });
                         } else if (response.message) {
-                            $('#editGenreValidationSummary').text(response.message);
+                            $('.validation-summary').text(response.message);
                         }
                     }
                 },
                 error: function (xhr) {
                     if (xhr.responseJSON && xhr.responseJSON.errors) {
                         Object.keys(xhr.responseJSON.errors).forEach(key => {
-                            $(`#editGenre${key}Error`).text(xhr.responseJSON.errors[key][0]);
+                            const errorElement = $(`[data-valmsg-for="${key}"]`);
+                            if (errorElement.length) {
+                                errorElement.text(xhr.responseJSON.errors[key][0]);
+                            }
                         });
                     } else {
-                        $('#editGenreValidationSummary').text('An error occurred while saving.');
+                        $('.validation-summary').text('An error occurred while saving.');
                     }
                 },
                 complete: function () {
@@ -240,12 +245,11 @@
     }
 
     async function loadFilteredResults() {
-        const form = $('form[method="get"]');
+        const searchString = $('#searchString').val();
+        const searchType = $('#searchType').val();
         const urlParams = new URLSearchParams(window.location.search);
         const page = urlParams.get('page') || '1';
         const pageSize = urlParams.get('pageSize') || '10';
-
-        const formData = form.serialize() + `&page=${page}&pageSize=${pageSize}`;
 
         $('#genreListContainer').html(loadingSpinner);
 
@@ -253,7 +257,12 @@
             const response = await $.ajax({
                 url: settings.genreMasterScreenUrl,
                 type: 'GET',
-                data: formData,
+                data: {
+                    searchString: searchString,
+                    searchType: searchType,
+                    page: page,
+                    pageSize: pageSize
+                },
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
@@ -321,31 +330,38 @@
     }
 
     function openGenreViewModal(genreId) {
-        fetch(`${genreMasterSettings.genreViewModalUrl}?id=${genreId}`)
-            .then(response => response.text())
-            .then(html => {
-                // Create modal container if it doesn't exist
-                let modalContainer = document.getElementById('genreViewModalContainer');
-                if (!modalContainer) {
-                    modalContainer = document.createElement('div');
-                    modalContainer.id = 'genreViewModalContainer';
-                    document.body.appendChild(modalContainer);
-                }
+        $('#genreViewModalContainer').remove();
 
-                modalContainer.innerHTML = `<div class="modal fade" id="genreViewModal" tabindex="-1" aria-hidden="true">
+        const modalContainer = document.createElement('div');
+        modalContainer.id = 'genreViewModalContainer';
+        document.body.appendChild(modalContainer);
+
+        modalContainer.innerHTML = `
+            <div class="modal fade" id="genreViewModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-xl">
-                    ${html}
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Genre Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="genreViewModalBody">
+                            ${loadingSpinner}
+                        </div>
+                    </div>
                 </div>
             </div>`;
 
-                const modal = new bootstrap.Modal(document.getElementById('genreViewModal'));
-                modal.show();
+        const modal = new bootstrap.Modal(document.getElementById('genreViewModal'));
+        modal.show();
+
+        $.get(settings.genreViewModalUrl, { id: genreId })
+            .done(function (data) {
+                $('#genreViewModalBody').html(data);
             })
-            .catch(error => {
-                console.error('Error loading genre view modal:', error);
+            .fail(function () {
+                $('#genreViewModalBody').html('<div class="alert alert-danger">Failed to load genre details</div>');
             });
     }
-
 
     return {
         init: function (config) {
@@ -360,12 +376,5 @@
 })();
 
 $(function () {
-    GenreMasterScreen.init({
-        genreMasterScreenUrl: '/GenreMaster/GenreMasterScreen',
-        genreAddModalUrl: '/GenreMaster/GenreAddModal',
-        genreEditModalUrl: '/GenreMaster/GenreEditModal',
-        createGenreUrl: '/GenreMaster/Create',
-        editGenreUrl: '/GenreMaster/Edit',
-        deleteGenreUrl: '/GenreMaster/Delete'
-    });
+    GenreMasterScreen.init(genreMasterSettings);
 });
