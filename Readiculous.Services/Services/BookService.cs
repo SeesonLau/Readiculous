@@ -343,11 +343,7 @@ namespace Readiculous.Services.Services
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
-
-                    var bookReviews = _reviewRepository.GetReviewsByBookId(book.BookId).ToList();
-                    model.AverageRating = (decimal)(bookReviews.Count != 0
-                        ? bookReviews.Average(r => r.Rating)
-                        : 0);
+                   
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
 
