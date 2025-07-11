@@ -20,7 +20,7 @@ namespace Readiculous.Services.Interfaces
         GenreViewModel GetGenreEditById(string id);
         GenreDetailsViewModel GetGenreDetailsById(string id);
         List<string> GetSelectedGenreIds(List<GenreViewModel> genreViewModels);
-        List<SelectListItem> GetGenreSortTypes();
+        List<SelectListItem> GetGenreSortTypes(GenreSortType sortType);
         List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter);
         List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels);
         List<BookListItemViewModel> GetBooksByGenreId(string genreId);

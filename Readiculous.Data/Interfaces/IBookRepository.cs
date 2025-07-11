@@ -24,5 +24,6 @@ namespace Readiculous.Data.Interfaces
         Book GetBookById(string id);
 
         int GetBookCountByGenreId(string genreId);
+
     }
 }

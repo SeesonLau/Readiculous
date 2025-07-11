@@ -6,8 +6,10 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
@@ -137,16 +139,26 @@ namespace Readiculous.Services.Services
 
             return genreViewModels.Select(g => g.GenreId).ToList();
         }
-        public List<SelectListItem> GetGenreSortTypes()
+        public List<SelectListItem> GetGenreSortTypes(GenreSortType sortType)
         {
             return Enum.GetValues(typeof(GenreSortType))
                 .Cast<GenreSortType>()
-                .Select(t => new SelectListItem
+                .Select(t =>
                 {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString(),
+                    var displayName = t.GetType()
+                                     .GetMember(t.ToString())
+                                     .First()
+                                     .GetCustomAttribute<DisplayAttribute>()?
+                                     .Name ?? t.ToString();
+                    return new SelectListItem
+                    {
+                        Value = ((int)t).ToString(),
+                        Text = displayName,
+                        Selected = t == sortType
+                    };
                 }).ToList();
         }
+  
         public List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter)
         {
             var genres = _genreRepository.GetAllActiveGenres()

@@ -492,8 +492,8 @@ namespace Readiculous.Services.Services
                 BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
                 BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
                 BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
-                BookSortType.Oldest => books.OrderBy(b => b.CreatedTime),
-                BookSortType.Latest => books.OrderByDescending(b => b.CreatedTime),
+                BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
+                BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
                 _ => books, // Default case
             };
         }
