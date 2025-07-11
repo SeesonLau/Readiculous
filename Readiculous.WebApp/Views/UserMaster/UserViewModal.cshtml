@@ -1,4 +1,5 @@
 ﻿@model Readiculous.Services.ServiceModels.UserDetailsViewModel
+@using System;
 
 <div class="user-view-container">
     <h4 class="user-view-title">Profile</h4>
@@ -73,7 +74,6 @@
             <h5 class="user-view-meta-title">Activity Summary</h5>
             <div class="user-view-activity-stats">
                 <div class="activity-stat">
-
                     <div class="stat-value">@Model.UserReviewModels.Count</div>
                     <div class="stat-label">Reviews Written</div>
                 </div>
@@ -82,18 +82,13 @@
                     <div class="stat-label">Book Favorites</div>
                 </div>
                 <div class="activity-stat">
-                    <div class="stat-value">
-                        @(Model.UserReviewModels.Any()
-                                                ? Model.UserReviewModels.Average(u => u.Rating).ToString("F2")
-                                                : "0.00")
-                    </div>
+                    <div class="stat-value">@Model.AverageRating</div>
                     <div class="stat-label">Avg Rating</div>
                 </div>
 
 
-                <div class="activity-stat">
-            
-                    <div class="stat-value">Fantasy</div>
+                <div class="activity-stat">\
+                    <div class="stat-value">@string.Join(", ", Model.TopGenres)</div>
                     <div class="stat-label">Top Genre</div>
                 </div>
             </div>

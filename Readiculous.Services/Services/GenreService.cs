@@ -31,7 +31,7 @@ namespace Readiculous.Services.Services
         }
 
         // CRUD operations for Genre
-        public async Task AddGenre(GenreViewModel model, string creatorId)
+        public void AddGenre(GenreViewModel model, string creatorId)
         {
             if (_genreRepository.GenreNameExists(model.Name))
             {
@@ -49,9 +49,9 @@ namespace Readiculous.Services.Services
             genre.UpdatedBy = creatorId;
             genre.UpdatedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _genreRepository.AddGenre(genre));
+            _genreRepository.AddGenre(genre);
         }
-        public async Task UpdateGenre(GenreViewModel model, string updaterId)
+        public void UpdateGenre(GenreViewModel model, string updaterId)
         {
             if (!_genreRepository.GenreNameExists(model.Name))
             {
@@ -66,9 +66,9 @@ namespace Readiculous.Services.Services
             genre.UpdatedBy = updaterId;
             genre.UpdatedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _genreRepository.UpdateGenre(genre));
+            _genreRepository.UpdateGenre(genre);
         }
-        public async Task DeleteGenre(string genreId, string deleterId)
+        public void DeleteGenre(string genreId, string deleterId)
         {
             if (!_genreRepository.GenreIdExists(genreId))
             {
@@ -79,7 +79,7 @@ namespace Readiculous.Services.Services
             genre.DeletedBy = deleterId;
             genre.DeletedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _genreRepository.UpdateGenre(genre));
+            _genreRepository.UpdateGenre(genre);
         }
 
         // Multiple Genre Listing methods
