@@ -275,7 +275,7 @@ namespace Readiculous.Services.Services
                 _mapper.Map(user, userViewModel);
                 userViewModel.ProfilePictureUrl = user.ProfilePictureUrl;
                 userViewModel.NewPassword = PasswordManager.DecryptPassword(user.Password);
-                userViewModel.RemoveProfilePicture = string.IsNullOrEmpty(user.ProfilePictureUrl) ? false : true;
+                userViewModel.RemoveProfilePicture = !string.IsNullOrEmpty(user.ProfilePictureUrl);
                 return userViewModel;
             }
             else
@@ -324,6 +324,20 @@ namespace Readiculous.Services.Services
                         return reviewViewModel;
                     })
                     .ToList();
+                userViewModel.TopGenres = userViewModel.FavoriteBookModels
+                    .SelectMany(b => b.BookGenres)
+                    .GroupBy(genre => genre)
+                    .Select(g => new { Genre = g.Key, Count = g.Count() })
+                    .GroupBy(g => g.Count)
+                    .OrderByDescending(g => g.Key)
+                    .FirstOrDefault()?
+                    .Select(g => g.Genre)
+                    .ToList() ?? new List<string>() { "No genres available." };
+
+                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ?
+                    (decimal)userViewModel.UserReviewModels
+                        .Select(u => u.Rating).Average() :
+                    0;
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;
                 userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
 
@@ -630,5 +644,6 @@ namespace Readiculous.Services.Services
                 return false;
             }
         }
+
     }
 }

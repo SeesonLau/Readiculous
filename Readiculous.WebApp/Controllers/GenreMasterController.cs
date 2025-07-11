@@ -145,11 +145,11 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Delete(string id)
+        public IActionResult Delete(string id)
         {
             try
             {
-                await _genreService.DeleteGenre(id, this.UserId);
+                _genreService.DeleteGenre(id, this.UserId);
                 return Json(new { success = true });
             }
             catch (InvalidOperationException ex)
