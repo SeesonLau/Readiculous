@@ -13,7 +13,7 @@ namespace Readiculous.Services.ServiceModels
     public class BookViewModel
     {
         [Required(ErrorMessage = "Title is required!")]
-        [StringLength(100, ErrorMessage = "Title must not exceed 50 characters!")]
+        [StringLength(100, ErrorMessage = "Title must not exceed 100 characters!")]
         public string Title { get; set; }
 
         [Required(ErrorMessage = "ISBN is required!")]
@@ -21,7 +21,7 @@ namespace Readiculous.Services.ServiceModels
         public string ISBN { get; set; }
 
         [Required(ErrorMessage = "Description is required!")]
-        [StringLength(300, ErrorMessage = "Description must not exceed characters!")]
+        [StringLength(300, ErrorMessage = "Description must not exceed 300 characters!")]
         public string Description { get; set; }
 
         [Required(ErrorMessage = "Author is required!")]
