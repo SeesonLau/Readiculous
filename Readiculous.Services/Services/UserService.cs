@@ -41,7 +41,7 @@ namespace Readiculous.Services.Services
             _emailService = emailService;
         }
 
-        // Authentication Method
+        // Authentication Methods
         public LoginResult AuthenticateUserByEmail(string email, string password, ref User user)
         {
             user = new User();
@@ -120,62 +120,69 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new DuplicateNameException(Resources.Messages.Errors.UserExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.EmailExists);
             }
         }
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
-            if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
-            {
-                var user = _userRepository.GetUserById(model.UserId);
-
-                // Map properties for Username, Email, Updated Time, and UpdatedBy
-
-                _mapper.Map(model, user);
-                user.Username = model.Username.Trim();
-                user.Email = model.Email.Trim();
-                user.UpdatedTime = DateTime.UtcNow;
-                user.UpdatedBy = editorId;
-
-                // Only update password if a new one was provided
-                if (!string.IsNullOrEmpty(model.Password))
-                {
-                    user.Password = PasswordManager.EncryptPassword(model.Password);
-                }
-
-                // Handle profile picture changes
-                if (model.RemoveProfilePicture) // If the remove checkbox was checked
-                {
-                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        await DeleteProfilePicture(user.ProfilePictureUrl);
-                        user.ProfilePictureUrl = null;
-                    }
-                }
-                // If a new picture was uploaded
-                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
-                {
-                    // Upload new picture
-                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        // Delete old picture first
-                        await DeleteProfilePicture(user.ProfilePictureUrl);
-                    }
-                    user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
-                }
-                // If neither, the picture remains unchanged
-                _userRepository.UpdateUser(user);
-            }
-            else
+            if(!_userRepository.UserExists(model.UserId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
+            
+            if(!_userRepository.EmailExists(model.Email.Trim()))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
+            }
+
+            var user = _userRepository.GetUserById(model.UserId);
+
+            // Map properties for Username, Email, Updated Time, and UpdatedBy
+
+            _mapper.Map(model, user);
+            user.Username = model.Username.Trim();
+            user.Email = model.Email.Trim();
+            user.UpdatedTime = DateTime.UtcNow;
+            user.UpdatedBy = editorId;
+
+            // Only update password if a new one was provided
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                user.Password = PasswordManager.EncryptPassword(model.Password);
+            }
+
+            // Handle profile picture changes
+            if (model.RemoveProfilePicture) // If the remove checkbox was checked
+            {
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    await DeleteProfilePicture(user.ProfilePictureUrl);
+                    user.ProfilePictureUrl = null;
+                }
+            }
+            // If a new picture was uploaded
+            else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                // Upload new picture
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    // Delete old picture first
+                    await DeleteProfilePicture(user.ProfilePictureUrl);
+                }
+                user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+            }
+            // If neither, the picture remains unchanged
+            _userRepository.UpdateUser(user);
         }
         public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
-            if (!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
+            if (!_userRepository.UserExists(editProfileViewModel.UserId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+            }
+            if (!_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
             }
 
             var user = _userRepository.GetUserById(editProfileViewModel.UserId);
