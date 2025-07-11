@@ -19,6 +19,7 @@ using Readiculous.Resources.Messages;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : ControllerBase<AccountController>
     {
         private readonly SessionManager _sessionManager;
@@ -63,7 +64,6 @@ namespace Readiculous.WebApp.Controllers
         /// </summary>
         /// <returns>Created response view</returns>
         [HttpGet]
-        [AllowAnonymous]
         public ActionResult Login()
         {
             TempData["returnUrl"] = System.Net.WebUtility.UrlDecode(HttpContext.Request.Query["ReturnUrl"]);
@@ -79,52 +79,54 @@ namespace Readiculous.WebApp.Controllers
         /// <param name="returnUrl">The return URL.</param>
         /// <returns> Created response view </returns>
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
             this._session.SetString("HasSession", "Exist");
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            /*
-            var tempModel = _userService.GetUserByEmail(model.Email);
-            User user = new() { UserId = tempModel.UserId, Username = "Name", Password = "Password" };
-
-            await this._signInManager.SignInAsync(user);
-            this._session.SetString("UserName", user.UserId);
-
-            return RedirectToAction("Index", "Home");
-            */
-            
-            User user = null;
-            
-            var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
-            if (loginResult == LoginResult.Success)
+            try
             {
-                if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+                User user = null;
+                var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
+                if (loginResult == LoginResult.Success)
                 {
-                    TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
-                    return View();
+                    if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+                    {
+                        TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
+                        return View();
+                    }
+
+                    await this._signInManager.SignInAsync(user);
+                    this._session.SetString("UserName", user.Username);
+                    // Pass AccessStatus to the view for modal logic
+                    TempData["AccessStatus"] = user.AccessStatus.ToString();
+                    return RedirectToAction("Index", "Home");
                 }
-                await this._signInManager.SignInAsync(user);
-                this._session.SetString("UserName", user.Username);
-                // Pass AccessStatus to the view for modal logic
-                TempData["AccessStatus"] = user.AccessStatus.ToString();
-                return RedirectToAction("Index", "Home");
+                else
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.IncorrectLoginCredentials;
+                    return View(model);
+                }
             }
-            else
+            catch (InvalidDataException ex)
             {
-                // 認証NG
-                TempData["ErrorMessage"] = "Incorrect UserId or Password";
-                return View();
+                TempData["ErrorMessage"] = ex.Message;
+                return View(model);
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                // Optionally log ex.Message
+                return View(model);
             }
         }
 
+
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Register()
         {
             return View(new EmailRequestModel());
@@ -223,7 +225,6 @@ namespace Readiculous.WebApp.Controllers
         /// Sign Out current account and return login view.
         /// </summary>
         /// <returns>Created response view</returns>
-        [AllowAnonymous]
         public async Task<IActionResult> SignOutUser()
         {
             await this._signInManager.SignOutAsync();

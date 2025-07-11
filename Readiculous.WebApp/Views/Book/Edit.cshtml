@@ -105,4 +105,11 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/review/review.js"></script>
+    <script>
+        var errorMessage = '@TempData["ErrorMessage"]';
+        if (errorMessage) {
+            toastr.error(errorMessage, 'Error');
+        }
+    </script>
 }

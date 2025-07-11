@@ -1,14 +1,18 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Readiculous.WebApp.Authentication;
 using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
@@ -18,18 +22,22 @@ using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserMasterController : ControllerBase<UserController>
     {
         private readonly IUserService _userService;
+        private readonly SignInManager _signInManager;
 
         public UserMasterController(IHttpContextAccessor httpContextAccessor,
                                   ILoggerFactory loggerFactory,
                                   IConfiguration configuration,
                                   IMapper mapper,
-                                  IUserService userService)
+                                  IUserService userService,
+                                  SignInManager signInManager)
             : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _userService = userService;
+            _signInManager = signInManager;
         }
 
         public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType, int page = 1, int pageSize = 10)
@@ -58,10 +66,12 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserAddModal()
         {
-            return PartialView(new UserViewModel());
+            UserViewModel userViewModel = new();
+            return PartialView(userViewModel);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserViewModel model)
         {
             if (ModelState.IsValid)
@@ -71,9 +81,17 @@ namespace Readiculous.WebApp.Controllers
                     await _userService.AddUserAsync(model, this.UserId);
                     return Json(new { success = true });
                 }
+                catch (DuplicateNameException ex)
+                {
+                    TempData["ErrorMessage"] = ex.Message;
+                }
                 catch (InvalidDataException ex)
                 {
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                    TempData["ErrorMessage"] = ex.Message;
+                }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 }
             }
             return PartialView("UserAddModal", model);
@@ -82,18 +100,12 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserEditModal(string userId)
         {
-            try
-            {
-                var user = _userService.GetUserEditById(userId);
-                return PartialView(user);
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var user = _userService.GetUserEditById(userId);
+            return PartialView(user);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserViewModel model)
         {
             if (ModelState.IsValid)
@@ -101,11 +113,26 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     await _userService.UpdateUserAsync(model, this.UserId);
+
+                    if (model.UserId == User.FindFirst("UserId")?.Value)
+                    {
+                        User updatedUser = _userService.GetUserById(model.UserId);
+                        await _signInManager.SignInAsync(updatedUser, isPersistent: true);
+                    }
+
                     return Json(new { success = true });
+                }
+                catch (KeyNotFoundException)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.UserNotFound;
                 }
                 catch (InvalidDataException ex)
                 {
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                    TempData["ErrorMessage"] = ex.Message;
+                }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 }
             }
             return PartialView("UserEditModal", model);
@@ -114,29 +141,16 @@ namespace Readiculous.WebApp.Controllers
         [HttpGet]
         public IActionResult UserViewModal(string userId)
         {
-            try
-            {
-                var user = _userService.GetUserDetailsById(userId);
-                return PartialView(user);
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var user = _userService.GetUserDetailsById(userId);
+            return PartialView(user);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string userId)
         {
-            try
-            {
-                await _userService.DeleteUserAsync(userId, this.UserId);
-                return Json(new { success = true });
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _userService.DeleteUserAsync(userId, this.UserId);
+            return Json(new { success = true });
         }
     }
 }

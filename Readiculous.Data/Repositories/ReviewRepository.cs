@@ -1,5 +1,6 @@
 ﻿using Basecode.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using System;
@@ -33,7 +34,7 @@ namespace Readiculous.Data.Repositories
                             r.User.DeletedTime == null);
         }
 
-        public IQueryable<Review> GetReviewsByUserId(string userId)
+        public IQueryable<Review> GetReviewsWithNavigationPropertiesByUserId(string userId)
         {
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
@@ -41,19 +42,35 @@ namespace Readiculous.Data.Repositories
                 .Where(r => r.UserId == userId &&
                         r.Book.DeletedTime == null);
         }
+        public IQueryable<Review> GetReviewsByGenreId(string genreId) 
+        {
+            return this.GetDbSet<Review>()
+                .Where(r => r.DeletedTime == null && 
+                            r.Book.GenreAssociations
+                    .Any(ga => ga.GenreId == genreId &&
+                                ga.Genre.DeletedTime == null));
+        }
+        public IQueryable<Review> GetReviewsByUserId(string userId)
+        {
+            return this.GetDbSet<Review>()
+                .Where(r => r.UserId == userId &&
+                        r.DeletedTime == null);
+        }
         public Review GetReviewByBookIdAndUserId(string bookId, string userId)
         {
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
                 .FirstOrDefault(r => r.BookId == bookId && 
-                                     r.UserId == userId);
+                                     r.UserId == userId &&
+                                     r.DeletedTime == null );
         }
 
         public bool ReviewExists(string bookId, string userId)
         {
             return this.GetDbSet<Review>().Any(r => r.BookId == bookId && 
-                                                  r.UserId == userId);
+                                                  r.UserId == userId &&
+                                                  r.DeletedTime == null);
         }
     }
 }

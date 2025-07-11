@@ -53,10 +53,6 @@ namespace Readiculous.Data.Repositories
             var users = this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                //.Include(u => u.UserFavoriteBooks) REMOVED THE INCLUDE TO MAXIMIZE PERFORMANCE
-                //    .ThenInclude(fb => fb.Book)
-                //.Include(u => u.UserReviews)
-                //    .ThenInclude(r => r.Book)
                 .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
                         u.DeletedTime == null);
 
@@ -65,14 +61,9 @@ namespace Readiculous.Data.Repositories
 
         public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
         {
-            // CAN BE OPTIMIZED TO REMOVE USER FAVORITE BOOKS AND USER REVIEWS IF NOT NEEDED
             var users = this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                //.Include(u => u.UserFavoriteBooks) REMOVED THE INCLUDE TO MAXIMIZE PERFORMANCE
-                //    .ThenInclude(fb => fb.Book)
-                //.Include(u => u.UserReviews)
-                //    .ThenInclude(r => r.Book)
                 .Where(u => u.Role == role &&
                         u.Username.ToLower().Contains(username.ToLower()) &&
                         u.DeletedTime == null);
@@ -92,10 +83,6 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .Include(u => u.UserFavoriteBooks)
-                    .ThenInclude(fb => fb.Book)
-                .Include(u => u.UserReviews)
-                    .ThenInclude(r => r.Book)
                 .FirstOrDefault(u => u.UserId == id
                                     && u.DeletedTime == null);
         }

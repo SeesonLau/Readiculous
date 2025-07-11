@@ -88,6 +88,24 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Book already favorited!.
+        /// </summary>
+        public static string FavoriteBookExists {
+            get {
+                return ResourceManager.GetString("FavoriteBookExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Book not favorited!.
+        /// </summary>
+        public static string FavoritedBookNotExists {
+            get {
+                return ResourceManager.GetString("FavoritedBookNotExists", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Email not found or failed to send OTP..
         /// </summary>
         public static string ForgotPasswordEmailFailed {
@@ -133,6 +151,15 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Email or Password!.
+        /// </summary>
+        public static string IncorrectLoginCredentials {
+            get {
+                return ResourceManager.GetString("IncorrectLoginCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Current Password does not match your current password!.
         /// </summary>
         public static string InvalidCurrentPassword {
@@ -142,11 +169,47 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Book with the same ISBN already exists!.
+        /// </summary>
+        public static string ISBNExists {
+            get {
+                return ResourceManager.GetString("ISBNExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Review already exists for this book by the user!.
+        /// </summary>
+        public static string ReviewExists {
+            get {
+                return ResourceManager.GetString("ReviewExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Review does not exist for this book by the user!.
+        /// </summary>
+        public static string ReviewNotExist {
+            get {
+                return ResourceManager.GetString("ReviewNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server error occured!.
         /// </summary>
         public static string ServerError {
             get {
                 return ResourceManager.GetString("ServerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to Update Favorite: .
+        /// </summary>
+        public static string UnableToAddFavorite {
+            get {
+                return ResourceManager.GetString("UnableToAddFavorite", resourceCulture);
             }
         }
         

@@ -28,16 +28,31 @@
         /// <summary>
         /// authentication scheme Name
         /// </summary>
-        public const string AuthenticationScheme = "ASI_Basecode";
+        public const string AuthenticationScheme = "Readiculous_Basecode";
 
         /// <summary>
         /// authentication Issuer
         /// </summary>
         public const string Issuer = "Readiculous";
 
+        /// <summary>
+        /// Bucket name for file storage in Readiculous
+        /// </summary>
         public const string BucketName = "readiculous-bucket";
+
+        /// <summary>
+        /// Represents the directory name for storing user-related data.
+        /// </summary>
         public const string UserDirectory = "users";
+
+        /// <summary>
+        /// Represents the directory name for storing book-related data.
+        /// </summary>
         public const string BookDirectory = "books";
+
+        /// <summary>
+        /// Represents the path in the storage where files are accessible publicly.
+        /// </summary>
         public const string StoragePath = $"/storage/v1/object/public/{BucketName}/";
     }
 }

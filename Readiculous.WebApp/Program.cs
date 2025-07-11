@@ -27,6 +27,7 @@ var configurer = new StartupConfigurer(appBuilder.Configuration);
 configurer.ConfigureServices(appBuilder.Services);
 
 var app = appBuilder.Build();
+app.UseStatusCodePagesWithReExecute("/html/404.html");
 
 configurer.ConfigureApp(app, app.Environment);
 

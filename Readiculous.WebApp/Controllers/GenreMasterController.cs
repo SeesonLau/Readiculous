@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,6 +12,7 @@ using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -18,6 +20,7 @@ using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class GenreMasterController : ControllerBase<GenreMasterController>
     {
         private readonly IGenreService _genreService;
@@ -58,6 +61,7 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(GenreViewModel model)
         {
             if (ModelState.IsValid)
@@ -72,7 +76,7 @@ namespace Readiculous.WebApp.Controllers
                     }
                     return RedirectToAction("Index");
                 }
-                catch (InvalidOperationException ex)
+                catch (DuplicateNameException ex)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
@@ -107,6 +111,7 @@ namespace Readiculous.WebApp.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(GenreViewModel model)
         {
             if (ModelState.IsValid)

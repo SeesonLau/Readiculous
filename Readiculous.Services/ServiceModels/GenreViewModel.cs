@@ -9,10 +9,12 @@ namespace Readiculous.Services.ServiceModels
 {
     public class GenreViewModel
     {
-        [Required(ErrorMessage = "Genre Name is required.")]
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(50, ErrorMessage = "Name must not exceed 50 characters!")]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Genre Description is required.")]
+        [Required(ErrorMessage = "Description is required.")]
+        [StringLength(200, ErrorMessage = "Description must not exceed 200 characters!")]
         public string Description { get; set; }
 
         public string GenreId { get; set; }
