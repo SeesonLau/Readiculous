@@ -65,6 +65,7 @@
                     <dt>Last Modified On</dt>
                     <dd>@Html.DisplayFor(model => model.UpdatedTime)</dd>
                 </div>
+     
             </dl>
         </div>
 
@@ -84,7 +85,9 @@
                     <div class="stat-value">@Model.AverageRating</div>
                     <div class="stat-label">Avg Rating</div>
                 </div>
-                <div class="activity-stat">
+
+
+                <div class="activity-stat">\
                     <div class="stat-value">@string.Join(", ", Model.TopGenres)</div>
                     <div class="stat-label">Top Genre</div>
                 </div>

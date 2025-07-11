@@ -119,6 +119,7 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
 }
 
 .btn-view {
@@ -139,6 +140,7 @@
 
 .genre-action-btn:hover {
     transform: scale(1.1);
+    text-decoration: none;
 }
 
 .genre-action-btn i {
