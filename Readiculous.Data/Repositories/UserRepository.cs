@@ -26,9 +26,10 @@ namespace Readiculous.Data.Repositories
                                                 u.DeletedTime == null);
         }
 
-        public bool EmailExists(string email)
+        public bool EmailExists(string email, string userId)
         {
             return this.GetDbSet<User>().Any(u => u.Email.ToLower() == email.ToLower() &&
+                                                u.UserId != userId &&
                                                 u.DeletedTime == null);
         }
 

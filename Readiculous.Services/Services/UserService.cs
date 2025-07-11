@@ -72,7 +72,7 @@ namespace Readiculous.Services.Services
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
             // Adds User when Email does not exist
-            if (!_userRepository.EmailExists(model.Email.Trim()))
+            if (!_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
                 // Creation of New User Entity
                 var user = new User();
@@ -130,7 +130,7 @@ namespace Readiculous.Services.Services
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
             
-            if(!_userRepository.EmailExists(model.Email.Trim()))
+            if(!_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
             }
@@ -180,7 +180,7 @@ namespace Readiculous.Services.Services
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
-            if (!_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
+            if (!_userRepository.EmailExists(editProfileViewModel.Email.Trim(), editProfileViewModel.UserId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
             }
@@ -514,7 +514,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email already exists
-                if (_userRepository.EmailExists(email.Trim()))
+                if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -536,7 +536,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email already exists
-                if (_userRepository.EmailExists(email.Trim()))
+                if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -577,7 +577,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email exists
-                if (!_userRepository.EmailExists(email.Trim()))
+                if (!_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -600,7 +600,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email exists
-                if (!_userRepository.EmailExists(email.Trim()))
+                if (!_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
