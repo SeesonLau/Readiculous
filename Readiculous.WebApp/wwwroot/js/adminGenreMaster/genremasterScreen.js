@@ -20,15 +20,7 @@
     }
 
     function initializeEventHandlers() {
-        // View Modal
-    
-        document.addEventListener('click', function (e) {
-            if (e.target.closest('.btn-view')) {
-                e.preventDefault();
-                const genreId = e.target.closest('.btn-view').dataset.genreId;
-                openGenreViewModal(genreId);
-            }
-        });
+  
         // Main screen pagination handlers
         $(document).on('click', '[data-page-size]', function (e) {
             e.preventDefault();
