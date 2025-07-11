@@ -334,10 +334,7 @@ namespace Readiculous.Services.Services
                     .Select(g => g.Genre)
                     .ToList() ?? new List<string>() { "No genres available" };
 
-                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0
-    ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2)
-    : 0;
-
+                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2): 0;
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;
                 userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
 
