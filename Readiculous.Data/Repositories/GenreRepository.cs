@@ -66,6 +66,16 @@ namespace Readiculous.Data.Repositories
                 .FirstOrDefault(g => g.GenreId == id &&
                                     g.DeletedTime == null);
         }
+        public Genre GetGenreWithBooksPropertiesById(string id)
+        {
+            return this.GetDbSet<Genre>()
+                .Include(g => g.Books)
+                    .ThenInclude(g => g.Book)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
+                .FirstOrDefault(g => g.GenreId == id &&
+                                    g.DeletedTime == null);
+        }
         public IQueryable<string> GetGenreNamesByBookId(string bookId)
         {
             return this.GetDbSet<BookGenreAssignment>()
