@@ -21,7 +21,6 @@
 
     function initializeEventHandlers() {
         // Pagination
-        // Add these lines to the initializeEventHandlers function
         $(document).on('click', '[data-page-size]', function (e) {
             e.preventDefault();
             const pageSize = $(this).data('page-size');
@@ -36,7 +35,6 @@
             }
         });
 
-        // Add these helper functions
         function updateUrlWithPage(page) {
             const url = new URL(window.location.href);
             url.searchParams.set('page', page);

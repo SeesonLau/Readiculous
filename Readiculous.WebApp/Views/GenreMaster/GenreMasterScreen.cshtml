@@ -3,6 +3,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/adminGenreMaster/genre-master.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/adminGenreMaster/genre-master-modal.css" asp-append-version="true" />
 }
 
 @{
@@ -21,25 +22,21 @@
         </div>
     </div>
 
-    <div class="genre-filter-controls row g-3 align-items-end mx-0 mb-4">
-        <div class="filter-group col-md-8 px-0 pe-md-2">
-            <label for="searchString" class="filter-label">Search Genre</label>
-            <input type="text" id="searchString" name="searchString" class="filter-input"
-                   placeholder="Enter genre name" value="@ViewData["CurrentFilter"]" />
-        </div>
+    <form id="genreFilterForm">
+        <div class="genre-filter-controls row g-3 align-items-end mx-0 mb-4">
 
-        <div class="filter-group col-md-4 px-0">
-            <label for="searchType" class="filter-label">Sort By</label>
-            <select id="searchType" name="searchType" class="filter-input">
-                @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.GenreSearchTypes)
-                {
-                    <option value="@type.Value" selected="@(type.Selected ? "selected" : null)">
-                        @type.Text
-                    </option>
-                }
-            </select>
+            <div class="filter-group col-md-8 px-0 pe-md-2">
+                <label for="searchString" class="filter-label">Search Genre</label>
+                <input type="text" name="searchString" id="searchString" class="filter-input" placeholder="Search..." value="@ViewData["CurrentFilter"]" />
+            </div>
+
+            <div class="filter-group col-md-4 px-0">
+                <label for="sortType" class="filter-label">Sort By</label>
+                <select name="sortType" id="sortType" class="filter-input" asp-items="@ViewBag.GenreSortTypes"></select>
+            </div>
+
         </div>
-    </div>
+    </form>
 
     <div class="row mx-0">
         <div class="col px-0">
