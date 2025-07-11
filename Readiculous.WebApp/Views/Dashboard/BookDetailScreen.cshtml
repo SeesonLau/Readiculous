@@ -1,0 +1,123 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Book Details";
+    ViewBag.ShowReviewerNav = true;
+}
+
+
+
+<section class="container py-4">
+    <div class="book-details-container row g-4">
+        <!-- Book Cover and Favorite Button -->
+        <div class="col-md-4 text-center">
+            <img src="@Url.Content(Model.CoverImageUrl ?? "~/img/placeholder.png")"
+                 alt="@Model.Title Cover"
+                 class="img-fluid rounded shadow-sm mb-3" />
+
+            <button class="btn btn-outline-primary w-100">
+                <i class="bi bi-heart me-2"></i> Add to Favorites
+            </button>
+        </div>
+
+        <!-- Book Information -->
+        <div class="col-md-8">
+            <h2 class="mb-3">@Model.Title</h2>
+            <table class="table table-bordered book-details-table mb-4">
+                <tr><th>Author</th><td>@Model.Author</td></tr>
+                <tr><th>Genre</th><td>@Model.Genre</td></tr>
+                <tr><th>Series</th><td>@(Model.Series ?? "N/A")</td></tr>
+                <tr>
+                    <th>Rating</th>
+                    <td>
+                        <span class="fw-bold">@Model.Rating</span>
+                        <span style="color: gold;">&#9733;</span>
+                    </td>
+                </tr>
+                <tr><th>Added Date</th><td>@Model.AddedDate.ToString("MMMM dd, yyyy")</td></tr>
+            </table>
+
+            <h4 class="fw-semibold">Description</h4>
+            <p class="text-muted">@Model.Description</p>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Reviews (@Model.Reviews.Count)</h4>
+            <button class="btn btn-sm btn-outline-primary" onclick="showModal('required')">
+                <i class="bi bi-pencil-square me-1"></i> Add Review
+            </button>
+        </div>
+
+        @if (Model.Reviews.Any())
+        {
+            <div class="row g-4">
+                @foreach (var review in Model.Reviews)
+                {
+                    <div class="col-md-6">
+                        <div class="card review-card shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold">@review.Reviewer</span>
+                                    <small class="text-muted">@review.Date.ToString("MMM dd, yyyy")</small>
+                                </div>
+                                <div class="review-stars mb-2">
+                                    @for (int i = 0; i < review.Stars; i++)
+                                    {
+                                        <span style="color: gold;">&#9733;</span>
+                                    }
+                                    @for (int i = review.Stars; i < 5; i++)
+                                    {
+                                        <span style="color: lightgray;">&#9733;</span>
+                                    }
+                                </div>
+                                <p class="mb-0">@review.Comment</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No reviews yet.</p>
+        }
+    </div>
+</section>
+
+<style>
+    /* Custom styles for Book Details */
+    .book-details-container {
+        background: #fff;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+
+        .book-details-container img {
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+    .book-details-table th {
+        width: 150px;
+        background: #f8f9fa;
+    }
+
+    .review-stars span {
+        font-size: 1.2rem;
+    }
+
+    .card.review-card {
+        transition: transform .2s ease-in-out;
+    }
+
+        .card.review-card:hover {
+            transform: scale(1.02);
+        }
+
+    .btn-outline-primary {
+        border-width: 2px;
+    }
+</style>

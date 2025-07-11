@@ -16,9 +16,9 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/css/coreui.min.css" />
-    
+
     <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
-   
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
     @RenderSection("Styles", required: false)
@@ -88,7 +88,6 @@
         </main>
         <partial name="_Footer" />
     </div>
-
     <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" id="registrationModalContent">
@@ -177,9 +176,35 @@
             });
         });
     </script>
+
+    @await Html.PartialAsync("_LoginModal")
+    @await Html.PartialAsync("_RegisterModal")
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<script src="~/js/login.js" asp-append-version="true"></script>
+<script src="~/js/register.js" asp-append-version="true"></script>
+
+
+<script>
+    function switchModal(currentModalId, targetModalId) {
+      const currentModalEl = document.querySelector(currentModalId);
+      const targetModalEl = document.querySelector(targetModalId);
+
+      // Hide the current modal
+      const currentModal = bootstrap.Modal.getInstance(currentModalEl);
+      if (currentModal) {
+        currentModal.hide();
+      }
+
+      // Show the target modal
+      const targetModal = new bootstrap.Modal(targetModalEl);
+      targetModal.show();
+    }
+</script>
+
+
+
 
 <style>
     /* Reset default margins/paddings */
@@ -219,3 +244,11 @@
             margin: 0 5px;
         }
 </style>
+@{
+    bool hasEnoughNewBooks = ViewBag.HasEnoughNewBooks == true;
+}
+
+<button class="nav-button @(hasEnoughNewBooks ? "" : "disabled")"
+@(hasEnoughNewBooks ? "onclick=\"window.location.href='/Dashboard/ViewNewBooks'\"" : "disabled")">
+    New Book
+</button>

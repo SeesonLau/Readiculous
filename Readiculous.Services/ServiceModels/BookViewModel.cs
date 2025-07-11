@@ -43,7 +43,7 @@ namespace Readiculous.Services.ServiceModels
         [Required(ErrorMessage = "Genre is required!")]
         [MinLength(1, ErrorMessage = "At least one genre must be selected!")]
         public List<string> SelectedGenres { get; set; } = [];
-
+        public double AverageRating { get; set; }
         public List<GenreViewModel> AllAvailableGenres { get; set; } = [];
         public string BookId { get; set; }
         public string CoverImageUrl { get; set; }

@@ -79,6 +79,32 @@ namespace Readiculous.WebApp.Controllers
             {
                 try
                 {
+                    // ✅ Handle Cover Image Upload
+                    if (model.CoverImage != null && model.CoverImage.Length > 0)
+                    {
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.CoverImage.FileName);
+                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img/uploads");
+
+                        if (!Directory.Exists(uploadPath))
+                        {
+                            Directory.CreateDirectory(uploadPath);
+                        }
+
+                        var fullPath = Path.Combine(uploadPath, fileName);
+
+                        using (var stream = new FileStream(fullPath, FileMode.Create))
+                        {
+                            await model.CoverImage.CopyToAsync(stream);
+                        }
+
+                        model.CoverImageUrl = $"/img/uploads/{fileName}"; // Save path to model
+                    }
+                    else
+                    {
+                        model.CoverImageUrl = "/img/placeholder.png"; // fallback default
+                    }
+
+                    // ✅ Save book through service
                     await _bookService.AddBook(model, this.UserId);
                     return Json(new { success = true });
                 }
@@ -92,10 +118,12 @@ namespace Readiculous.WebApp.Controllers
                 }
             }
 
+            // If validation fails or error occurs, re-populate genres
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
             model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
             return PartialView("BookAddModal", model);
         }
+
 
         [HttpGet]
         public IActionResult BookEditModal(string id)
@@ -210,5 +238,7 @@ namespace Readiculous.WebApp.Controllers
                 return View(model);
             }
         }
+
+
     }
 }

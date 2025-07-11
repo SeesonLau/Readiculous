@@ -14,10 +14,11 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Supabase;
+using AutoMapper; 
 using System;
 using System.IO;
 using System.Text;
+using Readiculous.Services;
 
 namespace Readiculous.WebApp
 {
@@ -82,7 +83,7 @@ namespace Readiculous.WebApp
             this._services = services;
 
             services.AddMemoryCache();
-
+            services.AddAutoMapper(typeof(AutoMapperProfile));
             // Register SQL database configuration context as services.
             services.AddDbContext<ReadiculousDbContext>(options =>
             {

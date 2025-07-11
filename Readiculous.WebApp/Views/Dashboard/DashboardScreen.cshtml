@@ -1,0 +1,165 @@
+﻿@model Readiculous.WebApp.Models.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Dashboard";
+}
+
+<main class="container py-4">
+
+    <!-- Search bar -->
+    <input type="text" class="form-control mb-5" placeholder="🔍 Book Search..." />
+
+    <!-- New Books Section -->
+    <section class="mb-5">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">NEW BOOKS</h2>
+            <a class="view-more-link @(Model.NewBooks.Count < 5 ? "disabled-link" : "")"
+               href="@(Model.NewBooks.Count < 5 ? "#" : Url.Action("ViewNewBooks", "Dashboard"))">
+                View More
+            </a>
+        </div>
+
+        <div class="section-box p-3">
+            <div class="row g-4 justify-content-center">
+                @if (Model.NewBooks != null && Model.NewBooks.Any())
+                {
+                    foreach (var book in Model.NewBooks)
+                    {
+                        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                            <div class="book-card h-100">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                     class="book-image mb-3" alt="@book.Title" />
+                                <h6 class="book-title text-center mb-1">@book.Title</h6>
+                                <p class="book-author text-center mb-1 small">@book.Author, @book.PublicationYear</p>
+                                <p class="book-rating text-center text-warning mb-0">⭐ @book.AverageRating</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center text-muted">No new books available.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Books Section -->
+    <section class="mb-5">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">TOP BOOKS</h2>
+            <a class="view-more-link @(Model.TopBooks.Count < 5 ? "disabled-link" : "")"
+               href="@(Model.TopBooks.Count < 5 ? "#" : Url.Action("ViewTopBooks", "Dashboard"))">
+                View More
+            </a>
+        </div>
+
+        <div class="section-box p-4">
+            <div class="row g-4 justify-content-center">
+                @if (Model.TopBooks != null && Model.TopBooks.Any())
+                {
+                    foreach (var book in Model.TopBooks)
+                    {
+                        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                            <div class="book-card h-100">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                     class="book-image mb-3" alt="@book.Title" />
+                                <h6 class="book-title text-center mb-1">@book.Title</h6>
+                                <p class="book-author text-center mb-1 small">@book.Author, @book.PublicationYear</p>
+                                <p class="book-rating text-center text-warning mb-0">⭐ @book.AverageRating</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center text-muted">No top-rated books available.</p>
+                }
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    body {
+        background-color: #f6f1f4;
+    }
+
+    .section-header {
+        background-color: #f8ece9;
+        border: 1px solid #b089a5;
+        border-radius: 10px;
+        padding: 10px 20px;
+    }
+
+    .section-title {
+        font-weight: bold;
+        color: #3d2c40;
+        letter-spacing: 0.5px;
+    }
+
+    .view-more-link {
+        color: #b089a5;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .view-more-link:hover {
+            text-decoration: underline;
+        }
+
+    .disabled-link {
+        pointer-events: none;
+        color: #bbb !important;
+        text-decoration: none;
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    .section-box {
+        background-color: #fff;
+        border: 1px solid #ecd6e0;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .book-card {
+        background-color: #fff;
+        height: 230%;
+        border: 1px solid #ecd6e0;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 10px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+    .book-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .book-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #3d2c40;
+    }
+
+    .book-author {
+        color: #777;
+    }
+
+    .book-rating {
+        font-weight: bold;
+        color: #f0ad4e;
+    }
+</style>

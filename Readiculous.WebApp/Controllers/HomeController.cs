@@ -11,6 +11,7 @@ using System;
 using System.IO;
 using Readiculous.WebApp.Authentication;
 using Readiculous.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -101,6 +102,14 @@ namespace Readiculous.WebApp.Controllers
             {
                 return PartialView("_EditProfileModal", editProfileViewModel);
             }
+
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult LandingScreen()
+        {
+            ViewBag.ShowProfile = false;
+            return View();
         }
     }
 }
