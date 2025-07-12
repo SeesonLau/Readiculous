@@ -36,8 +36,16 @@ namespace Readiculous.WebApp
                                opt => opt.MapFrom(src => src.UpdatedByUser.Username))
                     .ForMember(dest => dest.Role,
                                opt => opt.MapFrom(src => src.Role.ToString()));
-                CreateMap<User, UserDetailsViewModel>();
-                CreateMap<UserViewModel, User>();
+                CreateMap<User, UserDetailsViewModel>()
+                    .ForMember(dest => dest.ProfileImageUrl,
+                               opt => opt.MapFrom(src => src.ProfilePictureUrl))
+                    .ForMember(dest => dest.Role, 
+                               opt => opt.MapFrom(src => src.Role.ToString()));
+                CreateMap<UserViewModel, User>()
+                    .ForMember(dest => dest.Username,
+                               opt => opt.MapFrom(src => src.Username.Trim()))
+                    .ForMember(dest => dest.Email,
+                               opt => opt.MapFrom(src => src.Email.Trim()));
                 CreateMap<User, UserViewModel>();
                 CreateMap<EditProfileViewModel, User>();
                 CreateMap<User, EditProfileViewModel>();
