@@ -17,5 +17,6 @@ namespace Readiculous.Services.ServiceModels
         public string Comment { get; set; }
         public decimal Rating { get; set; }
         public DateTime CreatedTime { get; set; }
+
     }
 }

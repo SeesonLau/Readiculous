@@ -1,0 +1,33 @@
+﻿
+<div class="modal fade" id="requiredLoginModal" tabindex="-1" aria-labelledby="requiredLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4" style="background-color: #fceef0; border-radius: 20px;">
+            <img src="~/img/mewmew.png"alt="Login Required"class="mb-3 mx-auto d-block modal-image" />
+            <h4 class="fw-bold">Login Required</h4>
+            <p>You need to login to review more books.</p>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-pink" onclick="switchModal('#requiredLoginModal', '#loginModal')">Login</button>
+                <button type="button" class="btn btn-light" onclick="switchModal('#requiredLoginModal', '#registerModal')">Sign Up</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .btn-pink {
+        background-color: #edaec0;
+        color: white;
+        border: none;
+    }
+
+        .btn-pink:hover {
+            background-color: #d596a6;
+        }
+
+    .modal-image {
+        width: 130px;
+        max-width: 100%;
+        height: auto;
+    }
+</style>

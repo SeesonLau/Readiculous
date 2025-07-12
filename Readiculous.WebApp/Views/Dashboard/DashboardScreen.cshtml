@@ -2,6 +2,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Dashboard";
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <main class="container py-4">
@@ -26,12 +27,14 @@
                     foreach (var book in Model.NewBooks)
                     {
                         <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                            <div class="book-card h-100">
-                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
-                                     class="book-image mb-3" alt="@book.Title" />
-                                <h6 class="book-title text-center mb-1">@book.Title</h6>
-                                <p class="book-author text-center mb-1 small">@book.Author, @book.PublicationYear</p>
-                                <p class="book-rating text-center text-warning mb-0">⭐ @book.AverageRating</p>
+                            <div class="book-card h-100 text-center">
+                                <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
+                                    <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                         class="book-image mb-3" alt="@book.Title" />
+                                    <h6 class="book-title mb-1">@book.Title</h6>
+                                    <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                    <p class="book-rating text-warning mb-0">⭐ @book.AverageRating</p>
+                                </a>
                             </div>
                         </div>
                     }
@@ -61,12 +64,14 @@
                     foreach (var book in Model.TopBooks)
                     {
                         <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                            <div class="book-card h-100">
-                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
-                                     class="book-image mb-3" alt="@book.Title" />
-                                <h6 class="book-title text-center mb-1">@book.Title</h6>
-                                <p class="book-author text-center mb-1 small">@book.Author, @book.PublicationYear</p>
-                                <p class="book-rating text-center text-warning mb-0">⭐ @book.AverageRating</p>
+                            <div class="book-card h-100 text-center">
+                                <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
+                                    <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                         class="book-image mb-3" alt="@book.Title" />
+                                    <h6 class="book-title mb-1">@book.Title</h6>
+                                    <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                    <p class="book-rating text-warning mb-0">⭐ @book.AverageRating</p>
+                                </a>
                             </div>
                         </div>
                     }
@@ -125,15 +130,11 @@
 
     .book-card {
         background-color: #fff;
-        height: 230%;
         border: 1px solid #ecd6e0;
         border-radius: 12px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         padding: 10px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
 
         .book-card:hover {
