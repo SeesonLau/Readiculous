@@ -3,6 +3,7 @@ using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Readiculous.WebApp
 {
@@ -44,10 +45,11 @@ namespace Readiculous.WebApp
 
                 // Book Mappings
                 CreateMap<Book, BookDetailsViewModel>();
-                CreateMap<Book, BookListItemViewModel>();
+                CreateMap<Book, BookListItemViewModel>().ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser.Username));
                 CreateMap<BookViewModel, Book>();
                 CreateMap<Book, BookViewModel>();
                 CreateMap<Book, FavoriteBookModel>();
+
 
                 // Review Mappings
                 CreateMap<ReviewViewModel, Review>();

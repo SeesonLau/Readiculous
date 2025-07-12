@@ -196,9 +196,9 @@ namespace Readiculous.Services.Services
 
             await UpdateUserAsync(userViewModel, editorId);
         }
-        public async Task DeleteUserAsync(string userId, string deleterId)
+        public void DeleteUser(string userId, string deleterId)
         {
-            if (await Task.Run(() => !_userRepository.UserExists(userId)))
+            if (!_userRepository.UserExists(userId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
@@ -220,7 +220,7 @@ namespace Readiculous.Services.Services
             user.DeletedBy = deleterId;
             user.DeletedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _userRepository.UpdateUser(user)); 
+            _userRepository.UpdateUser(user); 
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)

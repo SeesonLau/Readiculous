@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Data.Entity;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -177,17 +178,15 @@ namespace Readiculous.Services.Services
         private List<GenreListItemViewModel> ListAllActiveGenres()
         {
             var genres = _genreRepository.GetAllActiveGenres()
-                .ToList()
-                .Select(genre =>
+                .AsNoTracking()
+                .Select(genre => new GenreListItemViewModel
                 {
-                    GenreListItemViewModel model = new();
-
-                    _mapper.Map(genre, model);
-                    model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
-                    model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
-                    model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
-
-                    return model;
+                    GenreId = genre.GenreId,
+                    Name = genre.Name,
+                    CreatedTime = genre.CreatedTime,
+                    CreatedByUsername = genre.CreatedByUser.Username,
+                    UpdatedTime = (DateTime)genre.UpdatedTime,
+                    UpdatedByUsername = genre.UpdatedByUser.Username,
                 })
                 .OrderByDescending(g => g.CreatedTime)
                 .ToList();

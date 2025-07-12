@@ -20,5 +20,6 @@ namespace Readiculous.Data.Interfaces
         IQueryable<string> GetGenreNamesByBookId(string bookId);
         Genre GetGenreById(string id);
         Genre GetGenreWithBooksPropertiesById(string id);
+        IQueryable<BookGenreAssignment> GetAllGenreNamesByBookId(List<string> bookIds);
     }
 }

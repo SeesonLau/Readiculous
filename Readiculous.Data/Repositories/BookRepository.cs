@@ -114,7 +114,7 @@ namespace Readiculous.Data.Repositories
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
                             b.Title.ToLower().Contains(bookTitle.ToLower()) &&
-                                b.GenreAssociations.Any(ga => genres.Any(g => g.GenreId == ga.GenreId)));
+                            b.GenreAssociations.Any(ga => genres.Any(g => g.GenreId == ga.GenreId)));
             }
 
             return books;
@@ -134,6 +134,15 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<BookGenreAssignment>()
                 .Count(bga => bga.GenreId == genreId &&
                               bga.Book.DeletedTime == null);
+        }
+
+        public Dictionary<string, int> GetBookCountByGenreIds(List<string> genreIds)
+        {
+            return this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => genreIds.Contains(bga.GenreId) && bga.Book.DeletedTime == null)
+                .GroupBy(bga => bga.GenreId)
+                .Select(g => new { GenreId = g.Key, Count = g.Count() })
+                .ToDictionary(g => g.GenreId, g => g.Count);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Readiculous.Data.Interfaces
         void AddReview(Review review);
         void UpdateReview(Review review);
 
+        IQueryable<Review> GetAllReviews();
         IQueryable<Review> GetReviewsByBookId(string bookId);
         IQueryable<Review> GetReviewsWithNavigationPropertiesByUserId(string userId);
         IQueryable<Review> GetReviewsByUserId(string userId);
