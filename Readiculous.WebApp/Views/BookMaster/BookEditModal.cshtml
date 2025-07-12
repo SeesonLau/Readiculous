@@ -7,7 +7,9 @@
     <div class="modal-body">
         <input type="hidden" asp-for="BookId" />
         <input type="hidden" asp-for="CreatedBy" />
+        <input type="hidden" asp-for="CreatedTime" />
         <input type="hidden" asp-for="UpdatedBy" />
+        <input type="hidden" asp-for="UpdatedTime" />
 
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -101,7 +103,7 @@
         <div class="mb-3">
             <label asp-for="CoverImage" class="form-label">Replace Cover Image</label>
             <label class="file-input-label">
-                <span>Click to upload or drag and drop</span>
+                <span>Click to upload</span>
                 <input asp-for="CoverImage" type="file" class="d-none" accept="image/*" />
             </label>
             <div class="image-preview-container mt-2 d-none" id="imagePreviewContainer">

@@ -11,7 +11,7 @@ namespace Readiculous.Data.Interfaces
     public interface IGenreRepository
     {
         bool GenreIdExists(string genreId);
-        bool GenreNameExists(string genreName);
+        bool GenreNameExists(string genreName, string genreId);
         void AddGenre(Genre genre);
         void UpdateGenre(Genre genre);
 
@@ -19,5 +19,6 @@ namespace Readiculous.Data.Interfaces
         IQueryable<Genre> GetGenresByName(string genreName);
         IQueryable<string> GetGenreNamesByBookId(string bookId);
         Genre GetGenreById(string id);
+        Genre GetGenreWithBooksPropertiesById(string id);
     }
 }

@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Readiculous.Data.Models;
+using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Readiculous.Services.Services;
 using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
@@ -16,7 +18,6 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
-using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -32,14 +33,17 @@ namespace Readiculous.WebApp.Controllers
         }
 
         //GenreListItemViewModel
-        public IActionResult GenreMasterScreen(string searchString, GenreSortType searchType = GenreSortType.Latest, int page = 1, int pageSize = 10)
+        public IActionResult GenreMasterScreen(string searchString, GenreSortType sortType = GenreSortType.Latest, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentGenreSearchType"] = searchType.ToString();
+            ViewData["CurrentGenreSearchType"] = sortType;
 
-            ViewBag.GenreSearchTypes = _genreService.GetGenreSortTypes();
+            ViewBag.GenreSortTypes = _genreService.GetGenreSortTypes(sortType);
 
-            var allGenres = _genreService.GetGenreList(searchString, searchType);
+            var allGenres = _genreService.GetGenreList(
+                searchString,
+                sortType : sortType);
+
             var totalItems = allGenres.Count;
             var paginatedGenres = allGenres
                 .Skip((page - 1) * pageSize)
@@ -125,13 +129,19 @@ namespace Readiculous.WebApp.Controllers
                     }
                     // No redirect
                 }
-                catch (InvalidOperationException ex)
+                catch (DuplicateNameException ex)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         return Json(new { success = false, message = ex.Message });
                     }
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = ex.Message });
+                    }
                 }
             }
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -145,11 +155,11 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Delete(string id)
+        public IActionResult Delete(string id)
         {
             try
             {
-                await _genreService.DeleteGenre(id, this.UserId);
+                _genreService.DeleteGenre(id, this.UserId);
                 return Json(new { success = true });
             }
             catch (InvalidOperationException ex)

@@ -43,7 +43,7 @@ namespace Readiculous.Services.Services
         public async Task AddBook(BookViewModel model, string creatorId)
         {
             // Books can only be added if the title and author combination does not already exist.
-            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim(), model.BookId))
             {
                 throw new DuplicateNameException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
@@ -119,7 +119,7 @@ namespace Readiculous.Services.Services
         }
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-            if (_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim(), model.BookId))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
             }
@@ -343,9 +343,7 @@ namespace Readiculous.Services.Services
                         .ToList();
                     model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
-                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
+                   
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
 
@@ -499,14 +497,8 @@ namespace Readiculous.Services.Services
                 BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
                 BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
                 BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
-
-                // BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
-                // BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
                 BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
                 BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
-
-                BookSortType.Oldest => books.OrderBy(b => b.CreatedTime),
-                BookSortType.Latest => books.OrderByDescending(b => b.CreatedTime),
 
                 _ => books, // Default case
             };

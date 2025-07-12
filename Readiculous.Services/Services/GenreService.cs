@@ -6,8 +6,10 @@ using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
@@ -29,9 +31,9 @@ namespace Readiculous.Services.Services
         }
 
         // CRUD operations for Genre
-        public async Task AddGenre(GenreViewModel model, string creatorId)
+        public void AddGenre(GenreViewModel model, string creatorId)
         {
-            if (_genreRepository.GenreNameExists(model.Name))
+            if (_genreRepository.GenreNameExists(model.Name, model.GenreId))
             {
                 throw new DuplicateNameException(Resources.Messages.Errors.GenreExists);
             }
@@ -47,13 +49,13 @@ namespace Readiculous.Services.Services
             genre.UpdatedBy = creatorId;
             genre.UpdatedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _genreRepository.AddGenre(genre));
+            _genreRepository.AddGenre(genre);
         }
-        public async Task UpdateGenre(GenreViewModel model, string updaterId)
+        public void UpdateGenre(GenreViewModel model, string updaterId)
         {
-            if (!_genreRepository.GenreNameExists(model.Name))
+            if (_genreRepository.GenreNameExists(model.Name, model.GenreId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.GenreNotExist);
+                throw new DuplicateNameException(Resources.Messages.Errors.GenreExists);
             }
 
             var genre = new Genre();
@@ -64,9 +66,9 @@ namespace Readiculous.Services.Services
             genre.UpdatedBy = updaterId;
             genre.UpdatedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _genreRepository.UpdateGenre(genre));
+            _genreRepository.UpdateGenre(genre);
         }
-        public async Task DeleteGenre(string genreId, string deleterId)
+        public void DeleteGenre(string genreId, string deleterId)
         {
             if (!_genreRepository.GenreIdExists(genreId))
             {
@@ -77,7 +79,7 @@ namespace Readiculous.Services.Services
             genre.DeletedBy = deleterId;
             genre.DeletedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _genreRepository.UpdateGenre(genre));
+            _genreRepository.UpdateGenre(genre);
         }
 
         // Multiple Genre Listing methods
@@ -137,16 +139,26 @@ namespace Readiculous.Services.Services
 
             return genreViewModels.Select(g => g.GenreId).ToList();
         }
-        public List<SelectListItem> GetGenreSortTypes()
+        public List<SelectListItem> GetGenreSortTypes(GenreSortType sortType)
         {
             return Enum.GetValues(typeof(GenreSortType))
                 .Cast<GenreSortType>()
-                .Select(t => new SelectListItem
+                .Select(t =>
                 {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString(),
+                    var displayName = t.GetType()
+                                     .GetMember(t.ToString())
+                                     .First()
+                                     .GetCustomAttribute<DisplayAttribute>()?
+                                     .Name ?? t.ToString();
+                    return new SelectListItem
+                    {
+                        Value = ((int)t).ToString(),
+                        Text = displayName,
+                        Selected = t == sortType
+                    };
                 }).ToList();
         }
+  
         public List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter)
         {
             var genres = _genreRepository.GetAllActiveGenres()
@@ -225,11 +237,12 @@ namespace Readiculous.Services.Services
 
         public List<BookListItemViewModel> GetBooksByGenreId(string genreId)
         {
-            var genre = _genreRepository.GetGenreById(genreId);
+            var genre = _genreRepository.GetGenreWithBooksPropertiesById(genreId);
             if (genre == null || genre.DeletedTime != null)
             {
                 return new List<BookListItemViewModel>();
             }
+
             var books = genre.Books
                 .Where(bga => bga.Book != null && 
                     bga.Book.DeletedTime == null)

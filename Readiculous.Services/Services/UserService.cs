@@ -41,7 +41,7 @@ namespace Readiculous.Services.Services
             _emailService = emailService;
         }
 
-        // Authentication Method
+        // Authentication Methods
         public LoginResult AuthenticateUserByEmail(string email, string password, ref User user)
         {
             user = new User();
@@ -72,7 +72,7 @@ namespace Readiculous.Services.Services
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
             // Adds User when Email does not exist
-            if (!_userRepository.EmailExists(model.Email.Trim()))
+            if (!_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
                 // Creation of New User Entity
                 var user = new User();
@@ -120,62 +120,69 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new DuplicateNameException(Resources.Messages.Errors.UserExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.EmailExists);
             }
         }
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
-            if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
-            {
-                var user = _userRepository.GetUserById(model.UserId);
-
-                // Map properties for Username, Email, Updated Time, and UpdatedBy
-
-                _mapper.Map(model, user);
-                user.Username = model.Username.Trim();
-                user.Email = model.Email.Trim();
-                user.UpdatedTime = DateTime.UtcNow;
-                user.UpdatedBy = editorId;
-
-                // Only update password if a new one was provided
-                if (!string.IsNullOrEmpty(model.Password))
-                {
-                    user.Password = PasswordManager.EncryptPassword(model.Password);
-                }
-
-                // Handle profile picture changes
-                if (model.RemoveProfilePicture) // If the remove checkbox was checked
-                {
-                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        await DeleteProfilePicture(user.ProfilePictureUrl);
-                        user.ProfilePictureUrl = null;
-                    }
-                }
-                // If a new picture was uploaded
-                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
-                {
-                    // Upload new picture
-                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        // Delete old picture first
-                        await DeleteProfilePicture(user.ProfilePictureUrl);
-                    }
-                    user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
-                }
-                // If neither, the picture remains unchanged
-                _userRepository.UpdateUser(user);
-            }
-            else
+            if(!_userRepository.UserExists(model.UserId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
+            
+            if(!_userRepository.EmailExists(model.Email.Trim(), model.UserId))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
+            }
+
+            var user = _userRepository.GetUserById(model.UserId);
+
+            // Map properties for Username, Email, Updated Time, and UpdatedBy
+
+            _mapper.Map(model, user);
+            user.Username = model.Username.Trim();
+            user.Email = model.Email.Trim();
+            user.UpdatedTime = DateTime.UtcNow;
+            user.UpdatedBy = editorId;
+
+            // Only update password if a new one was provided
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                user.Password = PasswordManager.EncryptPassword(model.Password);
+            }
+
+            // Handle profile picture changes
+            if (model.RemoveProfilePicture) // If the remove checkbox was checked
+            {
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    await DeleteProfilePicture(user.ProfilePictureUrl);
+                    user.ProfilePictureUrl = null;
+                }
+            }
+            // If a new picture was uploaded
+            else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                // Upload new picture
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    // Delete old picture first
+                    await DeleteProfilePicture(user.ProfilePictureUrl);
+                }
+                user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+            }
+            // If neither, the picture remains unchanged
+            _userRepository.UpdateUser(user);
         }
         public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
-            if (!_userRepository.UserExists(editProfileViewModel.UserId) || !_userRepository.EmailExists(editProfileViewModel.Email.Trim()))
+            if (!_userRepository.UserExists(editProfileViewModel.UserId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+            }
+            if (!_userRepository.EmailExists(editProfileViewModel.Email.Trim(), editProfileViewModel.UserId))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
             }
 
             var user = _userRepository.GetUserById(editProfileViewModel.UserId);
@@ -268,7 +275,7 @@ namespace Readiculous.Services.Services
                 _mapper.Map(user, userViewModel);
                 userViewModel.ProfilePictureUrl = user.ProfilePictureUrl;
                 userViewModel.NewPassword = PasswordManager.DecryptPassword(user.Password);
-                userViewModel.RemoveProfilePicture = string.IsNullOrEmpty(user.ProfilePictureUrl) ? false : true;
+                userViewModel.RemoveProfilePicture = !string.IsNullOrEmpty(user.ProfilePictureUrl);
                 return userViewModel;
             }
             else
@@ -317,6 +324,20 @@ namespace Readiculous.Services.Services
                         return reviewViewModel;
                     })
                     .ToList();
+                userViewModel.TopGenres = userViewModel.FavoriteBookModels
+                    .SelectMany(b => b.BookGenres)
+                    .GroupBy(genre => genre)
+                    .Select(g => new { Genre = g.Key, Count = g.Count() })
+                    .GroupBy(g => g.Count)
+                    .OrderByDescending(g => g.Key)
+                    .FirstOrDefault()?
+                    .Select(g => g.Genre)
+                    .ToList() ?? new List<string>() { "No genres available." };
+
+                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ?
+                    (decimal)userViewModel.UserReviewModels
+                        .Select(u => u.Rating).Average() :
+                    0;
                 userViewModel.CreatedByUserName = user.CreatedByUser.Username;
                 userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
 
@@ -493,7 +514,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email already exists
-                if (_userRepository.EmailExists(email.Trim()))
+                if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -515,7 +536,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email already exists
-                if (_userRepository.EmailExists(email.Trim()))
+                if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -556,7 +577,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email exists
-                if (!_userRepository.EmailExists(email.Trim()))
+                if (!_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -579,7 +600,7 @@ namespace Readiculous.Services.Services
             try
             {
                 // Check if email exists
-                if (!_userRepository.EmailExists(email.Trim()))
+                if (!_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
                 }
@@ -623,5 +644,6 @@ namespace Readiculous.Services.Services
                 return false;
             }
         }
+
     }
 }

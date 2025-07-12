@@ -1,4 +1,5 @@
 ﻿@model Readiculous.Services.ServiceModels.UserDetailsViewModel
+@using System;
 
 <div class="user-view-container">
     <h4 class="user-view-title">Profile</h4>
@@ -64,6 +65,7 @@
                     <dt>Last Modified On</dt>
                     <dd>@Html.DisplayFor(model => model.UpdatedTime)</dd>
                 </div>
+     
             </dl>
         </div>
 
@@ -72,19 +74,21 @@
             <h5 class="user-view-meta-title">Activity Summary</h5>
             <div class="user-view-activity-stats">
                 <div class="activity-stat">
-                    <div class="stat-value">42</div>
+                    <div class="stat-value">@Model.UserReviewModels.Count</div>
                     <div class="stat-label">Reviews Written</div>
                 </div>
                 <div class="activity-stat">
-                    <div class="stat-value">18</div>
+                    <div class="stat-value">@Model.FavoriteBookModels.Count</div>
                     <div class="stat-label">Book Favorites</div>
                 </div>
                 <div class="activity-stat">
-                    <div class="stat-value">4.2</div>
+                    <div class="stat-value">@Model.AverageRating</div>
                     <div class="stat-label">Avg Rating</div>
                 </div>
-                <div class="activity-stat">
-                    <div class="stat-value">Fantasy</div>
+
+
+                <div class="activity-stat">\
+                    <div class="stat-value">@string.Join(", ", Model.TopGenres)</div>
                     <div class="stat-label">Top Genre</div>
                 </div>
             </div>

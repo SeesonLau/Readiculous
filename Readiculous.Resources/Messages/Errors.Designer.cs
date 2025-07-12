@@ -88,6 +88,24 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email already exists!.
+        /// </summary>
+        public static string EmailExists {
+            get {
+                return ResourceManager.GetString("EmailExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email does not exist!.
+        /// </summary>
+        public static string EmailNotExist {
+            get {
+                return ResourceManager.GetString("EmailNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Book already favorited!.
         /// </summary>
         public static string FavoriteBookExists {
@@ -104,7 +122,7 @@ namespace Readiculous.Resources.Messages {
                 return ResourceManager.GetString("FavoritedBookNotExists", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Email not found or failed to send OTP..
         /// </summary>

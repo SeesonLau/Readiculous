@@ -1,6 +1,7 @@
 ﻿using Basecode.Data.Repositories;
 using CsvHelper.TypeConversion;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using System;
@@ -24,10 +25,11 @@ namespace Readiculous.Data.Repositories
                                                  b.DeletedTime == null);
         }
 
-        public bool BookTitleAndAuthorExists(string bookTitle, string author)
+        public bool BookTitleAndAuthorExists(string bookTitle, string author, string id)
         {
             return this.GetDbSet<Book>().Any(b => b.Title.ToLower() == bookTitle.ToLower() &&
                                                 b.Author.ToLower() == author.ToLower() &&
+                                                b.BookId != id &&
                                                 b.DeletedTime == null);
         }
 
