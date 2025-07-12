@@ -87,7 +87,7 @@ namespace Readiculous.Services.Services
                 user.Email = user.Email.Trim();
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
-                user.AccessStatus = AccessStatus.FirstTime;
+                //user.AccessStatus = AccessStatus.FirstTime;
 
                 // If a picture was uploaded
                 if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
@@ -97,7 +97,7 @@ namespace Readiculous.Services.Services
                 }
 
                 // If the creator is not the same as the new user (admin creation), generate a temp password
-                bool isAdminCreated = creatorId != model.UserId;
+                /*bool isAdminCreated = creatorId != model.UserId;
                 string tempPassword = null;
                 if (isAdminCreated)
                 {
@@ -107,16 +107,16 @@ namespace Readiculous.Services.Services
                 else
                 {
                     user.Password = PasswordManager.EncryptPassword(model.Password);
-                }
+                }*/
 
-                // Add User
+                 //Add User
                 _userRepository.AddUser(user, creatorId);
 
-                // Send temp password email if admin created
-                if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
+                 //Send temp password email if admin created
+                /*if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
                 {
                     await _emailService.SendTempPasswordEmailAsync(user.Email, tempPassword);
-                }
+                }*/
             }
             else
             {

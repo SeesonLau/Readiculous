@@ -9,7 +9,7 @@ using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.ServiceModels
 {
-    public class UserViewModel
+    public class UserViewModel /*: IValidatableObject*/
     {
 
         [Required(ErrorMessage = "Username is required.")]
@@ -21,7 +21,7 @@ namespace Readiculous.Services.ServiceModels
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
+        //[Required(ErrorMessage = "Password is required.")]
         [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d\\s]).{8,16}$",
         ErrorMessage = "Password must be 8-16 characters long and contain at least one lowercase letter, one uppercase letter, one digit, and one special character.")]
         [DataType(DataType.Password)]
@@ -38,5 +38,28 @@ namespace Readiculous.Services.ServiceModels
         [Display(Name = "Remove Profile Picture")]
         public bool RemoveProfilePicture { get; set; }
         public AccessStatus AccessStatus { get; set; }
+
+        /*public bool IsAdminCreation { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!IsAdminCreation)
+            {
+                if (string.IsNullOrWhiteSpace(Password))
+                {
+                    yield return new ValidationResult("Password is required.", new[] { nameof(Password) });
+                }
+                else
+                {
+                    var regex = new System.Text.RegularExpressions.Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d\\s]).{8,16}$");
+                    if (!regex.IsMatch(Password))
+                    {
+                        yield return new ValidationResult(
+                            "Password must be 8-16 characters long and contain at least one lowercase letter, one uppercase letter, one digit, and one special character.",
+                            new[] { nameof(Password) });
+                    }
+                }
+            }
+        }*/
     }
 }
