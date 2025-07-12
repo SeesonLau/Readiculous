@@ -60,10 +60,6 @@ namespace Readiculous.Services.Services
             model.BookId = Guid.NewGuid().ToString();
 
             _mapper.Map(model, book);
-            book.Title = book.Title.Trim();
-            book.Description = book.Description.Trim();
-            book.Author = book.Author.Trim();
-            book.ISBN = book.ISBN.Trim();
             book.CreatedBy = creatorId;
             book.CreatedTime = DateTime.UtcNow;
             book.UpdatedBy = creatorId;
@@ -212,28 +208,13 @@ namespace Readiculous.Services.Services
             _mapper.Map(book, model);
             model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                 .ToList();
-            model.Reviews = _reviewRepository.GetReviewsByBookId(book.BookId)
-                .ToList()
-                .Select(r =>
-                {
-                    ReviewListItemViewModel reviewViewModel = new();
-
-                    _mapper.Map(r, reviewViewModel);
-                    reviewViewModel.Reviewer = r.User.Username;
-                    reviewViewModel.BookName = r.Book.Title;
-                    reviewViewModel.Author = r.Book.Author;
-                    reviewViewModel.PublicationYear = r.Book.PublicationYear;
-                    reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
-
-                    return reviewViewModel;
-                })
-                .ToList();
+            
+            var reviews = _reviewRepository.GetReviewsByBookId(book.BookId);
+            model.Reviews = _mapper.Map<List<ReviewListItemViewModel>>(reviews);
 
             model.AverageRating = model.Reviews.Count != 0
                         ? (decimal)(book.BookReviews.Average(r => r.Rating))
                         : 0;
-            model.CreatedByUserName = book.CreatedByUser.Username;
-            model.UpdatedByUserName = book.UpdatedByUser.Username;
             return model;
         }
         public BookViewModel GetBookEditById(string id)
@@ -339,7 +320,7 @@ namespace Readiculous.Services.Services
         }
         private List<BookListItemViewModel> ListBooksByTitle(string bookTitle, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
-            var booksByTitle = new List<BookListItemViewModel>();
+            var booksByTitle = _bookRepository.GetBooksByTitle(bookTitle);
             var bookIds = booksByTitle.Select(s => s.BookId).ToList();
             var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
@@ -366,7 +347,7 @@ namespace Readiculous.Services.Services
                     : 0);
             }
 
-            return SearchAndSortBook(booksByTitle, searchType, sortType, genreFilter)
+            return SearchAndSortBook(bookMapModels, searchType, sortType, genreFilter)
                 .ToList();
         }
         private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)

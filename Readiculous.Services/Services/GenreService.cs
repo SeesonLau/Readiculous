@@ -44,8 +44,6 @@ namespace Readiculous.Services.Services
             model.GenreId = Guid.NewGuid().ToString();
 
             _mapper.Map(model, genre);
-            genre.Name = genre.Name.Trim();
-            genre.Description = genre.Description.Trim();
             genre.CreatedBy = creatorId;
             genre.CreatedTime = DateTime.UtcNow;
             genre.UpdatedBy = creatorId;
@@ -63,8 +61,6 @@ namespace Readiculous.Services.Services
             var genre = new Genre();
 
             _mapper.Map(model, genre);
-            genre.Name = genre.Name.Trim();
-            genre.Description = genre.Description.Trim();
             genre.UpdatedBy = updaterId;
             genre.UpdatedTime = DateTime.UtcNow;
 
@@ -125,8 +121,6 @@ namespace Readiculous.Services.Services
             var model = new GenreDetailsViewModel();
             _mapper.Map(genre, model);
             model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
-            model.CreatedByUsername = genre.CreatedByUser.Username;
-            model.UpdatedByUsername = genre.UpdatedByUser.Username;
 
             return model;
         }
@@ -253,12 +247,8 @@ namespace Readiculous.Services.Services
                 .Select(bga => bga.Book)
                 .ToList();
 
-            return books.Select(book =>
-            {
-                var model = new BookListItemViewModel();
-                _mapper.Map(book, model);
-                return model;
-            }).ToList();
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(books);
+            return bookMapModels;
         }
     }
 }
