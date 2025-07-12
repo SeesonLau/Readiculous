@@ -75,16 +75,11 @@ namespace Readiculous.Data.Repositories
             IQueryable<Book> books;
             if (genres == null || !genres.Any())
             {
-                books = this.GetDbSet<Book>()
-                    .AsNoTracking()
-                    .Include(b => b.CreatedByUser)
-                    .Include(b => b.UpdatedByUser)
-                    .Where(b => b.DeletedTime == null);
+                books = GetAllActiveBooks();
             }
             else
             {
                 books = this.GetDbSet<Book>()
-                    .AsNoTracking()
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&

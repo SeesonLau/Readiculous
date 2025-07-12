@@ -38,14 +38,23 @@ namespace Readiculous.WebApp
 
 
                 // Genre Mappings
-                CreateMap<Genre, GenreListItemViewModel>();
+                CreateMap<Genre, GenreListItemViewModel>()
+                    .ForMember(dest => dest.CreatedByUsername,
+                               opt => opt.MapFrom(
+                                  src => src.CreatedByUser.Username))
+                    .ForMember(dest => dest.UpdatedByUsername,
+                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
                 CreateMap<Genre, GenreDetailsViewModel>();
                 CreateMap<GenreViewModel, Genre>();
                 CreateMap<Genre, GenreViewModel>();
 
                 // Book Mappings
                 CreateMap<Book, BookDetailsViewModel>();
-                CreateMap<Book, BookListItemViewModel>().ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser.Username));
+                CreateMap<Book, BookListItemViewModel>()
+                    .ForMember(dest => dest.CreatedByUserName, 
+                               opt => opt.MapFrom(src => src.CreatedByUser.Username))
+                    .ForMember(dest => dest.UpdatedByUserName,
+                               opt => opt.MapFrom(src => src.UpdatedByUser.Username));
                 CreateMap<BookViewModel, Book>();
                 CreateMap<Book, BookViewModel>();
                 CreateMap<Book, FavoriteBookModel>();

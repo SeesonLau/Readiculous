@@ -100,11 +100,22 @@ namespace Readiculous.Data.Repositories
             return data;
         }
 
-        public IQueryable<BookGenreAssignment> GetAllGenreNamesByBookId(List<string> bookIds)
+        public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookId(List<string> bookIds)
         {
             var data = this.GetDbSet<BookGenreAssignment>()
                 .Where(bga => bookIds.Any(a => a.Equals(bga.BookId)) &&
-                                bga.Genre.DeletedTime == null);
+                                bga.Genre.DeletedTime == null &&
+                                bga.Book.DeletedTime == null);
+
+            return data;
+        }
+
+        public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByGenreIds(List<string> genreIds)
+        {
+            var data = this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => genreIds.Any(a => a.Equals(bga.GenreId)) &&
+                                bga.Genre.DeletedTime == null &&
+                                bga.Book.DeletedTime == null);
 
             return data;
         }

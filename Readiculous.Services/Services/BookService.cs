@@ -308,7 +308,7 @@ namespace Readiculous.Services.Services
         {
             var allActiveBooks = _bookRepository.GetAllActiveBooks();
             var bookIds = allActiveBooks.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreNamesByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -329,7 +329,7 @@ namespace Readiculous.Services.Services
                 var bookReviews = allReviews
                     .Where(r =>  r.BookId == model.BookId)
                     .ToList();
-                model.AverageRating = (decimal) (bookReviews.Any()
+                model.AverageRating = (decimal) (bookReviews.Count > 0
                     ? bookReviews.Average(r => r.Rating)
                     : 0);
             }
@@ -341,7 +341,7 @@ namespace Readiculous.Services.Services
         {
             var booksByTitle = new List<BookListItemViewModel>();
             var bookIds = booksByTitle.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreNamesByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -376,7 +376,7 @@ namespace Readiculous.Services.Services
             var booksByGenre = _bookRepository.GetBooksByGenreList(bookGenres);
             var bookIds = booksByGenre
                 .Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreNamesByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -391,8 +391,9 @@ namespace Readiculous.Services.Services
                     .ToList();
                 model.IsFavorite = favoriteBooksByUser
                     .Any(a => a.BookId == model.BookId);
-                model.IsReviewed = reviewsByUser
-                    .Any(a => a.BookId == model.BookId);
+                model.IsReviewed = allReviews
+                    .Where(r => r.UserId == userID)
+                    .Any(r => r.BookId == model.BookId);
 
                 var bookReviews = allReviews
                     .Where(r => r.BookId == model.BookId)
@@ -413,7 +414,7 @@ namespace Readiculous.Services.Services
             var bookIds = booksByTitleAndGenre
                 .Select(book => book.BookId)
                 .ToList();
-            var genres = _genreRepository.GetAllGenreNamesByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();

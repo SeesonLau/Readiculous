@@ -11,6 +11,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
@@ -177,47 +178,51 @@ namespace Readiculous.Services.Services
         // Helper methods for Searching genres
         private List<GenreListItemViewModel> ListAllActiveGenres()
         {
-            var genres = _genreRepository.GetAllActiveGenres()
-                .AsNoTracking()
-                .Select(genre => new GenreListItemViewModel
-                {
-                    GenreId = genre.GenreId,
-                    Name = genre.Name,
-                    CreatedTime = genre.CreatedTime,
-                    CreatedByUsername = genre.CreatedByUser.Username,
-                    UpdatedTime = (DateTime)genre.UpdatedTime,
-                    UpdatedByUsername = genre.UpdatedByUser.Username,
-                })
-                .OrderByDescending(g => g.CreatedTime)
-                .ToList();
+            var allGenres = _genreRepository.GetAllActiveGenres();
 
-            return genres;
+            var genreIds = allGenres
+                .Select(g => g.GenreId)
+                .ToList();
+            var booksByGenreList = _genreRepository.GetAllGenreAssignmentsByGenreIds(genreIds);
+
+            var genreViewModels = _mapper.Map<List<GenreListItemViewModel>>(allGenres);
+
+            foreach(var model in genreViewModels)
+            {
+                model.BookCount = booksByGenreList
+                    .Where(b => b.GenreId == model.GenreId)
+                    .Count();
+            }
+
+            return genreViewModels;
         }
         private List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.Latest)
         {
-            var genres = _genreRepository.GetGenresByName(genreName)
-                .Where(g => g.DeletedTime == null)
-                .ToList()
-                .Select(genre =>
-                {
-                    GenreListItemViewModel model = new GenreListItemViewModel();
-                    _mapper.Map(genre, model);
-                    model.BookCount = _bookRepository.GetBookCountByGenreId(genre.GenreId);
-                    model.CreatedByUsername = genre.CreatedByUser != null ? genre.CreatedByUser.Username : string.Empty;
-                    model.UpdatedByUsername = genre.UpdatedByUser != null ? genre.UpdatedByUser.Username : string.Empty;
-                    return model;
-                })
+            var genresByName = _genreRepository.GetGenresByName(genreName);
+
+            var genreIds = genresByName
+                .Select(g => g.GenreId)
                 .ToList();
+            var booksByGenreList = _genreRepository.GetAllGenreAssignmentsByGenreIds(genreIds);
+
+            var genreViewModels = _mapper.Map<List<GenreListItemViewModel>>(genresByName);
+            
+            foreach(var model in genreViewModels)
+            {
+                model.BookCount = booksByGenreList
+                    .Where(b => b.GenreId == model.GenreId)
+                    .Count();
+            }
 
             return (genreSortType) switch
             {
-                GenreSortType.NameAscending => genres.OrderBy(g => g.Name).ToList(),
-                GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name).ToList(),
-                GenreSortType.BookCountAscending => genres.OrderBy(g => g.BookCount).ToList(),
-                GenreSortType.BookCountDescending => genres.OrderByDescending(g => g.BookCount).ToList(),
-                GenreSortType.Oldest => genres.OrderBy(g => g.UpdatedTime).ToList(),
-                GenreSortType.Latest => genres.OrderByDescending(g => g.UpdatedTime).ToList(),
-                _ => genres, // Default case
+                GenreSortType.NameAscending => genreViewModels.OrderBy(g => g.Name).ToList(),
+                GenreSortType.NameDescending => genreViewModels.OrderByDescending(g => g.Name).ToList(),
+                GenreSortType.BookCountAscending => genreViewModels.OrderBy(g => g.BookCount).ToList(),
+                GenreSortType.BookCountDescending => genreViewModels.OrderByDescending(g => g.BookCount).ToList(),
+                GenreSortType.Oldest => genreViewModels.OrderBy(g => g.UpdatedTime).ToList(),
+                GenreSortType.Latest => genreViewModels.OrderByDescending(g => g.UpdatedTime).ToList(),
+                _ => genreViewModels, // Default case
             };
         }
 
