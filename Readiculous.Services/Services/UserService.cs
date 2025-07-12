@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
+using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.Manager;
@@ -399,70 +400,39 @@ namespace Readiculous.Services.Services
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
-            var userViewModels = _userRepository.GetUsersByUsername(string.Empty)
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
+            var allUsers = _userRepository.GetUsersByUsername(string.Empty);
+            var result = _mapper.Map<List<UserListItemViewModel>>(allUsers)
+                .OrderByDescending(u => u.CreatedTime)
+                .ToList();
 
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-
-                    return userViewModel;
-                });
-
-            return userViewModels.OrderByDescending(u => u.CreatedTime).ToList();
+            return result;
         }
-        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType searchType)
+        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType sortType)
         {
-            var userViewModels = _userRepository.GetUsersByUsername(username.Trim())
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
+            var usersByUsername = _userRepository.GetUsersByUsername(username.Trim());
+            var result = _mapper.Map<List<UserListItemViewModel>>(usersByUsername);
 
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-                    
-                    return userViewModel;
-                });
-
-            return searchType switch
+            return sortType switch
             {
-                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
-                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
-                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
-                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList()
+                UserSortType.UsernameAscending => result.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => result.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.Oldest => result.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => result.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => result.OrderByDescending(u => u.UpdatedTime).ToList()
             };
         }
         private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
         {
-            var userViewModels = _userRepository.GetUsersByRoleAndUsername(role, username.Trim())
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
-
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-
-                    return userViewModel;
-                });
+            var usersByRoleAndUsername = _userRepository.GetUsersByRoleAndUsername(role, username.Trim());
+            var result = _mapper.Map<List<UserListItemViewModel>>(usersByRoleAndUsername);
 
             return searchType switch
             {
-                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
-                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
-                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
-                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
+                UserSortType.UsernameAscending => result.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => result.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.Oldest => result.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => result.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => result.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
         }
         // Helper methods for profile picture management
