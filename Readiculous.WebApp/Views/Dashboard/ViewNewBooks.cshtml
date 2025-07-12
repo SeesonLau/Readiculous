@@ -5,6 +5,7 @@
 }
 
 <section class="container py-4">
+    <input type="text" class="form-control mb-5" placeholder="🔍 Book Search..." />
     <h2 class="section-title mb-4 text-center">NEW BOOKS</h2>
 
     @if (Model != null && Model.Count > 0)
@@ -15,14 +16,16 @@
                 @foreach (var book in Model.Take(5))
                 {
                     <div class="col">
-                        <div class="card book-card h-100 text-center">
-                            <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top book-image" alt="@book.Title" />
-                            <div class="card-body">
-                                <h6 class="card-title">@book.Title</h6>
-                                <p class="card-author small text-muted">@book.Author</p>
-                                <p class="card-rating text-warning mb-0">⭐ @book.AverageRating</p>
+                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none text-reset">
+                            <div class="card book-card h-100 text-center">
+                                <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top book-image" alt="@book.Title" />
+                                <div class="card-body">
+                                    <h6 class="card-title">@book.Title</h6>
+                                    <p class="card-author small text-muted">@book.Author</p>
+                                    <p class="card-rating text-warning mb-0">⭐ @book.AverageRating</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 }
             </div>
@@ -34,14 +37,16 @@
                 @foreach (var book in Model.Skip(5).Take(5))
                 {
                     <div class="col">
-                        <div class="card book-card h-100 text-center">
-                            <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top book-image" alt="@book.Title" />
-                            <div class="card-body">
-                                <h6 class="card-title">@book.Title</h6>
-                                <p class="card-author small text-muted">@book.Author</p>
-                                <p class="card-rating text-warning mb-0">⭐ @book.AverageRating</p>
+                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none text-reset">
+                            <div class="card book-card h-100 text-center">
+                                <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top book-image" alt="@book.Title" />
+                                <div class="card-body">
+                                    <h6 class="card-title">@book.Title</h6>
+                                    <p class="card-author small text-muted">@book.Author</p>
+                                    <p class="card-rating text-warning mb-0">⭐ @book.AverageRating</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 }
             </div>

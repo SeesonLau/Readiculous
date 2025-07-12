@@ -68,6 +68,11 @@
     .btn-outline-primary {
         border-width: 2px;
     }
+
+    a.text-card-link {
+        text-decoration: none;
+        color: inherit;
+    }
 </style>
 
 <section class="container py-4">
@@ -122,18 +127,21 @@
         @foreach (var book in Model)
         {
             <div class="col">
-                <div class="card h-100 text-center">
-                    <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top" alt="@book.Title" />
-                    <div class="card-body">
-                        <h5 class="card-title">@book.Title</h5>
-                        <p class="card-text text-muted">@book.Author</p>
-                        <p class="card-text text-warning fw-bold">⭐ @book.AverageRating</p>
+                <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-card-link">
+                    <div class="card h-100 text-center">
+                        <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top" alt="@book.Title" />
+                        <div class="card-body">
+                            <h5 class="card-title">@book.Title</h5>
+                            <p class="card-text text-muted">@book.Author</p>
+                            <p class="card-text text-warning fw-bold">⭐ @book.AverageRating</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         }
     </div>
 </section>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const toggleButton = document.getElementById('genreToggle');
@@ -161,8 +169,6 @@
         checkboxes.forEach(function (checkbox) {
             checkbox.addEventListener('change', function () {
                 updateSelectedGenres();
-
-                // Auto-close dropdown after change
                 genreMenu.classList.remove('show');
             });
         });
@@ -192,11 +198,10 @@
             filterTypeInput.value = type;
             hiddenGenreInput.value = selected.join(',');
 
-            // Update display title
             const genrePart = selected.length ? ` - ${selected.join(', ')}` : '';
             displayTitle.textContent = `${type} Books${genrePart}`;
 
-            // TODO: Optional backend post or reload here
+            // Optional: Send to server or AJAX
         };
     });
 </script>

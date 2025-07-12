@@ -1,123 +1,276 @@
-﻿@{
-    Layout = "_Layout";
-    ViewData["Title"] = "Book Details";
-    ViewBag.ShowReviewerNav = true;
+﻿@model Readiculous.Services.ServiceModels.BookDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.Title;
+
+    string role = ViewBag.UserRole as string;
+    bool isAdmin = role == "Admin";
+    bool isReviewer = role == "Reviewer";
+
+    string userId = ViewBag.UserId as string ?? "";
+    string userName = ViewBag.UserName as string ?? "";
+    string userEmail = ViewBag.UserEmail as string ?? "";
+    int totalReviews = ViewData["TotalReviews"] as int? ?? Model.Reviews?.Count ?? 0;
 }
 
-
-
-<section class="container py-4">
-    <div class="book-details-container row g-4">
-        <!-- Book Cover and Favorite Button -->
-        <div class="col-md-4 text-center">
-            <img src="@Url.Content(Model.CoverImageUrl ?? "~/img/placeholder.png")"
-                 alt="@Model.Title Cover"
-                 class="img-fluid rounded shadow-sm mb-3" />
-
-            <button class="btn btn-outline-primary w-100">
-                <i class="bi bi-heart me-2"></i> Add to Favorites
-            </button>
-        </div>
-
-        <!-- Book Information -->
-        <div class="col-md-8">
-            <h2 class="mb-3">@Model.Title</h2>
-            <table class="table table-bordered book-details-table mb-4">
-                <tr><th>Author</th><td>@Model.Author</td></tr>
-                <tr><th>Genre</th><td>@Model.Genre</td></tr>
-                <tr><th>Series</th><td>@(Model.Series ?? "N/A")</td></tr>
-                <tr>
-                    <th>Rating</th>
-                    <td>
-                        <span class="fw-bold">@Model.Rating</span>
-                        <span style="color: gold;">&#9733;</span>
-                    </td>
-                </tr>
-                <tr><th>Added Date</th><td>@Model.AddedDate.ToString("MMMM dd, yyyy")</td></tr>
-            </table>
-
-            <h4 class="fw-semibold">Description</h4>
-            <p class="text-muted">@Model.Description</p>
-        </div>
-    </div>
-
-    <!-- Reviews Section -->
-    <div class="mt-5">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">Reviews (@Model.Reviews.Count)</h4>
-            <button class="btn btn-sm btn-outline-primary" onclick="showModal('required')">
-                <i class="bi bi-pencil-square me-1"></i> Add Review
-            </button>
-        </div>
-
-        @if (Model.Reviews.Any())
-        {
-            <div class="row g-4">
-                @foreach (var review in Model.Reviews)
-                {
-                    <div class="col-md-6">
-                        <div class="card review-card shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-semibold">@review.Reviewer</span>
-                                    <small class="text-muted">@review.Date.ToString("MMM dd, yyyy")</small>
-                                </div>
-                                <div class="review-stars mb-2">
-                                    @for (int i = 0; i < review.Stars; i++)
-                                    {
-                                        <span style="color: gold;">&#9733;</span>
-                                    }
-                                    @for (int i = review.Stars; i < 5; i++)
-                                    {
-                                        <span style="color: lightgray;">&#9733;</span>
-                                    }
-                                </div>
-                                <p class="mb-0">@review.Comment</p>
-                            </div>
-                        </div>
-                    </div>
-                }
+<div class="container py-5">
+    <div class="row g-3">
+        <!-- LEFT COLUMN -->
+        <div class="col-md-4 d-flex flex-column align-items-center">
+            <div class="book-card text-center mb-3">
+                <img src="@(string.IsNullOrEmpty(Model.CoverImageUrl) ? "/img/placeholder.png" : Model.CoverImageUrl)"
+                     class="book-image"
+                     alt="@Model.Title" />
             </div>
-        }
-        else
-        {
-            <p class="text-muted">No reviews yet.</p>
-        }
+
+            @if (!isAdmin)
+            {
+                if (User.Identity.IsAuthenticated)
+                {
+                    if (isReviewer)
+                    {
+                        <button class="btn btn-outline-primary mb-2"
+                                onclick="showFavoriteMessage()">
+                            + Add to Favorites
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary mb-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#requiredLoginModal">
+                            + Add to Favorites
+                        </button>
+                    }
+                }
+                else
+                {
+                    <button class="btn btn-secondary mb-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#requiredLoginModal">
+                        + Add to Favorites
+                    </button>
+                }
+            }
+
+            <div id="favoriteAlert"
+                 class="alert alert-success alert-dismissible fade show d-none text-center"
+                 role="alert"
+                 style="width: 90%;">
+                ✅ Added to your favorite books!
+                <button type="button"
+                        class="btn-close"
+                        onclick="hideFavoriteMessage()">
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-md-8">
+            <h2>@Model.Title</h2>
+            <p class="text-muted">by <strong>@Model.Author</strong></p>
+            <p><strong>Genre:</strong> @(Model.Genres?.Any() == true ? string.Join(", ", Model.Genres) : "Unknown")</p>
+            <p><strong>Series:</strong> @(Model.SeriesNumber > 0 ? $"Book {Model.SeriesNumber}" : "Standalone")</p>
+            <p><strong>Publisher:</strong> @Model.Publisher</p>
+            <p><strong>Published:</strong> @Model.PublicationYear</p>
+            <p><strong>Added on:</strong> @Model.CreatedTime.ToString("MMMM dd, yyyy")</p>
+            <p><strong>Average Rating:</strong> ⭐ @Model.AverageRating</p>
+
+            <div class="card mt-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p class="card-text">@Model.Description</p>
+                </div>
+            </div>
+
+            <div class="card review-card mt-4 shadow-sm">
+                <div class="card-body d-flex flex-column h-100">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                        <h5 class="mb-0">Reviews (<span id="review-count">@totalReviews</span>)</h5>
+
+                        @if (!isAdmin)
+                        {
+                            if (User.Identity.IsAuthenticated)
+                            {
+                                if (isReviewer)
+                                {
+                                    <button class="btn btn-sm btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#addReviewModal">
+                                        + Add Review
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-secondary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#requiredLoginModal">
+                                        + Add Review
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#requiredLoginModal">
+                                    + Add Review
+                                </button>
+                            }
+                        }
+                    </div>
+
+                    <div class="overflow-auto" id="reviews-container">
+                        @if (Model.Reviews != null && Model.Reviews.Any())
+                        {
+                            @foreach (var review in Model.Reviews)
+                            {
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            @review.Reviewer —
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi @(i <= (int)review.Rating ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+                                            }
+                                        </h6>
+                                        <p class="card-text">@review.Comment</p>
+                                        <p class="card-subtitle text-muted small">
+                                            @review.CreatedTime.ToString("MMMM dd, yyyy")
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0 mt-3" id="no-reviews-text">No reviews yet.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</section>
+</div>
+
+<!-- Reviewer Add Review Modal -->
+@if (isReviewer)
+{
+    <div class="modal fade" id="addReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                @await Html.PartialAsync("~/Views/Shared/_AddReviewModal.cshtml",
+                         new Readiculous.Services.ServiceModels.ReviewViewModel
+            {
+                BookId = Model.BookId,
+                UserId = userId,
+                UserName = userName,
+                Email = userEmail,
+                BookTitle = Model.Title
+            })
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Required Login/Register Modal -->
+@await Html.PartialAsync("~/Views/Shared/_RequiredModal.cshtml")
 
 <style>
-    /* Custom styles for Book Details */
-    .book-details-container {
-        background: #fff;
+    .book-card {
+        background-color: #fff;
+        border: 1px solid #ecd6e0;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 10px;
+        width: 100%;
+        max-width: 220px;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .book-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 0 20px rgba(0,0,0,0.05);
     }
 
-        .book-details-container img {
-            max-height: 400px;
-            object-fit: cover;
+    .review-card {
+        width: 100%;
+        min-height: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+        .review-card .card-body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
-    .book-details-table th {
-        width: 150px;
-        background: #f8f9fa;
-    }
-
-    .review-stars span {
-        font-size: 1.2rem;
-    }
-
-    .card.review-card {
-        transition: transform .2s ease-in-out;
-    }
-
-        .card.review-card:hover {
-            transform: scale(1.02);
+        .review-card .overflow-auto {
+            flex-grow: 1;
+            overflow-y: auto;
         }
-
-    .btn-outline-primary {
-        border-width: 2px;
-    }
 </style>
+
+@section Scripts {
+    <script>
+        function showFavoriteMessage() {
+            const alertBox = document.getElementById("favoriteAlert");
+            alertBox.classList.remove("d-none");
+            setTimeout(() => alertBox.classList.add("d-none"), 3000);
+        }
+
+        function hideFavoriteMessage() {
+            document.getElementById("favoriteAlert").classList.add("d-none");
+        }
+
+        $(document).ready(function () {
+            $(document).on("submit", "#addReviewForm", function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+                var url = '@Url.Action("Create", "Reviews")';
+                var formData = form.serialize();
+
+                $.post(url, formData)
+                    .done(function (response) {
+                        $("#addReviewModal").modal("hide");
+                        $("#no-reviews-text").remove();
+
+                        var starsHtml = "";
+                        for (var i = 1; i <= 5; i++) {
+                            starsHtml += i <= response.rating
+                                ? '<i class="bi bi-star-fill text-warning"></i>'
+                                : '<i class="bi bi-star text-muted"></i>';
+                        }
+
+                        var html =
+                            `<div class="card mb-3 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        ${response.reviewer} — ${starsHtml}
+                                    </h6>
+                                    <p class="card-text">${response.comment}</p>
+                                    <p class="card-subtitle text-muted small">
+                                        ${response.createdTime}
+                                    </p>
+                                </div>
+                            </div>`;
+
+                        $("#reviews-container").prepend(html);
+                        var count = parseInt($("#review-count").text());
+                        $("#review-count").text(count + 1);
+                    })
+                    .fail(function () {
+                        alert("An error occurred while saving the review.");
+                    });
+            });
+        });
+    </script>
+}
