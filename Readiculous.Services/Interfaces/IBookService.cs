@@ -15,10 +15,9 @@ namespace Readiculous.Services.Interfaces
 
         Task DeleteBook(string bookId, string deleterId);
 
-        List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null);
+        List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSortType sortType = BookSortType.Latest, string? genreFilter = null);
         BookDetailsViewModel GetBookDetailsById(string id);
         BookViewModel GetBookEditById(string id);
-        List<SelectListItem> GetBookSearchTypes(BookSearchType searchType);
         List<SelectListItem> GetBookSortTypes(BookSortType sortType);
 
         void AddBookToFavorites(string bookId, string userId);

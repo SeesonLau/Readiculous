@@ -45,28 +45,38 @@ namespace Readiculous.WebApp.Controllers
             _emailService = emailService;
         }
 
-        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType, int page = 1, int pageSize = 10)
+        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType sortOrder = UserSortType.Latest, int page = 1, int pageSize = 10)
         {
-            ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
-            ViewData["CurrentUserSearchType"] = searchType.ToString();
+            ViewData["CurrentFilter"] = searchString ?? "";
+            ViewData["CurrentRoleType"] = roleType?.ToString() ?? "";
+            ViewData["CurrentSortOrder"] = sortOrder.ToString();
 
             ViewBag.RoleTypes = _userService.GetUserRoles();
-            ViewBag.UserSearchTypes = _userService.GetUserSortTypes();
+            ViewBag.UserSortTypes = _userService.GetUserSortTypes(sortOrder);
+ 
+            var allUsers = _userService.GetUserList(
+                username: searchString,
+                role: roleType,
+                sortType: sortOrder);
 
-            List<UserListItemViewModel> allUsers = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
+            var totalItems = allUsers.Count;
+            var paginatedUsers = allUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            //Pagination
-            var paginatedUsers = allUsers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
+            ViewBag.PageSize = pageSize;
 
             var model = new UserMasterViewModel
             {
                 Users = paginatedUsers,
-                Pagination = new PaginationModel(allUsers.Count, page, pageSize)
+                Pagination = (PaginationModel)ViewBag.PaginationModel
             };
 
             return View(model);
         }
+
 
         [HttpGet]
         public IActionResult UserAddModal()

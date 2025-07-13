@@ -30,7 +30,7 @@ namespace Readiculous.Services.Interfaces
 
         // Dropdown Filler Methods
         List<SelectListItem> GetUserRoles();
-        List<SelectListItem> GetUserSortTypes();
+        List<SelectListItem> GetUserSortTypes(UserSortType sortType);
         
         // OTP Methods
         Task<bool> SendOtpForRegistrationAsync(string email);
