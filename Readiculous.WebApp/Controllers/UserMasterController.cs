@@ -171,9 +171,9 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(string userId)
+        public IActionResult Delete(string id)
         {
-            _userService.DeleteUser(userId, this.UserId);
+            _userService.DeleteUser(id, this.UserId);
             return Json(new { success = true });
         }
     }
