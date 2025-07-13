@@ -50,15 +50,3 @@ function togglePassword(inputId, button) {
     // Update aria-pressed state for accessibility
     button.setAttribute('aria-pressed', input.type === 'text');
 }
-
-// User View Modal
-$(function () {
-    $('.edit-user').click(function () {
-        var userId = $(this).data('userid');
-        $('#viewUserModal').modal('hide');
-
-        $('#editUserModalBody').load('@Url.Action("UserEditModal", "UserMaster")?userId=' + userId, function () {
-            $('#editUserModal').modal('show');
-        });
-    });
-});

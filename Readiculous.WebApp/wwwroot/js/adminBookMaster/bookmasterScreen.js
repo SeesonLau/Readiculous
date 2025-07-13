@@ -12,7 +12,6 @@
 
         CommonMaster.init(bookSettings);
 
-        // Book-specific event handlers
         $(document).on('click', '.btn-add-book', function () {
             $('#addBookModal').modal('show');
             CommonMaster.loadModalContent('#addBookModalBody', bookSettings.addModalUrl, '#addBookForm');
@@ -38,8 +37,15 @@
             $('#deleteModal').modal('show');
         });
 
-        // Genre checkbox filtering
-        $(document).on('change', 'input[name="selectedGenreIds"]', CommonMaster.debounce(function () {
+        $(document).on('input', 'input[name="searchString"]', CommonMaster.debounce(function () {
+            CommonMaster.loadFilteredResults();
+        }, 300));
+
+        $(document).on('change', 'select[name="genreFilter"]', CommonMaster.debounce(function () {
+            CommonMaster.loadFilteredResults();
+        }, 300));
+
+        $(document).on('change', 'select[name="sortOrder"]', CommonMaster.debounce(function () {
             CommonMaster.loadFilteredResults();
         }, 300));
     }

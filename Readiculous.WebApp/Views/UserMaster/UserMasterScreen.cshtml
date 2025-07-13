@@ -23,6 +23,8 @@
         </div>
     </div>
 
+
+    <form id="userFilterForm">
     <div class="user-filter-controls row g-3 align-items-end mx-0 mb-4">
         <div class="filter-group col-md-4 px-0 pe-md-2">
             <label for="searchString" class="filter-label">Search Username</label>
@@ -47,8 +49,9 @@
             <label for="sortOrder" class="filter-label">Sort By</label>
             <select id="sortOrder" name="sortOrder" class="filter-input form-select" asp-items="@ViewBag.UserSortTypes"></select>
         </div>
-
     </div>
+    </form>
+
 
     <div class="row mx-0">
         <div class="col px-0">
@@ -117,8 +120,10 @@
 })
 
 @section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
     <script src="~/js/common/commonMaster.js" asp-append-version="true"></script>
     <script>
         const userMasterSettings = {

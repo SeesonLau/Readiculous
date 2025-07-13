@@ -162,11 +162,7 @@ const CommonMaster = (function () {
             contentType: false,
             success: function (response) {
                 if (response.success) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const pageSize = urlParams.get('pageSize') || '10';
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('pageSize', pageSize);
-                    window.location.href = newUrl.toString();
+                    window.location.reload();
                 } else {
                     const modalBody = form.closest('.modal-body').attr('id');
                     $(`#${modalBody}`).html(response);
@@ -182,6 +178,7 @@ const CommonMaster = (function () {
         });
     }
 
+
     function handleDeleteConfirmation() {
         const btn = $(this);
         const originalBtnText = btn.html();
@@ -194,11 +191,7 @@ const CommonMaster = (function () {
 
         $.post(settings.deleteUrl, { id: itemId })
             .done(function () {
-                const urlParams = new URLSearchParams(window.location.search);
-                const pageSize = urlParams.get('pageSize') || '10';
-                const newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('pageSize', pageSize);
-                window.location.href = newUrl.toString();
+                window.location.reload();
             })
             .fail(function () {
                 showErrorAlert('Failed to delete item');
@@ -242,6 +235,14 @@ const CommonMaster = (function () {
             // Set up sort order change handler
             if ($('#sortOrder').length) {
                 $('#sortOrder').on('change', loadFilteredResults);
+            }
+
+            if ($('#roleType').length) {
+                $('#roleType').on('change', loadFilteredResults);
+            }
+
+            if ($('#genreFilter').length) {
+                $('#genreFilter').on('change', loadFilteredResults);
             }
 
             // Load initial results if URL has parameters
