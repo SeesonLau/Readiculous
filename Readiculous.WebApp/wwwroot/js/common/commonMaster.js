@@ -233,15 +233,15 @@ const CommonMaster = (function () {
 
             // Set up sort order change handler
             if ($('#sortOrder').length) {
-                $('#sortOrder').on('change', loadFilteredResults); // might need to debounce this
+                $('#sortOrder').on('change', loadFilteredResults); 
             }
             // Set up roleType change handler
             if ($('#roleType').length) {
-                $('#roleType').on('change', loadFilteredResults); // might need to debounce this
+                $('#roleType').on('change', loadFilteredResults); 
             }
             // Set up roleType change handler
             if ($('#genreFilter').length) {
-                $('#genreFilter').on('change', loadFilteredResults); // might need to debounce this
+                $('#genreFilter').on('change', loadFilteredResults);
             }
 
             // Load initial results if URL has parameters

@@ -329,7 +329,7 @@ namespace Readiculous.Services.Services
                     ? bookReviews.Average(r => r.Rating)
                     : 0);
             }
-            return SearchAndSortBook(bookMapModels, sortType, genreFilter)
+            return SortBook(bookMapModels, sortType, genreFilter)
 
                 .ToList();
         }
@@ -367,7 +367,7 @@ namespace Readiculous.Services.Services
                     : 0);
             }
 
-            return SearchAndSortBook(bookViewModels, sortType, genreFilter)
+            return SortBook(bookViewModels, sortType, genreFilter)
 
                 .ToList();
         }
@@ -405,13 +405,13 @@ namespace Readiculous.Services.Services
                     : 0);
             }
 
-            return SearchAndSortBook(bookViewModels, sortType, genreFilter)
+            return SortBook(bookViewModels, sortType, genreFilter)
 
                 .ToList();
         }
 
         // Search And Sort Book Helper Function
-        private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType, string? genreFilter)
+        private IEnumerable<BookListItemViewModel> SortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType, string? genreFilter)
         {
             if (!string.IsNullOrWhiteSpace(genreFilter))
             {
