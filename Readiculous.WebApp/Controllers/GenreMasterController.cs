@@ -154,7 +154,7 @@ namespace Readiculous.WebApp.Controllers
             return View(model);
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult Delete(string id)
         {
             try
