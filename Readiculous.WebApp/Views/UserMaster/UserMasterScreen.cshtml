@@ -29,7 +29,6 @@
             <input type="text" id="searchString" name="searchString" class="filter-input"
                    placeholder="Enter username" value="@ViewData["CurrentFilter"]" />
         </div>
-
         <div class="filter-group col-md-4 px-0 pe-md-2">
             <label for="roleType" class="filter-label">Filter Role</label>
             <select id="roleType" name="roleType" class="filter-input">
@@ -45,18 +44,10 @@
         </div>
 
         <div class="filter-group col-md-4 px-0">
-            <label for="searchType" class="filter-label">Sort By</label>
-            <select id="searchType" name="searchType" class="filter-input">
-                @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
-                {
-                    <option value="@type.Value" selected="@(type.Selected ? "selected" : null)">
-                        @type.Text
-                    </option>
-                }
-            </select>
+            <label for="sortOrder" class="filter-label">Sort By</label>
+            <select id="sortOrder" name="sortOrder" class="filter-input form-select" asp-items="@ViewBag.UserSortTypes"></select>
         </div>
-        @* java script problem, refer to bookmasterscreen.cshtml for reference and is js *@
-       @*  <select name="sortOrder" class="form-select filter-input" asp-items="@ViewBag.BookSortTypes"></select> *@
+
     </div>
 
     <div class="row mx-0">
@@ -119,22 +110,25 @@
     </div>
 </div>
 
-@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml", new {
+    ModalId = "deleteModal",
+    ItemIdField = "itemToDeleteId",
+    ItemNameField = "itemToDeleteName"
+})
 
 @section Scripts {
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
+    <script src="~/js/common/commonMaster.js" asp-append-version="true"></script>
     <script>
         const userMasterSettings = {
+            userMasterScreenUrl: '@Url.Action("UserMasterScreen", "UserMaster")',
             userAddModalUrl: '@Url.Action("UserAddModal", "UserMaster")',
             userEditModalUrl: '@Url.Action("UserEditModal", "UserMaster")',
             userViewModalUrl: '@Url.Action("UserViewModal", "UserMaster")',
-            userMasterScreenUrl: '@Url.Action("UserMasterScreen", "UserMaster")',
             deleteUserUrl: '@Url.Action("Delete", "UserMaster")'
         };
     </script>
-    <script src="~/js/pagination.js"></script>
-    <script src="~/js/pageSize.js"></script>
+
     <script src="~/js/adminUserMaster/usermasterScreen.js" asp-append-version="true"></script>
 }

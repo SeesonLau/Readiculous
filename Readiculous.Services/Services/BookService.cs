@@ -350,9 +350,9 @@ namespace Readiculous.Services.Services
                     model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
                     model.CreatedByUserName = book.CreatedByUser.Username;
                     model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
+
+                    var reviews = _reviewRepository.GetReviewsByBookId(book.BookId).ToList();
+                    model.AverageRating = reviews.Count > 0 ? Math.Round((decimal)reviews.Average(r => r.Rating), 2): 0;
 
                     return model;
                 });

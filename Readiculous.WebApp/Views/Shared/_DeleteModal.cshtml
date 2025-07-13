@@ -1,4 +1,10 @@
-﻿<div class="modal fade delete-modal" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+﻿@{
+    string modalId = Model?.ModalId ?? "deleteModal";
+    string itemIdField = Model?.ItemIdField ?? "itemToDeleteId";
+    string itemNameField = Model?.ItemNameField ?? "itemToDeleteName";
+
+}
+<div class="modal fade delete-modal" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

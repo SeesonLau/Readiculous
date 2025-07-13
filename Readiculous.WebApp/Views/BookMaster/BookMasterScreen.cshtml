@@ -127,14 +127,18 @@
     </div>
 </div>
 
-@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml", new {
+    ModalId = "deleteModal",
+    ItemIdField = "itemToDeleteId",
+    ItemNameField = "itemToDeleteName"
+})
 
 @section Scripts {
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
+    <script src="~/js/common/commonMaster.js" asp-append-version="true"></script>
     <script>
-        var bookMasterSettings = {
+        const bookMasterSettings = {
             bookMasterScreenUrl: '@Url.Action("BookMasterScreen", "BookMaster")',
             bookAddModalUrl: '@Url.Action("BookAddModal", "BookMaster")',
             bookEditModalUrl: '@Url.Action("BookEditModal", "BookMaster")',
@@ -142,12 +146,6 @@
             deleteBookUrl: '@Url.Action("Delete", "BookMaster")'
         };
     </script>
+
     <script src="~/js/adminBookMaster/bookmasterScreen.js" asp-append-version="true"></script>
-    <script>
-        // Check for error message and display Toastr notification
-        var errorMessage = '@TempData["ErrorMessage"]';
-        if (errorMessage) {
-            toastr.error(errorMessage);
-        }
-    </script>
 }
