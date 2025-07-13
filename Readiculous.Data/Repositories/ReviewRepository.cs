@@ -25,13 +25,22 @@ namespace Readiculous.Data.Repositories
             UnitOfWork.SaveChanges();
         }
 
+        public IQueryable<Review> GetAllReviews()
+        {
+            return this.GetDbSet<Review>()
+                .Where(r => r.DeletedTime == null &&
+                            r.Book.DeletedTime == null &&
+                            r.User.DeletedTime == null);
+        }
+
         public IQueryable<Review> GetReviewsByBookId(string bookId)
         {
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
                 .Where(r => r.BookId == bookId &&
-                            r.User.DeletedTime == null);
+                            r.User.DeletedTime == null &&
+                            r.DeletedTime == null);
         }
 
         public IQueryable<Review> GetReviewsWithNavigationPropertiesByUserId(string userId)
@@ -40,12 +49,14 @@ namespace Readiculous.Data.Repositories
                 .Include(r => r.Book)
                 .Include(r => r.User)
                 .Where(r => r.UserId == userId &&
-                        r.Book.DeletedTime == null);
+                            r.Book.DeletedTime == null &&
+                            r.DeletedTime == null);
         }
         public IQueryable<Review> GetReviewsByGenreId(string genreId) 
         {
             return this.GetDbSet<Review>()
                 .Where(r => r.DeletedTime == null && 
+                            r.DeletedTime == null &&
                             r.Book.GenreAssociations
                     .Any(ga => ga.GenreId == genreId &&
                                 ga.Genre.DeletedTime == null));
@@ -54,7 +65,7 @@ namespace Readiculous.Data.Repositories
         {
             return this.GetDbSet<Review>()
                 .Where(r => r.UserId == userId &&
-                        r.DeletedTime == null);
+                            r.DeletedTime == null);
         }
         public Review GetReviewByBookIdAndUserId(string bookId, string userId)
         {

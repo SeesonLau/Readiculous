@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Readiculous.Services.ServiceModels
 {
     public class GenreViewModel
     {
         [Required(ErrorMessage = "Name is required.")]
-        [StringLength(50, ErrorMessage = "Name must not exceed 50 characters!")]
+        [StringLength(20, ErrorMessage = "Name must not exceed 20 characters!")]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Description is required.")]
-        [StringLength(200, ErrorMessage = "Description must not exceed 200 characters!")]
+        [StringLength(300, ErrorMessage = "Description must not exceed 300 characters!")]
         public string Description { get; set; }
 
         public string GenreId { get; set; }

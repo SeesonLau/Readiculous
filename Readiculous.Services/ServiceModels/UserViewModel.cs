@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.ServiceModels
@@ -17,7 +13,7 @@ namespace Readiculous.Services.ServiceModels
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
-        [StringLength(50, ErrorMessage = "Your email must not exceed 50 characters!")]
+        [StringLength(100, ErrorMessage = "Your email must not exceed 100 characters!")]
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
         public string Email { get; set; }
 
