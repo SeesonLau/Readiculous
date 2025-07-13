@@ -18,7 +18,7 @@ namespace Readiculous.Services.Interfaces
         Task AddUserAsync(UserViewModel model, string creationId);
         Task UpdateUserAsync(UserViewModel model, string editorId);
         Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId);
-        Task DeleteUserAsync(string userId, string deleterId);
+        void DeleteUser(string userId, string deleterId);
 
         // Retrieval Methods
         List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest);

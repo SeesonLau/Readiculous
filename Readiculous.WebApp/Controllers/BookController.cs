@@ -9,7 +9,6 @@ using Readiculous.Services.ServiceModels;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 

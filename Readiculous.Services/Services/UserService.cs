@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
+using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.Manager;
@@ -23,6 +25,7 @@ namespace Readiculous.Services.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IGenreRepository _genreRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IFavoriteBookRepository _favoriteBookRepository;
         private readonly IReviewRepository _reviewRepository;
@@ -30,9 +33,10 @@ namespace Readiculous.Services.Services
         private readonly Client _client;
         private readonly IEmailService _emailService;
 
-        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client, IEmailService emailService)
+        public UserService(IUserRepository userRepository, IGenreRepository genreRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client, IEmailService emailService)
         {
             _userRepository = userRepository;
+            _genreRepository = genreRepository;
             _bookRepository = bookRepository;
             _favoriteBookRepository = favoriteBookRepository;
             _reviewRepository = reviewRepository;
@@ -83,8 +87,6 @@ namespace Readiculous.Services.Services
 
                 // Map properties for Username, Email, CreatedTime and UpdatedTime
                 _mapper.Map(model, user);
-                user.Username = user.Username.Trim();
-                user.Email = user.Email.Trim();
                 user.CreatedTime = DateTime.UtcNow;
                 user.UpdatedTime = DateTime.UtcNow;
                 //user.AccessStatus = AccessStatus.FirstTime;
@@ -137,11 +139,9 @@ namespace Readiculous.Services.Services
 
             var user = _userRepository.GetUserById(model.UserId);
 
-            // Map properties for Username, Email, Updated Time, and UpdatedBy
+            // Map properties for Updated Time, and UpdatedBy
 
             _mapper.Map(model, user);
-            user.Username = model.Username.Trim();
-            user.Email = model.Email.Trim();
             user.UpdatedTime = DateTime.UtcNow;
             user.UpdatedBy = editorId;
 
@@ -196,9 +196,9 @@ namespace Readiculous.Services.Services
 
             await UpdateUserAsync(userViewModel, editorId);
         }
-        public async Task DeleteUserAsync(string userId, string deleterId)
+        public void DeleteUser(string userId, string deleterId)
         {
-            if (await Task.Run(() => !_userRepository.UserExists(userId)))
+            if (!_userRepository.UserExists(userId))
             {
                 throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
             }
@@ -220,7 +220,7 @@ namespace Readiculous.Services.Services
             user.DeletedBy = deleterId;
             user.DeletedTime = DateTime.UtcNow;
 
-            await Task.Run(() => _userRepository.UpdateUser(user)); 
+            _userRepository.UpdateUser(user); 
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
@@ -273,7 +273,6 @@ namespace Readiculous.Services.Services
             {
                 EditProfileViewModel userViewModel = new();
                 _mapper.Map(user, userViewModel);
-                userViewModel.ProfilePictureUrl = user.ProfilePictureUrl;
                 userViewModel.NewPassword = PasswordManager.DecryptPassword(user.Password);
                 userViewModel.RemoveProfilePicture = !string.IsNullOrEmpty(user.ProfilePictureUrl);
                 return userViewModel;
@@ -292,38 +291,25 @@ namespace Readiculous.Services.Services
                 UserDetailsViewModel userViewModel = new();
 
                 _mapper.Map(user, userViewModel);
-                userViewModel.ProfileImageUrl = user.ProfilePictureUrl;
-                userViewModel.Role = user.Role.ToString();
-                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId) 
-                    .ToList()
-                    .Select(fb =>
-                    {
-                        var favoriteBookModel = new FavoriteBookModel();
-                        var book = _bookRepository.GetBookById(fb.BookId); 
 
-                        _mapper.Map(book, favoriteBookModel);
-                        favoriteBookModel.BookGenres = book.GenreAssociations.Select(bg => bg.Genre.Name)
-                            .ToList();
+                var favoriteBooks = _favoriteBookRepository.GetFavoriteBooksByUserId(userId).ToList();
 
-                        return favoriteBookModel;
-                    })
+                var bookIds = favoriteBooks
+                    .Select(fb => fb.BookId)
                     .ToList();
-                userViewModel.UserReviewModels = _reviewRepository.GetReviewsWithNavigationPropertiesByUserId(userId)
-                    .ToList()
-                    .Select(r =>
-                    {
-                        var reviewViewModel = new ReviewListItemViewModel();
+                var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+                var favoriteBookMapModels = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
+                foreach(var model in favoriteBookMapModels)
+                {
+                    model.BookGenres = genres
+                        .Where(g => g.BookId == model.BookId)
+                        .Select(g => g.Genre.Name)
+                        .ToList();
+                }
 
-                        _mapper.Map(r, reviewViewModel);
-                        reviewViewModel.Reviewer = r.User.Username;
-                        reviewViewModel.BookName = r.Book.Title;
-                        reviewViewModel.Author = r.Book.Author;
-                        reviewViewModel.PublicationYear = r.Book.PublicationYear;
-                        reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
+                var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
+                userViewModel.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewsByUser);
 
-                        return reviewViewModel;
-                    })
-                    .ToList();
                 userViewModel.TopGenres = userViewModel.FavoriteBookModels
                     .SelectMany(b => b.BookGenres)
                     .GroupBy(genre => genre)
@@ -335,8 +321,7 @@ namespace Readiculous.Services.Services
                     .ToList() ?? new List<string>() { "No genres available" };
 
                 userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2): 0;
-                userViewModel.CreatedByUserName = user.CreatedByUser.Username;
-                userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
+
 
                 return userViewModel;
             }
@@ -397,70 +382,39 @@ namespace Readiculous.Services.Services
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
-            var userViewModels = _userRepository.GetUsersByUsername(string.Empty)
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
+            var allUsers = _userRepository.GetUsersByUsername(string.Empty);
+            var result = _mapper.Map<List<UserListItemViewModel>>(allUsers)
+                .OrderByDescending(u => u.CreatedTime)
+                .ToList();
 
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-
-                    return userViewModel;
-                });
-
-            return userViewModels.OrderByDescending(u => u.CreatedTime).ToList();
+            return result;
         }
-        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType searchType)
+        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType sortType)
         {
-            var userViewModels = _userRepository.GetUsersByUsername(username.Trim())
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
+            var usersByUsername = _userRepository.GetUsersByUsername(username.Trim());
+            var result = _mapper.Map<List<UserListItemViewModel>>(usersByUsername);
 
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-                    
-                    return userViewModel;
-                });
-
-            return searchType switch
+            return sortType switch
             {
-                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
-                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
-                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
-                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList()
+                UserSortType.UsernameAscending => result.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => result.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.Oldest => result.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => result.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => result.OrderByDescending(u => u.UpdatedTime).ToList()
             };
         }
         private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
         {
-            var userViewModels = _userRepository.GetUsersByRoleAndUsername(role, username.Trim())
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
-
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-
-                    return userViewModel;
-                });
+            var usersByRoleAndUsername = _userRepository.GetUsersByRoleAndUsername(role, username.Trim());
+            var result = _mapper.Map<List<UserListItemViewModel>>(usersByRoleAndUsername);
 
             return searchType switch
             {
-                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
-                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
-                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
-                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
+                UserSortType.UsernameAscending => result.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => result.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.Oldest => result.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => result.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => result.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
         }
         // Helper methods for profile picture management
@@ -514,6 +468,7 @@ namespace Readiculous.Services.Services
                 // Check if email already exists
                 if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
+                    return false;
                     return false;
                 }
 

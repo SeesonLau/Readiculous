@@ -171,9 +171,9 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(string userId)
+        public IActionResult Delete(string userId)
         {
-            await _userService.DeleteUserAsync(userId, this.UserId);
+            _userService.DeleteUser(userId, this.UserId);
             return Json(new { success = true });
         }
     }

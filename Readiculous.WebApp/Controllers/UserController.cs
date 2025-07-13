@@ -117,7 +117,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                _userService.DeleteUserAsync(userId, this.UserId);
+                _userService.DeleteUser(userId, this.UserId);
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)
