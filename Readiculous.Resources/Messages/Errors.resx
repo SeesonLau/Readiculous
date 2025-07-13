@@ -183,4 +183,10 @@
   <data name="EmailNotExist" xml:space="preserve">
     <value>Email does not exist!</value>
   </data>
+  <data name="UsernameExists" xml:space="preserve">
+    <value>Username already exists!</value>
+  </data>
+  <data name="UsernameNotExist" xml:space="preserve">
+    <value>Username does not exist!</value>
+  </data>
 </root>
