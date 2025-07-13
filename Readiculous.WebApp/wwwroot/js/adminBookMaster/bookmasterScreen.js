@@ -46,6 +46,7 @@ const BookMasterScreen = (function () {
                 date: $row.find('.date-cell').data('sort-value') || ''
             });
         });
+        $('#emptyStateRow').hide();
     }
 
     function initFromUrlParams() {
@@ -216,6 +217,14 @@ const BookMasterScreen = (function () {
         // Update UI
         $('.book-table tbody tr').hide();
         filteredBooks.forEach(book => book.element.show());
+
+        // Show empty state if no books match the filters
+        const $emptyStateRow = $('#emptyStateRow');
+        if (filteredBooks.length === 0) {
+            $emptyStateRow.show();
+        } else {
+            $emptyStateRow.hide();
+        }
     }
 
     function getSortComparator(sortOrder) {
