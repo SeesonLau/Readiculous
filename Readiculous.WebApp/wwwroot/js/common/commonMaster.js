@@ -1,7 +1,6 @@
-﻿/**
- * CommonMaster - Centralized functionality for all master screens
- * Handles filtering, sorting, pagination, modals, and common operations
- */
+﻿//CommonMaster - Centralized functionality for all master screens
+//Handles filtering, sorting, pagination, modals, and common operations
+
 const CommonMaster = (function () {
     let settings = {};
 
@@ -234,15 +233,15 @@ const CommonMaster = (function () {
 
             // Set up sort order change handler
             if ($('#sortOrder').length) {
-                $('#sortOrder').on('change', loadFilteredResults);
+                $('#sortOrder').on('change', loadFilteredResults); // might need to debounce this
             }
-
+            // Set up roleType change handler
             if ($('#roleType').length) {
-                $('#roleType').on('change', loadFilteredResults);
+                $('#roleType').on('change', loadFilteredResults); // might need to debounce this
             }
-
+            // Set up roleType change handler
             if ($('#genreFilter').length) {
-                $('#genreFilter').on('change', loadFilteredResults);
+                $('#genreFilter').on('change', loadFilteredResults); // might need to debounce this
             }
 
             // Load initial results if URL has parameters
