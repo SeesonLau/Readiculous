@@ -250,6 +250,24 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Username already exists!.
+        /// </summary>
+        public static string UsernameExists {
+            get {
+                return ResourceManager.GetString("UsernameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username does not exist!.
+        /// </summary>
+        public static string UsernameNotExist {
+            get {
+                return ResourceManager.GetString("UsernameNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User is not found!.
         /// </summary>
         public static string UserNotFound {

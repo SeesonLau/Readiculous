@@ -32,6 +32,13 @@ namespace Readiculous.Data.Repositories
                                                 u.UserId != userId &&
                                                 u.DeletedTime == null);
         }
+        public bool UsernameExists(string username, string userId)
+        {
+            return this.GetDbSet<User>()
+                .Any(u => u.Username == username &&
+                          u.UserId != userId &&
+                          u.DeletedTime == null);
+        }
 
         public void AddUser(User user, string creatorId)
         {
