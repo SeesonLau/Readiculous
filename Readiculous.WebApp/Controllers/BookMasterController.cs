@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Readiculous.Services.Interfaces;
@@ -10,6 +11,7 @@ using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -80,6 +82,10 @@ namespace Readiculous.WebApp.Controllers
                     return Json(new { success = true });
                 }
                 catch (InvalidOperationException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (DuplicateNameException ex)
                 {
                     ModelState.AddModelError(string.Empty, ex.Message);
                 }
