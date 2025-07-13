@@ -2,6 +2,7 @@
 using AutoMapper.Configuration.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Resources.Messages;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Data.Repositories;
@@ -61,7 +62,7 @@ namespace Readiculous.Services.Services
             var user = _userRepository.GetUserById(userId);
             if (user == null)
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new InvalidDataException(Errors.UserNotFound);
             }
             return PasswordManager.DecryptPassword(user.Password) == currentPassword;
         }
@@ -76,66 +77,73 @@ namespace Readiculous.Services.Services
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
             // Adds User when Email does not exist
-            if (!_userRepository.EmailExists(model.Email.Trim(), model.UserId))
+            if (_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
-                // Creation of New User Entity
-                var user = new User();
-                if (string.IsNullOrEmpty(model.UserId))
-                {
-                    model.UserId = Guid.NewGuid().ToString();
-                }
+                throw new DuplicateNameException(Errors.EmailExists);
+            }
+            if (_userRepository.UsernameExists(model.Username.Trim(), model.UserId))
+            {
+                throw new DuplicateNameException(Errors.UsernameExists);
+            }
 
-                // Map properties for Username, Email, CreatedTime and UpdatedTime
-                _mapper.Map(model, user);
-                user.CreatedTime = DateTime.UtcNow;
-                user.UpdatedTime = DateTime.UtcNow;
-                //user.AccessStatus = AccessStatus.FirstTime;
+            // Creation of New User Entity
+            var user = new User();
+            if (string.IsNullOrEmpty(model.UserId))
+            {
+                model.UserId = Guid.NewGuid().ToString();
+            }
 
-                // If a picture was uploaded
-                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
-                {
-                    // Upload picture
-                    user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
-                }
+            // Map properties for Username, Email, CreatedTime and UpdatedTime
+            _mapper.Map(model, user);
+            user.CreatedTime = DateTime.UtcNow;
+            user.UpdatedTime = DateTime.UtcNow;
+            //user.AccessStatus = AccessStatus.FirstTime;
 
-                // If the creator is not the same as the new user (admin creation), generate a temp password
-                /*bool isAdminCreated = creatorId != model.UserId;
-                string tempPassword = null;
-                if (isAdminCreated)
-                {
-                    tempPassword = OtpManager.GenerateTempPassword();
-                    user.Password = PasswordManager.EncryptPassword(tempPassword);
-                }
-                else
-                {
-                    user.Password = PasswordManager.EncryptPassword(model.Password);
-                }*/
+            // If a picture was uploaded
+            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                // Upload picture
+                user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+            }
 
-                 //Add User
-                _userRepository.AddUser(user, creatorId);
-
-                 //Send temp password email if admin created
-                /*if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
-                {
-                    await _emailService.SendTempPasswordEmailAsync(user.Email, tempPassword);
-                }*/
+            // If the creator is not the same as the new user (admin creation), generate a temp password
+            /*bool isAdminCreated = creatorId != model.UserId;
+            string tempPassword = null;
+            if (isAdminCreated)
+            {
+                tempPassword = OtpManager.GenerateTempPassword();
+                user.Password = PasswordManager.EncryptPassword(tempPassword);
             }
             else
             {
-                throw new DuplicateNameException(Resources.Messages.Errors.EmailExists);
-            }
+                user.Password = PasswordManager.EncryptPassword(model.Password);
+            }*/
+
+            //Add User
+            _userRepository.AddUser(user, creatorId);
+
+            //Send temp password email if admin created
+            /*if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
+            {
+                await _emailService.SendTempPasswordEmailAsync(user.Email, tempPassword);
+            }*/
         }
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
             if(!_userRepository.UserExists(model.UserId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserExists);
             }
             
-            if(!_userRepository.EmailExists(model.Email.Trim(), model.UserId))
+            if(_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
+                throw new DuplicateNameException(Errors.EmailExists);
             }
+
+            if(_userRepository.UsernameExists(model.Username.Trim(), model.UserId))
+            {
+                throw new DuplicateNameException(Errors.UsernameNotExist);
+            }    
 
             var user = _userRepository.GetUserById(model.UserId);
 
@@ -178,11 +186,15 @@ namespace Readiculous.Services.Services
         {
             if (!_userRepository.UserExists(editProfileViewModel.UserId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
-            if (!_userRepository.EmailExists(editProfileViewModel.Email.Trim(), editProfileViewModel.UserId))
+            if (_userRepository.EmailExists(editProfileViewModel.Email.Trim(), editProfileViewModel.UserId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.EmailNotExist);
+                throw new DuplicateNameException(Errors.EmailExists);
+            }
+            if(_userRepository.UsernameExists(editProfileViewModel.Username.Trim(), editProfileViewModel.UserId))
+            {
+                throw new DuplicateNameException(Errors.UsernameExists);
             }
 
             var user = _userRepository.GetUserById(editProfileViewModel.UserId);
@@ -200,7 +212,7 @@ namespace Readiculous.Services.Services
         {
             if (!_userRepository.UserExists(userId))
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
             if (userId == deleterId)
             {
@@ -263,7 +275,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
         }
         public EditProfileViewModel GetEditProfileById(string userId)
@@ -279,7 +291,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
         }
         public UserDetailsViewModel GetUserDetailsById(string userId)
@@ -327,7 +339,7 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
         }
         public User GetUserById(string userId)
@@ -373,7 +385,7 @@ namespace Readiculous.Services.Services
 
             if(user == null)
             {
-                throw new KeyNotFoundException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
 
             return user.Email;
@@ -429,7 +441,7 @@ namespace Readiculous.Services.Services
 
             if (result == null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+                throw new InvalidOperationException(Errors.ImageFailedToDelete);
             }
         }
         private async Task<string> UploadProfilePicture(IFormFile file, string userId)

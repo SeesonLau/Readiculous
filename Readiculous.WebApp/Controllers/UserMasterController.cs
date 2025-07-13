@@ -108,7 +108,7 @@ namespace Readiculous.WebApp.Controllers
                 {
                     TempData["ErrorMessage"] = ex.Message;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 }
