@@ -89,48 +89,103 @@ const CommonMaster = (function () {
         const page = urlParams.get('page') || '1';
         const pageSize = urlParams.get('pageSize') || '10';
 
-        const formData = form.serialize() + `&page=${page}&pageSize=${pageSize}`;
+        // Build form data more safely
+        const formData = `${form.serialize()}&page=${page}&pageSize=${pageSize}`;
 
-        $(settings.listContainer).html(loadingSpinner);
+        // Show loading state
+        const $container = $(settings.listContainer);
+        $container.html(loadingSpinner);
 
         try {
             const response = await $.ajax({
                 url: settings.masterScreenUrl,
                 type: 'GET',
                 data: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                dataType: 'html' // Explicitly expect HTML response
             });
 
+            // Update URL first
             updateUrlWithFilters(formData);
-            const content = $(response).find(settings.listContainer).html() || response;
-            $(settings.listContainer).html(content);
 
-            // Update pagination controls
-            const paginationHtml = $(response).find('.pagination-container').html();
-            if (paginationHtml) {
-                $('.pagination-container').html(paginationHtml);
+            // Parse the response safely
+            const $response = $(response);
+
+            // Update main content
+            const content = $response.find(settings.listContainer).html() || response;
+            $container.html(content);
+
+            // Helper function to safely update sections
+            const updateSection = (selector) => {
+                const $section = $(selector);
+                if ($section.length) {
+                    const html = $response.find(selector).html();
+                    if (html) $section.html(html);
+                }
+            };
+
+            // Update pagination and page size controls
+            updateSection('.pagination-container');
+            updateSection('.page-size-container');
+
+            // Reinitialize any components if needed
+            if (typeof initComponents === 'function') {
+                initComponents();
             }
 
-            // Update page size controls
-            const pageSizeHtml = $(response).find('.page-size-container').html();
-            if (pageSizeHtml) {
-                $('.page-size-container').html(pageSizeHtml);
-            }
         } catch (error) {
-            showErrorAlert('Failed to load data. Please try again.');
+            console.error('Filter load error:', error);
+
+            let errorMessage = 'Failed to load data. Please try again.';
+            if (error.responseText) {
+                try {
+                    const errResponse = JSON.parse(error.responseText);
+                    errorMessage = errResponse.message || errorMessage;
+                } catch (e) {
+                    // Not JSON, use default message
+                }
+            }
+
+            showErrorAlert(errorMessage);
+
+            // Optionally restore previous content
+            if (window.lastGoodContent) {
+                $container.html(window.lastGoodContent);
+            }
+        } finally {
+            // Any cleanup if needed
         }
     }
 
+    // Helper function to update URL
     function updateUrlWithFilters(params) {
-        const newUrl = `${window.location.pathname}?${params}`;
-        window.history.replaceState({ path: newUrl }, '', newUrl);
+        try {
+            const url = new URL(window.location.href);
+            const newParams = new URLSearchParams(params);
+
+            // Update all parameters
+            newParams.forEach((value, key) => {
+                url.searchParams.set(key, value);
+            });
+
+            window.history.replaceState({ path: url.href }, '', url.href);
+        } catch (e) {
+            console.error('Failed to update URL:', e);
+        }
     }
 
     function loadModalContent(modalBodyId, url, formId = null) {
         $(modalBodyId).html(loadingSpinner);
-        $(modalBodyId).load(url, function () {
+        $(modalBodyId).load(url, function (response, status, xhr) {
             if (formId) {
-                $.validator.unobtrusive.parse(formId);
+                const form = $(formId);
+                $.validator.unobtrusive.parse(form);
+
+                // Remove any existing handlers to prevent duplicate bindings
+                form.off('submit');
+
+                // Bind the new handler
+                form.on('submit', handleFormSubmit);
             }
         });
     }
@@ -140,7 +195,7 @@ const CommonMaster = (function () {
         const form = $(this);
         const submitBtn = form.find('button[type="submit"]');
         const originalBtnText = submitBtn.html();
-
+        const modal = form.closest('.modal');
         if (!form.valid()) {
             showErrorAlert('Please fill in all required fields correctly.');
             return;
@@ -158,10 +213,11 @@ const CommonMaster = (function () {
             type: 'POST',
             data: formData,
             processData: false,
-            contentType: false,
+            contentType: false,           
             success: function (response) {
                 if (response.success) {
-                    window.location.reload();
+                    modal.modal('hide');
+                    loadFilteredResults(); 
                 } else {
                     const modalBody = form.closest('.modal-body').attr('id');
                     $(`#${modalBody}`).html(response);
