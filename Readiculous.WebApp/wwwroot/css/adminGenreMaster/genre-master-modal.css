@@ -1,0 +1,127 @@
+﻿/* Genre Modal Styles */
+.genre-modal-card {
+    padding: 1.5rem;
+    background-color: var(--color-modal);
+    border-radius: 12px;
+}
+
+.genre-modal-label {
+    font-family: var(--font-secondary);
+    font-weight: 500;
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.genre-modal-input,
+.genre-modal-textarea {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+    .genre-modal-input:focus,
+    .genre-modal-textarea:focus {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.15);
+        outline: none;
+    }
+
+.genre-modal-textarea {
+    resize: vertical;
+    min-height: 100px;
+    max-height: 200px;
+}
+
+.genre-modal-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.genre-modal .btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-family: var(--font-secondary);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.genre-btn-cancel {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+    .genre-btn-cancel:hover {
+        background-color: var(--color-highlight);
+        border-color: var(--color-highlight);
+    }
+
+.genre-btn-save {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-modal);
+}
+
+    .genre-btn-save:hover {
+        background-color: var(--color-header);
+        border-color: var(--color-header);
+    }
+
+/* Modal size adjustments */
+.genre-modal .modal-dialog {
+    max-width: 600px;
+}
+
+.genre-modal .modal-content {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(139, 94, 131, 0.2);
+}
+
+.genre-modal .modal-header {
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    padding: 1rem 1.5rem;
+    border-bottom: none;
+}
+
+.genre-modal .modal-title {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.genre-modal .modal-body {
+    padding: 0;
+}
+
+/* Validation error styles */
+.text-danger.small {
+    font-size: 0.8rem;
+    color: var(--color-danger);
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .genre-modal .modal-dialog {
+        margin: 1rem auto;
+    }
+
+    .genre-modal-card {
+        padding: 1rem;
+    }
+}
+
+

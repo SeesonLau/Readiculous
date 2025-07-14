@@ -77,6 +77,10 @@
             </tr>
         }
 
+        <tr id="emptyStateRow" style="display: none;">
+            <td colspan="9" class="text-center text-muted empty-state">No books found matching your criteria.</td>
+         </tr>
+
         @if (!Model.Any())
         {
             <tr>

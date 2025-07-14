@@ -30,16 +30,16 @@ namespace Readiculous.WebApp.Controllers
         }
 
         //GenreListItemViewModel
-        public IActionResult GenreMasterScreen(string searchString, GenreSortType sortType = GenreSortType.Latest, int page = 1, int pageSize = 10)
+        public IActionResult GenreMasterScreen(string searchString, GenreSortType sortOrder = GenreSortType.Latest, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentGenreSearchType"] = sortType;
+            ViewData["CurrentGenreSearchType"] = sortOrder;
 
-            ViewBag.GenreSortTypes = _genreService.GetGenreSortTypes(sortType);
+            ViewBag.GenreSortTypes = _genreService.GetGenreSortTypes(sortOrder);
 
             var allGenres = _genreService.GetGenreList(
                 searchString,
-                sortType : sortType);
+                sortType : sortOrder);
 
             var totalItems = allGenres.Count;
             var paginatedGenres = allGenres
@@ -151,7 +151,7 @@ namespace Readiculous.WebApp.Controllers
             return View(model);
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult Delete(string id)
         {
             try

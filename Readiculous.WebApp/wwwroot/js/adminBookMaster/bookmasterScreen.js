@@ -1,280 +1,292 @@
-﻿const BookMasterScreen = (function () {
-    let settings = {};
-    const loadingSpinner = `
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading books...</p>
-        </div>`;
+﻿// Cache temporary fix for genreFilter response time
 
-    function debounce(func, wait) {
-        let timeout;
-        return function () {
-            const context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                func.apply(context, args);
-            }, wait);
+const BookMasterScreen = (function () {
+    let allBooks = []; // Cache for all books
+    let currentFilters = {
+        searchString: '',
+        genreFilters: {},
+        sortOrder: ''
+    };
+
+    function init(config) {
+        // Cache all books on initial load
+        cacheAllBooks();
+
+        const bookSettings = {
+            masterScreenUrl: config.bookMasterScreenUrl || window.location.pathname,
+            listContainer: '#bookListContainer',
+            addModalUrl: config.bookAddModalUrl,
+            editModalUrl: config.bookEditModalUrl,
+            viewModalUrl: config.bookViewModalUrl,
+            deleteUrl: config.deleteBookUrl,
+            filterForm: '#bookFilterForm'
         };
+
+        CommonMaster.init(bookSettings);
+        initGenreDropdown();
+        initEventHandlers(bookSettings);
+
+        // Initialize from URL params if present
+        initFromUrlParams();
     }
 
-    function initializeEventHandlers() {
-        // Pagination
-        $(document).on('click', '[data-page-size]', function (e) {
-            e.preventDefault();
-            const pageSize = $(this).data('page-size');
-            updateUrlWithPageSize(pageSize);
-        });
+    function cacheAllBooks() {
+        allBooks = [];
+        $('.book-table tbody tr').each(function () {
+            const $row = $(this);
+            const genres = $row.find('.genre-badge').map(function () {
+                return $(this).text().trim().toLowerCase();
+            }).get();
 
-        $(document).on('click', '.pagination .page-link:not(.jump-to-page)', function (e) {
-            e.preventDefault();
-            const page = $(this).data('page');
-            if (page && !$(this).closest('.page-item').hasClass('disabled')) {
-                updateUrlWithPage(page);
-            }
-        });
-
-        function updateUrlWithPage(page) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('page', page);
-            window.history.replaceState({ path: url.toString() }, '', url.toString());
-            loadFilteredResults();
-        }
-
-        function updateUrlWithPageSize(pageSize) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('pageSize', pageSize);
-            url.searchParams.set('page', '1'); // Reset to first page when changing page size
-            window.history.replaceState({ path: url.toString() }, '', url.toString());
-            loadFilteredResults();
-        }
-
-        // Modify the loadFilteredResults function to include pagination params
-        async function loadFilteredResults() {
-            const form = $('#bookFilterForm');
-            const urlParams = new URLSearchParams(window.location.search);
-            const page = urlParams.get('page') || '1';
-            const pageSize = urlParams.get('pageSize') || '10';
-
-            const formData = form.serialize() + `&page=${page}&pageSize=${pageSize}`;
-
-            $('#bookListContainer').html(loadingSpinner);
-
-            try {
-                const response = await $.ajax({
-                    url: settings.bookMasterScreenUrl,
-                    type: 'GET',
-                    data: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-
-                updateUrlWithFilters(formData);
-                const content = $(response).find('#bookListContainer').html() || response;
-                $('#bookListContainer').html(content);
-
-                // Update pagination controls
-                const paginationHtml = $(response).find('.pagination-container').html();
-                if (paginationHtml) {
-                    $('.pagination-container').html(paginationHtml);
-                }
-
-                // Update page size controls
-                const pageSizeHtml = $(response).find('.page-size-container').html();
-                if (pageSizeHtml) {
-                    $('.page-size-container').html(pageSizeHtml);
-                }
-            } catch (error) {
-                showErrorAlert('Failed to load books. Please try again.');
-            }
-        }
-
-        // FILTERS
-
-        const filterForm = $('#bookFilterForm');
-
-        $('input[name="searchString"]').on('input', debounce(loadFilteredResults, 300));
-        $('select[name="searchType"], select[name="genreFilter"], select[name="sortOrder"]').on('change', loadFilteredResults);
-        $(document).on('change', 'input[name="selectedGenreIds"]', debounce(loadFilteredResults, 300));
-
-        $(document).on('click', '.btn-add-book', function () {
-            $('#addBookModalBody').html(loadingSpinner);
-            $('#addBookModal').modal('show');
-            $('#addBookModalBody').load(settings.bookAddModalUrl, function () {
-                $.validator.unobtrusive.parse('#addBookForm');
+            allBooks.push({
+                element: $row,
+                title: $row.find('.title-cell').text().trim().toLowerCase(),
+                genres: genres,
+                author: $row.find('.author-cell').text().trim().toLowerCase(),
+                date: $row.find('.date-cell').data('sort-value') || ''
             });
         });
+        $('#emptyStateRow').hide();
+    }
 
+    function initFromUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Search string
+        if (urlParams.has('searchString')) {
+            currentFilters.searchString = urlParams.get('searchString').toLowerCase();
+            $('input[name="searchString"]').val(urlParams.get('searchString'));
+        }
+
+        // Sort order
+        if (urlParams.has('sortOrder')) {
+            currentFilters.sortOrder = urlParams.get('sortOrder');
+            $('select[name="sortOrder"]').val(urlParams.get('sortOrder'));
+        }
+
+        // Genre filters
+        if (urlParams.has('genreFilter')) {
+            const genreFilterParam = urlParams.get('genreFilter');
+            genreFilterParam.split(',').forEach(filter => {
+                const action = filter[0] === '+' ? 'include' : 'exclude';
+                const genre = decodeURIComponent(filter.substring(1)).toLowerCase();
+                currentFilters.genreFilters[genre] = action;
+
+                // Update UI for genre checkboxes
+                $(`.genre-check-item`).each(function () {
+                    const $item = $(this);
+                    const itemGenre = $item.find('.genre-check-label').text().trim().toLowerCase();
+                    if (itemGenre === genre) {
+                        $item.attr('data-state', action === 'include' ? 'included' : 'excluded');
+                        $item.find('.genre-checkbox').html(action === 'include' ? '✓' : '✕');
+                    }
+                });
+            });
+            updateSelectedCount();
+        }
+
+        // Apply initial filters
+        applyFilters();
+    }
+
+    function initGenreDropdown() {
+        const $dropdownToggle = $('.genre-dropdown-toggle');
+        const $dropdownMenu = $('.genre-dropdown-menu');
+        const $selectedCount = $('.selected-genres-count');
+        const $selectedText = $('.selected-genres-text');
+
+        // Toggle dropdown
+        $dropdownToggle.on('click', function (e) {
+            e.stopPropagation();
+            $(this).toggleClass('open');
+            $dropdownMenu.toggleClass('open');
+        });
+
+        // Close when clicking outside
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.genre-filter-container').length) {
+                $dropdownToggle.removeClass('open');
+                $dropdownMenu.removeClass('open');
+            }
+        });
+
+        // Initialize genre items
+        $('.genre-check-item').on('click', function () {
+            const $this = $(this);
+            const currentState = $this.attr('data-state') || 'unchecked';
+            const genreName = $this.find('.genre-check-label').text().trim().toLowerCase();
+
+            // Cycle through states
+            if (currentState === 'unchecked') {
+                $this.attr('data-state', 'included');
+                currentFilters.genreFilters[genreName] = 'include';
+                $this.find('.genre-checkbox').html('✓');
+            } else if (currentState === 'included') {
+                $this.attr('data-state', 'excluded');
+                currentFilters.genreFilters[genreName] = 'exclude';
+                $this.find('.genre-checkbox').html('✕');
+            } else {
+                $this.attr('data-state', 'unchecked');
+                delete currentFilters.genreFilters[genreName];
+                $this.find('.genre-checkbox').html('');
+            }
+
+            updateSelectedCount();
+            applyFilters();
+            updateUrlParams();
+        });
+
+        function updateSelectedCount() {
+            const count = Object.keys(currentFilters.genreFilters).length;
+            $selectedCount.text(count).toggle(count > 0);
+            $selectedText.text(count === 0 ? 'Select genres' :
+                count === 1 ? '1 genre selected' : `${count} genres selected`);
+        }
+    }
+
+    function initEventHandlers(bookSettings) {
+        // Add Book
+        $(document).on('click', '.btn-add-book', function () {
+            $('#addBookModal').modal('show');
+            CommonMaster.loadModalContent('#addBookModalBody', bookSettings.addModalUrl, '#addBookForm');
+        });
+
+        // Edit Book
         $(document).on('click', '.btn-edit-book', function () {
             const bookId = $(this).data('bookid');
-            $('#editBookModalBody').html(loadingSpinner);
             $('#editBookModal').modal('show');
-            $('#editBookModalBody').load(`${settings.bookEditModalUrl}?id=${bookId}`, function () {
-                $.validator.unobtrusive.parse('#editBookForm');
-            });
+            CommonMaster.loadModalContent('#editBookModalBody', `${bookSettings.editModalUrl}?id=${bookId}`, '#editBookForm');
         });
 
+        // View Book
         $(document).on('click', '.btn-view-book', function () {
             const bookId = $(this).data('bookid');
-            $('#viewBookModalBody').html(loadingSpinner);
             $('#viewBookModal').modal('show');
-            $('#viewBookModalBody').load(`${settings.bookViewModalUrl}?id=${bookId}`);
+            CommonMaster.loadModalContent('#viewBookModalBody', `${bookSettings.viewModalUrl}?id=${bookId}`);
         });
 
+        // Delete Book
         $(document).on('click', '.btn-delete-book', function () {
             const bookId = $(this).data('bookid');
             const bookName = $(this).data('bookname');
-            $('#userToDeleteId').val(bookId);
-            $('#userToDeleteName').text(bookName);
-            $('#deleteUserModal').modal('show');
+            $('#itemToDeleteId').val(bookId);
+            $('#itemToDeleteName').text(bookName);
+            $('#deleteModal').modal('show');
         });
 
-        $(document).on('submit', '#addBookForm, #editBookForm', handleFormSubmit);
-        $('#confirmDeleteBtn').click(handleDeleteConfirmation);
+        // Search Input
+        $(document).on('input', 'input[name="searchString"]', CommonMaster.debounce(function () {
+            CommonMaster.loadFilteredResults();
+        }, 300));
+
+
+        // Sort Order
+        $(document).on('change', 'select[name="sortOrder"]', CommonMaster.debounce(function () {
+            CommonMaster.loadFilteredResults();
+        }, 300));
     }
 
-    async function loadFilteredResults() {
-        const form = $('#bookFilterForm');
-        const formData = form.serialize();
+    function applyFilters() {
+        const filteredBooks = allBooks.filter(book => {
+            // Search filter
+            if (currentFilters.searchString &&
+                !book.title.includes(currentFilters.searchString)) {
+                return false;
+            }
 
-        $('#bookListContainer').html(loadingSpinner);
+            // Genre filters
+            const genreFilters = currentFilters.genreFilters;
+            if (Object.keys(genreFilters).length > 0) {
+                for (const [genre, action] of Object.entries(genreFilters)) {
+                    const hasGenre = book.genres.includes(genre.toLowerCase());
+                    if ((action === 'include' && !hasGenre) ||
+                        (action === 'exclude' && hasGenre)) {
+                        return false;
+                    }
+                }
+            }
 
-        try {
-            const response = await $.ajax({
-                url: settings.bookMasterScreenUrl,
-                type: 'GET',
-                data: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
+            return true;
+        });
 
-            updateUrlWithFilters(formData);
-            const content = $(response).find('#bookListContainer').html() || response;
-            $('#bookListContainer').html(content);
-        } catch (error) {
-            showErrorAlert('Failed to load books. Please try again.');
+        // Sort if needed
+        if (currentFilters.sortOrder) {
+            filteredBooks.sort(getSortComparator(currentFilters.sortOrder));
+        }
+
+        // Update UI
+        $('.book-table tbody tr').hide();
+        filteredBooks.forEach(book => book.element.show());
+
+        // Show empty state if no books match the filters
+        const $emptyStateRow = $('#emptyStateRow');
+        if (filteredBooks.length === 0) {
+            $emptyStateRow.show();
+        } else {
+            $emptyStateRow.hide();
         }
     }
 
-    function updateUrlWithFilters(params) {
-        const newUrl = `${window.location.pathname}?${params}`;
+    function getSortComparator(sortOrder) {
+        switch (sortOrder) {
+            case 'title_asc':
+                return (a, b) => a.title.localeCompare(b.title);
+            case 'title_desc':
+                return (a, b) => b.title.localeCompare(a.title);
+            case 'author_asc':
+                return (a, b) => a.author.localeCompare(b.author);
+            case 'author_desc':
+                return (a, b) => b.author.localeCompare(a.author);
+            case 'date_asc':
+                return (a, b) => new Date(a.date) - new Date(b.date);
+            case 'date_desc':
+                return (a, b) => new Date(b.date) - new Date(a.date);
+            default:
+                return () => 0;
+        }
+    }
+
+    function updateUrlParams() {
+        const urlParams = new URLSearchParams();
+
+        if (currentFilters.searchString) {
+            urlParams.set('searchString', currentFilters.searchString);
+        }
+
+        if (currentFilters.sortOrder) {
+            urlParams.set('sortOrder', currentFilters.sortOrder);
+        }
+
+        // Convert genre filters to URL format
+        const genreParams = [];
+        for (const [genre, action] of Object.entries(currentFilters.genreFilters)) {
+            genreParams.push(`${action === 'include' ? '+' : '-'}${encodeURIComponent(genre)}`);
+        }
+
+        if (genreParams.length > 0) {
+            urlParams.set('genreFilter', genreParams.join(','));
+        }
+
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({ path: newUrl }, '', newUrl);
     }
 
-    function handleFormSubmit(e) {
-        e.preventDefault();
-        const form = $(this);
-        const submitBtn = form.find('button[type="submit"]');
-        const originalBtnText = submitBtn.html();
-
-        if (!form.valid()) {
-            showErrorAlert('Please fill in all required fields correctly.');
-            return;
-        }
-
-        submitBtn.prop('disabled', true).html(`
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Processing...
-    `);
-
-        const formData = new FormData(form[0]);
-
-        $.ajax({
-            url: form.attr('action'),
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                if (response.success) {
-                    // Get current pageSize from URL or use default
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const pageSize = urlParams.get('pageSize') || '10';
-
-                    // Reload with the preserved pageSize
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('pageSize', pageSize);
-                    window.location.href = newUrl.toString();
-                } else {
-                    const modalBody = form.closest('.modal-body').attr('id');
-                    $(`#${modalBody}`).html(response);
-                    $.validator.unobtrusive.parse(form);
-                }
-            },
-            error: function () {
-                showErrorAlert('Request failed. Please try again.');
-            },
-            complete: function () {
-                submitBtn.prop('disabled', false).html(originalBtnText);
-            }
-        });
-    }
-
-    function handleDeleteConfirmation() {
-        const btn = $(this);
-        const originalBtnText = btn.html();
-        const bookId = $('#userToDeleteId').val();
-
-        btn.prop('disabled', true).html(`
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Deleting...
-    `);
-
-        $.post(settings.deleteBookUrl, { id: bookId })
-            .done(function () {
-                // Preserve pageSize on delete
-                const urlParams = new URLSearchParams(window.location.search);
-                const pageSize = urlParams.get('pageSize') || '10';
-                const newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('pageSize', pageSize);
-                window.location.href = newUrl.toString();
-            })
-            .fail(function () {
-                showErrorAlert('Failed to delete book');
-            })
-            .always(function () {
-                btn.prop('disabled', false).html(originalBtnText);
-                $('#deleteUserModal').modal('hide');
-            });
-    }
-
-    function showErrorAlert(message) {
-        const alertHtml = `
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`;
-
-        $('#bookListContainer').prepend(alertHtml);
-        setTimeout(() => $('.alert').alert('close'), 5000);
-    }
-
-    return {
-        init: function (config) {
-            settings = config;
-            initializeEventHandlers();
-            const initialParams = new URLSearchParams(window.location.search);
-            if (initialParams.toString()) {
-                loadFilteredResults();
-            }
-        }
-    };
-
+    return { init };
 })();
 
 $(function () {
-    if (typeof bookMasterSettings !== 'undefined') {
-        if (!bookMasterSettings.bookMasterScreenUrl) {
-            bookMasterSettings.bookMasterScreenUrl = window.location.pathname;
-        }
-        BookMasterScreen.init(bookMasterSettings);
-    } else {
-        BookMasterScreen.init({
-            bookMasterScreenUrl: window.location.pathname,
-            bookAddModalUrl: '/BookMaster/BookAddModal',
-            bookEditModalUrl: '/BookMaster/BookEditModal',
-            bookViewModalUrl: '/BookMaster/BookViewModal',
-            deleteBookUrl: '/BookMaster/Delete'
-        });
-    }
+    const defaultSettings = {
+        bookMasterScreenUrl: window.location.pathname,
+        bookAddModalUrl: '/BookMaster/BookAddModal',
+        bookEditModalUrl: '/BookMaster/BookEditModal',
+        bookViewModalUrl: '/BookMaster/BookViewModal',
+        deleteBookUrl: '/BookMaster/Delete'
+    };
+
+    const settings = typeof bookMasterSettings !== 'undefined' ?
+        { ...defaultSettings, ...bookMasterSettings } : defaultSettings;
+
+    BookMasterScreen.init(settings);
 });
+
+
