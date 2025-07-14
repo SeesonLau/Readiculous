@@ -5,7 +5,19 @@
 }
 
 <section class="container py-4">
-    <input type="text" class="form-control mb-5" placeholder="🔍 Book Search..." />
+
+    <!-- ✅ NEW CODE: Search bar container -->
+    <div class="position-relative mb-5">
+        <input type="text"
+               class="form-control"
+               id="bookSearchNewBook"
+               placeholder="🔍 Book Search..."
+               autocomplete="off" />
+        <div id="searchResultsNewBook"
+             class="list-group position-absolute"
+             style="z-index: 999; width: 100%; display: none;"></div>
+    </div>
+
     <h2 class="section-title mb-4 text-center">NEW BOOKS</h2>
 
     @if (Model != null && Model.Count > 0)
@@ -32,6 +44,7 @@
         </div>
 
         <!-- Bottom Row (Next 5 Books) -->
+
         <div class="book-wrapper p-4">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
                 @foreach (var book in Model.Skip(5).Take(5))
@@ -58,6 +71,15 @@
             No new books found in the past 2 weeks.
         </div>
     }
+
+    <!-- ✅ NEW CODE: JSON data -->
+    <input type="hidden" id="booksJsonNewBook" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+        Model.Select(b => new {
+            id = b.BookId,
+            title = b.Title.Trim(),
+            cover = string.IsNullOrEmpty(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
+        })
+    ))' />
 
     <!-- Pagination (Placeholder) -->
     <div class="mt-5 d-flex justify-content-center">
@@ -138,4 +160,17 @@
         background-color: #edaec0;
         color: white;
     }
+
+    #searchResultsNewBook {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+        #searchResultsNewBook .list-group-item {
+            padding: 8px 12px;
+        }
 </style>
+
+@section Scripts {
+    <script src="~/js/newBook.js"></script>
+}

@@ -1,9 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
-    var userRole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
-    var userName = HttpContextAccessor.HttpContext.Session.GetString("UserName");
+    var userRole = User.FindFirst("UserRole")?.Value; // Use user Identity Claims instead of this
+    var userName = User.FindFirst("UserName")?.Value;
     var isLoggedIn = !string.IsNullOrEmpty(userRole);
     var isAdmin = userRole == "Admin";
     var isReviewer = userRole == "Reviewer";
@@ -58,6 +59,11 @@
                     <ul>
                         @if (isReviewer)
                         {
+
+                            <li>
+                                <i class="fa-solid fa-gear"></i>
+                                <a class="yes">New Books</a>
+                            </li>
                             <li>
                                 <i class="fa-solid fa-gear"></i>
                                 <a class="open-edit-profile">Edit Profile</a>
