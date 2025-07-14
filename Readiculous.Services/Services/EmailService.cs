@@ -44,29 +44,11 @@ namespace Readiculous.Services.Services
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
                 var resolvedPassword = ResolveSmtpPassword(smtpSettings);
-                
-                
-                Console.WriteLine($"🔧 SMTP Configuration:");
-                Console.WriteLine($"   Host: {smtpSettings["Host"]}");
-                Console.WriteLine($"   Port: {smtpSettings["Port"]}");
-                Console.WriteLine($"   SSL: {smtpSettings["EnableSsl"]}");
-                Console.WriteLine($"   Username: {smtpSettings["Username"]}");
-                Console.WriteLine($"   Password: {resolvedPassword.Substring(0, Math.Min(4, resolvedPassword.Length))}***");
-                
-                var smtpClient = new SmtpClient
-                {
-                    Host = smtpSettings["Host"],
-                    Port = int.Parse(smtpSettings["Port"]),
-                    EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
-                    UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(smtpSettings["Username"], resolvedPassword),
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    Timeout = 10000 
-                };
-
+                var fromEmail = smtpSettings["FromEmail"] ?? "no-reply@readiculous.com";
+                var fromName = smtpSettings["FromName"] ?? "Readiculous Team";
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
+                    From = new MailAddress(fromEmail, fromName),
                     Subject = "Your OTP - Readiculous",
                     Body = $@"
                         <html>
@@ -74,10 +56,8 @@ namespace Readiculous.Services.Services
                             <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
                                 <h2 style='color: #007bff; margin-bottom: 20px;'>Welcome to Readiculous!</h2>
                                 <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                                    <p style='margin-bottom: 10px;'>Your verification code is:</p>
-                                    <div style='font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 5px; padding: 15px; background-color: #e9ecef; border-radius: 5px;'>
-                                        {otp}
-                                
+                                    <p style='margin-bottom: 10px;'>Your verification code is: <b>{otp}</b></p>
+                                    <p style='color: #d63384; font-weight: bold; margin-top: 18px;'>DO NOT REPLY TO THIS EMAIL.</p>
                                 </div>
                                 <p style='color: #6c757d; font-size: 14px;'>This code and password will expire in 10 minutes.</p>
                                 <p style='color: #6c757d; font-size: 14px;'>If you didn't request this code, please ignore this email.</p>
@@ -89,7 +69,16 @@ namespace Readiculous.Services.Services
                     IsBodyHtml = true
                 };
                 mailMessage.To.Add(email);
-
+                var smtpClient = new SmtpClient
+                {
+                    Host = smtpSettings["Host"],
+                    Port = int.Parse(smtpSettings["Port"]),
+                    EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(smtpSettings["Username"], resolvedPassword),
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Timeout = 10000 
+                };
                 await smtpClient.SendMailAsync(mailMessage);
                 Console.WriteLine($"✅ Email sent successfully to {email}");
                 return true;
@@ -108,10 +97,11 @@ namespace Readiculous.Services.Services
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
                 var resolvedPassword = ResolveSmtpPassword(smtpSettings);
-                
+                var fromEmail = smtpSettings["FromEmail"] ?? "no-reply@readiculous.com";
+                var fromName = smtpSettings["FromName"] ?? "Readiculous Team";
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"] ?? "Readiculous Team"),
+                    From = new MailAddress(fromEmail, fromName),
                     Subject = "Your Temporary Password - Readiculous",
                     Body = $@"
                         <html>
@@ -119,10 +109,8 @@ namespace Readiculous.Services.Services
                             <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
                                 <h2 style='color: #007bff; margin-bottom: 20px;'>Welcome to Readiculous!</h2>
                                 <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                                    <p style='margin-bottom: 10px;'>Your temporary password is:</p>
-                                    <div style='font-size: 22px; font-weight: bold; color: #d63384; letter-spacing: 2px; padding: 10px; background-color: #f7e6f7; border-radius: 5px;'>
-                                        {tempPassword}
-                                    </div>
+                                    <p style='margin-bottom: 10px;'>Your temporary password is: <b>{tempPassword}</b></p>
+                                    <p style='color: #d63384; font-weight: bold; margin-top: 18px;'>DO NOT REPLY TO THIS EMAIL.</p>
                                 </div>
                                 <p style='color: #6c757d; font-size: 14px;'>Use this password to log in. You will be prompted to change it after your first login.</p>
                                 <hr style='margin: 30px 0; border: none; border-top: 1px solid #dee2e6;'>
@@ -182,10 +170,8 @@ namespace Readiculous.Services.Services
                             <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
                                 <h2 style='color: #007bff; margin-bottom: 20px;'>Password Reset Request</h2>
                                 <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                                    <p style='margin-bottom: 10px;'>Your password reset verification code is:</p>
-                                    <div style='font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 5px; padding: 15px; background-color: #e9ecef; border-radius: 5px;'>
-                                        {otp}
-                                    </div>
+                                    <p style='margin-bottom: 10px;'>Your password reset verification code is: <b>{otp}</b></p>
+                                    <p style='color: #d63384; font-weight: bold; margin-top: 18px;'>DO NOT REPLY TO THIS EMAIL.</p>
                                 </div>
                                 <p style='color: #6c757d; font-size: 14px;'>This code will expire in 10 minutes.</p>
                                 <p style='color: #6c757d; font-size: 14px;'>If you didn't request this password reset, please ignore this email.</p>

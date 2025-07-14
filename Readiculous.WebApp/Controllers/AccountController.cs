@@ -236,7 +236,21 @@ namespace Readiculous.WebApp.Controllers
                 var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
                 if (loginResult == LoginResult.Success)
                 {
-                    if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
+                    if (user.AccessStatus == AccessStatus.FirstTime)
+                    {
+                        await this._signInManager.SignInAsync(user);
+                        this._session.SetString("UserName", user.Username);
+                        TempData["AccessStatus"] = user.AccessStatus.ToString();
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Json(new { success = true, firstTime = true });
+                        }
+                        else
+                        {
+                            return RedirectToAction("FirstTimeProfile");
+                        }
+                    }
+                    if (user.AccessStatus != AccessStatus.Verified)
                     {
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                             return Json(new { success = false, message = "Your account is not allowed to login. Please contact support." });
@@ -256,8 +270,8 @@ namespace Readiculous.WebApp.Controllers
                 else
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(new { success = false, message = Resources.Messages.Errors.IncorrectLoginCredentials });
-                    TempData["ErrorMessage"] = Resources.Messages.Errors.IncorrectLoginCredentials;
+                        return Json(new { success = false, message = "Incorrect email or password." });
+                    TempData["ErrorMessage"] = "Incorrect email or password.";
                     return View(model);
                 }
             }
@@ -271,10 +285,21 @@ namespace Readiculous.WebApp.Controllers
             catch (Exception)
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(new { success = false, message = Resources.Messages.Errors.ServerError });
-                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
+                    return Json(new { success = false, message = "A server error occurred. Please try again later." });
+                TempData["ErrorMessage"] = "A server error occurred. Please try again later.";
                 return View(model);
             }
+        }
+
+        [HttpGet]
+        public IActionResult FirstTimeProfile()
+        {
+            // Return a partial/modal for first time profile completion
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var user = _userService.GetUserEditById(userId);
+            return PartialView("~/Views/Shared/Auth_FirstTimeProfilePartial.cshtml", user);
         }
 
         [HttpPost]
@@ -717,7 +742,19 @@ namespace Readiculous.WebApp.Controllers
                 case "reset":
                     return PartialView("~/Views/Shared/Auth_ResetPasswordPartial.cshtml", new ForgotPasswordModel { Email = email });
                 case "success":
-                    ViewBag.Message = TempData["SuccessMessage"] ?? "All done!";
+                    if (flow == "signup") {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = "Check your email for your temporary password.";
+                    } else if (flow == "forgot") {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = "Your password has been reset.";
+                    } else if (flow == "firsttime") {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = "Welcome to Readiculous";
+                    } else {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = TempData["SuccessMessage"] ?? "Success!";
+                    }
                     return PartialView("~/Views/Shared/Auth_SuccessPartial.cshtml");
                 default:
                     return PartialView("~/Views/Shared/Auth_LoginPartial.cshtml", new LoginViewModel());

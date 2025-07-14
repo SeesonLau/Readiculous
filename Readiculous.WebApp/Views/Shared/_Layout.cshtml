@@ -172,6 +172,14 @@
     @await Html.PartialAsync("Auth_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
     @await Html.PartialAsync("Auth_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
     @await Html.PartialAsync("Auth_SuccessPartial")
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="editProfileModalContent">
+          <!-- AJAX content will be loaded here -->
+        </div>
+      </div>
+    </div>
 </body>
 </html>
 <!-- Removed deleted scripts: login.js, register.js, forgotPassword.js -->

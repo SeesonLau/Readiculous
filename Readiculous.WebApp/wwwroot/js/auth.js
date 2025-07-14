@@ -35,7 +35,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                     .then(res => res.json())
                     .then(data => {
-                        if (data.success && data.redirectUrl) {
+                        if (data.success && data.firstTime) {
+                            // Show first time profile modal/partial
+                            loadPartial('/Account/FirstTimeProfile');
+                        } else if (data.success && data.redirectUrl) {
                             window.location.href = data.redirectUrl;
                         } else {
                             toastr.error(data.message || 'Login failed.');
@@ -194,6 +197,28 @@ document.addEventListener('DOMContentLoaded', function () {
         if (successLoginBtn) {
             successLoginBtn.addEventListener('click', function () {
                 loadPartial('/Account/AuthPartial?view=login');
+            });
+        }
+        // First Time Profile
+        const firstTimeProfileForm = document.getElementById('firstTimeProfileForm');
+        if (firstTimeProfileForm) {
+            firstTimeProfileForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(firstTimeProfileForm);
+                fetch('/Account/CompleteFirstTimeProfile', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(res => {
+                        if (res.ok) {
+                            // Show the success partial after profile completion
+                            loadPartial('/Account/AuthPartial?view=success');
+                        } else {
+                            toastr.error('Failed to complete profile.');
+                        }
+                    });
             });
         }
     }
