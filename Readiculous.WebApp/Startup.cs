@@ -83,7 +83,6 @@ namespace Readiculous.WebApp
             this._services = services;
 
             services.AddMemoryCache();
-            services.AddAutoMapper(typeof(AutoMapperProfile));
             // Register SQL database configuration context as services.
             services.AddDbContext<ReadiculousDbContext>(options =>
             {

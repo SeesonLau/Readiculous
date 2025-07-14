@@ -39,7 +39,6 @@ namespace Readiculous.Services.ServiceModels
         [MinLength(1, ErrorMessage = "At least one genre must be selected!")]
         [MaxLength(5, ErrorMessage = "At most 5 genres must be selected!")]
         public List<string> SelectedGenres { get; set; } = [];
-        public double AverageRating { get; set; }
         public List<GenreViewModel> AllAvailableGenres { get; set; } = [];
         public string BookId { get; set; }
         public string CoverImageUrl { get; set; }
