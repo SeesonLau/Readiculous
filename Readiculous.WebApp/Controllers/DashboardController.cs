@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Readiculous.Resources.Constants;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
@@ -22,7 +26,6 @@ namespace Readiculous.WebApp.Controllers
     {
         private readonly IBookService _bookService;
         private readonly IGenreService _genreService;
-        private readonly SignInManager _signInManager;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
@@ -30,7 +33,6 @@ namespace Readiculous.WebApp.Controllers
             IBookService bookService,
             IGenreService genreService,
             IUserService userService,
-            SignInManager signInManager,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
             ILoggerFactory loggerFactory,

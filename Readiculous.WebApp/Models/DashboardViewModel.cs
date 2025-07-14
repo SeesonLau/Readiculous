@@ -11,5 +11,7 @@ namespace Readiculous.WebApp.Models
         public string UserRole { get; set; }
 
 
+
+
     }
 }

@@ -4,14 +4,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Dashboard";
     var isAdmin = User.IsInRole("Admin");
-
-    var allBooks = Model.NewBooks
-        .Concat(Model.TopBooks)
-        .GroupBy(b => b.BookId)
-        .Select(g => g.First())
-        .OrderByDescending(b => b.AverageRating > 0 ? b.AverageRating : -1)
-        .ThenBy(b => b.Title)
-        .ToList();
 }
 
 <main class="container py-4">
