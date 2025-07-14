@@ -166,12 +166,12 @@
     <!-- Removed deleted modal partials: _LoginModal, _OTPModal, _ForgotPasswordModal, _ForgotPasswordOtpModal, _ResetPasswordModal, _AllDoneModal -->
     @await RenderSectionAsync("Scripts", required: false)
     <!-- Authentication partials for AJAX/modal use -->
-    @await Html.PartialAsync("Auth_LoginPartial", new Readiculous.WebApp.Models.LoginViewModel())
-    @await Html.PartialAsync("Auth_RegisterPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
-    @await Html.PartialAsync("Auth_ForgotPasswordPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
-    @await Html.PartialAsync("Auth_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
-    @await Html.PartialAsync("Auth_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
-    @await Html.PartialAsync("Auth_SuccessPartial")
+    @await Html.PartialAsync("_LoginPartial", new Readiculous.WebApp.Models.LoginViewModel())
+    @await Html.PartialAsync("_RegisterPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("_ForgotPasswordPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
+    @await Html.PartialAsync("_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
+    @await Html.PartialAsync("_SuccessPartial")
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">

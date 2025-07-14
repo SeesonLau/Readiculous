@@ -112,15 +112,15 @@ namespace Readiculous.WebApp.Controllers
                 {
                     if (user.AccessStatus == AccessStatus.FirstTime)
                     {
-                        await this._signInManager.SignInAsync(user);
+                        await this._signInManager.SignInAsync(user, isPersistent: true);
                         this._session.SetString("UserName", user.Username);
                         TempData["AccessStatus"] = user.AccessStatus.ToString();
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
                             return Json(new { success = true, firstTime = true });
-                        }
-                        else
-                        {
+            }
+            else
+            {
                             return RedirectToAction("FirstTimeProfile");
                         }
                     }
@@ -132,7 +132,7 @@ namespace Readiculous.WebApp.Controllers
                         return View();
                     }
 
-                    await this._signInManager.SignInAsync(user);
+                    await this._signInManager.SignInAsync(user, isPersistent: true);
                     this._session.SetString("UserName", user.Username);
                     TempData["AccessStatus"] = user.AccessStatus.ToString();
 
@@ -185,7 +185,7 @@ namespace Readiculous.WebApp.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
             var user = _userService.GetUserEditById(userId);
-            return PartialView("~/Views/Shared/Auth_FirstTimeProfilePartial.cshtml", user);
+            return PartialView("~/Views/Shared/_FirstTimeProfilePartial.cshtml", user);
         }
 
         [HttpPost]
@@ -210,7 +210,7 @@ namespace Readiculous.WebApp.Controllers
                         return Json(new { success = false, message = "Your account is not allowed to login. Please contact support." });
                     }
 
-                    await _signInManager.SignInAsync(user);
+                    await _signInManager.SignInAsync(user, isPersistent: true);
                     _session.SetString("UserRole", user.Role.ToString());
 
                     // Redirect based on role
@@ -505,7 +505,7 @@ namespace Readiculous.WebApp.Controllers
             else
             {
                 TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
-                return View(model);
+            return View(model);
             }
         }
 
@@ -622,16 +622,16 @@ namespace Readiculous.WebApp.Controllers
             switch (view)
             {
                 case "login":
-                    return PartialView("~/Views/Shared/Auth_LoginPartial.cshtml", new LoginViewModel());
+                    return PartialView("~/Views/Shared/_LoginPartial.cshtml", new LoginViewModel());
                 case "register":
-                    return PartialView("~/Views/Shared/Auth_RegisterPartial.cshtml", new EmailRequestModel());
+                    return PartialView("~/Views/Shared/_RegisterPartial.cshtml", new EmailRequestModel());
                 case "forgot":
-                    return PartialView("~/Views/Shared/Auth_ForgotPasswordPartial.cshtml", new EmailRequestModel());
+                    return PartialView("~/Views/Shared/_ForgotPasswordPartial.cshtml", new EmailRequestModel());
                 case "otp":
                     ViewBag.OtpFlow = (flow == "forgot") ? "forgot" : "signup";
-                    return PartialView("~/Views/Shared/Auth_OtpPartial.cshtml", new OtpVerificationModel { Email = email });
+                    return PartialView("~/Views/Shared/_OtpPartial.cshtml", new OtpVerificationModel { Email = email });
                 case "reset":
-                    return PartialView("~/Views/Shared/Auth_ResetPasswordPartial.cshtml", new ForgotPasswordModel { Email = email });
+                    return PartialView("~/Views/Shared/_ResetPasswordPartial.cshtml", new ForgotPasswordModel { Email = email });
                 case "success":
                     if (flow == "signup") {
                         ViewBag.Title = "All done";
@@ -646,9 +646,9 @@ namespace Readiculous.WebApp.Controllers
                         ViewBag.Title = "All done";
                         ViewBag.Message = TempData["SuccessMessage"] ?? "Success!";
                     }
-                    return PartialView("~/Views/Shared/Auth_SuccessPartial.cshtml");
+                    return PartialView("~/Views/Shared/_SuccessPartial.cshtml");
                 default:
-                    return PartialView("~/Views/Shared/Auth_LoginPartial.cshtml", new LoginViewModel());
+                    return PartialView("~/Views/Shared/_LoginPartial.cshtml", new LoginViewModel());
             }
         }
     }
