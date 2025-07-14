@@ -226,7 +226,6 @@ const CommonMaster = (function () {
         });
     }
 
-
     function handleDeleteConfirmation() {
         const btn = $(this);
         const originalBtnText = btn.html();

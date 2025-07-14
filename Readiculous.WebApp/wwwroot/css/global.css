@@ -3,6 +3,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
+/* ================ */
+/* Global Reset & Variables */
+/* ================ */
 * {
     margin: 0;
     padding: 0;
@@ -15,7 +18,8 @@
     --color-header: #B089A5;
     --color-btn: #EDAEC0;
     --color-modal: #F8ECE9;
-    --color-background: #F2EFF1;
+    --color-background: linear-gradient(135deg, #E6C7D5 0%, #B089A5 50%, #8B5E83 100%);
+   /* --color-background: #F2EFF1;*/
     --color-accent: #D4A5A5;
     --color-secondary: #8B5E83;
     --color-border: #C9A8B8;
@@ -27,9 +31,10 @@
     --font-primary: 'Gentium Book Plus', serif;
     --font-secondary: 'Playfair Display', serif;
     --font-ui: 'Poppins', sans-serif;
+    /* Greyed Out Colors */
     --color-greyed-out-bg: #d6d8db;
     --color-greyed-out-text: #495057;
-    /* Subtle */
+    /* Subtle Colors */
     --color-subtle-bg: #f8f9fa;
     --color-subtle-text: #6c757d;
     --color-subtle-border: #ced4da;
@@ -39,17 +44,23 @@
     --color-subtle-focus-text: #495057;
 }
 
+/* ================ */
 /* Base HTML & Body Styles */
+/* ================ */
 html {
     font-size: 14px;
     position: relative;
     min-height: 100%;
 }
 
-@media (min-width: 768px) {
-    html {
-        font-size: 16px;
-    }
+/* Transferred from layout.cshtml */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: var(--font-primary);
+    background: var(--color-background);
 }
 
 body {
@@ -60,23 +71,68 @@ body {
     font-family: var(--font-primary);
     line-height: 1.6;
     margin-bottom: 60px;
+    background-clip: padding-box;
 }
 
-/* Focus States */
-.btn:focus, .btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem var(--color-modal), 0 0 0 0.25rem var(--color-focus);
-    outline: none;
+/* ================ */
+/* Scrollbar Styles (from layout.cshtml) */
+/* ================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
+::-webkit-scrollbar-track {
+    background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-header);
+    border-radius: 4px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-btn);
+    }
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-header) var(--color-background);
+}
+
+/* ================ */
+/* Layout & Structure */
+/* ================ */
+/* Transferred from layout.cshtml */
+.flex-column {
+    height: 100vh;
+}
+
+main {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px - 60px); /* Adjust heights */
+}
+
+/* Additional layout styles from layout.cshtml */
+body.d-flex.flex-column {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.d-flex.flex-column {
+    height: 100vh;
+}
+
+/* ================ */
 /* Header Styles */
+/* ================ */
 header {
     height: 70px;
     width: 100vw;
     padding: 0 30px;
-    background-color: var(--color-header);
+    background-color: var(--color-header) !important;
     z-index: 100;
     box-shadow: 1px 1px 15px rgba(176, 137, 165, 0.5);
     display: flex;
@@ -175,7 +231,9 @@ header {
     color: var(--color-modal);
 }
 
+/* ================ */
 /* Dropdown Styles */
+/* ================ */
 .dropdown {
     display: none;
     position: absolute;
@@ -186,7 +244,7 @@ header {
     z-index: 1000;
     border-radius: 8px;
     overflow: hidden;
-    min-width: 180px; 
+    min-width: 180px;
 }
 
     .dropdown ul {
@@ -196,10 +254,10 @@ header {
     }
 
         .dropdown ul li {
-            padding: 8px 20px; 
+            padding: 8px 20px;
             transition: all 0.2s ease;
             display: flex;
-            align-items: center; 
+            align-items: center;
             gap: 12px;
         }
 
@@ -248,7 +306,9 @@ header {
     }
 }
 
+/* ================ */
 /* Main Container & Navigation */
+/* ================ */
 .main-container {
     display: flex;
     width: 100vw;
@@ -356,7 +416,9 @@ header {
         background-color: var(--color-accent);
     }
 
+/* ================ */
 /* Dashboard Boxes */
+/* ================ */
 .box-container {
     display: flex;
     justify-content: space-evenly;
@@ -423,7 +485,9 @@ header {
     color: var(--color-text);
 }
 
+/* ================ */
 /* Report Sections */
+/* ================ */
 .report-container {
     min-height: 300px;
     max-width: 1200px;
@@ -520,13 +584,29 @@ header {
         background-color: var(--color-danger);
     }
 
+/* ================ */
 /* Footer System */
+/* ================ */
+/* Transferred from layout.cshtml */
+footer {
+    flex-shrink: 0; /* Prevents footer from shrinking */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px; /* Adjust as needed */
+    border-top: 1px solid #dee2e6; /* Bootstrap's border color */
+}
+
+    footer a {
+        margin: 0 5px;
+    }
+
 .footer {
     position: absolute;
     bottom: 0;
     width: 100%;
     white-space: nowrap;
-    background-color: var(--color-header);
+    background-color: var(--color-header) !important;
     color: var(--color-modal);
     padding: 20px 0;
     font-family: var(--font-secondary);
@@ -550,7 +630,9 @@ header {
     display: none;
 }
 
+/* ================ */
 /* Utility Classes */
+/* ================ */
 .mr-20 {
     margin-right: 20px;
 }
@@ -565,7 +647,9 @@ header {
     text-align: center;
 }
 
+/* ================ */
 /* Delete Modal Styles */
+/* ================ */
 .delete-modal .modal-content {
     border-radius: 12px;
     overflow: hidden;
@@ -642,7 +726,52 @@ header {
         margin-right: 0.5rem;
     }
 
+/* ================ */
+/* Form Input States */
+/* ================ */
+.input-greyed-out {
+    background-color: var(--color-greyed-out-bg);
+    color: var(--color-greyed-out-text);
+    cursor: not-allowed;
+}
+
+input.form-control.input-greyed-out {
+    background-color: var(--color-greyed-out-bg) !important;
+    color: var(--color-greyed-out-text) !important;
+}
+
+.input-greyed-out::placeholder {
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--color-greyed-out-text);
+    opacity: 1;
+}
+
+.input-subtle {
+    background-color: var(--color-subtle-bg);
+    color: var(--color-subtle-text);
+    border-color: var(--color-subtle-border);
+    font-style: italic;
+}
+
+input.form-control.input-subtle::placeholder {
+    color: var(--color-subtle-placeholder);
+    font-size: 0.875rem;
+    font-style: italic;
+    opacity: 1;
+}
+
+.input-subtle:focus {
+    background-color: var(--color-subtle-focus-bg);
+    border-color: var(--color-subtle-focus-border);
+    color: var(--color-subtle-focus-text);
+    outline: none;
+    box-shadow: none;
+}
+
+/* ================ */
 /* Responsive Design */
+/* ================ */
 @media (max-width: 1200px) {
     .report-topic-heading,
     .item1 {
@@ -674,6 +803,7 @@ header {
     .delete-modal .modal-body {
         padding: 1.5rem;
     }
+
     header {
         padding: 0 15px;
     }
@@ -728,6 +858,7 @@ header {
     .delete-modal .btn {
         width: 100%;
     }
+
     html {
         font-size: 13px;
     }
@@ -759,45 +890,4 @@ header {
     .wrapper {
         padding-bottom: 120px;
     }
-}
-
-.input-greyed-out {
-    background-color: var(--color-greyed-out-bg);
-    color: var(--color-greyed-out-text);
-    cursor: not-allowed;
-}
-
-input.form-control.input-greyed-out {
-    background-color: var(--color-greyed-out-bg) !important;
-    color: var(--color-greyed-out-text) !important;
-}
-
-.input-greyed-out::placeholder {
-    font-size: 0.875rem;
-    font-style: italic;
-    color: var(--color-greyed-out-text);
-    opacity: 1;
-}
-
-
-.input-subtle {
-    background-color: var(--color-subtle-bg);
-    color: var(--color-subtle-text);
-    border-color: var(--color-subtle-border);
-    font-style: italic;
-}
-
-input.form-control.input-subtle::placeholder {
-    color: var(--color-subtle-placeholder);
-    font-size: 0.875rem;
-    font-style: italic;
-    opacity: 1;
-}
-
-.input-subtle:focus {
-    background-color: var(--color-subtle-focus-bg);
-    border-color: var(--color-subtle-focus-border);
-    color: var(--color-subtle-focus-text);
-    outline: none;
-    box-shadow: none;
 }

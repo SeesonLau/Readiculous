@@ -29,6 +29,7 @@ namespace Readiculous.Services.Services
         private readonly IMapper _mapper;
         private readonly Client _client;
 
+
         public BookService(IBookRepository bookRepository, IGenreRepository genreRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
         {
             _bookRepository = bookRepository;
