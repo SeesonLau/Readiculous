@@ -1,4 +1,5 @@
-﻿const UserEditModal = (function () {
+﻿// User Edit Modal
+const UserEditModal = (function () {
     function initializeEventHandlers() {
         const removeCheckbox = document.getElementById('removeProfilePicture');
         const fileInput = document.getElementById('newProfilePicture');
@@ -30,3 +31,22 @@
 document.addEventListener('DOMContentLoaded', function () {
     UserEditModal.init();
 });
+
+// User Add Modal & User Edit Modal
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+
+    // Toggle input type
+    input.type = input.type === 'password' ? 'text' : 'password';
+
+    // Toggle icon classes
+    icon.classList.toggle('fa-eye-slash');
+    icon.classList.toggle('fa-eye');
+
+    // Focus back on input for better UX
+    input.focus();
+
+    // Update aria-pressed state for accessibility
+    button.setAttribute('aria-pressed', input.type === 'text');
+}

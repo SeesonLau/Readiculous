@@ -1,0 +1,146 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.BookListItemViewModel>
+@{
+    ViewData["Title"] = "Book Management";
+    var selectedGenres = ViewBag.Genres as List<Readiculous.Services.ServiceModels.GenreViewModel>;
+}
+
+@section Styles {
+    <link href="~/css/adminBookMaster/book-master.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/adminBookMaster/book-master-modal.css" rel="stylesheet" />
+}
+
+<div class="container-fluid px-0 book-management-container">
+    <div class="row mb-4 mx-0 align-items-center book-management-header">
+        <div class="col-md-6 px-0">
+            <h1 class="mb-0 book-management-title">Book Management</h1>
+        </div>
+        <div class="col-md-6 px-0 text-md-end">
+            <button type="button" class="btn btn-success btn-add-book">
+                <i class="fas fa-plus me-2"></i>Add Book
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filter Form -->
+    <form asp-action="BookMasterScreen" method="get" class="mb-4 book-filter-controls" id="bookFilterForm">
+        <!-- Inline filter controls -->
+        <div class="row g-3 align-items-end mx-0">
+            <!-- Search Book Title -->
+            <div class="col-md px-0 pe-md-2 filter-group">
+                <label for="searchString" class="form-label filter-label">Search Book Title:</label>
+                <input type="text" name="searchString" class="form-control filter-input" placeholder="Enter book title"
+                       value="@ViewData["CurrentFilter"]" />
+            </div>
+
+            <!-- Filter by Genre Dropdown -->
+            <div class="col-md px-0 pe-md-2 filter-group genre-filter-container">
+                <label class="form-label filter-label">Filter by Genre:</label>
+                <input type="hidden" name="genreFilter" id="genreFilter" value="@Context.Request.Query["genreFilter"]" />
+                <button type="button" class="genre-dropdown-toggle">
+                    <span class="selected-genres-text">Select genres</span>
+                    <span class="selected-genres-count" style="display: none;">0</span>
+                </button>
+                <div class="genre-dropdown-menu">
+                    <div class="genre-checklist-columns">
+                        @{
+                            var genres = (ViewBag.GenreList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>) ??
+                            new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+                            genres = genres.OrderBy(g => g.Text).ToList();
+                        }
+                        @foreach (var genre in genres)
+                        {
+                            <div class="genre-check-item" data-genre-id="@genre.Value" data-state="unchecked">
+                                <div class="genre-checkbox"></div>
+                                <span class="genre-check-label">@genre.Text</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-md px-0 filter-group">
+                <label for="sortOrder" class="form-label filter-label">Sort By:</label>
+                <select name="sortOrder" class="form-select filter-input" asp-items="@ViewBag.BookSortTypes"></select>
+            </div>
+
+        </div>
+
+    </form>
+
+    <div class="row mx-0">
+        <div class="col px-0 book-table-container">
+            <div id="bookListContainer" class="table-responsive">
+                @await Html.PartialAsync("_BookListPartial", Model)
+            </div>
+        </div>
+    </div>
+
+    <div class="row mx-0 mt-3 pagination-controls">
+        <div class="col-md-6 px-0 text-md-end">
+            @if (ViewBag.PaginationModel != null)
+            {
+                @await Component.InvokeAsync("Pagination", ViewBag.PaginationModel)
+            }
+        </div>
+        <div class="col-md-6 px-0">
+            @await Component.InvokeAsync("PageSize", new { currentPageSize = ViewBag.PageSize ?? 10 })
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade book-modal" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" id="addBookModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade book-modal" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" id="editBookModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Modal -->
+<div class="modal fade book-modal" id="viewBookModal" tabindex="-1" aria-labelledby="viewBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" id="viewBookModalBody">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml", new {
+    ModalId = "deleteModal",
+    ItemIdField = "itemToDeleteId",
+    ItemNameField = "itemToDeleteName"
+})
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/common/commonMaster.js" asp-append-version="true"></script>
+    <script>
+        const bookMasterSettings = {
+            bookMasterScreenUrl: '@Url.Action("BookMasterScreen", "BookMaster")',
+            bookAddModalUrl: '@Url.Action("BookAddModal", "BookMaster")',
+            bookEditModalUrl: '@Url.Action("BookEditModal", "BookMaster")',
+            bookViewModalUrl: '@Url.Action("BookViewModal", "BookMaster")',
+            deleteBookUrl: '@Url.Action("Delete", "BookMaster")'
+        };
+    </script>
+
+    <script src="~/js/adminBookMaster/bookmasterScreen.js" asp-append-version="true"></script>
+}

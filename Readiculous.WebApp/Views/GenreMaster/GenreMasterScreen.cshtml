@@ -1,0 +1,118 @@
+﻿@model IEnumerable<Readiculous.Services.ServiceModels.GenreListItemViewModel>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/adminGenreMaster/genre-master.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/adminGenreMaster/genre-master-modal.css" asp-append-version="true" />
+}
+
+@{
+    ViewData["Title"] = "Genre Management";
+}
+
+<div class="container-fluid genre-management-container px-0">
+    <div class="genre-management-header row mb-4 mx-0 align-items-center">
+        <div class="col-md-6 px-0">
+            <h1 class="genre-management-title mb-0">Genre Management</h1>
+        </div>
+        <div class="col-md-6 px-0 text-md-end">
+            <button type="button" class="btn btn-success" id="openAddGenreModalBtn">
+                <i class="fas fa-plus me-2"></i>Add Genre
+            </button>
+        </div>
+    </div>
+
+    <form id="genreFilterForm">
+    <div class="genre-filter-controls row g-3 align-items-end mx-0 mb-4">
+        <div class="filter-group col-md-8 px-0 pe-md-2">
+            <label for="searchString" class="filter-label">Search Genre</label>
+                <input type="text" name="searchString" id="searchString" class="filter-input form-control" placeholder="Search..." value="@ViewData["CurrentFilter"]" />
+        </div>
+
+        <div class="filter-group col-md-4 px-0">
+            <label for="sortOrder" class="filter-label">Sort By</label>
+            <select name="sortOrder" id="sortOrder" class="filter-input form-select" asp-items="@ViewBag.GenreSortTypes"></select>
+        </div>
+    </div>
+</form>
+
+    <div class="row mx-0">
+        <div class="col px-0">
+            <div id="genreListContainer" class="genre-table-container">
+                @await Html.PartialAsync("_GenreListPartial", Model)
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination-controls row mb-4 mx-0 align-items-center">
+        <div class="col-md-6 px-0 pagination-container">
+            @if (ViewBag.PaginationModel != null)
+            {
+                @await Component.InvokeAsync("Pagination", ViewBag.PaginationModel)
+            }
+        </div>
+        <div class="col-md-6 px-0 text-md-end page-size-container">
+            @await Component.InvokeAsync("PageSize", new { currentPageSize = ViewBag.PageSize ?? 10 })
+        </div>
+    </div>
+</div>
+<div class="modal fade genre-modal" id="addGenreModal" tabindex="-1" aria-labelledby="addGenreModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addGenreModalLabel">Add New Genre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addGenreModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade genre-modal" id="editGenreModal" tabindex="-1" aria-labelledby="editGenreModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGenreModalLabel">Edit Genre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editGenreModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade genre-modal" id="viewGenreModal" tabindex="-1" aria-labelledby="viewGenreModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewGenreModalLabel">View Genre Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewGenreModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml", new {
+    ModalId = "deleteModal",
+    ItemIdField = "itemToDeleteId",
+    ItemNameField = "itemToDeleteName"
+})
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/common/commonMaster.js" asp-append-version="true"></script>
+    <script>
+        const genreMasterSettings = {
+            genreMasterScreenUrl: '@Url.Action("GenreMasterScreen", "GenreMaster")',
+            genreAddModalUrl: '@Url.Action("GenreAddModal", "GenreMaster")',
+            genreEditModalUrl: '@Url.Action("GenreEditModal", "GenreMaster")',
+            genreViewModalUrl: '@Url.Action("GenreViewPage", "GenreMaster")',
+            deleteGenreUrl: '@Url.Action("Delete", "GenreMaster")'
+        };
+    </script>
+    <script src="~/js/adminGenreMaster/genremasterScreen.js" asp-append-version="true"></script>
+}

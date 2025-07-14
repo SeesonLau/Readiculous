@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Resources.Constants;
@@ -8,9 +10,11 @@ using Readiculous.Services.ServiceModels;
 using Supabase;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
 
@@ -39,9 +43,13 @@ namespace Readiculous.Services.Services
         public async Task AddBook(BookViewModel model, string creatorId)
         {
             // Books can only be added if the title and author combination does not already exist.
-            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim()) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title.Trim(), model.Author.Trim(), model.BookId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+            }
+            if (_bookRepository.ISBNExists(model.BookId, model.ISBN))
+            {
+                throw new DuplicateNameException(Resources.Messages.Errors.ISBNExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -52,10 +60,6 @@ namespace Readiculous.Services.Services
             model.BookId = Guid.NewGuid().ToString();
 
             _mapper.Map(model, book);
-            book.Title = book.Title.Trim();
-            book.Description = book.Description.Trim();
-            book.Author = book.Author.Trim();
-            book.ISBN = book.ISBN.Trim();
             book.CreatedBy = creatorId;
             book.CreatedTime = DateTime.UtcNow;
             book.UpdatedBy = creatorId;
@@ -63,33 +67,7 @@ namespace Readiculous.Services.Services
 
             if (model.CoverImage != null && model.CoverImage.Length > 0)
             {
-                var extension = Path.GetExtension(model.CoverImage.FileName);
-                var fileName = Path.Combine(Const.BookDirectory, $"{book.BookId}{extension}");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await model.CoverImage.CopyToAsync(memoryStream);
-                    var fileBytes = memoryStream.ToArray();
-
-                    var uploadResult = await _client.Storage
-                        .From(Const.BucketName)
-                        .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                        {
-                            ContentType = model.CoverImage.ContentType,
-                            Upsert = true
-                        });
-
-                    if (!string.IsNullOrEmpty(uploadResult))
-                    {
-                        book.CoverImageUrl = _client.Storage
-                            .From(Const.BucketName)
-                            .GetPublicUrl(fileName);
-                    }
-                    else
-                    {
-                        throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
-                    }
-                }
+                book.CoverImageUrl = await UploadCoverImage(model.CoverImage, model.BookId);
             }
 
             foreach (var genreId in model.SelectedGenres)
@@ -107,19 +85,23 @@ namespace Readiculous.Services.Services
                 });
             }
 
-            _bookRepository.AddBook(book);
+            await Task.Run(() => _bookRepository.AddBook(book));
         }
         public async Task UpdateBook(BookViewModel model, string updaterId)
         {
-            if (!_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author) && !_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            if (_bookRepository.BookTitleAndAuthorExists(model.Title, model.Author.Trim(), model.BookId))
             {
                 throw new InvalidOperationException(Resources.Messages.Errors.BookTitleAndAuthorExists);
+            }
+            if (_bookRepository.ISBNExists(model.BookId, model.ISBN.Trim()))
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ISBNExists);
             }
 
             var book = _bookRepository.GetBookById(model.BookId);
             if (book == null)
             {
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (string.IsNullOrEmpty(model.CoverImageUrl))
             {
@@ -133,45 +115,9 @@ namespace Readiculous.Services.Services
 
             if (model.CoverImage != null && model.CoverImage.Length > 0)
             {
-                var uri = new Uri(book.CoverImageUrl);
-                var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+                await DeleteCoverImage(book.CoverImageUrl);
 
-                var result = await _client.Storage
-                    .From(Const.BucketName)
-                    .Remove(new List<string> { relativePath });
-
-                if (result == null)
-                {
-                    throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
-                }
-
-                var extension = Path.GetExtension(model.CoverImage.FileName);
-                var fileName = Path.Combine(Const.BookDirectory, $"{book.BookId}-{Guid.NewGuid():N}{extension}");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await model.CoverImage.CopyToAsync(memoryStream);
-                    var fileBytes = memoryStream.ToArray();
-
-                    var uploadResult = await _client.Storage
-                        .From(Const.BucketName)
-                        .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                        {
-                            ContentType = model.CoverImage.ContentType,
-                            Upsert = true
-                        });
-
-                    if (!string.IsNullOrEmpty(uploadResult))
-                    {
-                        book.CoverImageUrl = _client.Storage
-                            .From(Const.BucketName)
-                            .GetPublicUrl(fileName);
-                    }
-                    else
-                    {
-                        throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
-                    }
-                }
+                book.CoverImageUrl = await UploadCoverImage(model.CoverImage, book.BookId);
             }
 
             var assignmentsToRemove = book.GenreAssociations
@@ -197,13 +143,13 @@ namespace Readiculous.Services.Services
                 });
             }
 
-            _bookRepository.UpdateBook(book);
+            await Task.Run(() => _bookRepository.UpdateBook(book));
         }
-        public void DeleteBook(string bookId, string deleterId)
+        public async Task DeleteBook(string bookId, string deleterId)
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.ServerError);
             }
 
             var book = _bookRepository.GetBookById(bookId);
@@ -216,36 +162,36 @@ namespace Readiculous.Services.Services
             book.BookReviews = _reviewRepository.GetReviewsByBookId(bookId).ToList();
             foreach (var review in book.BookReviews)
             {
-
                 review.DeletedBy = deleterId;
                 review.DeletedTime = DateTime.UtcNow;
-
                 _reviewRepository.UpdateReview(review);
             }
 
             book.DeletedBy = deleterId;
             book.DeletedTime = DateTime.UtcNow;
-            _bookRepository.UpdateBook(book);
+
+            await Task.Run(() => _bookRepository.UpdateBook(book));
         }
 
         // Multiple Book Listing Methods, ADD USEREID FOR FAVORITES
-        public List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
+        public List<BookListItemViewModel> GetBookList(string searchString, List<GenreViewModel> genres, string userID, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
-            if (string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && searchType == BookSearchType.AllBooks && sortType == BookSortType.CreatedTimeDescending)
+            if (string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && sortType == BookSortType.Latest)
             {
                 return ListAllActiveBooks(userID);
             }
             else if (string.IsNullOrEmpty(searchString))
             {
-                return ListBooksByGenreList(genres: genres, userID: userID, searchType: searchType, sortType: sortType);
+                return ListBooksByGenreList(genreViewModels: genres, userID: userID, sortType: sortType, genreFilter: genreFilter);
             }
             else if (genres == null || !genres.Any())
             {
-                return ListBooksByTitle(bookTitle: searchString, userID: userID, searchType: searchType, sortType: sortType);
+                return ListBooksByTitle(bookTitle: searchString, userID: userID, sortType: sortType, genreFilter: genreFilter);
             }
             else
             {
-                return ListBooksByTitleAndGenres(bookTitle: searchString, genres: genres, userID: userID, searchType: searchType, sortType: sortType);
+                return ListBooksByTitleAndGenres(bookTitle: searchString, genreViewModels: genres, userID: userID, sortType: sortType, genreFilter: genreFilter);
+
             }
         }
 
@@ -255,39 +201,21 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(id);
             if (book == null)
             {
-                return null;
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
 
             var model = new BookDetailsViewModel();
 
-
-            //TO ADD: REVIEW COUNT AND RATING AVERAGE
             _mapper.Map(book, model);
-            model.Genres = book.GenreAssociations
-                .Where(ga => ga.Genre.DeletedTime == null)
-                .Select(ga => ga.Genre.Name)
+            model.Genres = _genreRepository.GetGenreNamesByBookId(book.BookId)
                 .ToList();
-            model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
-            model.Reviews = _reviewRepository.GetReviewsByBookId(book.BookId)
-                .ToList()
-                .Select(r =>
-                {
-                    ReviewListItemViewModel reviewViewModel = new();
+            
+            var reviews = _reviewRepository.GetReviewsByBookId(book.BookId);
+            model.Reviews = _mapper.Map<List<ReviewListItemViewModel>>(reviews);
 
-                    _mapper.Map(r, reviewViewModel);
-                    reviewViewModel.Reviewer = r.User.Username;
-                    reviewViewModel.BookName = r.Book.Title;
-                    reviewViewModel.Author = r.Book.Author;
-                    reviewViewModel.PublicationYear = r.Book.PublicationYear;
-                    reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
-
-                    return reviewViewModel;
-                })
-                .ToList();
-            model.CreatedByUserName = book.CreatedByUser.Username;
-            model.UpdatedByUserName = book.UpdatedByUser.Username;
+            model.AverageRating = model.Reviews.Count != 0
+                        ? (decimal)(book.BookReviews.Average(r => r.Rating))
+                        : 0;
             return model;
         }
         public BookViewModel GetBookEditById(string id)
@@ -295,7 +223,7 @@ namespace Readiculous.Services.Services
             var book = _bookRepository.GetBookById(id);
             if (book == null)
             {
-                return null;
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
 
             var model = new BookViewModel();
@@ -305,209 +233,211 @@ namespace Readiculous.Services.Services
         }
 
         // Book Dropdown Fillup Methods
-        public List<SelectListItem> GetBookSearchTypes(BookSearchType searchType)
-        {
-            return Enum.GetValues(typeof(BookSearchType))
-                .Cast<BookSearchType>()
-                .Select(t => new SelectListItem
-                {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString(),
-                    Selected = t == searchType
-                }).ToList();
-        }
         public List<SelectListItem> GetBookSortTypes(BookSortType sortType)
         {
             return Enum.GetValues(typeof(BookSortType))
                 .Cast<BookSortType>()
-                .Select(t => new SelectListItem
+                .Select(t =>
                 {
-                    Value = ((int)t).ToString(),
-                    Text = t.ToString(),
-                    Selected = t == sortType
+                    var displayName = t.GetType()
+                                     .GetMember(t.ToString())
+                                     .First()
+                                     .GetCustomAttribute<DisplayAttribute>()?
+                                     .Name ?? t.ToString();
+
+                    return new SelectListItem
+                    {
+                        Value = ((int)t).ToString(),
+                        Text = displayName,
+                        Selected = t == sortType
+                    };
                 }).ToList();
+        }
+
+        // String Helper Functions
+        public string GetTitleByBookId(string bookId)
+        {
+            var book = _bookRepository.GetBookById(bookId);
+            if (book == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
+            }
+
+            return book.Title;
         }
 
         // Private Helper Methods for Book Listing
         private List<BookListItemViewModel> ListAllActiveBooks(string userID)
         {
-            var books = _bookRepository.GetAllActiveBooks()
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
+            var allActiveBooks = _bookRepository.GetAllActiveBooks();
+            var bookIds = allActiveBooks.Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
+            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
+            var allReviews = _reviewRepository.GetAllReviews();
 
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
-                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
-                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(allActiveBooks);
 
-                    return model;
-                })
-                .OrderByDescending(b => b.CreatedTime)
-                .ToList();
-            return books;
-        }
-        private List<BookListItemViewModel> ListBooksByTitle(string bookTitle, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
-        {
-            var books = _bookRepository.GetBooksByTitle(bookTitle.Trim())
-                .Where(b => b.DeletedTime == null)
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-
-                    //TO ADD: REVIEW COUNT AND RATING AVERAGE
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
-                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
-
-                    return model;
-                });
-
-            return SearchAndSortBook(books, searchType, sortType)
-                .ToList();
-        }
-        private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeDescending)
-        {
-            var bookGenres = genres.Select(g =>
+            foreach (var model in bookMapModels)
             {
-                var genre = _genreRepository.GetGenreById(g.GenreId);
-                return genre;
-            })
-                .ToList();
+                model.Genres = genres
+                    .Where(s => s.BookId == model.BookId)
+                    .Select(s=>s.Genre.Name)
+                    .ToList();
+                model.IsFavorite = favoriteBooksByUser
+                    .Any(a => a.BookId == model.BookId);
+                model.IsReviewed = reviewsByUser
+                    .Any(a => a.BookId == model.BookId);
 
-            var books = _bookRepository.GetBooksByGenreList(bookGenres)
-                .Where(b => b.DeletedTime == null)
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
-                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username; 
-                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
-
-                    return model;
-                });
-
-            return SearchAndSortBook(books, searchType, sortType)
-                .ToList();
-        }
-        private List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genres, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.CreatedTimeAscending)
-        {
-            var bookGenres = genres.Select(g =>
-            {
-                var genre = _genreRepository.GetGenreById(g.GenreId);
-                return genre;
-            })
-                .ToList();
-
-            var books = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres)
-                .Where(b => b.DeletedTime == null)
-                .ToList()
-                .Select(book =>
-                {
-                    var model = new BookListItemViewModel();
-
-                    _mapper.Map(book, model);
-                    model.Genres = book.GenreAssociations
-                        .Where(ga => ga.Genre.DeletedTime == null)
-                        .Select(ga => ga.Genre.Name)
-                        .ToList();
-                    model.IsFavorite = _favoriteBookRepository.FavoriteBookExists(book.BookId, userID);
-                    model.IsReviewed = _reviewRepository.ReviewExists(book.BookId, userID);
-                    model.CreatedByUserName = book.CreatedByUser.Username;
-                    model.UpdatedByUserName = book.UpdatedByUser.Username;
-                    model.AverageRating = (decimal)(_reviewRepository.GetReviewsByBookId(book.BookId).ToList().Count != 0
-                        ? book.BookReviews.Average(r => r.Rating)
-                        : 0);
-
-                    return model;
-                });
-
-            return SearchAndSortBook(books, searchType, sortType)
-                .ToList();
-        }
-        
-        // Search And Sort Book Helper Function
-        private IEnumerable<BookListItemViewModel> SearchAndSortBook(IEnumerable<BookListItemViewModel> books, BookSearchType searchType, BookSortType sortType)
-        {
-            switch (searchType)
-            {
-                case BookSearchType.AllBooks:
-                    break;
-
-                case BookSearchType.TopBooks:
-                    books = books.OrderByDescending(b => b.AverageRating);
-
-                    switch (sortType)
-                    {
-                        case BookSortType.RatingAscending:
-                            return books.Reverse();
-                        case BookSortType.RatingDescending:
-                            return books;
-                        default:
-                            break;
-                    }
-                    break;
-
-                case BookSearchType.NewBooks:
-                    DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
-                    books = books.Where(b => b.CreatedTime >= twoWeeksAgo);
-                    break;
-                default:
-                    break;
+                var bookReviews = allReviews
+                    .Where(r =>  r.BookId == model.BookId)
+                    .ToList();
+                model.AverageRating = (decimal) (bookReviews.Count > 0
+                    ? bookReviews.Average(r => r.Rating)
+                    : 0);
             }
 
+            var result = bookMapModels.OrderByDescending(o => o.CreatedTime).ToList(); 
+            return result;
+        }
+        private List<BookListItemViewModel> ListBooksByTitle(string bookTitle, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        {
+            var booksByTitle = _bookRepository.GetBooksByTitle(bookTitle);
+            var bookIds = booksByTitle.Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
+            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
+            var allReviews = _reviewRepository.GetAllReviews();
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(booksByTitle);
+
+            foreach(var model in bookMapModels)
+            {
+                model.Genres = genres
+                    .Where(s => s.BookId == model.BookId)
+                    .Select(s => s.Genre.Name)
+                    .ToList();
+                model.IsFavorite = favoriteBooksByUser
+                    .Any(a => a.BookId == model.BookId);
+                model.IsReviewed = reviewsByUser
+                    .Any(a => a.BookId == model.BookId);
+
+
+                var bookReviews = allReviews
+                    .Where(r => r.BookId == model.BookId)
+                    .ToList();
+                model.AverageRating = (decimal)(bookReviews.Any()
+                    ? bookReviews.Average(r => r.Rating)
+                    : 0);
+            }
+            return SortBook(bookMapModels, sortType, genreFilter)
+
+                .ToList();
+        }
+        private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        {
+            var bookGenres = _mapper.Map<List<Genre>>(genreViewModels);
+
+            var booksByGenre = _bookRepository.GetBooksByGenreList(bookGenres);
+            var bookIds = booksByGenre
+                .Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
+            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
+            var allReviews = _reviewRepository.GetAllReviews();
+
+            var bookViewModels = _mapper.Map<List<BookListItemViewModel>>(booksByGenre);
+
+            foreach (var model in bookViewModels)
+            {
+                model.Genres = genres
+                    .Where(s => s.BookId == model.BookId)
+                    .Select(s => s.Genre.Name)
+                    .ToList();
+                model.IsFavorite = favoriteBooksByUser
+                    .Any(a => a.BookId == model.BookId);
+                model.IsReviewed = allReviews
+                    .Where(r => r.UserId == userID)
+                    .Any(r => r.BookId == model.BookId);
+
+                var bookReviews = allReviews
+                    .Where(r => r.BookId == model.BookId)
+                    .ToList();
+                model.AverageRating = (decimal)(bookReviews.Any()
+                    ? bookReviews.Average(r => r.Rating)
+                    : 0);
+            }
+
+            return SortBook(bookViewModels, sortType, genreFilter)
+
+                .ToList();
+        }
+        private List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        {
+            var bookGenres = _mapper.Map<List<Genre>>(genreViewModels);
+            
+            var booksByTitleAndGenre = _bookRepository.GetBooksByTitleAndGenres(bookTitle, bookGenres);
+            var bookIds = booksByTitleAndGenre
+                .Select(book => book.BookId)
+                .ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
+            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
+            var allReviews = _reviewRepository.GetAllReviews();
+
+            var bookViewModels = _mapper.Map<List<BookListItemViewModel>>(booksByTitleAndGenre);
+
+            foreach (var model in bookViewModels)
+            {
+                model.Genres = genres
+                    .Where(s => s.BookId == model.BookId)
+                    .Select(s => s.Genre.Name)
+                    .ToList();
+                model.IsFavorite = favoriteBooksByUser
+                    .Any(a => a.BookId == model.BookId);
+                model.IsReviewed = reviewsByUser
+                    .Any(a => a.BookId == model.BookId);
+
+                var bookReviews = allReviews
+                    .Where(r => r.BookId == model.BookId)
+                    .ToList();
+                model.AverageRating = (decimal)(bookReviews.Any()
+                    ? bookReviews.Average(r => r.Rating)
+                    : 0);
+            }
+
+            return SortBook(bookViewModels, sortType, genreFilter)
+
+                .ToList();
+        }
+
+        // Search And Sort Book Helper Function
+        private IEnumerable<BookListItemViewModel> SortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType, string? genreFilter)
+        {
+            if (!string.IsNullOrWhiteSpace(genreFilter))
+            {
+                bookViewModels = bookViewModels.Where(b => b.Genres.Any(g =>
+                    string.Equals(g, genreFilter, StringComparison.OrdinalIgnoreCase)));
+            }
+            DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
             return sortType switch
             {
-                BookSortType.GenreAscending => books.OrderBy(b => b.Genres
-                    .Select(name => name)
-                    .OrderBy(name => name)
-                    .FirstOrDefault()),
-                BookSortType.GenreDescending => books.OrderBy(b => b.Genres
-                    .Select(name => name)
-                    .OrderByDescending(name => name)
-                    .FirstOrDefault()),
-                BookSortType.TitleAscending => books.OrderBy(b => b.Title),
-                BookSortType.TitleDescending => books.OrderByDescending(b => b.Title),
-                BookSortType.AuthorAscending => books.OrderBy(b => b.Author),
-                BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
-                BookSortType.RatingAscending => books.OrderByDescending(b => b.AverageRating),
-                BookSortType.RatingDescending => books.OrderBy(b => b.AverageRating),
-                BookSortType.SeriesAscending => books.OrderBy(b => b.SeriesNumber),
-                BookSortType.SeriesDescending => books.OrderByDescending(b => b.SeriesNumber),
-                BookSortType.CreatedTimeAscending => books.OrderBy(b => b.CreatedTime),
-                BookSortType.CreatedTimeDescending => books.OrderByDescending(b => b.CreatedTime),
-                _ => books, // Default case
+
+                BookSortType.TitleAscending => bookViewModels.OrderBy(b => b.Title),
+                BookSortType.TitleDescending => bookViewModels.OrderByDescending(b => b.Title),
+                BookSortType.AuthorAscending => bookViewModels.OrderBy(b => b.Author),
+                BookSortType.AuthorDescending => bookViewModels.OrderByDescending(b => b.Author),
+                BookSortType.RatingAscending => bookViewModels.OrderByDescending(b => b.AverageRating),
+                BookSortType.RatingDescending => bookViewModels.OrderBy(b => b.AverageRating),
+                BookSortType.Oldest => bookViewModels.OrderBy(b => b.UpdatedTime),
+                BookSortType.Latest => bookViewModels.OrderByDescending(b => b.UpdatedTime),
+                BookSortType.NewBooksAscending => bookViewModels
+                    .Where(b => b.CreatedTime >= twoWeeksAgo)
+                    .OrderBy(b => b.CreatedTime),
+                BookSortType.NewBooksDescending => bookViewModels
+                    .Where(b => b.CreatedTime >= twoWeeksAgo)
+                    .OrderByDescending(b => b.CreatedTime),
+                _ => bookViewModels, // Default case
+
             };
         }
 
@@ -516,13 +446,11 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book is already in favorites.");
+                throw new InvalidOperationException(Resources.Messages.Errors.FavoriteBookExists);
             }
 
             var favoriteBook = new FavoriteBook
@@ -538,18 +466,60 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book does not exist.");
+                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
             }
             if (!_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                // MAKE MESSAGE ERROR IN RESOURCES
-                throw new InvalidOperationException("Book is not in favorites.");
+                throw new InvalidOperationException(Resources.Messages.Errors.FavoritedBookNotExists);
             }
 
             var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
 
             _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
         }
+        private async Task DeleteCoverImage(string pictureUrl)
+        {
+            var uri = new Uri(pictureUrl);
+            var relativePath = uri.AbsolutePath.Replace(Const.StoragePath, string.Empty);
+
+            var result = await _client.Storage
+                .From(Const.BucketName)
+                .Remove(new List<string> { relativePath });
+
+            if (result == null)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+            }
+        }
+        private async Task<string> UploadCoverImage(IFormFile file, string bookId)
+        {
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = Path.Combine(Const.BookDirectory, $"{bookId}-{Guid.NewGuid():N}{extension}");
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                var uploadResult = await _client.Storage
+                    .From(Const.BucketName)
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                    {
+                        ContentType = file.ContentType,
+                        Upsert = true
+                    });
+
+                if (!string.IsNullOrEmpty(uploadResult))
+                {
+                    return _client.Storage
+                        .From(Const.BucketName)
+                        .GetPublicUrl(fileName);
+                }
+            }
+
+            throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
+        }
+
+
     }
 }

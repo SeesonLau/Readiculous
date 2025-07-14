@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Readiculous.Resources.Messages;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
+using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.Manager;
@@ -11,6 +14,7 @@ using Supabase;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,23 +26,27 @@ namespace Readiculous.Services.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IGenreRepository _genreRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IFavoriteBookRepository _favoriteBookRepository;
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
         private readonly Client _client;
+        private readonly IEmailService _emailService;
 
-        public UserService(IUserRepository userRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client)
+        public UserService(IUserRepository userRepository, IGenreRepository genreRepository, IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IReviewRepository reviewRepository, IMapper mapper, Client client, IEmailService emailService)
         {
             _userRepository = userRepository;
+            _genreRepository = genreRepository;
             _bookRepository = bookRepository;
             _favoriteBookRepository = favoriteBookRepository;
             _reviewRepository = reviewRepository;
             _mapper = mapper;
             _client = client;
+            _emailService = emailService;
         }
 
-        // Authentication Method
+        // Authentication Methods
         public LoginResult AuthenticateUserByEmail(string email, string password, ref User user)
         {
             user = new User();
@@ -49,132 +57,182 @@ namespace Readiculous.Services.Services
                 return LoginResult.Failed;
             return LoginResult.Success;
         }
+        public bool IsCurrentPasswordCorrect(string userId, string currentPassword)
+        {
+            var user = _userRepository.GetUserById(userId);
+            if (user == null)
+            {
+                throw new InvalidDataException(Errors.UserNotFound);
+            }
+            return PasswordManager.DecryptPassword(user.Password) == currentPassword;
+        }
+        public bool IsChangingPassword(EditProfileViewModel editProfileViewModel)
+        {
+            return !string.IsNullOrWhiteSpace(editProfileViewModel.CurrentPassword) ||
+                !string.IsNullOrWhiteSpace(editProfileViewModel.NewPassword) ||
+                !string.IsNullOrWhiteSpace(editProfileViewModel.ConfirmPassword);
+        }
+
         // CRUD Operations
         public async Task AddUserAsync(UserViewModel model, string creatorId)
         {
-            if (!_userRepository.EmailExists(model.Email.Trim()))
+            // Adds User when Email does not exist
+            if (_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
-                var user = new User();
-                if (string.IsNullOrEmpty(model.UserId))
-                {
-                    model.UserId = Guid.NewGuid().ToString();
-                }
+                throw new DuplicateNameException(Errors.EmailExists);
+            }
+            if (_userRepository.UsernameExists(model.Username.Trim(), model.UserId))
+            {
+                throw new DuplicateNameException(Errors.UsernameExists);
+            }
 
-                _mapper.Map(model, user);
-                user.Username = user.Username.Trim();
-                user.Email = user.Email.Trim();
-                user.Password = PasswordManager.EncryptPassword(model.Password);
-                user.CreatedTime = DateTime.UtcNow;
-                user.UpdatedTime = DateTime.UtcNow;
+            // Creation of New User Entity
+            var user = new User();
+            if (string.IsNullOrEmpty(model.UserId))
+            {
+                model.UserId = Guid.NewGuid().ToString();
+            }
 
-                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
-                {
-                    var extension = Path.GetExtension(model.ProfilePicture.FileName);
-                    var fileName = Path.Combine(Const.UserDirectory, $"{user.UserId}-{Guid.NewGuid():N}{extension}");
+            // Map properties for Username, Email, CreatedTime and UpdatedTime
+            _mapper.Map(model, user);
+            user.CreatedTime = DateTime.UtcNow;
+            user.UpdatedTime = DateTime.UtcNow;
+            //user.AccessStatus = AccessStatus.FirstTime;
 
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await model.ProfilePicture.CopyToAsync(memoryStream);
-                        var fileBytes = memoryStream.ToArray();
+            // If a picture was uploaded
+            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                // Upload picture
+                user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+            }
 
-                        var uploadResult = await _client.Storage
-                            .From(Const.BucketName)
-                            .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                            {
-                                ContentType = model.ProfilePicture.ContentType,
-                                Upsert = true
-                            });
-
-                        if (!string.IsNullOrEmpty(uploadResult))
-                        {
-                            user.ProfilePictureUrl = _client.Storage
-                                .From(Const.BucketName)
-                                .GetPublicUrl(fileName);
-                        }
-                        else
-                        {
-                            throw new Exception(Resources.Messages.Errors.ImageFailedToUpload);
-                        }
-                    }
-                }
-
-                _userRepository.AddUser(user, creatorId);
+            // If the creator is not the same as the new user (admin creation), generate a temp password
+            /*bool isAdminCreated = creatorId != model.UserId;
+            string tempPassword = null;
+            if (isAdminCreated)
+            {
+                tempPassword = OtpManager.GenerateTempPassword();
+                user.Password = PasswordManager.EncryptPassword(tempPassword);
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserExists);
-            }
+                user.Password = PasswordManager.EncryptPassword(model.Password);
+            }*/
+
+            //Add User
+            _userRepository.AddUser(user, creatorId);
+
+            //Send temp password email if admin created
+            /*if (isAdminCreated && !string.IsNullOrEmpty(tempPassword))
+            {
+                await _emailService.SendTempPasswordEmailAsync(user.Email, tempPassword);
+            }*/
         }
         public async Task UpdateUserAsync(UserViewModel model, string editorId)
         {
-            if (_userRepository.UserExists(model.UserId) && _userRepository.EmailExists(model.Email.Trim()))
+            if(!_userRepository.UserExists(model.UserId))
             {
-                var user = _userRepository.GetUserById(model.UserId);
-
-                // Map properties for Username, Email, Updated Time, and UpdatedBy
-                _mapper.Map(model, user);
-                user.Username = model.Username.Trim();
-                user.Email = model.Email.Trim();
-                user.UpdatedTime = DateTime.UtcNow;
-                user.UpdatedBy = editorId;
-
-                // Only update password if a new one was provided
-                if (!string.IsNullOrEmpty(model.Password))
-                {
-                    user.Password = PasswordManager.EncryptPassword(model.Password);
-                }
-
-                // Handle profile picture changes
-                if (model.RemoveProfilePicture) // If the remove checkbox was checked
-                {
-                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        await DeleteProfilePicture(user.ProfilePictureUrl);
-                        user.ProfilePictureUrl = null;
-                    }
-                }
-                // If a new picture was uploaded
-                else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0) 
-                {
-                    // Upload new picture
-                    if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        // Delete old picture first
-                        await DeleteProfilePicture(user.ProfilePictureUrl);
-                    }
-                    user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
-                }
-                // If neither, the picture remains unchanged
-                _userRepository.UpdateUser(user);
+                throw new KeyNotFoundException(Errors.UserExists);
             }
-            else
+            
+            if(_userRepository.EmailExists(model.Email.Trim(), model.UserId))
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new DuplicateNameException(Errors.EmailExists);
             }
+
+            if(_userRepository.UsernameExists(model.Username.Trim(), model.UserId))
+            {
+                throw new DuplicateNameException(Errors.UsernameNotExist);
+            }    
+
+            var user = _userRepository.GetUserById(model.UserId);
+
+            // Map properties for Updated Time, and UpdatedBy
+
+            _mapper.Map(model, user);
+            user.UpdatedTime = DateTime.UtcNow;
+            user.UpdatedBy = editorId;
+
+            // Only update password if a new one was provided
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                user.Password = PasswordManager.EncryptPassword(model.Password);
+            }
+
+            // Handle profile picture changes
+            if (model.RemoveProfilePicture) // If the remove checkbox was checked
+            {
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    await DeleteProfilePicture(user.ProfilePictureUrl);
+                    user.ProfilePictureUrl = null;
+                }
+            }
+            // If a new picture was uploaded
+            else if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                // Upload new picture
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    // Delete old picture first
+                    await DeleteProfilePicture(user.ProfilePictureUrl);
+                }
+                user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
+            }
+            // If neither, the picture remains unchanged
+            _userRepository.UpdateUser(user);
         }
-        public async Task DeleteUserAsync(string userId, string deleterId)
+        public async Task UpdateProfileAsync(EditProfileViewModel editProfileViewModel, string editorId)
         {
-            if (await Task.Run(() => _userRepository.UserExists(userId)))
+            if (!_userRepository.UserExists(editProfileViewModel.UserId))
             {
-                var user = await Task.Run(() => _userRepository.GetUserById(userId));
-
-                user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
-                foreach (var review in user.UserReviews)
-                {
-                    review.DeletedBy = deleterId;
-                    review.DeletedTime = DateTime.UtcNow;
-
-                    _reviewRepository.UpdateReview(review);
-                }
-                user.DeletedBy = deleterId;
-                user.DeletedTime = DateTime.UtcNow;
-
-                await Task.Run(() => _userRepository.UpdateUser(user));
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
-            else
+            if (_userRepository.EmailExists(editProfileViewModel.Email.Trim(), editProfileViewModel.UserId))
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new DuplicateNameException(Errors.EmailExists);
             }
+            if(_userRepository.UsernameExists(editProfileViewModel.Username.Trim(), editProfileViewModel.UserId))
+            {
+                throw new DuplicateNameException(Errors.UsernameExists);
+            }
+
+            var user = _userRepository.GetUserById(editProfileViewModel.UserId);
+            var userViewModel = new UserViewModel();
+
+            _mapper.Map(editProfileViewModel, userViewModel);
+            if (string.IsNullOrEmpty(editProfileViewModel.NewPassword))
+            {
+                userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
+            }
+
+            await UpdateUserAsync(userViewModel, editorId);
+        }
+        public void DeleteUser(string userId, string deleterId)
+        {
+            if (!_userRepository.UserExists(userId))
+            {
+                throw new KeyNotFoundException(Errors.UserNotFound);
+            }
+            if (userId == deleterId)
+            {
+                throw new InvalidOperationException(Resources.Messages.Errors.UserCannotDeleteSelf);
+            }
+
+            var user = _userRepository.GetUserById(userId); 
+
+            user.UserReviews = _reviewRepository.GetReviewsByUserId(userId).ToList();
+            foreach (var review in user.UserReviews)
+            {
+                review.DeletedBy = deleterId;
+                review.DeletedTime = DateTime.UtcNow;
+
+                _reviewRepository.UpdateReview(review);
+            }
+            user.DeletedBy = deleterId;
+            user.DeletedTime = DateTime.UtcNow;
+
+            _userRepository.UpdateUser(user); 
         }
         // Multiple User Retrieval Methods
         public List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest)
@@ -203,13 +261,13 @@ namespace Readiculous.Services.Services
         }
 
         // Single User Retrieval Methods
-        public UserViewModel SearchUserEditById(string userId)
+        public UserViewModel GetUserEditById(string userId)
         {
             User user = _userRepository.GetUserById(userId);
 
             if (user != null)
             {
-                UserViewModel userViewModel = new();
+                var userViewModel = new UserViewModel();
 
                 _mapper.Map(user, userViewModel);
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
@@ -217,60 +275,78 @@ namespace Readiculous.Services.Services
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
         }
-        public UserDetailsViewModel SearchUserDetailsById(string userId)
+        public EditProfileViewModel GetEditProfileById(string userId)
         {
             User user = _userRepository.GetUserById(userId);
+            if (user != null)
+            {
+                EditProfileViewModel userViewModel = new();
+                _mapper.Map(user, userViewModel);
+                userViewModel.NewPassword = PasswordManager.DecryptPassword(user.Password);
+                userViewModel.RemoveProfilePicture = !string.IsNullOrEmpty(user.ProfilePictureUrl);
+                return userViewModel;
+            }
+            else
+            {
+                throw new KeyNotFoundException(Errors.UserNotFound);
+            }
+        }
+        public UserDetailsViewModel GetUserDetailsById(string userId)
+        {
+            User user = _userRepository.GetUserWithNavigationPropertiesById(userId);
 
             if (user != null)
             {
                 UserDetailsViewModel userViewModel = new();
 
                 _mapper.Map(user, userViewModel);
-                userViewModel.ProfileImageUrl = user.ProfilePictureUrl;
-                userViewModel.Role = user.Role.ToString();
-                userViewModel.FavoriteBookModels = _favoriteBookRepository.GetFavoriteBooksByUserId(userId)
-                    .ToList()
-                    .Select(fb =>
-                    {
-                        var favoriteBookModel = new FavoriteBookModel();
-                        var book = _bookRepository.GetBookById(fb.BookId);
 
-                        _mapper.Map(book, favoriteBookModel);
-                        favoriteBookModel.BookGenres = book.GenreAssociations.Select(bg => bg.Genre.Name)
-                            .ToList();
+                var favoriteBooks = _favoriteBookRepository.GetFavoriteBooksByUserId(userId).ToList();
 
-                        return favoriteBookModel;
-                    })
+                var bookIds = favoriteBooks
+                    .Select(fb => fb.BookId)
                     .ToList();
-                userViewModel.UserReviewModels = _reviewRepository.GetReviewsByUserId(userId)
-                    .ToList()
-                    .Select(r =>
-                    {
-                        var reviewViewModel = new ReviewListItemViewModel();
+                var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+                var favoriteBookMapModels = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
+                foreach(var model in favoriteBookMapModels)
+                {
+                    model.BookGenres = genres
+                        .Where(g => g.BookId == model.BookId)
+                        .Select(g => g.Genre.Name)
+                        .ToList();
+                }
 
-                        _mapper.Map(r, reviewViewModel);
-                        reviewViewModel.Reviewer = r.User.Username;
-                        reviewViewModel.BookName = r.Book.Title;
-                        reviewViewModel.Author = r.Book.Author;
-                        reviewViewModel.PublicationYear = r.Book.PublicationYear;
-                        reviewViewModel.ReviewBookCrImageUrl = r.Book.CoverImageUrl;
+                var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
+                userViewModel.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewsByUser);
 
-                        return reviewViewModel;
-                    })
-                    .ToList();
-                userViewModel.CreatedByUserName = user.CreatedByUser.Username;
-                userViewModel.UpdatedByUserName = user.UpdatedByUser.Username;
+                userViewModel.TopGenres = userViewModel.FavoriteBookModels
+                    .SelectMany(b => b.BookGenres)
+                    .GroupBy(genre => genre)
+                    .Select(g => new { Genre = g.Key, Count = g.Count() })
+                    .GroupBy(g => g.Count)
+                    .OrderByDescending(g => g.Key)
+                    .FirstOrDefault()?
+                    .Select(g => g.Genre)
+                    .ToList() ?? new List<string>() { "No genres available" };
+
+                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2): 0;
+
 
                 return userViewModel;
             }
             else
             {
-                throw new InvalidDataException(Resources.Messages.Errors.UserNotFound);
+                throw new KeyNotFoundException(Errors.UserNotFound);
             }
         }
+        public User GetUserById(string userId)
+        {
+            return _userRepository.GetUserById(userId);
+        }
+
         //Populating Dropdown Lists
         public List<SelectListItem> GetUserRoles()
         {
@@ -282,87 +358,75 @@ namespace Readiculous.Services.Services
                     Text = r.ToString()
                 }).ToList();
         }
-        public List<SelectListItem> GetUserSortTypes()
+        public List<SelectListItem> GetUserSortTypes(UserSortType sortType)
         {
             return Enum.GetValues(typeof(UserSortType))
                 .Cast<UserSortType>()
-                .Select(r => {
-                    var displayName = r.GetType()
-                                     .GetMember(r.ToString())
+                .Select(t =>
+                {
+                    var displayName = t.GetType()
+                                     .GetMember(t.ToString())
                                      .First()
                                      .GetCustomAttribute<DisplayAttribute>()?
-                                     .Name ?? r.ToString();
+                                     .Name ?? t.ToString();
 
                     return new SelectListItem
                     {
-                        Value = ((int)r).ToString(),
+                        Value = ((int)t).ToString(),
                         Text = displayName,
-                        Selected = r == UserSortType.Latest 
+                        Selected = t == sortType
                     };
                 }).ToList();
         }
+        // String Helper
+        public string GetEmailByUserId(string userId)
+        {
+            var user = _userRepository.GetUserById(userId);
+
+            if(user == null)
+            {
+                throw new KeyNotFoundException(Errors.UserNotFound);
+            }
+
+            return user.Email;
+        }
+
         // Helper methods for searching users
         private List<UserListItemViewModel> GetAllActiveUsers()
         {
-            var userViewModels = _userRepository.GetUsersByUsername(string.Empty)
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
+            var allUsers = _userRepository.GetUsersByUsername(string.Empty);
+            var result = _mapper.Map<List<UserListItemViewModel>>(allUsers)
+                .OrderByDescending(u => u.CreatedTime)
+                .ToList();
 
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-
-                    return userViewModel;
-                });
-
-            return userViewModels.OrderByDescending(u => u.CreatedTime).ToList();
+            return result;
         }
-        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType searchType)
+        private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType sortType)
         {
-            var userViewModels = _userRepository.GetUsersByUsername(username.Trim())
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
-                    _mapper.Map(user, userViewModel);
-                    return userViewModel;
-                });
+            var usersByUsername = _userRepository.GetUsersByUsername(username.Trim());
+            var result = _mapper.Map<List<UserListItemViewModel>>(usersByUsername);
 
-            return searchType switch
+            return sortType switch
             {
-                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
-                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
-                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
-                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList()
+                UserSortType.UsernameAscending => result.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => result.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.Oldest => result.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => result.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => result.OrderByDescending(u => u.UpdatedTime).ToList()
             };
         }
         private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
         {
-            var userViewModels = _userRepository.GetUsersByRoleAndUsername(role, username.Trim())
-                .ToList()
-                .Select(user =>
-                {
-                    UserListItemViewModel userViewModel = new();
-
-                    _mapper.Map(user, userViewModel);
-                    userViewModel.Role = user.Role.ToString();
-                    userViewModel.CreatedByUsername = user.CreatedByUser.Username;
-                    userViewModel.UpdatedByUsername = user.UpdatedByUser.Username;
-
-                    return userViewModel;
-                });
+            var usersByRoleAndUsername = _userRepository.GetUsersByRoleAndUsername(role, username.Trim());
+            var result = _mapper.Map<List<UserListItemViewModel>>(usersByRoleAndUsername);
 
             return searchType switch
             {
-                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName).ToList(),
-                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName).ToList(),
-                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime).ToList(),
-                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
-                _ => userViewModels.OrderByDescending(u => u.UpdatedTime).ToList(),
+                UserSortType.UsernameAscending => result.OrderBy(u => u.UserName).ToList(),
+                UserSortType.UsernameDescending => result.OrderByDescending(u => u.UserName).ToList(),
+                UserSortType.Oldest => result.OrderBy(u => u.UpdatedTime).ToList(),
+                UserSortType.Latest => result.OrderByDescending(u => u.UpdatedTime).ToList(),
+                _ => result.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
         }
         // Helper methods for profile picture management
@@ -377,7 +441,7 @@ namespace Readiculous.Services.Services
 
             if (result == null)
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToDelete);
+                throw new InvalidOperationException(Errors.ImageFailedToDelete);
             }
         }
         private async Task<string> UploadProfilePicture(IFormFile file, string userId)
@@ -408,5 +472,143 @@ namespace Readiculous.Services.Services
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
+        // OTP Methods
+        public async Task<bool> SendOtpForRegistrationAsync(string email)
+        {
+            try
+            {
+                // Check if email already exists
+                if (_userRepository.EmailExists(email.Trim(), string.Empty))
+                {
+                    return false;
+                    return false;
+                }
+
+                // Generate and store OTP only
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null); // Store null for temp password for now
+
+                // Send OTP via email service (no temp password)
+                return await _emailService.SendOtpEmailAsync(email, otp, null);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        public async Task<bool> ResendOtpForRegistrationAsync(string email)
+        {
+            try
+            {
+                // Check if email already exists
+                if (_userRepository.EmailExists(email.Trim(), string.Empty))
+                {
+                    return false;
+                }
+
+                // Generate and store new OTP only
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service (no temp password)
+                return await _emailService.SendOtpEmailAsync(email, otp, null);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        // New method to send temp password after OTP is confirmed
+        public async Task<bool> SendTempPasswordEmailAsync(string email, string tempPassword)
+        {
+            // Compose and send a new email with only the temp password
+            return await _emailService.SendTempPasswordEmailAsync(email, tempPassword);
+        }
+
+        public bool ValidateOtpForRegistration(string email, string otp)
+        {
+            // Only validate OTP, do not remove temp password yet
+            return OtpManager.ValidateOtp(email, otp);
+        }
+
+        public string GetTempPasswordForEmail(string email)
+        {
+            return OtpManager.GetTempPassword(email);
+        }
+
+        // Forgot Password Methods
+        public async Task<bool> SendOtpForForgotPasswordAsync(string email)
+        {
+            try
+            {
+                // Check if email exists
+                if (!_userRepository.EmailExists(email.Trim(), string.Empty))
+                {
+                    return false;
+                }
+
+                // Generate and store OTP for forgot password
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service
+                return await _emailService.SendOtpForForgotPasswordEmailAsync(email, otp);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ResendOtpForForgotPasswordAsync(string email)
+        {
+            try
+            {
+                // Check if email exists
+                if (!_userRepository.EmailExists(email.Trim(), string.Empty))
+                {
+                    return false;
+                }
+
+                // Generate and store new OTP
+                var otp = OtpManager.GenerateOtp();
+                OtpManager.StoreOtpAndPassword(email, otp, null);
+
+                // Send OTP via email service
+                return await _emailService.SendOtpForForgotPasswordEmailAsync(email, otp);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool ValidateOtpForForgotPassword(string email, string otp)
+        {
+            return OtpManager.ValidateOtp(email, otp);
+        }
+
+        public async Task<bool> UpdatePasswordAsync(string email, string newPassword)
+        {
+            try
+            {
+                var user = _userRepository.GetUserByEmail(email);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                user.Password = PasswordManager.EncryptPassword(newPassword);
+                user.UpdatedTime = DateTime.UtcNow;
+                _userRepository.UpdateUser(user);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
     }
 }

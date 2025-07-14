@@ -1,10 +1,4 @@
-﻿using Readiculous.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Readiculous.Services.ServiceModels
 {
@@ -19,7 +13,9 @@ namespace Readiculous.Services.ServiceModels
         public string CreatedTime { get; set; }
         public string UpdatedByUserName { get; set; }
         public string UpdatedTime { get; set; }
+        public decimal AverageRating { get; set; }
 
+        public List<string> TopGenres { get; set; }
         public List<ReviewListItemViewModel> UserReviewModels { get; set; } = [];
         public List<FavoriteBookModel> FavoriteBookModels { get; set; } = [];
 

@@ -126,6 +126,12 @@
   <data name="BookTitleAndAuthorExists" xml:space="preserve">
     <value>A book with the same title and author already exists!</value>
   </data>
+  <data name="FavoriteBookExists" xml:space="preserve">
+    <value>Book already favorited!</value>
+  </data>
+  <data name="FavoritedBookNotExists" xml:space="preserve">
+    <value>Book not favorited!</value>
+  </data>
   <data name="GenreExists" xml:space="preserve">
     <value>Genre Name already exists!</value>
   </data>
@@ -138,13 +144,49 @@
   <data name="ImageFailedToUpload" xml:space="preserve">
     <value>Image failed to upload!</value>
   </data>
+  <data name="IncorrectLoginCredentials" xml:space="preserve">
+    <value>Invalid Email or Password!</value>
+  </data>
+  <data name="InvalidCurrentPassword" xml:space="preserve">
+    <value>Current Password does not match your current password!</value>
+  </data>
+  <data name="ISBNExists" xml:space="preserve">
+    <value>Book with the same ISBN already exists!</value>
+  </data>
+  <data name="ReviewExists" xml:space="preserve">
+    <value>Review already exists for this book by the user!</value>
+  </data>
+  <data name="ReviewNotExist" xml:space="preserve">
+    <value>Review does not exist for this book by the user!</value>
+  </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error occured!</value>
+  </data>
+  <data name="UnableToAddFavorite" xml:space="preserve">
+    <value>Unable to Update Favorite: </value>
+  </data>
+  <data name="UserCannotDeleteSelf" xml:space="preserve">
+    <value>User cannot delete self!</value>
   </data>
   <data name="UserExists" xml:space="preserve">
     <value>UserId already exists!</value>
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>User is not found!</value>
+  </data>
+  <data name="ForgotPasswordEmailFailed" xml:space="preserve">
+    <value>Email not found or failed to send OTP.</value>
+  </data>
+  <data name="EmailExists" xml:space="preserve">
+    <value>Email already exists!</value>
+  </data>
+  <data name="EmailNotExist" xml:space="preserve">
+    <value>Email does not exist!</value>
+  </data>
+  <data name="UsernameExists" xml:space="preserve">
+    <value>Username already exists!</value>
+  </data>
+  <data name="UsernameNotExist" xml:space="preserve">
+    <value>Username does not exist!</value>
   </data>
 </root>

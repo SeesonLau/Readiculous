@@ -26,10 +26,18 @@ namespace Readiculous.Data.Repositories
                                                 u.DeletedTime == null);
         }
 
-        public bool EmailExists(string email)
+        public bool EmailExists(string email, string userId)
         {
             return this.GetDbSet<User>().Any(u => u.Email.ToLower() == email.ToLower() &&
+                                                u.UserId != userId &&
                                                 u.DeletedTime == null);
+        }
+        public bool UsernameExists(string username, string userId)
+        {
+            return this.GetDbSet<User>()
+                .Any(u => u.Username == username &&
+                          u.UserId != userId &&
+                          u.DeletedTime == null);
         }
 
         public void AddUser(User user, string creatorId)
@@ -50,29 +58,20 @@ namespace Readiculous.Data.Repositories
         //User List Queries
         public IQueryable<User> GetUsersByUsername(string username)
         {
-            // CAN BE OPTIMIZED TO REMOVE USER FAVORITE BOOKS AND USER REVIEWS IF NOT NEEDED
             var users = this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .Include(u => u.UserFavoriteBooks)
-                    .ThenInclude(fb => fb.Book)
-                .Include(u => u.UserReviews)
-                    .ThenInclude(r => r.Book)
                 .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
                         u.DeletedTime == null);
 
             return users;
         }
+
         public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
         {
-            // CAN BE OPTIMIZED TO REMOVE USER FAVORITE BOOKS AND USER REVIEWS IF NOT NEEDED
             var users = this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .Include(u => u.UserFavoriteBooks)
-                    .ThenInclude(fb => fb.Book)
-                .Include(u => u.UserReviews)
-                    .ThenInclude(r => r.Book)
                 .Where(u => u.Role == role &&
                         u.Username.ToLower().Contains(username.ToLower()) &&
                         u.DeletedTime == null);
@@ -84,10 +83,14 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .Include(u => u.UserFavoriteBooks)
-                    .ThenInclude(fb => fb.Book)
-                .Include(u => u.UserReviews)
-                    .ThenInclude(r => r.Book)
+                .FirstOrDefault(u => u.UserId == id
+                                    && u.DeletedTime == null);
+        }
+        public User GetUserWithNavigationPropertiesById(string id)
+        {
+            return this.GetDbSet<User>()
+                .Include(u => u.CreatedByUser)
+                .Include(u => u.UpdatedByUser)
                 .FirstOrDefault(u => u.UserId == id
                                     && u.DeletedTime == null);
         }
@@ -96,6 +99,13 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<User>()
                 .FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
                                     && u.Password == password
+                                    && u.DeletedTime == null);
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            return this.GetDbSet<User>()
+                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
                                     && u.DeletedTime == null);
         }
     }

@@ -13,7 +13,8 @@ namespace Readiculous.Data.Interfaces
     {
         IQueryable<User> GetUsers();
         bool UserExists(string userId);
-        bool EmailExists(string email);
+        bool EmailExists(string email, string userId);
+        bool UsernameExists(string username, string userId);
         void AddUser(User user, string creatorId);
         void UpdateUser(User user);
 
@@ -21,6 +22,8 @@ namespace Readiculous.Data.Interfaces
         IQueryable<User> GetUsersByUsername(string username);
         IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username);
         User GetUserById(string id);
+        User GetUserWithNavigationPropertiesById(string id);
         User GetUserByEmailAndPassword(string email, string password);
+        User GetUserByEmail(string email);
     }
 }

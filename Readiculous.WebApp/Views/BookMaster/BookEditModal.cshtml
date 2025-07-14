@@ -1,0 +1,121 @@
+﻿@model Readiculous.Services.ServiceModels.BookViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Edit Book</h5>
+</div>
+<form id="editBookForm" asp-action="Edit" enctype="multipart/form-data">
+    <div class="modal-body">
+        <input type="hidden" asp-for="BookId" />
+        <input type="hidden" asp-for="CreatedBy" />
+        <input type="hidden" asp-for="CreatedTime" />
+        <input type="hidden" asp-for="UpdatedBy" />
+        <input type="hidden" asp-for="UpdatedTime" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Title*</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Author" class="form-label">Author*</label>
+                <input asp-for="Author" class="form-control" />
+                <span asp-validation-for="Author" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ISBN" class="form-label">ISBN</label>
+                <input asp-for="ISBN" class="form-control" />
+                <span asp-validation-for="ISBN" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="SeriesNumber" class="form-label">Series Number</label>
+                <input asp-for="SeriesNumber" class="form-control" />
+                <span asp-validation-for="SeriesNumber" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="PublicationYear" class="form-label">Publication Year</label>
+                <input asp-for="PublicationYear" class="form-control" />
+                <span asp-validation-for="PublicationYear" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Publisher" class="form-label">Publisher</label>
+                <input asp-for="Publisher" class="form-control" />
+                <span asp-validation-for="Publisher" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Genres*</label>
+            @if (Model.AllAvailableGenres != null && Model.AllAvailableGenres.Any())
+            {
+                <div class="genre-checkbox-grid">
+                    @foreach (var genre in Model.AllAvailableGenres)
+                    {
+                        <div class="genre-checkbox-item">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="SelectedGenres"
+                                   value="@genre.GenreId"
+                                   id="genre-@genre.GenreId"
+                                   @(Model.SelectedGenres != null && Model.SelectedGenres.Contains(genre.GenreId) ? "checked" : "") />
+                            <label class="form-check-label" for="genre-@genre.GenreId">@genre.Name</label>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-danger">No genres available.</p>
+            }
+            <span asp-validation-for="SelectedGenres" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Current Cover Image</label>
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <div class="image-preview-container">
+                    <img src="@Model.CoverImageUrl" class="image-preview" alt="Current Cover" />
+                </div>
+            }
+            else
+            {
+                <div class="image-preview-container">
+                    <div class="cover-image-placeholder">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CoverImage" class="form-label">Replace Cover Image</label>
+            <label class="file-input-label">
+                <span>Click to upload</span>
+                <input asp-for="CoverImage" type="file" class="d-none" accept="image/*" />
+            </label>
+            <div class="image-preview-container mt-2 d-none" id="imagePreviewContainer">
+                <img id="imagePreview" class="image-preview" src="#" alt="Preview" />
+            </div>
+            <span asp-validation-for="CoverImage" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+<script src="~/js/adminBookMaster/bookmasterModal.js" asp-append-version="true"></script>

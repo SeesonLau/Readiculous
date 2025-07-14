@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
 
 namespace Readiculous.Resources.Constants
 {
@@ -29,20 +30,20 @@ namespace Readiculous.Resources.Constants
 
         public enum RoleType
         {
-            Admin = 0,
-            Reviewer = 1,
+            Reviewer = 0,
+            Admin = 1,
         }
 
         public enum UserSortType
         {
-            [Display(Name = "Username: A-Z")]
-            UsernameAscending = 0,
-            [Display(Name = "Username: Z-A")]
-            UsernameDescending = 1,
             [Display(Name = "Latest")]
-            Latest = 2,  
+            Latest = 0,
             [Display(Name = "Oldest")]
-            Oldest = 3
+            Oldest = 1,
+            [Display(Name = "Username: A-Z")]
+            UsernameAscending = 2,
+            [Display(Name = "Username: Z-A")]
+            UsernameDescending = 3,
         }
 
         public enum AccessStatus
@@ -54,34 +55,51 @@ namespace Readiculous.Resources.Constants
 
         public enum GenreSortType
         {
-            NameAscending = 0,
-            NameDescending = 1,
-            BookCountAscending = 2,
-            BookCountDescending = 3,
-            CreatedTimeAscending = 4,
-            CreatedTimeDescending = 5,
+            [Display(Name = "Latest")]
+            Latest = 0,
+            [Display(Name = "Oldest")]
+            Oldest = 1,
+            [Display(Name = "Username: A-Z")]
+            NameAscending = 2,
+            [Display(Name = "Username: Z-A")]
+            NameDescending = 3,
+            [Display(Name = "Book Count: 🡡")]
+            BookCountAscending = 4,
+            [Display(Name = "Book Count: 🡣")]
+            BookCountDescending = 5,
         }
 
         public enum BookSearchType
         {
+            [Display(Name = "All Books")]
             AllBooks = 0,
+            [Display(Name = "Top Books")]
             TopBooks = 1,
+            [Display(Name = "New Books")]
             NewBooks = 2,
         }
         public enum BookSortType
         {
-            GenreAscending = 0,
-            GenreDescending = 1,
+            [Display(Name = "Latest")]
+            Latest = 0,
+            [Display(Name = "Oldest")]
+            Oldest = 1,
+            [Display(Name = "Title: A-Z")]
             TitleAscending = 2,
+            [Display(Name = "Title: Z-A")]
             TitleDescending = 3,
+            [Display(Name = "Author: A-Z")]
             AuthorAscending = 4,
+            [Display(Name = "Author: Z-A")]
             AuthorDescending = 5,
+            [Display(Name = "Top Books: 🡡")]
             RatingAscending = 6,
+            [Display(Name = "Top Books: 🡣")]
             RatingDescending = 7,
-            SeriesAscending = 8,
-            SeriesDescending = 9,
-            CreatedTimeAscending = 10,
-            CreatedTimeDescending = 11,
+            [Display(Name = "New Books: 🡡")]
+            NewBooksAscending = 8,
+            [Display(Name = "New Books: 🡣")]
+            NewBooksDescending = 9,
         }
     }
 }

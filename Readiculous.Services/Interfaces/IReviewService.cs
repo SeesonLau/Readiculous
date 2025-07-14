@@ -17,5 +17,6 @@ namespace Readiculous.Services.Interfaces
         List<ReviewListItemViewModel> GetReviewListFromBookId(string bookId);
         List<ReviewListItemViewModel> GetReviewListFromUserId(string userId);
         ReviewViewModel GetReviewByBookIdAndUserId(string bookId, string userId);
+        ReviewViewModel GenerateInitialReviewViewModel(string bookId, string userId, string userName);
     }
 }

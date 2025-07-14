@@ -5,6 +5,7 @@ using Readiculous.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -19,13 +20,20 @@ namespace Readiculous.Data.Repositories
 
         public bool GenreIdExists(string genreId)
         {
-            return this.GetDbSet<Genre>().Any(g => g.GenreId == genreId &&
-                                                g.DeletedTime == null);
+            var data = this.GetDbSet<Genre>()
+                .Any(g => g.GenreId == genreId && 
+                            g.DeletedTime == null);
+
+            return data;
         }
-        public bool GenreNameExists(string genreName)
+        public bool GenreNameExists(string genreName, string genreId)
         {
-            return this.GetDbSet<Genre>()
-                .Any(g => g.Name == genreName && g.DeletedTime == null);
+            var data = this.GetDbSet<Genre>()
+                .Any(g => g.Name == genreName
+                        && g.GenreId != genreId
+                        && g.DeletedTime == null);
+
+            return data;
         }
 
         public void AddGenre(Genre genre)
@@ -42,45 +50,74 @@ namespace Readiculous.Data.Repositories
 
         public IQueryable<Genre> GetAllActiveGenres()
         {
-            return this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(bga => bga.Book)
+            var data = this.GetDbSet<Genre>()
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .Where(g => g.DeletedTime == null);
+
+            return data;
         }
         public IQueryable<Genre> GetGenresByName(string genreName)
         {
-            var queryReturn = this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(bga => bga.Book)
+            var data = this.GetDbSet<Genre>()
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .Where(g => g.Name.ToLower().Contains(genreName.ToLower()) &&
                             g.DeletedTime == null);
 
-            return queryReturn;
+            return data;
         }
 
         public Genre GetGenreById(string id)
         {
-            return this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(bga => bga.Book)
+            var data = this.GetDbSet<Genre>()
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .FirstOrDefault(g => g.GenreId == id &&
                                     g.DeletedTime == null);
+        
+            return data;
         }
-
-        public Genre GetGenreByName(string name)
+        public Genre GetGenreWithBooksPropertiesById(string id)
         {
-            return this.GetDbSet<Genre>()
+            var data = this.GetDbSet<Genre>()
                 .Include(g => g.Books)
+                    .ThenInclude(g => g.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
-                .FirstOrDefault(g => g.Name == name &&
+                .FirstOrDefault(g => g.GenreId == id &&
                                     g.DeletedTime == null);
+
+            return data;
+        }
+        public IQueryable<string> GetGenreNamesByBookId(string bookId)
+        {
+            var data = this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => bga.BookId == bookId &&
+                                bga.Genre.DeletedTime == null)
+                .Select(bga => bga.Genre.Name);
+
+            return data;
+        }
+
+        public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookId(List<string> bookIds)
+        {
+            var data = this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => bookIds.Any(a => a.Equals(bga.BookId)) &&
+                                bga.Genre.DeletedTime == null &&
+                                bga.Book.DeletedTime == null);
+
+            return data;
+        }
+
+        public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByGenreIds(List<string> genreIds)
+        {
+            var data = this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => genreIds.Any(a => a.Equals(bga.GenreId)) &&
+                                bga.Genre.DeletedTime == null &&
+                                bga.Book.DeletedTime == null);
+
+            return data;
         }
     }
 }

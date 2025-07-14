@@ -1,12 +1,15 @@
-﻿using Readiculous.Services.Interfaces;
-using Readiculous.Services.ServiceModels;
-using Readiculous.WebApp.Mvc;
+﻿using AspNetCoreGeneratedDocument;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using Readiculous.Services.Interfaces;
+using Readiculous.Services.ServiceModels;
+using Readiculous.WebApp.Models;
+using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +34,7 @@ namespace Readiculous.WebApp.Controllers
             ViewData["CurrentUserSearchType"] = searchType.ToString();
 
             ViewBag.RoleTypes = _userService.GetUserRoles();
-            ViewBag.UserSearchTypes = _userService.GetUserSortTypes();
+            ViewBag.UserSearchTypes = _userService.GetUserSortTypes(searchType);
 
             List<UserListItemViewModel> users = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
 
@@ -63,44 +66,45 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(string userId)
+        public IActionResult EditUserModal(string userId)
         {
             try
             {
-                var user = _userService.SearchUserEditById(userId);
-                return View(user);
+                var user = _userService.GetUserEditById(userId);
+                return PartialView("_EditUserModal", user);
             }
             catch (InvalidDataException ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return RedirectToAction("Index");
+                return BadRequest(new { error = ex.Message });
             }
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAsync(UserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    await _userService.UpdateUserAsync(model, this.UserId);
-                    return RedirectToAction("Index");
-                }
-                catch (InvalidDataException ex)
-                {
-                    ModelState.AddModelError(string.Empty, ex.Message);
-                }
+                return PartialView("_EditUserModal", model);
             }
-            return View(model);
+
+            await _userService.UpdateUserAsync(model, this.UserId);
+            return Json(new { success = true });
         }
 
         public IActionResult Details(string userId)
         {
             try
             {
-                var user = _userService.SearchUserDetailsById(userId);
-                return View(user);
+                var user = _userService.GetUserEditById(userId);
+                var registrationComplete = new RegisterSuccessfulViewModel
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Password = user.Password
+                };
+                return PartialView("_RegistrationSuccessfulModal", registrationComplete);
             }
             catch (InvalidDataException ex)
             {
@@ -113,7 +117,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                _userService.DeleteUserAsync(userId, this.UserId);
+                _userService.DeleteUser(userId, this.UserId);
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)

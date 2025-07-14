@@ -11,7 +11,7 @@ namespace Readiculous.Data.Interfaces
     public interface IBookRepository
     {
         bool BookIdExists(string bookId);
-        bool BookTitleAndAuthorExists(string bookTitle, string author);
+        bool BookTitleAndAuthorExists(string bookTitle, string author, string id);
         bool ISBNExists(string id, string isbn);
         void AddBook(Book book);
         void UpdateBook(Book book);
@@ -23,7 +23,8 @@ namespace Readiculous.Data.Interfaces
         IQueryable<Book> GetBooksByTitleAndGenres(string bookTitle, List<Genre> genres);
         Book GetBookById(string id);
 
-        // Book GetBookByTitle(string title); //NOT USED AT THE MOMENT
-        // Book GetBookByAuthor(string authorName); //NOT USED AT THE MOMENT
+        int GetBookCountByGenreId(string genreId);
+        Dictionary<string, int> GetBookCountByGenreIds(List<string> genreIds);
+
     }
 }
