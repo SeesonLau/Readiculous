@@ -22,22 +22,22 @@ namespace Readiculous.Data.Repositories
 
         public bool UserExists(string userId)
         {
-            return this.GetDbSet<User>().Any(u => u.UserId == userId &&
-                                                u.DeletedTime == null);
+            return this.GetDbSet<User>().Any(u => u.DeletedTime == null &&
+                                                  u.UserId == userId);
         }
 
         public bool EmailExists(string email, string userId)
         {
-            return this.GetDbSet<User>().Any(u => u.Email.ToLower() == email.ToLower() &&
-                                                u.UserId != userId &&
-                                                u.DeletedTime == null);
+            return this.GetDbSet<User>().Any(u => u.DeletedTime == null&&
+                                                  u.UserId != userId &&
+                                                  u.Email.ToLower() == email.ToLower());
         }
         public bool UsernameExists(string username, string userId)
         {
             return this.GetDbSet<User>()
-                .Any(u => u.Username == username &&
+                .Any(u => u.DeletedTime == null &&
                           u.UserId != userId &&
-                          u.DeletedTime == null);
+                          u.Username == username);
         }
 
         public void AddUser(User user, string creatorId)
@@ -61,8 +61,8 @@ namespace Readiculous.Data.Repositories
             var users = this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .Where(u => u.Username.ToLower().Contains(username.ToLower()) &&
-                        u.DeletedTime == null);
+                .Where(u => u.DeletedTime == null &&
+                            u.Username.ToLower().Contains(username.ToLower()));
 
             return users;
         }
@@ -72,9 +72,9 @@ namespace Readiculous.Data.Repositories
             var users = this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .Where(u => u.Role == role &&
-                        u.Username.ToLower().Contains(username.ToLower()) &&
-                        u.DeletedTime == null);
+                .Where(u => u.DeletedTime == null &&
+                            u.Username.ToLower().Contains(username.ToLower()) &&
+                            u.Role == role);
 
             return users;
         }
@@ -83,30 +83,30 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .FirstOrDefault(u => u.UserId == id
-                                    && u.DeletedTime == null);
+                .FirstOrDefault(u => u.DeletedTime == null &&
+                                     u.UserId == id);
         }
         public User GetUserWithNavigationPropertiesById(string id)
         {
             return this.GetDbSet<User>()
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .FirstOrDefault(u => u.UserId == id
-                                    && u.DeletedTime == null);
+                .FirstOrDefault(u => u.DeletedTime == null &&
+                                     u.UserId == id);
         }
         public User GetUserByEmailAndPassword(string email, string password)
         {
             return this.GetDbSet<User>()
-                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
-                                    && u.Password == password
-                                    && u.DeletedTime == null);
+                .FirstOrDefault(u => u.DeletedTime == null && 
+                                     u.Password == password && 
+                                     u.Email.ToLower() == email.ToLower());
         }
 
         public User GetUserByEmail(string email)
         {
             return this.GetDbSet<User>()
-                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower()
-                                    && u.DeletedTime == null);
+                .FirstOrDefault(u => u.DeletedTime == null &&
+                                     u.Email.ToLower() == email.ToLower());
         }
     }
 }
