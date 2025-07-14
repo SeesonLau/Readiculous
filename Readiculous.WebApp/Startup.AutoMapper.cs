@@ -29,6 +29,7 @@ namespace Readiculous.WebApp
             public AutoMapperProfileConfiguration()
             {
                 //User Mappings
+
                 CreateMap<User, UserListItemViewModel>()
                     .ForMember(dest => dest.CreatedByUsername,
                                opt => opt.MapFrom(src => src.CreatedByUser.Username))
@@ -50,6 +51,9 @@ namespace Readiculous.WebApp
                 CreateMap<EditProfileViewModel, User>();
                 CreateMap<User, EditProfileViewModel>();
                 CreateMap<EditProfileViewModel, UserViewModel>();
+
+               
+
 
 
                 // Genre Mappings
