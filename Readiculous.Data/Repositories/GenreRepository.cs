@@ -21,17 +21,17 @@ namespace Readiculous.Data.Repositories
         public bool GenreIdExists(string genreId)
         {
             var data = this.GetDbSet<Genre>()
-                .Any(g => g.GenreId == genreId && 
-                            g.DeletedTime == null);
+                .Any(g => g.DeletedTime == null &&
+                          g.GenreId == genreId);
 
             return data;
         }
         public bool GenreNameExists(string genreName, string genreId)
         {
             var data = this.GetDbSet<Genre>()
-                .Any(g => g.Name == genreName
-                        && g.GenreId != genreId
-                        && g.DeletedTime == null);
+                .Any(g => g.DeletedTime == null && 
+                          g.GenreId != genreId &&
+                          g.Name == genreName);
 
             return data;
         }
@@ -62,8 +62,8 @@ namespace Readiculous.Data.Repositories
             var data = this.GetDbSet<Genre>()
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
-                .Where(g => g.Name.ToLower().Contains(genreName.ToLower()) &&
-                            g.DeletedTime == null);
+                .Where(g => g.DeletedTime == null &&
+                            g.Name.ToLower().Contains(genreName.ToLower()));
 
             return data;
         }
