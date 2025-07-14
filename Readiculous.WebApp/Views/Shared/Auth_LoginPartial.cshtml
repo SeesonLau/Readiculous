@@ -1,0 +1,20 @@
+@model Readiculous.WebApp.Models.LoginViewModel
+@using static Readiculous.Resources.Views.Screen
+<form method="post" action="/Account/Login" id="loginForm">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label" for="emailInput">@Email</label>
+        <input type="text" id="emailInput" class="form-control" asp-for="Email" placeholder="Enter email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="passwordInput">@Password</label>
+        <input type="password" id="passwordInput" class="form-control" asp-for="Password" placeholder="Enter password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <button class="btn login-btn" type="submit">@Login</button>
+    <div class="forgot-signup-row">
+        <a href="#" class="login-link" id="show-forgot">@ForgotPass</a>
+        <a href="#" class="login-link" id="show-signup">Sign Up</a>
+    </div>
+</form> 

@@ -52,7 +52,7 @@ namespace Readiculous.WebApp.Controllers
             {
                 return NotFound();
             }
-            return PartialView("_EditProfileModal", model);
+            return PartialView("~/Views/Shared/_EditProfileModal.cshtml", model);
         }
         [HttpPost]
         public async Task<IActionResult> EditProfile(EditProfileViewModel editProfileViewModel)

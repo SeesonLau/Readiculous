@@ -88,21 +88,7 @@
         </main>
         <partial name="_Footer" />
     </div>
-    <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" id="registrationModalContent">
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" id="editProfileModalContent">
-            </div>
-        </div>
-    </div>
-
-
+    <!-- Removed registrationModal and editProfileModal, as their partials are now loaded via AJAX or have been moved/deleted. -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -177,19 +163,18 @@
         });
     </script>
 
-    @await Html.PartialAsync("_LoginModal")
-    @await Html.PartialAsync("_RegisterModal")
-    @await Html.PartialAsync("_OTPModal")
-    @await Html.PartialAsync("_ForgotPasswordModal")
-    @await Html.PartialAsync("_ForgotPasswordOtpModal")
-    @await Html.PartialAsync("_ResetPasswordModal")
-    @await Html.PartialAsync("_AllDoneModal")
+    <!-- Removed deleted modal partials: _LoginModal, _OTPModal, _ForgotPasswordModal, _ForgotPasswordOtpModal, _ResetPasswordModal, _AllDoneModal -->
     @await RenderSectionAsync("Scripts", required: false)
+    <!-- Authentication partials for AJAX/modal use -->
+    @await Html.PartialAsync("Auth_LoginPartial", new Readiculous.WebApp.Models.LoginViewModel())
+    @await Html.PartialAsync("Auth_RegisterPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("Auth_ForgotPasswordPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("Auth_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
+    @await Html.PartialAsync("Auth_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
+    @await Html.PartialAsync("Auth_SuccessPartial")
 </body>
 </html>
-<script src="~/js/login.js" asp-append-version="true"></script>
-<script src="~/js/register.js" asp-append-version="true"></script>
-<script src="~/js/forgotPassword.js" asp-append-version="true"></script>
+<!-- Removed deleted scripts: login.js, register.js, forgotPassword.js -->
 
 
 <script>

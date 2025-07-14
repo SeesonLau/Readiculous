@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Readiculous.WebApp.Models.LoginViewModel
+@using static Readiculous.Resources.Views.Screen
+@{
     Layout = null;
 }
 
@@ -7,8 +9,6 @@
 <head>
     <meta charset="UTF-8" />
     <title>Readiculous - Landing Page</title>
-
-    <!-- Bring in same CSS as your _Layout -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -23,75 +23,163 @@
             --color-background: #F2EFF1;
             --font-primary: 'Gentium Book Plus', serif;
         }
-
-        body {
+        body, html {
+            height: 100%;
             margin: 0;
             font-family: var(--font-primary);
             background: var(--color-background);
         }
+        .split-container {
+            display: flex;
+            height: 100vh;
+        }
+        .left-half {
+            flex: 1;
+            background: var(--color-header);
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 30px;
+        }
+        .right-half {
+            flex: 1;
+            background: var(--color-background);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 30px;
+        }
+        .hero-image {
+            margin-bottom: 30px;
+        }
+        .hero-image img {
+            max-width: 350px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #fff;
+            text-align: center;
+        }
+        .hero-desc {
+            font-size: 1.1rem;
+            color: #f8ece9;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .brand-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 18px;
+        }
+        .login-card {
+            background: var(--color-header);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2.5rem 2rem;
+            max-width: 400px;
+            width: 100%;
+            color: #fff;
+        }
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .login-btn {
+            background: var(--color-btn);
+            color: var(--color-text);
+            border: none;
+            border-radius: 16px;
+            padding: 1rem 0;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            transition: background 0.2s;
+        }
+        .login-btn:hover {
+            background: #e89ab0;
+        }
+        .login-link {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            margin: 0 8px;
+            font-size: 1rem;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+            color: var(--color-btn);
+        }
+        .forgot-signup-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+        .form-label {
+            color: #fff;
+            font-weight: 600;
+        }
+        .form-control:focus {
+            border-color: var(--color-header);
+            box-shadow: 0 0 0 0.2rem #b089a540;
+        }
     </style>
 </head>
 <body>
-
-    <!-- Hardcoded navbar with logo and text side by side -->
-    <header style="
-        background-color: var(--color-header);
-        color: var(--color-text);
-        padding: 10px 20px;
-        display: flex;
-        align-items: center;
-        cursor: pointer;">
-        <div style="display: flex; align-items: center; gap: 10px;"
-             onclick="window.location.href='@Url.Action("LandingScreen", "Home")'">
-            <img src="@Url.Content("~/img/readiculous-logo.svg")"
-                 style="width: 40px; height: 40px;"
-                 alt="Logo">
-            <span style="font-weight: bold; font-size: 1.2rem;">
-                Readiculous
-            </span>
-        </div>
-    </header>
-
-    <!-- Hero section -->
-    <section class="hero" style="padding: 10px 20px; text-align: center;">
-        <div class="hero-text">
-            <div class="hero-image" style="margin-bottom: 20px;">
-                <img src="@Url.Content("~/img/download.png")"
-                     alt="Reading Illustration"
-                     style="max-width: 100%; height: auto;" />
+    <!-- Header-like logo and brand at top left -->
+    <div style="position: absolute; top: 32px; left: 48px; display: flex; align-items: center; gap: 12px; z-index: 10;">
+        <img src="@Url.Content("~/img/readiculous-logo.svg")" style="width: 40px; height: 40px;" alt="Logo" />
+        <span style="font-weight: bold; font-size: 1.5rem; color: #fff; letter-spacing: 1px; text-shadow: 0 1px 4px #b089a5;">Readiculous</span>
+    </div>
+    <div class="split-container">
+        <!-- Left Side: Image and Text -->
+        <div class="left-half">
+            <div class="hero-image">
+                <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
             </div>
-
-            <h2>Where Book Reviews are Seriously Readiculous!</h2>
-            <p>
+            <div class="hero-title">Where Book Reviews are Seriously Readiculous!</div>
+            <div class="hero-desc">
                 Discover new books worth reading, share your honest thoughts, and explore what others are saying.<br>
-                Whether you're a casual reader or a dedicated bookworm,
-                join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
-            </p>
-            <div class="button-wrapper" style="margin-top: 10px;">
-                <a href="@Url.Action("DashboardScreen", "Dashboard")"
-                   class="btn btn-primary cta-btn">
-                    Get Started
-                </a>
+                Whether you're a casual reader or a dedicated bookworm, join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
             </div>
-
-
         </div>
-    </section>
-
+        <!-- Right Side: Login Form -->
+        <div class="right-half">
+            <div class="login-card">
+                <div id="auth-container"></div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="~/js/auth.js"></script>
     <script>
-        // Configure toastr
         toastr.options = {
             "closeButton": true,
             "progressBar": true,
             "positionClass": "toast-top-right",
             "timeOut": "5000"
         };
-
-        // Display success message if available
+        var errorMessage = '@TempData["ErrorMessage"]';
         var successMessage = '@TempData["SuccessMessage"]';
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
         if (successMessage) {
             toastr.success(successMessage);
         }
