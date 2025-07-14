@@ -185,60 +185,13 @@
 <!-- Required Login/Register Modal -->
 @await Html.PartialAsync("~/Views/Shared/_RequiredModal.cshtml")
 
-<style>
-    .book-card {
-        background-color: #fff;
-        border: 1px solid #ecd6e0;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        padding: 10px;
-        width: 100%;
-        max-width: 220px;
-        height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .book-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-
-    .review-card {
-        width: 100%;
-        min-height: 300px;
-        max-height: 500px;
-        overflow-y: auto;
-    }
-
-        .review-card .card-body {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .review-card .overflow-auto {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-</style>
-
 @section Scripts {
-    <script>
-        function showFavoriteMessage() {
-            const alertBox = document.getElementById("favoriteAlert");
-            alertBox.classList.remove("d-none");
-            setTimeout(() => alertBox.classList.add("d-none"), 3000);
-        }
+    
+        <script src="~/js/bookDetail.js"></script>     
+}
+@section Styles{
+        <link href="~/css/book-detail.css" rel="stylesheet" />
+} 
 
-    .card.review-card {
-        transition: transform .2s ease-in-out;
-    }
 
-@await Html.PartialAsync("~/Views/Shared/_RequiredModal.cshtml")
 
-<link href="~/css/bookDetail.css" rel="stylesheet" />
-<script src="~/js/bookDetail.js"></script>

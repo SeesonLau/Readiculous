@@ -27,6 +27,7 @@ namespace Readiculous.WebApp.Controllers
         private readonly IBookService _bookService;
         private readonly IGenreService _genreService;
         private readonly IUserService _userService;
+        private readonly SignInManager _signInManager;
         private readonly IMapper _mapper;
 
         public DashboardController(
@@ -34,6 +35,7 @@ namespace Readiculous.WebApp.Controllers
             IGenreService genreService,
             IUserService userService,
             IMapper mapper,
+            SignInManager signInManager,
             IHttpContextAccessor httpContextAccessor,
             ILoggerFactory loggerFactory,
             IConfiguration configuration
@@ -117,7 +119,6 @@ namespace Readiculous.WebApp.Controllers
                 searchString: string.Empty,
                 genres: new List<GenreViewModel>(),
                 userID: null,
-                searchType: BookSearchType.NewBooks,
                 sortType: BookSortType.Latest
                 )
                 .Take(5)
@@ -126,7 +127,6 @@ namespace Readiculous.WebApp.Controllers
                 searchString: string.Empty,
                 genres: new List<GenreViewModel>(),
                 userID: null,
-                searchType: BookSearchType.NewBooks,
                 sortType: BookSortType.Latest
                 )
                 .Take(5)
@@ -145,7 +145,6 @@ namespace Readiculous.WebApp.Controllers
                 searchString: "",
                 genres: new List<GenreViewModel>(),
                 userID: null,
-                searchType: BookSearchType.AllBooks,
                 sortType: BookSortType.Latest
             ).Where(b => b.CreatedTime >= now.AddDays(-14))
              .OrderByDescending(b => b.CreatedTime)
@@ -162,7 +161,6 @@ namespace Readiculous.WebApp.Controllers
                 searchString: "",
                 genres: new List<GenreViewModel>(),
                 userID: null,
-                searchType: BookSearchType.AllBooks,
                 sortType: BookSortType.RatingDescending
             ).OrderByDescending(b => b.AverageRating)
              .ToList();
@@ -178,7 +176,6 @@ namespace Readiculous.WebApp.Controllers
                 searchString: "",
                 genres: new List<GenreViewModel>(),
                 userID: null,
-                searchType: BookSearchType.AllBooks,
                 sortType: BookSortType.Latest
             );
 

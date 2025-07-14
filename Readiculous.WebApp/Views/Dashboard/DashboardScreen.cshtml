@@ -7,7 +7,6 @@
 }
 
 <main class="container py-4">
-
     <!-- Search bar -->
     @if (!isAdmin)
     {
@@ -27,12 +26,10 @@
     <section class="mb-5">
         <div class="section-header d-flex justify-content-between align-items-center mb-4">
             <h2 class="section-title mb-0">NEW BOOKS</h2>
-
-            @* Remove view more link if admin *@
             @if (!isAdmin)
             {
                 <a class="view-more-link @(Model.NewBooks.Count < 5 ? "disabled-link" : "")"
-                   href="@(Model.NewBooks.Count < 5 ? "#" : Url.Action("ViewNewBooks", "Dashboard"))">
+                   href="@Url.Action("ViewNewBooks", "Dashboard")">
                     View More
                 </a>
             }
@@ -46,7 +43,6 @@
                     {
                         <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                             <div class="book-card h-100 text-center">
-
                                 @if (isAdmin)
                                 {
                                     <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
@@ -84,12 +80,10 @@
     <section class="mb-5">
         <div class="section-header d-flex justify-content-between align-items-center mb-4">
             <h2 class="section-title mb-0">TOP BOOKS</h2>
-
-            @* Remove view more link if admin *@
             @if (!isAdmin)
             {
-                <a class="view-more-link @(allBooks.Count < 5 ? "disabled-link" : "")"
-                   href="@(allBooks.Count < 5 ? "#" : Url.Action("ViewTopBooks", "Dashboard"))">
+                <a class="view-more-link"
+                   href="@Url.Action("ViewTopBooks", "Dashboard")">
                     View More
                 </a>
             }
@@ -97,13 +91,12 @@
 
         <div class="section-box p-4">
             <div class="row g-4 justify-content-center">
-                @if (allBooks.Any())
+                @if (Model.TopBooks != null && Model.TopBooks.Any())
                 {
-                    foreach (var book in allBooks)
+                    foreach (var book in Model.TopBooks)
                     {
                         <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                             <div class="book-card h-100 text-center">
-
                                 @if (isAdmin)
                                 {
                                     <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
@@ -137,112 +130,22 @@
         </div>
     </section>
 
-    <!-- Hidden JSON only if not admin -->
     @if (!isAdmin)
     {
         <input type="hidden" id="booksJson" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-            allBooks.Select(b => new {
+            Model.TopBooks.Select(b => new {
                 id = b.BookId,
                 title = b.Title.Trim(),
                 cover = string.IsNullOrEmpty(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
             })
         ))' />
     }
-
 </main>
 
-<style>
-    body {
-        background-color: #f6f1f4;
-    }
-
-    .section-header {
-        background-color: #f8ece9;
-        border: 1px solid #b089a5;
-        border-radius: 10px;
-        padding: 10px 20px;
-    }
-
-    .section-title {
-        font-weight: bold;
-        color: #3d2c40;
-        letter-spacing: 0.5px;
-    }
-
-    .view-more-link {
-        color: #b089a5;
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-        .view-more-link:hover {
-            text-decoration: underline;
-        }
-
-    .disabled-link {
-        pointer-events: none;
-        color: #bbb !important;
-        text-decoration: none;
-        cursor: default;
-        opacity: 0.5;
-    }
-
-    .section-box {
-        background-color: #fff;
-        border: 1px solid #ecd6e0;
-        border-radius: 12px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    }
-
-    .book-card {
-        background-color: #fff;
-        border: 1px solid #ecd6e0;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        padding: 10px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .book-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-        }
-
-    .book-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-
-    .book-title {
-        font-weight: 700;
-        font-size: 0.95rem;
-        color: #3d2c40;
-    }
-
-    .book-author {
-        color: #777;
-    }
-
-    .book-rating {
-        font-weight: bold;
-        color: #f0ad4e;
-    }
-
-    #searchResults {
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-        #searchResults .list-group-item {
-            padding: 8px 12px;
-        }
-</style>
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard-screen.css" asp-append-version="true" />
+}
 
 @section Scripts {
-    @if (!isAdmin)
-    {
-        <script src="~/js/dashboardScreen.js"></script>
-    }
+    <script src="~/js/dashboard-screen.js"></script>
 }
