@@ -102,7 +102,7 @@ const CommonMaster = (function () {
                 type: 'GET',
                 data: formData,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                dataType: 'html' // Explicitly expect HTML response
+                dataType: 'html' 
             });
 
             // Update URL first
@@ -134,8 +134,6 @@ const CommonMaster = (function () {
             }
 
         } catch (error) {
-            console.error('Filter load error:', error);
-
             let errorMessage = 'Failed to load data. Please try again.';
             if (error.responseText) {
                 try {
@@ -145,15 +143,10 @@ const CommonMaster = (function () {
                     // Not JSON, use default message
                 }
             }
-
             showErrorAlert(errorMessage);
-
-            // Optionally restore previous content
             if (window.lastGoodContent) {
                 $container.html(window.lastGoodContent);
             }
-        } finally {
-            // Any cleanup if needed
         }
     }
 
@@ -297,7 +290,6 @@ const CommonMaster = (function () {
             }
             // Set up roleType change handler
             if ($('#genreFilter').length) {
-                $('#genreFilter').on('change', loadFilteredResults);
             }
 
             // Load initial results if URL has parameters

@@ -110,7 +110,7 @@ namespace Readiculous.WebApp.Controllers
         {
             var model = _bookService.GetBookEditById(id);
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres).OrderBy(g => g.Name) .ToList();
             model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
             return PartialView(model);
         }
