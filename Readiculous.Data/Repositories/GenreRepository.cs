@@ -57,6 +57,21 @@ namespace Readiculous.Data.Repositories
 
             return data;
         }
+        public (IQueryable<Genre>, int) GetAllPaginatedActiveGenres(int pageNumber, int pageSize)
+        {
+            var data = this.GetDbSet<Genre>()
+                .Where(g => g.DeletedTime == null);
+            var dataCount = data.Count();
+
+            data = data
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
+                .AsNoTracking();
+
+            return (data, dataCount);
+        }
         public IQueryable<Genre> GetGenresByName(string genreName)
         {
             var data = this.GetDbSet<Genre>()
@@ -67,35 +82,54 @@ namespace Readiculous.Data.Repositories
 
             return data;
         }
-
-        public Genre GetGenreById(string id)
+        public (IQueryable<Genre>, int) GetPaginatedGenresByName(string genreName, int pageNumber, int pageSize)
         {
             var data = this.GetDbSet<Genre>()
-                .Include(g => g.CreatedByUser)
-                .Include(g => g.UpdatedByUser)
-                .FirstOrDefault(g => g.DeletedTime == null &&
-                                     g.GenreId == id);
-        
-            return data;
-        }
-        public Genre GetGenreWithBooksPropertiesById(string id)
-        {
-            var data = this.GetDbSet<Genre>()
-                .Include(g => g.Books)
-                    .ThenInclude(g => g.Book)
-                .Include(g => g.CreatedByUser)
-                .Include(g => g.UpdatedByUser)
-                .FirstOrDefault(g => g.DeletedTime == null &&
-                                     g.GenreId == id);
+                .Where(g => g.DeletedTime == null &&
+                            g.Name.ToLower().Contains(genreName.ToLower()));
+            var dataCount = data.Count();
 
-            return data;
+            data = data
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
+                .AsNoTracking();
+
+            return (data, dataCount);
         }
+
         public IQueryable<string> GetGenreNamesByBookId(string bookId)
         {
             var data = this.GetDbSet<BookGenreAssignment>()
                 .Where(bga => bga.Genre.DeletedTime == null &&
                               bga.BookId == bookId)
                 .Select(bga => bga.Genre.Name);
+
+            return data;
+        }
+
+        public Genre GetGenreById(string id)
+        {
+            var data = this.GetDbSet<Genre>()
+                .Where(g => g.DeletedTime == null &&
+                            g.GenreId == id)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
+                .FirstOrDefault();
+        
+            return data;
+        }
+        public Genre GetGenreWithBooksPropertiesById(string id)
+        {
+            var data = this.GetDbSet<Genre>()
+                .Where(g => g.DeletedTime == null &&
+                            g.GenreId == id)
+                .Include(g => g.Books)
+                    .ThenInclude(g => g.Book)
+                .Include(g => g.CreatedByUser)
+                .Include(g => g.UpdatedByUser)
+                .FirstOrDefault();
 
             return data;
         }

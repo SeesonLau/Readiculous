@@ -10,14 +10,65 @@ namespace Readiculous.Data.Interfaces
 {
     public interface IGenreRepository
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="genreId"></param>
+        /// <returns></returns>
         bool GenreIdExists(string genreId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="genreName"></param>
+        /// <param name="genreId"></param>
+        /// <returns></returns>
         bool GenreNameExists(string genreName, string genreId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="genre"></param>
         void AddGenre(Genre genre);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="genre"></param>
         void UpdateGenre(Genre genre);
 
         IQueryable<Genre> GetAllActiveGenres();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        (IQueryable<Genre>, int) GetAllPaginatedActiveGenres(int pageNumber, int pageSize);
         IQueryable<Genre> GetGenresByName(string genreName);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="genreName"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        (IQueryable<Genre>, int) GetPaginatedGenresByName(string genreName, int pageNumber, int pageSize);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookId"></param>
+        /// <returns></returns>
         IQueryable<string> GetGenreNamesByBookId(string bookId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         Genre GetGenreById(string id);
         Genre GetGenreWithBooksPropertiesById(string id);
         IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookId(List<string> bookIds);

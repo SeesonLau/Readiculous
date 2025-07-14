@@ -81,7 +81,7 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
-        public (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize = 10)
+        public (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize)
         {
 
             var data = this.GetDbSet<Book>()

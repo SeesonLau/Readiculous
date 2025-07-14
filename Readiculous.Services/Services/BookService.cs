@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Timers;
 using X.PagedList;
 using X.PagedList.Extensions;
 using static Readiculous.Resources.Constants.Enums;
@@ -293,11 +294,11 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
+                throw new KeyNotFoundException(Resources.Messages.Errors.BookNotExists);
             }
             if (_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.FavoriteBookExists);
+                throw new DuplicateNameException(Resources.Messages.Errors.FavoriteBookExists);
             }
 
             var favoriteBook = new FavoriteBook
@@ -313,11 +314,11 @@ namespace Readiculous.Services.Services
         {
             if (!_bookRepository.BookIdExists(bookId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
+                throw new KeyNotFoundException(Resources.Messages.Errors.BookNotExists);
             }
             if (!_favoriteBookRepository.FavoriteBookExists(bookId, userId))
             {
-                throw new InvalidOperationException(Resources.Messages.Errors.FavoritedBookNotExists);
+                throw new KeyNotFoundException(Resources.Messages.Errors.FavoritedBookNotExists);
             }
 
             var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
@@ -431,6 +432,9 @@ namespace Readiculous.Services.Services
             IQueryable<Book> queryableBookListItems;
             int bookCount;
 
+            var timer = new Timer();
+            timer.Start();
+
             (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitle(bookTitle, pageNumber, pageSize);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
@@ -443,6 +447,9 @@ namespace Readiculous.Services.Services
             PopulateListItem(bookMapModels, genres, allReviews);
 
             var result = SortBook(bookMapModels, sortType, genreFilter);
+
+            timer.Stop();
+
             return new StaticPagedList<BookListItemViewModel>(
                 result.ToList(),
                 pageNumber,
