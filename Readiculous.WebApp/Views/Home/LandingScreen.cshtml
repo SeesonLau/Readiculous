@@ -20,61 +20,73 @@
             --color-header: #B089A5;
             --color-btn: #EDAEC0;
             --color-modal: #F8ECE9;
-            --color-background: #F2EFF1;
+            --color-background: #E1DACD;
             --font-primary: 'Gentium Book Plus', serif;
         }
-        body, html {
+        html, body {
             height: 100%;
             margin: 0;
             font-family: var(--font-primary);
-            background: var(--color-background);
+            background: var(--color-background) !important;
+            overflow: hidden;
+        }
+        .center-viewport {
+            min-height: 0;
+            display: block;
         }
         .split-container {
             display: flex;
-            height: 100vh;
+            flex-direction: row;
+            max-width: 1300px;
+            min-width: 0;
+            margin: 8px auto 80px auto;
+            box-shadow: 0 4px 24px rgba(44,33,51,0.10);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            padding: 0;
+            position: relative;
         }
         .left-half {
             flex: 1;
             background: var(--color-header);
-            color: var(--color-text);
+            color: #fff;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px 30px;
+            padding: 32px 64px 32px 64px;
         }
         .right-half {
             flex: 1;
-            background: var(--color-background);
+            background: var(--color-modal);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px 30px;
+            padding: 32px 64px 32px 64px;
+            min-width: 340px;
         }
-        .hero-image {
-            margin-bottom: 30px;
-        }
-        .hero-image img {
-            max-width: 350px;
-            width: 100%;
-            height: auto;
+        .left-half img {
+            max-width: 320px;
+            height: 260px;
+            width: auto;
             display: block;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 18px;
         }
         .hero-title {
-            font-size: 2.2rem;
+            font-size: 1.7rem;
             font-weight: 700;
-            margin-bottom: 18px;
+            margin-bottom: 10px;
             color: #fff;
             text-align: center;
         }
         .hero-desc {
-            font-size: 1.1rem;
+            font-size: 1.12rem;
             color: #f8ece9;
-            margin-bottom: 30px;
+            margin-bottom: 0;
             text-align: center;
+            max-width: 520px;
         }
         .brand-logo {
             width: 60px;
@@ -83,18 +95,18 @@
         }
         .login-card {
             background: var(--color-header);
-            border-radius: 24px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            padding: 2.5rem 2rem;
-            max-width: 400px;
-            width: 100%;
             color: #fff;
+            border-radius: 18px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 2.5rem 2.2rem;
+            max-width: 480px;
+            width: 100%;
         }
         .login-title {
-            font-size: 2rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             text-align: center;
         }
         .login-btn {
@@ -137,30 +149,51 @@
             border-color: var(--color-header);
             box-shadow: 0 0 0 0.2rem #b089a540;
         }
+        .welcome-message {
+            width: 100vw;
+            text-align: center;
+            margin-top: 2.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .welcome-title {
+            font-size: 2.3rem;
+            font-weight: bold;
+            color: #b089a5;
+            letter-spacing: 1px;
+        }
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            color: #2c2133;
+            margin-top: 0.1rem;
+        }
     </style>
 </head>
-<body>
-    <!-- Header-like logo and brand at top left -->
-    <div style="position: absolute; top: 32px; left: 48px; display: flex; align-items: center; gap: 12px; z-index: 10;">
-        <img src="@Url.Content("~/img/readiculous-logo.svg")" style="width: 40px; height: 40px;" alt="Logo" />
-        <span style="font-weight: bold; font-size: 1.5rem; color: #fff; letter-spacing: 1px; text-shadow: 0 1px 4px #b089a5;">Readiculous</span>
-    </div>
-    <div class="split-container">
-        <!-- Left Side: Image and Text -->
-        <div class="left-half">
-            <div class="hero-image">
-                <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
-            </div>
-            <div class="hero-title">Where Book Reviews are Seriously Readiculous!</div>
-            <div class="hero-desc">
-                Discover new books worth reading, share your honest thoughts, and explore what others are saying.<br>
-                Whether you're a casual reader or a dedicated bookworm, join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
-            </div>
+<body style="background: #f2eff1;">
+    <div class="center-viewport">
+        <!-- Centered Welcome Message -->
+        <div class="welcome-message">
+            <div class="welcome-title">Welcome Back, Reader!</div>
+            <div class="welcome-subtitle">Log in to join the readiculous fun.</div>
         </div>
-        <!-- Right Side: Login Form -->
-        <div class="right-half">
-            <div class="login-card">
-                <div id="auth-container"></div>
+        <div class="split-container">
+            <!-- Left Side: Image and Text -->
+            <div class="left-half">
+                <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
+                <div class="hero-title">Where Book Reviews are Seriously Readiculous!</div>
+                <div class="hero-desc">
+                    Discover new books worth reading, share your honest thoughts, and explore what others are saying.<br>
+                    Whether you're a casual reader or a dedicated bookworm, join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
+                </div>
+            </div>
+            <!-- Right Side: Login Form -->
+            <div class="right-half">
+                <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 18px; gap: 10px;">
+                    <img src="@Url.Content("~/img/readiculous-logo.svg")" style="width: 44px; height: 44px;" alt="Logo" />
+                    <span style="font-weight: bold; font-size: 1.3rem; color: #b089a5; letter-spacing: 1px; text-shadow: 0 1px 4px #fff;">Readiculous</span>
+                </div>
+                <div class="login-card">
+                    <div id="auth-container"></div>
+                </div>
             </div>
         </div>
     </div>

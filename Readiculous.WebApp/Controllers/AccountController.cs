@@ -83,126 +83,6 @@ namespace Readiculous.WebApp.Controllers
             return View(new EmailRequestModel());
         }
 
-        // The following function appears unused in the current codebase and can be safely commented out.
-        /*
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> RequestOtp(EmailRequestModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View("Register", model);
-            }
-
-            var success = await _userService.SendOtpForRegistrationAsync(model.Email.Trim());
-            if (success)
-            {
-                TempData["SuccessMessage"] = "OTP has been sent to your email address.";
-                TempData["EmailForOtp"] = model.Email;
-                return RedirectToAction("VerifyOtp");
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Email already exists or failed to send OTP.";
-                return View("Register", model);
-            }
-        }
-        */
-
-        // The following function appears unused in the current codebase and can be safely commented out.
-        /*
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult VerifyOtp()
-        {
-            var email = TempData["EmailForOtp"]?.ToString();
-            if (string.IsNullOrEmpty(email))
-            {
-                return RedirectToAction("Register");
-            }
-
-            var model = new OtpVerificationModel { Email = email };
-            return View(model);
-        }
-        */
-
-        // The following function appears unused in the current codebase and can be safely commented out.
-        /*
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> VerifyOtp(OtpVerificationModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var isValid = _userService.ValidateOtpForRegistration(model.Email.Trim(), model.Otp.Trim());
-            if (isValid)
-            {
-                try
-                {
-                    var tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
-                    var userModel = new UserViewModel
-                    {
-                        UserId = Guid.NewGuid().ToString(),
-                        Email = model.Email,
-                        Username = model.Email,
-                        Password = tempPassword,
-                        Role = RoleType.Reviewer
-                    };
-
-                    await _userService.AddUserAsync(userModel, userModel.UserId);
-                    await _userService.SendTempPasswordEmailAsync(model.Email, tempPassword);
-
-                    // Store success message for landing page
-                    TempData["SuccessMessage"] = "Registration successful! Check your email for your temporary password.";
-
-                    return RedirectToAction("LandingScreen", "Home");
-                }
-                catch (Exception ex)
-                {
-                    TempData["ErrorMessage"] = "Failed to create user or send email. " + ex.Message;
-                    return View(model);
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
-                return View(model);
-            }
-        }
-        */
-
-        // The following function appears unused in the current codebase and can be safely commented out.
-        /*
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult RegisterSuccess()
-        {
-            var userId = TempData["RegistrationSuccessUserId"]?.ToString();
-            var username = TempData["RegistrationSuccessUsername"]?.ToString();
-            var email = TempData["RegistrationSuccessEmail"]?.ToString();
-            var password = TempData["RegistrationSuccessPassword"]?.ToString();
-
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(username) ||
-                string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-            {
-                return RedirectToAction("Register");
-            }
-
-            var successModel = new RegisterSuccessfulViewModel
-            {
-                UserId = userId,
-                Username = username,
-                Email = email,
-                Password = password
-            };
-
-            return View(successModel);
-        }
-        */
-
         /// <summary>
         /// Authenticate user and signs the user in when successful.
         /// </summary>
@@ -276,8 +156,8 @@ namespace Readiculous.WebApp.Controllers
                 else
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(new { success = false, message = "Incorrect email or password." });
-                    TempData["ErrorMessage"] = "Incorrect email or password.";
+                        return Json(new { success = false, message = "Wrong Email or Password" });
+                    TempData["ErrorMessage"] = "Wrong Email or Password";
                     return View(model);
                 }
             }
@@ -342,7 +222,7 @@ namespace Readiculous.WebApp.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Incorrect email or password." });
+                    return Json(new { success = false, message = "Wrong Email or Password" });
                 }
             }
             catch (InvalidDataException ex)

@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else if (data.success && data.redirectUrl) {
                             window.location.href = data.redirectUrl;
                         } else {
-                            toastr.error(data.message || 'Login failed.');
+                            // Show specific error messages from backend
+                            toastr.error(data.message || 'Wrong Email or Password');
                         }
                     });
             });
@@ -71,8 +72,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.success) {
                             // Load the OTP partial with the email (signup flow)
                             loadPartial('/Account/AuthPartial?view=otp&email=' + encodeURIComponent(formData.get('Email')) + '&flow=signup');
+                            toastr.success('OTP has been sent to your email.');
                         } else {
-                            toastr.error(data.message || 'Could not send OTP.');
+                            toastr.error(data.message || 'Email already exists.');
                         }
                     });
             });
@@ -98,8 +100,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.success) {
                             // Load the OTP partial with the email (forgot flow)
                             loadPartial('/Account/AuthPartial?view=otp&email=' + encodeURIComponent(formData.get('Email')) + '&flow=forgot');
+                            toastr.success('OTP has been sent to your email.');
                         } else {
-                            toastr.error(data.message || 'Could not send OTP.');
+                            toastr.error(data.message || 'Email does not exist.');
                         }
                     });
             });
@@ -158,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         .then(data => {
                             if (data.success) {
                                 onSuccess();
+                                toastr.success('OTP verified!');
                             } else {
                                 toastr.error(data.message || 'Invalid OTP. Please try again.');
                             }
@@ -186,8 +190,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.success) {
                             // Show the success partial with the reset password message
                             loadPartial('/Account/AuthPartial?view=success');
+                            toastr.success('Your password has been reset.');
                         } else {
-                            toastr.error(data.message || 'Failed to reset password.');
+                            toastr.error(data.message || 'Failed to update password. Please try again.');
                         }
                     });
             });

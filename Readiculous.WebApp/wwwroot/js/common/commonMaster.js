@@ -211,6 +211,9 @@ const CommonMaster = (function () {
                 if (response.success) {
                     modal.modal('hide');
                     loadFilteredResults(); 
+                    if (form.attr('id') === 'addUserForm') {
+                        toastr.success('Account has been successfully created!');
+                    }
                 } else {
                     const modalBody = form.closest('.modal-body').attr('id');
                     $(`#${modalBody}`).html(response);
