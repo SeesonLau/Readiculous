@@ -24,7 +24,5 @@ namespace Readiculous.Data.Interfaces
         Book GetBookById(string id);
 
         int GetBookCountByGenreId(string genreId);
-        Dictionary<string, int> GetBookCountByGenreIds(List<string> genreIds);
-
     }
 }

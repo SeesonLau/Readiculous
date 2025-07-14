@@ -1,15 +1,10 @@
 ﻿using Basecode.Data.Repositories;
-using CsvHelper.TypeConversion;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Data.Repositories
 {
@@ -22,22 +17,22 @@ namespace Readiculous.Data.Repositories
         public bool BookIdExists(string bookId) 
         {
             return this.GetDbSet<Book>().Any(b => b.BookId == bookId &&
-                                                 b.DeletedTime == null);
+                                                  b.DeletedTime == null);
         }
 
         public bool BookTitleAndAuthorExists(string bookTitle, string author, string id)
         {
-            return this.GetDbSet<Book>().Any(b => b.Title.ToLower() == bookTitle.ToLower() &&
-                                                b.Author.ToLower() == author.ToLower() &&
-                                                b.BookId != id &&
-                                                b.DeletedTime == null);
+            return this.GetDbSet<Book>().Any(b => b.DeletedTime == null &&
+                                                  b.Author.ToLower() == author.ToLower() &&
+                                                  b.BookId != id &&
+                                                  b.Title.ToLower() == bookTitle.ToLower());
         }
 
         public bool ISBNExists(string id, string isbn)
         {
             return this.GetDbSet<Book>().Any(b => b.ISBN == isbn &&
-                                                 b.BookId != id && 
-                                                 b.DeletedTime == null);
+                                                  b.BookId != id && 
+                                                  b.DeletedTime == null);
         }
 
         public void AddBook(Book book)
@@ -65,8 +60,8 @@ namespace Readiculous.Data.Repositories
                 .AsNoTracking()
                 .Include(book => book.CreatedByUser)
                 .Include(book => book.UpdatedByUser)
-                .Where(b => b.Title.ToLower().Contains(bookTitle.ToLower()) && //Book title search is case-insensitive
-                            b.DeletedTime == null);
+                .Where(b => b.DeletedTime == null && //Book title search is case-insensitive
+                            b.Title.ToLower().Contains(bookTitle.ToLower()));
 
             return books;
         }
@@ -99,7 +94,7 @@ namespace Readiculous.Data.Repositories
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
-                            b.Title.ToLower().Contains(bookTitle.ToLower()));
+                                b.Title.ToLower().Contains(bookTitle.ToLower()));
             }
             else
             {
@@ -108,8 +103,8 @@ namespace Readiculous.Data.Repositories
                     .Include(b => b.CreatedByUser)
                     .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
-                            b.Title.ToLower().Contains(bookTitle.ToLower()) &&
-                            b.GenreAssociations.Any(ga => genres.Any(g => g.GenreId == ga.GenreId)));
+                                b.Title.ToLower().Contains(bookTitle.ToLower()) &&
+                                b.GenreAssociations.Any(ga => genres.Any(g => g.GenreId == ga.GenreId)));
             }
 
             return books;
@@ -121,23 +116,14 @@ namespace Readiculous.Data.Repositories
                     .ThenInclude(bga => bga.Genre)
                 .Include(book => book.CreatedByUser)
                 .Include(book => book.UpdatedByUser)
-                .FirstOrDefault(b => b.BookId == id && 
-                                    b.DeletedTime == null);
+                .FirstOrDefault(b => b.DeletedTime == null &&
+                                     b.BookId == id);
         }
         public int GetBookCountByGenreId(string genreId)
         {
             return this.GetDbSet<BookGenreAssignment>()
-                .Count(bga => bga.GenreId == genreId &&
-                              bga.Book.DeletedTime == null);
-        }
-
-        public Dictionary<string, int> GetBookCountByGenreIds(List<string> genreIds)
-        {
-            return this.GetDbSet<BookGenreAssignment>()
-                .Where(bga => genreIds.Contains(bga.GenreId) && bga.Book.DeletedTime == null)
-                .GroupBy(bga => bga.GenreId)
-                .Select(g => new { GenreId = g.Key, Count = g.Count() })
-                .ToDictionary(g => g.GenreId, g => g.Count);
+                .Count(bga => bga.Book.DeletedTime == null &&
+                              bga.GenreId == genreId);
         }
     }
 }

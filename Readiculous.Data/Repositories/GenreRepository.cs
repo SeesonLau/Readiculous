@@ -73,8 +73,8 @@ namespace Readiculous.Data.Repositories
             var data = this.GetDbSet<Genre>()
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
-                .FirstOrDefault(g => g.GenreId == id &&
-                                    g.DeletedTime == null);
+                .FirstOrDefault(g => g.DeletedTime == null &&
+                                     g.GenreId == id);
         
             return data;
         }
@@ -85,16 +85,16 @@ namespace Readiculous.Data.Repositories
                     .ThenInclude(g => g.Book)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
-                .FirstOrDefault(g => g.GenreId == id &&
-                                    g.DeletedTime == null);
+                .FirstOrDefault(g => g.DeletedTime == null &&
+                                     g.GenreId == id);
 
             return data;
         }
         public IQueryable<string> GetGenreNamesByBookId(string bookId)
         {
             var data = this.GetDbSet<BookGenreAssignment>()
-                .Where(bga => bga.BookId == bookId &&
-                                bga.Genre.DeletedTime == null)
+                .Where(bga => bga.Genre.DeletedTime == null &&
+                              bga.BookId == bookId)
                 .Select(bga => bga.Genre.Name);
 
             return data;
@@ -103,9 +103,9 @@ namespace Readiculous.Data.Repositories
         public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookId(List<string> bookIds)
         {
             var data = this.GetDbSet<BookGenreAssignment>()
-                .Where(bga => bookIds.Any(a => a.Equals(bga.BookId)) &&
-                                bga.Genre.DeletedTime == null &&
-                                bga.Book.DeletedTime == null);
+                .Where(bga => bga.Book.DeletedTime == null &&
+                              bga.Genre.DeletedTime == null &&
+                              bookIds.Any(a => a.Equals(bga.BookId)));
 
             return data;
         }
@@ -113,9 +113,9 @@ namespace Readiculous.Data.Repositories
         public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByGenreIds(List<string> genreIds)
         {
             var data = this.GetDbSet<BookGenreAssignment>()
-                .Where(bga => genreIds.Any(a => a.Equals(bga.GenreId)) &&
-                                bga.Genre.DeletedTime == null &&
-                                bga.Book.DeletedTime == null);
+                .Where(bga => bga.Book.DeletedTime == null &&
+                              bga.Genre.DeletedTime == null &&
+                              genreIds.Any(a => a.Equals(bga.GenreId)));
 
             return data;
         }
