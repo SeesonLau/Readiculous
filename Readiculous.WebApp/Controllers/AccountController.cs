@@ -83,11 +83,8 @@ namespace Readiculous.WebApp.Controllers
             return View(new EmailRequestModel());
         }
 
-        /// <summary>
-        /// Request OTP for registration - Handles email submission
-        /// </summary>
-        /// <param name="model">Email request model</param>
-        /// <returns>Redirects to OTP verification page</returns>
+        // The following function appears unused in the current codebase and can be safely commented out.
+        /*
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> RequestOtp(EmailRequestModel model)
@@ -110,11 +107,10 @@ namespace Readiculous.WebApp.Controllers
                 return View("Register", model);
             }
         }
+        */
 
-        /// <summary>
-        /// Verify OTP page - Shows OTP entry form
-        /// </summary>
-        /// <returns>OTP verification view</returns>
+        // The following function appears unused in the current codebase and can be safely commented out.
+        /*
         [HttpGet]
         [AllowAnonymous]
         public IActionResult VerifyOtp()
@@ -128,12 +124,10 @@ namespace Readiculous.WebApp.Controllers
             var model = new OtpVerificationModel { Email = email };
             return View(model);
         }
+        */
 
-        /// <summary>
-        /// Verify OTP - Handles OTP verification and user creation
-        /// </summary>
-        /// <param name="model">OTP verification model</param>
-        /// <returns>Redirects to registration success page</returns>
+        // The following function appears unused in the current codebase and can be safely commented out.
+        /*
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyOtp(OtpVerificationModel model)
@@ -178,11 +172,10 @@ namespace Readiculous.WebApp.Controllers
                 return View(model);
             }
         }
+        */
 
-        /// <summary>
-        /// Registration Success page
-        /// </summary>
-        /// <returns>Registration success view</returns>
+        // The following function appears unused in the current codebase and can be safely commented out.
+        /*
         [HttpGet]
         [AllowAnonymous]
         public IActionResult RegisterSuccess()
@@ -208,6 +201,7 @@ namespace Readiculous.WebApp.Controllers
 
             return View(successModel);
         }
+        */
 
         /// <summary>
         /// Authenticate user and signs the user in when successful.
@@ -262,10 +256,22 @@ namespace Readiculous.WebApp.Controllers
                     this._session.SetString("UserName", user.Username);
                     TempData["AccessStatus"] = user.AccessStatus.ToString();
 
+                    // Redirect based on role
+                    var isAdmin = user.Role == RoleType.Admin;
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(new { success = true, redirectUrl = Url.Action("DashboardScreen", "Dashboard") });
-
-                    return RedirectToAction("DashboardScreen", "Dashboard");
+                    {
+                        var redirectUrl = isAdmin
+                            ? Url.Action("DashboardScreen", "DashboardAdmin")
+                            : Url.Action("DashboardScreen", "Dashboard");
+                        return Json(new { success = true, redirectUrl });
+                    }
+                    else
+                    {
+                        if (isAdmin)
+                            return RedirectToAction("DashboardScreen", "DashboardAdmin");
+                        else
+                            return RedirectToAction("DashboardScreen", "Dashboard");
+                    }
                 }
                 else
                 {
@@ -327,7 +333,12 @@ namespace Readiculous.WebApp.Controllers
                     await _signInManager.SignInAsync(user);
                     _session.SetString("UserRole", user.Role.ToString());
 
-                    return Json(new { success = true, redirectUrl = Url.Action("DashboardScreen", "Dashboard") });
+                    // Redirect based on role
+                    var isAdmin = user.Role == RoleType.Admin;
+                    var redirectUrl = isAdmin
+                        ? Url.Action("DashboardScreen", "DashboardAdmin")
+                        : Url.Action("DashboardScreen", "Dashboard");
+                    return Json(new { success = true, redirectUrl });
                 }
                 else
                 {
