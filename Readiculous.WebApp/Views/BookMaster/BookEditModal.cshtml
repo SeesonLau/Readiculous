@@ -61,7 +61,7 @@
             @if (Model.AllAvailableGenres != null && Model.AllAvailableGenres.Any())
             {
                 <div class="genre-checkbox-grid">
-                    @foreach (var genre in Model.AllAvailableGenres.OrderBy(g => g.Name))
+                    @foreach (var genre in Model.AllAvailableGenres)
                     {
                         <div class="genre-checkbox-item">
                             <input class="form-check-input"
