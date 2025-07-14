@@ -131,7 +131,7 @@ namespace Readiculous.WebApp.Controllers
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 return View("Index", _bookService.GetBookList(searchString: string.Empty, genres: null, userID: this.UserId));
             }
-            
+
         }
         public IActionResult Delete(string id)
         {
@@ -276,5 +276,8 @@ namespace Readiculous.WebApp.Controllers
 
             return PartialView("_EditReviewModal", model);
         }
+
+
     }
+
 }

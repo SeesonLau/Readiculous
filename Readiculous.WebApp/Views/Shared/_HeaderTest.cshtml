@@ -1,53 +1,107 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims
 @inject IHttpContextAccessor HttpContextAccessor
-<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")" style="background-color: var(--color-header); color: var(--color-text);">
+
+@{
+    var userRole = User.FindFirst("UserRole")?.Value; // Use user Identity Claims instead of this
+    var userName = User.FindFirst("UserName")?.Value;
+    var isLoggedIn = !string.IsNullOrEmpty(userRole);
+    var isAdmin = userRole == "Admin";
+    var isReviewer = userRole == "Reviewer";
+}
+
+<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")"
+        style="background-color: var(--color-header); color: var(--color-text);">
     <div class="logosec hover-pointer" style="display: flex; align-items: center; gap: 10px;">
         <img src="~/img/readiculous-logo.svg"
              style="width: 40px; height: 40px;" alt="logo"
-             onclick="window.location.href = '@Url.Action("Index", "Home")';">
+             onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">
         <span style="font-weight: bold; font-size: 1.2rem;"
-              onclick="window.location.href = '@Url.Action("Index", "Home")';">Readiculous</span>
+              onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">Readiculous</span>
     </div>
-    <div class="logosec">
-        @User.FindFirst("UserName")?.Value
+
+    <div class="logosec" style="display: flex; align-items: center; gap: 20px;">
+        @* Show links for guest and reviewer *@
+        @if (!isLoggedIn || isReviewer)
+        {
+            <a class="nav-link" href="/Dashboard/ViewNewBooks">New Book</a>
+            <a class="nav-link" href="/Dashboard/ViewTopBooks">Top Book</a>
+            <a class="nav-link" href="/Dashboard/GenreScreen">Genre</a>
+        }
+
+        @if (isLoggedIn)
+        {
+            <span>@userName</span>
+        }
+
         <div class="mr-20 hover-pointer" style="position: relative">
             <div class="dp">
-                <img src="@User.FindFirst("UserProfilePictureUrl")?.Value"
-                     class="dpicn hover-pointer"
-                     alt="dp" />
+                @if (!isLoggedIn)
+                {
+                    <img src="~/img/profile-logo.png"
+                         class="dpicn hover-pointer"
+                         alt="dp"
+                         data-bs-toggle="modal"
+                         data-bs-target="#loginModal">
+                }
+                else
+                {
+                    <img src="~/img/profile-logo.png"
+                         class="dpicn hover-pointer"
+                         alt="dp"
+                         onclick="toggleDropdown()">
+                }
             </div>
-            <div class="dropdown" style="background-color: var(--color-modal);">
-                <ul>
-                    <li>
-                        <i class="fa-solid fa-gear"></i>
-                        <a class="open-edit-profile">Edit Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-users"></i>
-                        <a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-book"></i>
-                        <a asp-controller="BookMaster" asp-action="BookMasterScreen">Book Master</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-list"></i>
-                        <a asp-controller="GenreMaster" asp-action="GenreMasterScreen">Genre Master</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-users"></i>
-                        <a asp-controller="User" asp-action="Index">User</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-book"></i>
-                        <a asp-controller="Book" asp-action="Index">Book</a>
-                    </li>
-                    <li>
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <a asp-action="SignOutUser" asp-controller="Account">Logout</a>
-                    </li>
-                </ul>
-            </div>
+
+            @if (isLoggedIn)
+            {
+                <div id="userDropdown" class="dropdown" style="background-color: var(--color-modal); display: none;">
+                    <ul>
+                        @if (isReviewer)
+                        {
+                            <li>
+                                <i class="fa-solid fa-gear"></i>
+                                <a class="open-edit-profile">Edit Profile</a>
+                            </li>
+                            <li>
+                                <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
+                                    <button type="submit" style="border: none; background: none; padding: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else if (isAdmin)
+                        {
+                            <li><i class="fa-solid fa-users"></i><a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a></li>
+                            <li><i class="fa-solid fa-book"></i><a asp-controller="BookMaster" asp-action="BookMasterScreen">Book Master</a></li>
+                            <li><i class="fa-solid fa-list"></i><a asp-controller="GenreMaster" asp-action="GenreMasterScreen">Genre Master</a></li>
+                            <li><i class="fa-solid fa-users"></i><a asp-controller="User" asp-action="Index">User</a></li>
+                            <li><i class="fa-solid fa-book"></i><a asp-controller="Book" asp-action="Index">Book</a></li>
+                            <li>
+                                <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; padding: 0;">
+                                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
         </div>
     </div>
 </header>
+
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function openLoginModal() {
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    }
+</script>

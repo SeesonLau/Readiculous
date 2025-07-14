@@ -11,6 +11,7 @@ using System;
 using System.IO;
 using Readiculous.WebApp.Authentication;
 using Readiculous.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -48,59 +49,69 @@ namespace Readiculous.WebApp.Controllers
             return View();
         }
 
+        //[HttpGet]
+        //public IActionResult EditProfile()
+        //{
+        //    var model = _userService.GetEditProfileById(this.UserId);
+        //    if (model == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return PartialView("_EditProfileModal", model);
+        //}
+        //[HttpPost]
+        //public async Task<IActionResult> EditProfile(EditProfileViewModel editProfileViewModel)
+        //{
+        //    // Filling up passwords are optional when changing profile
+        //    if (_userService.IsChangingPassword(editProfileViewModel))
+        //    {
+        //        var isCurrentPasswordCorrect = _userService.IsCurrentPasswordCorrect(this.UserId, editProfileViewModel.CurrentPassword);
+        //        // Current password must match with user's current password
+        //        if (!isCurrentPasswordCorrect)
+        //        {
+        //            ModelState.AddModelError(nameof(editProfileViewModel.CurrentPassword), "Current password is incorrect.");
+        //        }
+
+        //        // If the user wants to change their password, all 3 fields must be filled out
+        //        if (string.IsNullOrWhiteSpace(editProfileViewModel.CurrentPassword))
+        //            ModelState.AddModelError(nameof(editProfileViewModel.CurrentPassword), "Current password is required.");
+        //        if (string.IsNullOrWhiteSpace(editProfileViewModel.NewPassword))
+        //            ModelState.AddModelError(nameof(editProfileViewModel.NewPassword), "New password is required.");
+        //        if (string.IsNullOrWhiteSpace(editProfileViewModel.ConfirmPassword))
+        //            ModelState.AddModelError(nameof(editProfileViewModel.ConfirmPassword), "Confirm password is required.");
+        //    }
+
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return PartialView("_EditProfileModal", editProfileViewModel);
+        //    }
+
+        //    try
+        //    {
+        //        await _userService.UpdateProfileAsync(editProfileViewModel, this.UserId);
+
+
+        //        if (editProfileViewModel.UserId == User.FindFirst("UserId")?.Value)
+        //        {
+        //            User updatedUser = _userService.GetUserById(editProfileViewModel.UserId);
+        //            await _signInManager.SignInAsync(updatedUser, isPersistent: true);
+        //        }
+        //        return Json(new { success = true });
+        //    }
+        //    catch
+        //    {
+        //        return PartialView("_EditProfileModal", editProfileViewModel);
+        //    }
+
+        //}
         [HttpGet]
-        public IActionResult EditProfile()
+        [AllowAnonymous]
+        public IActionResult LandingScreen()
         {
-            var model = _userService.GetEditProfileById(this.UserId);
-            if (model == null)
-            {
-                return NotFound();
-            }
-            return PartialView("_EditProfileModal", model);
+            ViewBag.ShowProfile = false;
+            return View();
         }
-        [HttpPost]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel editProfileViewModel)
-        {
-            // Filling up passwords are optional when changing profile
-            if (_userService.IsChangingPassword(editProfileViewModel))
-            {
-                var isCurrentPasswordCorrect = _userService.IsCurrentPasswordCorrect(this.UserId, editProfileViewModel.CurrentPassword);
-                // Current password must match with user's current password
-                if (!isCurrentPasswordCorrect)
-                {
-                    ModelState.AddModelError(nameof(editProfileViewModel.CurrentPassword), "Current password is incorrect.");
-                }
-
-                // If the user wants to change their password, all 3 fields must be filled out
-                if (string.IsNullOrWhiteSpace(editProfileViewModel.CurrentPassword))
-                    ModelState.AddModelError(nameof(editProfileViewModel.CurrentPassword), "Current password is required.");
-                if (string.IsNullOrWhiteSpace(editProfileViewModel.NewPassword))
-                    ModelState.AddModelError(nameof(editProfileViewModel.NewPassword), "New password is required.");
-                if (string.IsNullOrWhiteSpace(editProfileViewModel.ConfirmPassword))
-                    ModelState.AddModelError(nameof(editProfileViewModel.ConfirmPassword), "Confirm password is required.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return PartialView("_EditProfileModal", editProfileViewModel);
-            }
-
-            try
-            {
-                await _userService.UpdateProfileAsync(editProfileViewModel, this.UserId);
 
 
-                if (editProfileViewModel.UserId == User.FindFirst("UserId")?.Value)
-                {
-                    User updatedUser = _userService.GetUserById(editProfileViewModel.UserId);
-                    await _signInManager.SignInAsync(updatedUser, isPersistent: true);
-                }
-                return Json(new { success = true });
-            }
-            catch
-            {
-                return PartialView("_EditProfileModal", editProfileViewModel);
-            }
-        }
     }
 }
