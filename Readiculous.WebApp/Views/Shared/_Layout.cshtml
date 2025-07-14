@@ -139,7 +139,7 @@
             e.preventDefault();
 
             $.ajax({
-                url: '@Url.Action("EditProfile", "Home")',
+                url: '@Url.Action("EditProfile", "Dashboard")',
                 type: 'GET',
                 success: function (result) {
                     $('#editProfileModalContent').html(result);
@@ -179,12 +179,17 @@
 
     @await Html.PartialAsync("_LoginModal")
     @await Html.PartialAsync("_RegisterModal")
-    @await Html.PartialAsync("_RequiredModal")
+    @await Html.PartialAsync("_OTPModal")
+    @await Html.PartialAsync("_ForgotPasswordModal")
+    @await Html.PartialAsync("_ForgotPasswordOtpModal")
+    @await Html.PartialAsync("_ResetPasswordModal")
+    @await Html.PartialAsync("_AllDoneModal")
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
 <script src="~/js/login.js" asp-append-version="true"></script>
 <script src="~/js/register.js" asp-append-version="true"></script>
+<script src="~/js/forgotPassword.js" asp-append-version="true"></script>
 
 
 <script>
@@ -192,15 +197,34 @@
       const currentModalEl = document.querySelector(currentModalId);
       const targetModalEl = document.querySelector(targetModalId);
 
-      // Hide the current modal
-      const currentModal = bootstrap.Modal.getInstance(currentModalEl);
-      if (currentModal) {
-        currentModal.hide();
-      }
+      if (currentModalEl && targetModalEl) {
+        const currentModal = bootstrap.Modal.getInstance(currentModalEl);
+        const targetModal = new bootstrap.Modal(targetModalEl);
 
-      // Show the target modal
-      const targetModal = new bootstrap.Modal(targetModalEl);
-      targetModal.show();
+        if (currentModal) {
+          currentModal.hide();
+        }
+
+        setTimeout(() => {
+          targetModal.show();
+        }, 150);
+      }
+    }
+
+    function showAllDoneModal(message) {
+        const allDoneModal = document.getElementById('allDoneModal');
+        const messageElement = document.getElementById('allDoneMessage');
+
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+
+        const modal = new bootstrap.Modal(allDoneModal);
+        modal.show();
+    }
+
+    function goToLandingPage() {
+        window.location.href = '/Home/LandingScreen';
     }
 </script>
 
@@ -245,11 +269,3 @@
             margin: 0 5px;
         }
 </style>
-@{
-    bool hasEnoughNewBooks = ViewBag.HasEnoughNewBooks == true;
-}
-
-<button class="nav-button @(hasEnoughNewBooks ? "" : "disabled")"
-@(hasEnoughNewBooks ? "onclick=\"window.location.href='/Dashboard/ViewNewBooks'\"" : "disabled")">
-    New Book
-</button>

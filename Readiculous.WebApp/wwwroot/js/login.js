@@ -1,71 +1,49 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     const loginForm = document.getElementById("loginForm");
-    const errorBox = document.getElementById("loginError");
+    const loginError = document.getElementById("loginError");
 
-    if (!loginForm || !errorBox) return;
+    // Only add the event listener if the form exists on the page
+    if (loginForm) {
+        loginForm.addEventListener("submit", function (e) {
+            e.preventDefault();
 
-    // Reset form and error message
-    function resetLoginForm() {
-        loginForm.reset();
-        errorBox.innerText = "";
-        errorBox.style.display = "none";
-    }
+            if (loginError) {
+                loginError.style.display = "none";
+            }
 
-    loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
+            const formData = new FormData(loginForm);
+            const submitBtn = loginForm.querySelector("button[type='submit']");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Signing in...";
 
-        const formData = new FormData(loginForm);
-        const submitBtn = loginForm.querySelector("button[type='submit']");
-
-        errorBox.innerText = "";
-        errorBox.style.display = "none";
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Signing in...";
-
-        fetch("/Account/LoginAjax", {
-            method: "POST",
-            body: formData,
-            credentials: "same-origin"
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                return response.json();
+            fetch("/Account/LoginAjax", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin"
             })
-            .then(data => {
-                console.log("Login response:", data);
-
-                if (data.success) {
-                    // Hide modal
-                    const loginModalEl = document.getElementById("loginModal");
-                    const modalInstance = bootstrap.Modal.getInstance(loginModalEl);
-                    if (modalInstance) modalInstance.hide();
-
-                    // Optional fade-out effect
-                    document.body.classList.add("fade-out");
-
-                    // Redirect or reload after a short delay
-                    setTimeout(() => {
-                        if (data.redirectUrl) {
-                            window.location.href = data.redirectUrl;
-                        } else {
-                            location.reload();
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // ✅ Reload or redirect to home after login
+                        window.location.href = data.redirectUrl || "/";
+                    } else {
+                        if (loginError) {
+                            loginError.innerText = data.message || "Login failed.";
+                            loginError.style.display = "block";
                         }
-                    }, 300);
-                } else {
-                    errorBox.innerText = data.message || "Invalid login credentials.";
-                    errorBox.style.display = "block";
-                }
-            })
-            .catch(err => {
-                console.error("Login error:", err);
-                errorBox.innerText = err.message || "Something went wrong. Please try again.";
-                errorBox.style.display = "block";
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Sign In";
-            });
-    });
-
-    window.resetLoginForm = resetLoginForm;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    if (loginError) {
+                        loginError.innerText = "Something went wrong.";
+                        loginError.style.display = "block";
+                    }
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Sign In";
+                });
+        });
+    }
 });
