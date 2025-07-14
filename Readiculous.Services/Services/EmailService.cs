@@ -109,7 +109,7 @@ namespace Readiculous.Services.Services
                             <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;'>
                                 <h2 style='color: #007bff; margin-bottom: 20px;'>Welcome to Readiculous!</h2>
                                 <div style='background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                                    <p style='margin-bottom: 10px;'>Your temporary password is: <b>{tempPassword}</b></p>
+                                    <p style='margin-bottom: 10px;'>Your temporary password is: {tempPassword}</p>
                                     <p style='color: #d63384; font-weight: bold; margin-top: 18px;'>DO NOT REPLY TO THIS EMAIL.</p>
                                 </div>
                                 <p style='color: #6c757d; font-size: 14px;'>Use this password to log in. You will be prompted to change it after your first login.</p>

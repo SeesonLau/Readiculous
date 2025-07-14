@@ -85,7 +85,7 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     await _bookService.AddBook(model, this.UserId);
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Book Successfully Created!" });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -127,7 +127,7 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     await _bookService.UpdateBook(model, this.UserId);
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Book Details Successfully Edited!" });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -150,7 +150,7 @@ namespace Readiculous.WebApp.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             await _bookService.DeleteBook(id, this.UserId);
-            return Json(new { success = true });
+            return Json(new { success = true, message = "Book Successfully Deleted!" });
         }
 
         // Favorite Book Methods

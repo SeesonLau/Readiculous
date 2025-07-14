@@ -118,6 +118,23 @@
     </script>
 
     <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-center",
+            "timeOut": "5000"
+        };
+        var errorMessage = '@TempData["ErrorMessage"]';
+        var successMessage = '@TempData["SuccessMessage"]';
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
+        if (successMessage) {
+            toastr.success(successMessage);
+        }
+    </script>
+
+    <script>
         //For Header, Footer, and Main to take full height of the viewport
         document.querySelector('main').style.maxHeight = `calc(100vh - ${document.querySelector('header').offsetHeight}px - ${document.querySelector('footer').offsetHeight}px)`;
         // DO NOT REMOVE

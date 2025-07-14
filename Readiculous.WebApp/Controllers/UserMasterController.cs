@@ -99,7 +99,7 @@ namespace Readiculous.WebApp.Controllers
                     await _userService.AddUserAsync(model, this.UserId);
                     // Send the plain temp password in the email
                     await _emailService.SendTempPasswordEmailAsync(model.Email, tempPassword);
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Account Successfully Created!" });
                 }
                 catch (DuplicateNameException ex)
                 {
@@ -146,7 +146,7 @@ namespace Readiculous.WebApp.Controllers
                         await _signInManager.SignInAsync(updatedUser, isPersistent: true);
                     }
 
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Account Details Successfully Edited!" });
                 }
                 catch (KeyNotFoundException)
                 {
@@ -175,7 +175,8 @@ namespace Readiculous.WebApp.Controllers
         public IActionResult Delete(string id)
         {
             _userService.DeleteUser(id, this.UserId);
-            return Json(new { success = true });
+            TempData["SuccessMessage"] = "Account Successfully Deleted!";
+            return Json(new { success = true, message = "Account Successfully Deleted!" });
         }
     }
 }
