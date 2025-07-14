@@ -18,12 +18,12 @@
     <div class="form-group">
         <label asp-for="Password" class="form-label">Password</label>
         <input asp-for="Password"
-               class="form-control"
+               class="form-control input-greyed-out"
                type="text"
-               value="System Generated Password"
+               placeholder="A temporary password will be sent to the user’s email address."
                id="addPassword"
-               />
-        <small class="form-text text-muted">A temporary password will be sent to the user’s email address.</small>
+               readonly />
+        
     </div>
 
     <div class="form-group">

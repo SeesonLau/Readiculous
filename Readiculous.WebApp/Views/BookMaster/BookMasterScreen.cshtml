@@ -23,59 +23,49 @@
 
     <!-- Search and Filter Form -->
     <form asp-action="BookMasterScreen" method="get" class="mb-4 book-filter-controls" id="bookFilterForm">
+        <!-- Inline filter controls -->
         <div class="row g-3 align-items-end mx-0">
             <!-- Search Book Title -->
-            <div class="col-md-3 px-0 pe-md-2 filter-group">
+            <div class="col-md px-0 pe-md-2 filter-group">
                 <label for="searchString" class="form-label filter-label">Search Book Title:</label>
                 <input type="text" name="searchString" class="form-control filter-input" placeholder="Enter book title"
                        value="@ViewData["CurrentFilter"]" />
             </div>
 
-            <!-- Search Type -->
-            <div class="col-md-3 px-0 pe-md-2 filter-group">
-                <label for="searchType" class="form-label filter-label">Search Type:</label>
-                <select name="searchType" class="form-select filter-input" asp-items="@ViewBag.BookSearchTypes"></select>
-            </div>
-
-            <!-- Filter by Genre -->
-            <div class="col-md-3 px-0 pe-md-2 filter-group">
-                <label for="genreFilter" class="form-label filter-label">Filter by Genre:</label>
-                <select name="genreFilter" class="form-select filter-input" asp-items="@ViewBag.GenreList">
-                    <option value="">All Genres</option>
-                </select>
+            <!-- Filter by Genre Dropdown -->
+            <div class="col-md px-0 pe-md-2 filter-group genre-filter-container">
+                <label class="form-label filter-label">Filter by Genre:</label>
+                <input type="hidden" name="genreFilter" id="genreFilter" value="@Context.Request.Query["genreFilter"]" />
+                <button type="button" class="genre-dropdown-toggle">
+                    <span class="selected-genres-text">Select genres</span>
+                    <span class="selected-genres-count" style="display: none;">0</span>
+                </button>
+                <div class="genre-dropdown-menu">
+                    <div class="genre-checklist-columns">
+                        @{
+                            var genres = (ViewBag.GenreList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>) ??
+                            new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+                            genres = genres.OrderBy(g => g.Text).ToList();
+                        }
+                        @foreach (var genre in genres)
+                        {
+                            <div class="genre-check-item" data-genre-id="@genre.Value" data-state="unchecked">
+                                <div class="genre-checkbox"></div>
+                                <span class="genre-check-label">@genre.Text</span>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
 
             <!-- Sort By -->
-            <div class="col-md-3 px-0 pe-md-2 filter-group">
+            <div class="col-md px-0 filter-group">
                 <label for="sortOrder" class="form-label filter-label">Sort By:</label>
                 <select name="sortOrder" class="form-select filter-input" asp-items="@ViewBag.BookSortTypes"></select>
             </div>
+
         </div>
 
-        <!-- Genre checkboxes -->
-        @if (ViewBag.AllGenres is List<Readiculous.Services.ServiceModels.GenreViewModel> allGenres && allGenres.Any())
-        {
-            var selectedGenreIds = ViewBag.SelectedGenreIds as List<string> ?? new List<string>();
-
-            <div class="mb-3 mt-3">
-                <label class="form-label filter-label">Filter by Genre:</label>
-                <div class="row">
-                    @for (int i = 0; i < allGenres.Count; i++)
-                    {
-                        var genre = allGenres[i];
-                        var isChecked = selectedGenreIds.Contains(genre.GenreId);
-
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input type="checkbox" name="selectedGenreIds" value="@genre.GenreId"
-                                       class="form-check-input" @(isChecked ? "checked" : "") />
-                                <label class="form-check-label">@genre.Name</label>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
     </form>
 
     <div class="row mx-0">
@@ -132,14 +122,18 @@
     </div>
 </div>
 
-@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_DeleteModal.cshtml", new {
+    ModalId = "deleteModal",
+    ItemIdField = "itemToDeleteId",
+    ItemNameField = "itemToDeleteName"
+})
 
 @section Scripts {
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
+    <script src="~/js/common/commonMaster.js" asp-append-version="true"></script>
     <script>
-        var bookMasterSettings = {
+        const bookMasterSettings = {
             bookMasterScreenUrl: '@Url.Action("BookMasterScreen", "BookMaster")',
             bookAddModalUrl: '@Url.Action("BookAddModal", "BookMaster")',
             bookEditModalUrl: '@Url.Action("BookEditModal", "BookMaster")',
@@ -147,12 +141,6 @@
             deleteBookUrl: '@Url.Action("Delete", "BookMaster")'
         };
     </script>
+
     <script src="~/js/adminBookMaster/bookmasterScreen.js" asp-append-version="true"></script>
-    <script>
-        // Check for error message and display Toastr notification
-        var errorMessage = '@TempData["ErrorMessage"]';
-        if (errorMessage) {
-            toastr.error(errorMessage);
-        }
-    </script>
 }

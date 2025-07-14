@@ -34,7 +34,7 @@ namespace Readiculous.WebApp.Controllers
             ViewData["CurrentUserSearchType"] = searchType.ToString();
 
             ViewBag.RoleTypes = _userService.GetUserRoles();
-            ViewBag.UserSearchTypes = _userService.GetUserSortTypes();
+            ViewBag.UserSearchTypes = _userService.GetUserSortTypes(searchType);
 
             List<UserListItemViewModel> users = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
 
@@ -117,7 +117,7 @@ namespace Readiculous.WebApp.Controllers
         {
             try
             {
-                _userService.DeleteUserAsync(userId, this.UserId);
+                _userService.DeleteUser(userId, this.UserId);
                 return RedirectToAction("Index");
             }
             catch (InvalidDataException ex)

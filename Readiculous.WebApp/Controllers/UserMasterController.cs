@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Readiculous.Data.Models;
+using Readiculous.Resources.Constants;
 using Readiculous.Services.Interfaces;
+using Readiculous.Services.Manager;
 using Readiculous.Services.ServiceModels;
+using Readiculous.Services.Services;
 using Readiculous.WebApp.Authentication;
 using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
@@ -18,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
-using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -26,6 +28,7 @@ namespace Readiculous.WebApp.Controllers
     public class UserMasterController : ControllerBase<UserController>
     {
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
         private readonly SignInManager _signInManager;
 
         public UserMasterController(IHttpContextAccessor httpContextAccessor,
@@ -33,35 +36,47 @@ namespace Readiculous.WebApp.Controllers
                                   IConfiguration configuration,
                                   IMapper mapper,
                                   IUserService userService,
+                                  IEmailService emailService,
                                   SignInManager signInManager)
             : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
             _userService = userService;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
-        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType searchType, int page = 1, int pageSize = 10)
+        public IActionResult UserMasterScreen(string searchString, RoleType? roleType, UserSortType sortOrder = UserSortType.Latest, int page = 1, int pageSize = 10)
         {
-            ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
-            ViewData["CurrentUserSearchType"] = searchType.ToString();
+            ViewData["CurrentFilter"] = searchString ?? "";
+            ViewData["CurrentRoleType"] = roleType?.ToString() ?? "";
+            ViewData["CurrentSortOrder"] = sortOrder.ToString();
 
             ViewBag.RoleTypes = _userService.GetUserRoles();
-            ViewBag.UserSearchTypes = _userService.GetUserSortTypes();
+            ViewBag.UserSortTypes = _userService.GetUserSortTypes(sortOrder);
+ 
+            var allUsers = _userService.GetUserList(
+                username: searchString,
+                role: roleType,
+                sortType: sortOrder);
 
-            List<UserListItemViewModel> allUsers = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
+            var totalItems = allUsers.Count;
+            var paginatedUsers = allUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            //Pagination
-            var paginatedUsers = allUsers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
+            ViewBag.PageSize = pageSize;
 
             var model = new UserMasterViewModel
             {
                 Users = paginatedUsers,
-                Pagination = new PaginationModel(allUsers.Count, page, pageSize)
+                Pagination = (PaginationModel)ViewBag.PaginationModel
             };
 
             return View(model);
         }
+
 
         [HttpGet]
         public IActionResult UserAddModal()
@@ -74,11 +89,15 @@ namespace Readiculous.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserViewModel model)
         {
-            if (ModelState.IsValid)
+            //model.IsAdminCreation = true;
+           if (ModelState.IsValid)
             {
                 try
                 {
+                    string tempPassword = OtpManager.GenerateTempPassword();
+                    model.Password = PasswordManager.EncryptPassword(tempPassword);
                     await _userService.AddUserAsync(model, this.UserId);
+                    await _emailService.SendTempPasswordEmailAsync(model.Email, tempPassword);
                     return Json(new { success = true });
                 }
                 catch (DuplicateNameException ex)
@@ -89,12 +108,13 @@ namespace Readiculous.WebApp.Controllers
                 {
                     TempData["ErrorMessage"] = ex.Message;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
                 }
             }
             return PartialView("UserAddModal", model);
+            
         }
 
         [HttpGet]
@@ -108,7 +128,12 @@ namespace Readiculous.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrEmpty(model.Password))
+            {
+                ModelState.AddModelError(nameof(model.Password), "Password is required");
+            }
+                
+            if (ModelState.IsValid) 
             {
                 try
                 {
@@ -146,9 +171,9 @@ namespace Readiculous.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(string userId)
+        public IActionResult Delete(string id)
         {
-            await _userService.DeleteUserAsync(userId, this.UserId);
+            _userService.DeleteUser(id, this.UserId);
             return Json(new { success = true });
         }
     }

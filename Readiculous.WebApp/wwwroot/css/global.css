@@ -27,6 +27,16 @@
     --font-primary: 'Gentium Book Plus', serif;
     --font-secondary: 'Playfair Display', serif;
     --font-ui: 'Poppins', sans-serif;
+    --color-greyed-out-bg: #d6d8db;
+    --color-greyed-out-text: #495057;
+    /* Subtle */
+    --color-subtle-bg: #f8f9fa;
+    --color-subtle-text: #6c757d;
+    --color-subtle-border: #ced4da;
+    --color-subtle-placeholder: #adb5bd;
+    --color-subtle-focus-bg: #f1f3f5;
+    --color-subtle-focus-border: #adb5bd;
+    --color-subtle-focus-text: #495057;
 }
 
 /* Base HTML & Body Styles */
@@ -749,4 +759,45 @@ header {
     .wrapper {
         padding-bottom: 120px;
     }
+}
+
+.input-greyed-out {
+    background-color: var(--color-greyed-out-bg);
+    color: var(--color-greyed-out-text);
+    cursor: not-allowed;
+}
+
+input.form-control.input-greyed-out {
+    background-color: var(--color-greyed-out-bg) !important;
+    color: var(--color-greyed-out-text) !important;
+}
+
+.input-greyed-out::placeholder {
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--color-greyed-out-text);
+    opacity: 1;
+}
+
+
+.input-subtle {
+    background-color: var(--color-subtle-bg);
+    color: var(--color-subtle-text);
+    border-color: var(--color-subtle-border);
+    font-style: italic;
+}
+
+input.form-control.input-subtle::placeholder {
+    color: var(--color-subtle-placeholder);
+    font-size: 0.875rem;
+    font-style: italic;
+    opacity: 1;
+}
+
+.input-subtle:focus {
+    background-color: var(--color-subtle-focus-bg);
+    border-color: var(--color-subtle-focus-border);
+    color: var(--color-subtle-focus-text);
+    outline: none;
+    box-shadow: none;
 }

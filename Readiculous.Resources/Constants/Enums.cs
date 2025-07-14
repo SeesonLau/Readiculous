@@ -36,14 +36,14 @@ namespace Readiculous.Resources.Constants
 
         public enum UserSortType
         {
-            [Display(Name = "Username: A-Z")]
-            UsernameAscending = 0,
-            [Display(Name = "Username: Z-A")]
-            UsernameDescending = 1,
             [Display(Name = "Latest")]
-            Latest = 2,  
+            Latest = 0,
             [Display(Name = "Oldest")]
-            Oldest = 3
+            Oldest = 1,
+            [Display(Name = "Username: A-Z")]
+            UsernameAscending = 2,
+            [Display(Name = "Username: Z-A")]
+            UsernameDescending = 3,
         }
 
         public enum AccessStatus
@@ -55,18 +55,18 @@ namespace Readiculous.Resources.Constants
 
         public enum GenreSortType
         {
-            [Display(Name = "Username: A-Z")]
-            NameAscending = 0,
-            [Display(Name = "Username: Z-A")]
-            NameDescending = 1,
-            [Display(Name = "Book Count: 🡡")]
-            BookCountAscending = 2,
-            [Display(Name = "Book Count: 🡣")]
-            BookCountDescending = 3,
-            [Display(Name = "Oldest")]
-            Oldest = 4,
             [Display(Name = "Latest")]
-            Latest = 5,
+            Latest = 0,
+            [Display(Name = "Oldest")]
+            Oldest = 1,
+            [Display(Name = "Username: A-Z")]
+            NameAscending = 2,
+            [Display(Name = "Username: Z-A")]
+            NameDescending = 3,
+            [Display(Name = "Book Count: 🡡")]
+            BookCountAscending = 4,
+            [Display(Name = "Book Count: 🡣")]
+            BookCountDescending = 5,
         }
 
         public enum BookSearchType
@@ -80,22 +80,26 @@ namespace Readiculous.Resources.Constants
         }
         public enum BookSortType
         {
-            [Display(Name = "Title: A-Z")]
-            TitleAscending = 0,
-            [Display(Name = "Title: Z-A")]
-            TitleDescending = 1,
-            [Display(Name = "Author: A-Z")]
-            AuthorAscending = 2,
-            [Display(Name = "Author: Z-A")]
-            AuthorDescending = 3,
-            [Display(Name = "Rating: 🡡")]
-            RatingAscending = 4,
-            [Display(Name = "Rating: 🡣")]
-            RatingDescending = 5,
-            [Display(Name = "Oldest")]
-            Oldest = 6,
             [Display(Name = "Latest")]
-            Latest = 7,
+            Latest = 0,
+            [Display(Name = "Oldest")]
+            Oldest = 1,
+            [Display(Name = "Title: A-Z")]
+            TitleAscending = 2,
+            [Display(Name = "Title: Z-A")]
+            TitleDescending = 3,
+            [Display(Name = "Author: A-Z")]
+            AuthorAscending = 4,
+            [Display(Name = "Author: Z-A")]
+            AuthorDescending = 5,
+            [Display(Name = "Top Books: 🡡")]
+            RatingAscending = 6,
+            [Display(Name = "Top Books: 🡣")]
+            RatingDescending = 7,
+            [Display(Name = "New Books: 🡡")]
+            NewBooksAscending = 8,
+            [Display(Name = "New Books: 🡣")]
+            NewBooksDescending = 9,
         }
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Readiculous.Services.Interfaces;
@@ -11,11 +11,10 @@ using Readiculous.WebApp.Models;
 using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
-using Readiculous.Resources.Constants;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -34,23 +33,28 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 10)
+        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 100)
         {
-            ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentSortOrder"] = sortOrder;
+            ViewData["CurrentFilter"] = searchString ?? "";
+            ViewData["CurrentSortOrder"] = sortOrder.ToString();
+            ViewData["CurrentGenreFilter"] = genreFilter ?? "";
 
             ViewBag.GenreList = _genreService.GetAllGenreSelectListItems(genreFilter);
             ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
-            ViewBag.BookSearchTypes = _bookService.GetBookSearchTypes(searchType);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
             var allBooks = _bookService.GetBookList(
                 searchString: searchString,
                 genres: genres,
                 userID: this.UserId,
-                searchType: searchType,
                 sortType: sortOrder,
                 genreFilter: genreFilter);
+
+            // For client-side caching
+            if (pageSize == -1 || pageSize.ToString().ToLower() == "all")
+            {
+                return View(allBooks);
+            }
 
             var totalItems = allBooks.Count;
             var paginatedBooks = allBooks
@@ -112,6 +116,10 @@ namespace Readiculous.WebApp.Controllers
                 {
                     ModelState.AddModelError(string.Empty, ex.Message);
                 }
+                catch (DuplicateNameException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
                 catch (Exception)
                 {
                     ModelState.AddModelError(string.Empty, Resources.Messages.Errors.ServerError);
@@ -130,7 +138,7 @@ namespace Readiculous.WebApp.Controllers
         {
             var model = _bookService.GetBookEditById(id);
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres).OrderBy(g => g.Name) .ToList();
             model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
             return PartialView(model);
         }

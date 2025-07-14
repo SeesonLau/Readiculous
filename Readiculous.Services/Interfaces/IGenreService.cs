@@ -8,11 +8,11 @@ namespace Readiculous.Services.Interfaces
 {
     public interface IGenreService
     {
-        Task AddGenre(GenreViewModel model, string creatorId);
+        void AddGenre(GenreViewModel model, string creatorId);
 
-        Task UpdateGenre(GenreViewModel model, string updaterId);
+        void UpdateGenre(GenreViewModel model, string updaterId);
 
-        Task DeleteGenre(string genreId, string deleterId);
+        void DeleteGenre(string genreId, string deleterId);
 
 
         List<GenreListItemViewModel> GetGenreList(string genreName, GenreSortType sortType = GenreSortType.Latest);
@@ -20,7 +20,7 @@ namespace Readiculous.Services.Interfaces
         GenreViewModel GetGenreEditById(string id);
         GenreDetailsViewModel GetGenreDetailsById(string id);
         List<string> GetSelectedGenreIds(List<GenreViewModel> genreViewModels);
-        List<SelectListItem> GetGenreSortTypes();
+        List<SelectListItem> GetGenreSortTypes(GenreSortType sortType);
         List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter);
         List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels);
         List<BookListItemViewModel> GetBooksByGenreId(string genreId);
