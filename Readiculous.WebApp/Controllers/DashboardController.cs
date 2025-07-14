@@ -24,7 +24,6 @@ namespace Readiculous.WebApp.Controllers
         private readonly IGenreService _genreService;
         private readonly IUserService _userService;
         private readonly SignInManager _signInManager;
-        private readonly IMapper _mapper;
 
         public DashboardController(
             IBookService bookService,
@@ -110,24 +109,7 @@ namespace Readiculous.WebApp.Controllers
         [AllowAnonymous]
         public IActionResult DashboardScreen()
         {
-            var dashboardViewModel = new DashboardViewModel();
-            dashboardViewModel.NewBooks = _bookService.GetBookList(
-                searchString: string.Empty,
-                genres: new List<GenreViewModel>(),
-                userID: null,
-                sortType: BookSortType.Latest
-                )
-                .Take(5)
-                .ToList();
-            dashboardViewModel.TopBooks = _bookService.GetBookList(
-                searchString: string.Empty,
-                genres: new List<GenreViewModel>(),
-                userID: null,
-                sortType: BookSortType.Latest
-                )
-                .Take(5)
-                .ToList();
-
+            var dashboardViewModel = _bookService.GetDashboardViewModel();
             return View(dashboardViewModel);
         }
 

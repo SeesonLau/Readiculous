@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using X.PagedList;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
 using Readiculous.WebApp.Mvc;
@@ -28,16 +29,17 @@ namespace Readiculous.WebApp.Controllers
             _reviewService = reviewService;
         }
 
-        public IActionResult Index(string searchString, List<GenreViewModel> genres, BookSearchType searchType, BookSortType sortOrder)
+        public IActionResult Index(string searchString, List<GenreViewModel> genres, BookSortType sortOrder = BookSortType.Latest, int pageNumber = 1, int pageSize = 10)
         {
-            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentSearchString"] = searchString;
             ViewData["CurrentSortOrder"] = sortOrder;
 
+            ViewBag.SearchString = searchString ?? string.Empty;
             ViewBag.AllGenres = _genreService.GetGenreList(genreName: string.Empty);
             ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
-            var model = _bookService.GetBookList(searchString: searchString, genres: genres, userID: this.UserId, sortType: sortOrder);
+            var model = _bookService.GetPaginatedBookList(searchString: searchString, genres: genres, userId: this.UserId, sortType: sortOrder, pageNumber: pageNumber, pageSize: pageSize);
 
             return View(model);
         }

@@ -19,7 +19,6 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<Book>().Any(b => b.BookId == bookId &&
                                                   b.DeletedTime == null);
         }
-
         public bool BookTitleAndAuthorExists(string bookTitle, string author, string id)
         {
             return this.GetDbSet<Book>().Any(b => b.DeletedTime == null &&
@@ -28,6 +27,7 @@ namespace Readiculous.Data.Repositories
                                                   b.Title.ToLower() == bookTitle.ToLower());
         }
 
+       
         public bool ISBNExists(string id, string isbn)
         {
             return this.GetDbSet<Book>().Any(b => b.ISBN == isbn &&
@@ -46,13 +46,29 @@ namespace Readiculous.Data.Repositories
             this.GetDbSet<Book>().Update(book);
             this.UnitOfWork.SaveChanges();
         }
+
         public IQueryable<Book> GetAllActiveBooks()
         {
             return this.GetDbSet<Book>()
                 .AsNoTracking()
+                .Where(b => b.DeletedTime == null)
+                .Include(b => b.CreatedByUser)
+                .Include(b => b.UpdatedByUser);
+        }
+
+       public (IQueryable<Book>, int) GetAllPaginatedBooks(int pageNumber, int pageSize = 10)
+        {
+            var data = this.GetDbSet<Book>()
+                .Where(b => b.DeletedTime == null);
+            var dataCount = data.Count();
+            data = data
+                .Skip((pageNumber - 1) * 10)
+                .Take(pageSize)
                 .Include(b => b.CreatedByUser)
                 .Include(b => b.UpdatedByUser)
-                .Where(b => b.DeletedTime == null);
+                .AsNoTracking(); 
+
+            return (data, dataCount);
         }
         public IQueryable<Book> GetBooksByTitle(string bookTitle)
         {
@@ -65,6 +81,22 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
+        public (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize = 10)
+        {
+
+            var data = this.GetDbSet<Book>()
+                .Where(b => b.DeletedTime == null &&
+                            b.Title.ToLower().Contains(bookTitle.ToLower()));
+            var dataCount = data.Count();
+
+            data = data
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(book => book.CreatedByUser)
+                .Include(book => book.UpdatedByUser)
+                .AsNoTracking();
+            return (data, dataCount);
+        }
         public IQueryable<Book> GetBooksByGenreList(List<Genre> genres)
         {
             IQueryable<Book> books;
@@ -75,14 +107,47 @@ namespace Readiculous.Data.Repositories
             else
             {
                 books = this.GetDbSet<Book>()
-                    .Include(b => b.CreatedByUser)
-                    .Include(b => b.UpdatedByUser)
                     .Where(b => b.DeletedTime == null &&
-                                b.GenreAssociations.Any(ga => genres.Any(g => g.GenreId == ga.GenreId)));
+                                b.GenreAssociations
+                                    .Any(ga => genres
+                                        .Any(g => g.GenreId == ga.GenreId)))
+
+                    .Include(b => b.CreatedByUser)
+                    .Include(b => b.UpdatedByUser);
             }
 
             return books;
         }
+        public (IQueryable<Book>, int) GetPaginatedBooksByGenreList(List<Genre> genres, int pageNumber, int pageSize = 10)
+        {
+            IQueryable<Book> data;
+            int dataCount;
+            if(genres == null || !genres.Any())
+            {
+                data = GetAllActiveBooks();
+                dataCount = data.Count();
+            }
+            else
+            {
+                data = this.GetDbSet<Book>()
+                    .Where(b => b.DeletedTime == null &&
+                                b.GenreAssociations
+                                    .Any(ga => genres
+                                        .Any(g => g.GenreId == ga.GenreId)));
+
+                dataCount = data.Count();
+
+                data = data
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(b => b.CreatedByUser)
+                    .Include(b => b.UpdatedByUser)
+                    .AsNoTracking();
+            }
+
+            return (data, dataCount);
+        }
+
         public IQueryable<Book> GetBooksByTitleAndGenres(string bookTitle, List<Genre> genres)
         {
 
@@ -109,21 +174,66 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
+        public (IQueryable<Book>, int) GetPaginatedBooksByTitleAndGenres(string bookTitle, List<Genre> genres, int pageNumber, int pageSize = 10)
+        {
+            IQueryable<Book> data;
+            int dataCount;
+            if(genres == null || !genres.Any())
+            {
+                data = this.GetDbSet<Book>()
+                    .Where(b => b.DeletedTime == null &&
+                                b.Title.ToLower().Contains(bookTitle.ToLower()));
+                dataCount = data.Count();
+                data = data
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageNumber)
+                    .Include(b => b.CreatedByUser)
+                    .Include(b => b.UpdatedByUser)
+                    .AsNoTracking();
+            }
+            else
+            {
+                data = this.GetDbSet<Book>()
+                    .Where(b => b.DeletedTime == null &&
+                                b.Title.ToLower().Contains(bookTitle.ToLower()) &&
+                                b.GenreAssociations
+                                    .Any(ga => genres
+                                        .Any(g => g.GenreId == ga.GenreId)));
+                dataCount = data.Count();
+                data = data
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(b => b.CreatedByUser)
+                    .Include(b => b.UpdatedByUser)
+                    .AsNoTracking();
+            }
+
+            return (data, dataCount);
+        }
+
         public Book GetBookById(string id)
         {
             return this.GetDbSet<Book>()
+                .Where(b => b.DeletedTime == null &&
+                            b.BookId == id)
                 .Include(book => book.GenreAssociations)
                     .ThenInclude(bga => bga.Genre)
                 .Include(book => book.CreatedByUser)
                 .Include(book => book.UpdatedByUser)
-                .FirstOrDefault(b => b.DeletedTime == null &&
-                                     b.BookId == id);
+                .FirstOrDefault();
         }
+
         public int GetBookCountByGenreId(string genreId)
         {
             return this.GetDbSet<BookGenreAssignment>()
                 .Count(bga => bga.Book.DeletedTime == null &&
                               bga.GenreId == genreId);
+        }
+
+        public int GetActiveBookCount()
+        {
+            return this.GetDbSet<Book>()
+                .Count(b => b.DeletedTime == null);
         }
     }
 }

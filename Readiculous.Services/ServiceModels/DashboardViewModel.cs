@@ -1,7 +1,6 @@
-﻿using Readiculous.Services.ServiceModels;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Readiculous.WebApp.Models
+namespace Readiculous.Services.ServiceModels
 {
 
     public class DashboardViewModel
@@ -9,9 +8,5 @@ namespace Readiculous.WebApp.Models
         public List<BookListItemViewModel> NewBooks { get; set; }
         public List<BookListItemViewModel> TopBooks { get; set; }
         public string UserRole { get; set; }
-
-
-
-
     }
 }

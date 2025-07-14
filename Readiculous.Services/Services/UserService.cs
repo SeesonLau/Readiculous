@@ -481,7 +481,6 @@ namespace Readiculous.Services.Services
                 if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
                     return false;
-                    return false;
                 }
 
                 // Generate and store OTP only
