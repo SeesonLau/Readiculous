@@ -4,6 +4,7 @@ using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Supabase.Gotrue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,7 +85,31 @@ namespace Readiculous.Services.Services
 
             var queryableTopReviewers = _userRepository.GetTopReviewers(5);
             var listTopReviewers = queryableTopReviewers.ToList();
-            adminDashboardViewModel.TopReviewers = _mapper.Map<List<UserListItemViewModel>>(listTopReviewers);
+
+            List<UserDetailsViewModel> topReviewerDetails = new();
+            foreach(var reviewer in listTopReviewers)
+            {
+                UserDetailsViewModel userDetails = new();
+                _mapper.Map(reviewer, userDetails);
+
+                userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(reviewer.UserFavoriteBooks);
+                userDetails.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewer.UserReviews);
+
+                var bookIds = userDetails.FavoriteBookModels
+                    .Select(x => x.BookId)
+                    .ToList();
+                userDetails.TopGenres = _genreRepository.GetTopGenresFromBookIds(bookIds);
+
+                userDetails.AverageRating = userDetails.UserReviewModels.Count > 0
+                    ? Math.Round(userDetails.UserReviewModels.Average(r => r.Rating), 2)
+                    : 0;
+
+                topReviewerDetails.Add(userDetails);
+            }
+
+            adminDashboardViewModel.TopReviewers = topReviewerDetails
+                .OrderByDescending(r => r.AverageRating) 
+                .ToList();
 
             var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5);
             var listMostUsedGenres = queryableMostUsedGenres.ToList();

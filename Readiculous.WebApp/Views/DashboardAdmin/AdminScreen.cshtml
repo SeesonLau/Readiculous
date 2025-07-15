@@ -68,66 +68,21 @@
             <div class="reviewer-container h-100">
                 <h5 class="section-title text-center">Top 5 Reviewers</h5>
                 <!-- Reviewer cards -->
-                <div class="reviewer-card d-flex align-items-center">
-                    <div class="rank-number">1</div>
-                    <div class="user-avatar">BL</div>
-                    <div class="flex-grow-1">
-                        <div>BookLover42</div>
-                        <div class="d-flex align-items-center gap-2 small">
-                            <span><i class="bi bi-star-fill text-warning"></i> 4.8</span>
-                            <span>|</span>
-                            <span>42 Reviews</span>
+                @foreach (var reviewer in Model.TopReviewers)
+                {
+                    <div class="reviewer-card d-flex align-items-center">
+                        <div class="rank-number">@(Model.TopReviewers.IndexOf(reviewer) + 1)</div> <!-- dynamic rank -->
+                        <div class="user-avatar">US</div> <!-- assuming you have Initials -->
+                        <div class="flex-grow-1">
+                            <div>@reviewer.UserName</div>
+                            <div class="d-flex align-items-center gap-2 small">
+                                <span><i class="bi bi-star-fill text-warning"></i> @reviewer.AverageRating </span>
+                                <span>|</span>
+                                <span>@reviewer.UserReviewModels.Count Reviews</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="reviewer-card d-flex align-items-center">
-                    <div class="rank-number">2</div>
-                    <div class="user-avatar">LC</div>
-                    <div class="flex-grow-1">
-                        <div>LiteraryCritic</div>
-                        <div class="d-flex align-items-center gap-2 small">
-                            <span><i class="bi bi-star-fill text-warning"></i> 4.7</span>
-                            <span>|</span>
-                            <span>38 Reviews</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="reviewer-card d-flex align-items-center">
-                    <div class="rank-number">3</div>
-                    <div class="user-avatar">PT</div>
-                    <div class="flex-grow-1">
-                        <div>PageTurner</div>
-                        <div class="d-flex align-items-center gap-2 small">
-                            <span><i class="bi bi-star-fill text-warning"></i> 4.6</span>
-                            <span>|</span>
-                            <span>35 Reviews</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="reviewer-card d-flex align-items-center">
-                    <div class="rank-number">4</div>
-                    <div class="user-avatar">NE</div>
-                    <div class="flex-grow-1">
-                        <div>NovelEnthusiast</div>
-                        <div class="d-flex align-items-center gap-2 small">
-                            <span><i class="bi bi-star-fill text-warning"></i> 4.5</span>
-                            <span>|</span>
-                            <span>30 Reviews</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="reviewer-card d-flex align-items-center">
-                    <div class="rank-number">5</div>
-                    <div class="user-avatar">SS</div>
-                    <div class="flex-grow-1">
-                        <div>StorySeeker</div>
-                        <div class="d-flex align-items-center gap-2 small">
-                            <span><i class="bi bi-star-fill text-warning"></i> 4.4</span>
-                            <span>|</span>
-                            <span>28 Reviews</span>
-                        </div>
-                    </div>
-                </div>
+                }
             </div>
         </div>
     </div>
