@@ -52,10 +52,6 @@ namespace Readiculous.WebApp
                 CreateMap<User, EditProfileViewModel>();
                 CreateMap<EditProfileViewModel, UserViewModel>();
 
-               
-
-
-
                 // Genre Mappings
                 CreateMap<Genre, GenreListItemViewModel>()
                     .ForMember(dest => dest.CreatedByUsername,
@@ -96,7 +92,17 @@ namespace Readiculous.WebApp
                     .ForMember(dest => dest.ISBN,
                                opt => opt.MapFrom(src => src.ISBN.Trim()));
                 CreateMap<Book, BookViewModel>();
-                CreateMap<Book, FavoriteBookModel>();
+                CreateMap<FavoriteBook, FavoriteBookModel>()
+                    .ForMember(dest => dest.Title,
+                               opt => opt.MapFrom(src => src.Book.Title))
+                    .ForMember(dest => dest.Description,
+                               opt => opt.MapFrom(src => src.Book.Description))
+                    .ForMember(dest => dest.Author,
+                               opt => opt.MapFrom(src => src.Book.Author))
+                    .ForMember(dest => dest.CoverImageUrl,
+                               opt => opt.MapFrom(src => src.Book.CoverImageUrl))
+                    .ForMember(dest => dest.PublicationYear,
+                               opt => opt.MapFrom(src => src.Book.PublicationYear));
 
 
                 // Review Mappings

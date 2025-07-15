@@ -16,6 +16,7 @@ namespace Readiculous.Data.Interfaces
 
         IQueryable<FavoriteBook> GetFavoriteBooksByUserId(string userId);
         IQueryable<FavoriteBook> GetFavoriteBooksByBookId(string bookId);
+        (IQueryable<FavoriteBook>, int) GetPaginatedFavoriteBooksByUserId(string userId, int pageNumber, int pageSize);
         FavoriteBook GetFavoriteBookByBookIdAndUserId(string bookId, string userId);
     }
 }
