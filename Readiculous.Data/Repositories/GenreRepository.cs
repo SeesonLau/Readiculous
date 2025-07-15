@@ -1,5 +1,6 @@
 ﻿using Basecode.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using System;
@@ -152,6 +153,26 @@ namespace Readiculous.Data.Repositories
                               genreIds.Any(a => a.Equals(bga.GenreId)));
 
             return data;
+        }
+
+        public int GetActiveGenreCount()
+        {
+            return this.GetDbSet<Genre>()
+                .Count(g => g.DeletedTime == null);
+        }
+
+        public Dictionary<Genre, int> GetMostUsedGenresWithCount(int numberOfGenres)
+        {
+            return this.GetDbSet<Genre>()
+                .Where(g => g.DeletedTime == null)
+                .Select(g => new
+                {
+                    Genre = g,
+                    Count = g.Books.Count(b => b.Book.DeletedTime == null)
+                })
+                .OrderByDescending(g => g.Count)
+                .Take(numberOfGenres)
+                .ToDictionary(g => g.Genre, g => g.Count);
         }
     }
 }

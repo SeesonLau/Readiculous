@@ -46,6 +46,30 @@ namespace Readiculous.Services.Services
             userDashboardViewModel.TopBooks = _mapper.Map<List<BookListItemViewModel>>(topBooks);
             userDashboardViewModel.FavoriteBooks = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
 
+
+
+            foreach (var model in userDashboardViewModel.NewBooks)
+            {
+                var book = newBooks.FirstOrDefault(b => b.BookId == model.BookId);
+                if (book != null)
+                {
+                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
+                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
+                    model.TotalReviews = validReviews.Count;
+                }
+            }
+
+            foreach (var model in userDashboardViewModel.TopBooks)
+            {
+                var book = topBooks.FirstOrDefault(b => b.BookId == model.BookId);
+                if (book != null)
+                {
+                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
+                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
+                    model.TotalReviews = validReviews.Count;
+                }
+            }
+
             return userDashboardViewModel;
         }
 
@@ -69,29 +93,7 @@ namespace Readiculous.Services.Services
                 kvp => kvp.Value
             );
 
-            foreach(var model in  dashboardViewModel.NewBooks)
-            {
-                var book = newBooks.FirstOrDefault(b => b.BookId == model.BookId);
-                if (book != null)
-                {
-                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
-                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
-                    model.TotalReviews = validReviews.Count;
-                }
-            }
-
-            foreach (var model in dashboardViewModel.TopBooks)
-            {
-                var book = topBooks.FirstOrDefault(b => b.BookId == model.BookId);
-                if (book != null)
-                {
-                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
-                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
-                    model.TotalReviews = validReviews.Count;
-                }
-            }
-
-            return dashboardViewModel;
+            return adminDashboardViewModel;
         }
     }
 }
