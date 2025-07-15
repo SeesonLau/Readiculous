@@ -37,10 +37,6 @@ namespace Readiculous.WebApp.Controllers
 
             ViewBag.GenreSortTypes = _genreService.GetGenreSortTypes(sortOrder);
 
-            var allGenres = _genreService.GetGenreList(
-                searchString,
-                sortType : sortOrder);
-
             var genres = _genreService.GetPaginatedGenreList(
                 genreName: searchString,
                 sortType: sortOrder,
