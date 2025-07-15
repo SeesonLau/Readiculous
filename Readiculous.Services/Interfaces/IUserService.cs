@@ -47,5 +47,8 @@ namespace Readiculous.Services.Interfaces
         bool ValidateOtpForForgotPassword(string email, string otp);
         Task<bool> ResendOtpForForgotPasswordAsync(string email);
         Task<bool> UpdatePasswordAsync(string email, string newPassword);
+
+        // Utility
+        bool EmailExists(string email);
     }
 }

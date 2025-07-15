@@ -1,0 +1,72 @@
+﻿<link rel="stylesheet" href="~/css/adminDashboard/header-admin.css" />
+
+<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")" style="background: var(--color-header-bg)">
+    <!-- Logo Section -->
+    <div class="logosec" style="cursor: default">
+        <img src="~/img/readiculous-logo.svg" alt="Readiculous Logo" style="pointer-events: none">
+        <span>Readiculous</span>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="header-center-container">
+        <div class="header-nav-container">
+            <div class="header-nav-slider"></div>
+            <div class="header-nav-buttons">
+                <a asp-controller="DashboardAdmin" asp-action="AdminScreen"
+                   class="nav-btn @(ViewContext.RouteData.Values["Controller"]?.ToString() == "DashboardAdmin" ? "active" : "")">
+                    Home
+                </a>
+                <a asp-controller="UserMaster" asp-action="UserMasterScreen"
+                   class="nav-btn @(ViewContext.RouteData.Values["Controller"]?.ToString() == "UserMaster" ? "active" : "")">
+                    Users
+                </a>
+                <a asp-controller="BookMaster" asp-action="BookMasterScreen"
+                   class="nav-btn @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BookMaster" ? "active" : "")">
+                    Books
+                </a>
+                <a asp-controller="GenreMaster" asp-action="GenreMasterScreen"
+                   class="nav-btn @(ViewContext.RouteData.Values["Controller"]?.ToString() == "GenreMaster" ? "active" : "")">
+                    Genres
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Section -->
+    <div class="header-right-elements">
+        <!-- User Profile with Dropdown -->
+        <div class="user-profile">
+            <div class="dp" style="pointer-events: none">
+                <img src="@User.FindFirst("UserProfilePictureUrl")?.Value"
+                     class="dpicn"
+                     alt="Profile Picture" style="pointer-events: none" />
+            </div>
+            <span>@User.FindFirst("UserName")?.Value</span>
+
+            <!-- Dropdown Menu -->
+            <div class="profile-dropdown">
+                <!-- Navigation Items (will be populated by JS on small screens) -->
+                <div class="dropdown-nav-items-container"></div>
+
+                <!-- Dropdown Logout Button (shown only on mobile) -->
+                <a id="dropdown-logout-btn" asp-action="SignOutUser" asp-controller="Account">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Standalone Logout Button (shown only on desktop) -->
+        <div class="logout-container">
+            <a id="logout-btn" asp-action="SignOutUser" asp-controller="Account" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+
+</header>
+
+<partial name="_LogoutConfirmation" />
+
+<script src="~/js/adminDashboard/header-admin.js" asp-append-version="true"></script>

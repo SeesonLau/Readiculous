@@ -1,5 +1,6 @@
 body, html {
     background: #fff !important;
+    font-family: var(--font-primary);
 }
 .register-box-custom {
     background: #fff;
@@ -33,7 +34,6 @@ body, html {
     font-weight: 700;
     color: #39243b;
     margin-bottom: 1.6rem;
-    font-family: inherit;
 }
 .register-input {
     background: #f7e6f7;
@@ -44,7 +44,6 @@ body, html {
     margin-bottom: 1.4rem;
     width: 100%;
     color: #39243b;
-    font-family: inherit;
     font-weight: 500;
 }
 .register-input:focus {
@@ -62,7 +61,6 @@ body, html {
     font-weight: 700;
     margin-bottom: 1.4rem;
     transition: background 0.2s;
-    font-family: inherit;
 }
 .register-btn:hover {
     background: #e89ab0;
@@ -88,7 +86,6 @@ body, html {
     margin-bottom: 1.4rem;
     width: 100%;
     color: #39243b;
-    font-family: inherit;
 }
 .register-file-input::-webkit-file-upload-button {
     background: #f7b6c2;
@@ -109,4 +106,7 @@ body, html {
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
+} 
+.register-title, .register-input, .register-btn, .register-signin, .register-signin a, .register-file-input {
+    font-family: var(--font-primary) !important;
 } 

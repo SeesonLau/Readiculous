@@ -94,16 +94,17 @@ namespace Readiculous.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserViewModel model)
         {
-            //model.IsAdminCreation = true;
-           if (ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 try
                 {
                     string tempPassword = OtpManager.GenerateTempPassword();
-                    model.Password = PasswordManager.EncryptPassword(tempPassword);
+                    // Store the plain temp password in the model (do not encrypt here)
+                    model.Password = tempPassword;
                     await _userService.AddUserAsync(model, this.UserId);
+                    // Send the plain temp password in the email
                     await _emailService.SendTempPasswordEmailAsync(model.Email, tempPassword);
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Account Successfully Created!" });
                 }
                 catch (DuplicateNameException ex)
                 {
@@ -150,7 +151,7 @@ namespace Readiculous.WebApp.Controllers
                         await _signInManager.SignInAsync(updatedUser, isPersistent: true);
                     }
 
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Account Details Successfully Edited!" });
                 }
                 catch (KeyNotFoundException)
                 {
@@ -179,7 +180,8 @@ namespace Readiculous.WebApp.Controllers
         public IActionResult Delete(string id)
         {
             _userService.DeleteUser(id, this.UserId);
-            return Json(new { success = true });
+            TempData["SuccessMessage"] = "Account Successfully Deleted!";
+            return Json(new { success = true, message = "Account Successfully Deleted!" });
         }
     }
 }
