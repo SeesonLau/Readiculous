@@ -26,6 +26,7 @@ namespace Readiculous.Services.Services
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
+            _genreRepository = genreRepository;
             _favoriteBookRepository = favoriteBookRepository;
             _mapper = mapper;
         }

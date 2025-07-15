@@ -10,5 +10,6 @@ namespace Readiculous.Services.Interfaces
     public interface IDashboardService
     {
         UserDashboardViewModel GetUserDashboardViewModel(string userId);
+        AdminDashboardViewModel GetAdminDashboardViewModel();
     }
 }
