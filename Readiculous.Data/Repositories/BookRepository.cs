@@ -221,6 +221,7 @@ namespace Readiculous.Data.Repositories
             data = data
                 .Skip((pageNumber - 1) + pageSize)
                 .Take(pageSize)
+                .Include(b => b.BookReviews)
                 .Include(b => b.CreatedByUser)
                 .Include(b => b.UpdatedByUser)
                 .AsNoTracking();
@@ -238,7 +239,7 @@ namespace Readiculous.Data.Repositories
                     AverageRating = b.BookReviews
                         .Where(r => r.DeletedTime == null)
                         .Select(r => (double?)r.Rating)
-                        .DefaultIfEmpty(0)
+                        .DefaultIfEmpty() // No need to pass 0; EF handles nulls
                         .Average()
                 })
                 .OrderByDescending(x => x.AverageRating);
@@ -248,7 +249,8 @@ namespace Readiculous.Data.Repositories
             var data = booksWithAverageRatings
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(x => x.Book)
+                .Select(b => b.Book)
+                .Include(b => b.BookReviews)
                 .Include(b => b.CreatedByUser)
                 .Include(b => b.UpdatedByUser)
                 .AsNoTracking();

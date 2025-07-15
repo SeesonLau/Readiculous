@@ -41,6 +41,7 @@ namespace Readiculous.WebApp
             this._services.AddScoped<IBookService, BookService>();
             this._services.AddScoped<IReviewService, ReviewService>();
             this._services.AddScoped<IEmailService, EmailService>();
+            this._services.AddScoped<IDashboardService, DashboardService>();
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
