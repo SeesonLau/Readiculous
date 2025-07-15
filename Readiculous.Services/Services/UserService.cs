@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
-using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
 using Readiculous.Resources.Messages;
 using Readiculous.Services.Interfaces;
@@ -138,6 +137,11 @@ namespace Readiculous.Services.Services
             }    
 
             var user = _userRepository.GetUserById(model.UserId);
+
+            if(user.Role != model.Role)
+            {
+                throw new InvalidOperationException(Errors.CannotChangeRole);
+            }
 
             // Map properties for Updated Time, and UpdatedBy
 

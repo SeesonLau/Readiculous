@@ -153,7 +153,7 @@ namespace Readiculous.Data.Repositories
         {
             return this.GetDbSet<User>()
                 .Where(u => u.DeletedTime == null)
-                .OrderBy(u => u.UserReviews.Count())
+                .OrderByDescending(u => u.UserReviews.Count())
                 .Include(u => u.UserFavoriteBooks)
                 .Include(u => u.UserReviews)
                 .Take(numberOfUsers)

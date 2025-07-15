@@ -189,4 +189,7 @@
   <data name="UsernameNotExist" xml:space="preserve">
     <value>Username does not exist!</value>
   </data>
+  <data name="CannotChangeRole" xml:space="preserve">
+    <value>Cannot change role of signed-in user!</value>
+  </data>
 </root>

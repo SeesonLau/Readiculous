@@ -101,9 +101,7 @@ namespace Readiculous.Services.Services
                 topReviewerDetails.Add(userDetails);
             }
 
-            adminDashboardViewModel.TopReviewers = topReviewerDetails
-                .OrderByDescending(r => r.AverageRating) 
-                .ToList();
+            adminDashboardViewModel.TopReviewers = topReviewerDetails;
 
             var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5);
             var listMostUsedGenres = queryableMostUsedGenres.ToList();

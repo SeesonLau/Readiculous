@@ -432,10 +432,7 @@ namespace Readiculous.Services.Services
             IQueryable<Book> queryableBookListItems;
             int bookCount;
 
-            var timer = new Timer();
-            timer.Start();
-
-            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitle(bookTitle, pageNumber, pageSize);
+            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitle(bookTitle, pageNumber, pageSize, sortType);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
             var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
@@ -446,12 +443,8 @@ namespace Readiculous.Services.Services
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
             PopulateListItem(bookMapModels, genres, allReviews);
 
-            var result = SortBook(bookMapModels, sortType, genreFilter);
-
-            timer.Stop();
-
             return new StaticPagedList<BookListItemViewModel>(
-                result.ToList(),
+                bookMapModels.ToList(),
                 pageNumber,
                 pageSize,
                 bookCount
@@ -498,7 +491,7 @@ namespace Readiculous.Services.Services
             IQueryable<Book> queryableBookListItems;
             int bookCount;
 
-            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByGenreList(bookGenres, pageNumber, pageSize);
+            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByGenreList(bookGenres, pageNumber, pageSize, sortType);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
             var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
@@ -506,10 +499,9 @@ namespace Readiculous.Services.Services
 
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
             PopulateListItem(bookMapModels, genres, allReviews);
-
-            var result = SortBook(bookMapModels, sortType, genreFilter);
+            
             return new StaticPagedList<BookListItemViewModel>(
-                result.ToList(),
+                bookMapModels.ToList(),
                 pageNumber,
                 pageSize,
                 bookCount
@@ -554,7 +546,7 @@ namespace Readiculous.Services.Services
             IQueryable<Book> queryableBookListItems;
             int bookCount;
 
-            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitleAndGenres(bookTitle, bookGenres, pageNumber, pageSize);
+            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitleAndGenres(bookTitle, bookGenres, pageNumber, pageSize, sortType);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
             var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
@@ -563,9 +555,8 @@ namespace Readiculous.Services.Services
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
             PopulateListItem(bookMapModels, genres, allReviews);
 
-            var result = SortBook(bookMapModels, sortType, genreFilter);
             return new StaticPagedList<BookListItemViewModel>(
-                result.ToList(),
+                bookMapModels.ToList(),
                 pageNumber,
                 pageSize,
                 bookCount
@@ -573,7 +564,7 @@ namespace Readiculous.Services.Services
         }
 
         // Search And Sort Book Helper Function
-        private IEnumerable<BookListItemViewModel> SortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType, string? genreFilter)
+        private IEnumerable<BookListItemViewModel> SortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
             if (!string.IsNullOrWhiteSpace(genreFilter))
             {
