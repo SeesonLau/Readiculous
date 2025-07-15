@@ -216,14 +216,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     credentials: 'same-origin',
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
-                    .then(res => {
-                        if (res.ok) {
-                            // Show the success partial after profile completion
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else if (data.success) {
                             loadPartial('/Account/AuthPartial?view=success');
                         } else {
                             toastr.error('Failed to complete profile.');
                         }
-                    });
+                    })
+                    .catch(() => toastr.error('Failed to complete profile.'));
             });
         }
     }

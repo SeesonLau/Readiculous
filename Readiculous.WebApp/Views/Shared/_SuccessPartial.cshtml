@@ -10,7 +10,9 @@
     <button id="success-login-btn" style="width: 100%; background: #edaec0; color: #2c2133; font-weight: bold; border: none; border-radius: 8px; padding: 0.9rem 0; font-size: 1.15rem; margin-top: 0.5rem; transition: background 0.2s; text-align: center;">Continue</button>
 </div>
 <script>
-    document.getElementById('success-login-btn').onclick = function() {
-        window.location.href = '/Dashboard/DashboardScreen';
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('success-login-btn').onclick = function() {
+            window.location.href = '/Dashboard/DashboardScreen';
+        };
+    });
 </script> 
