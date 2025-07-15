@@ -96,32 +96,5 @@ namespace Readiculous.Services.Services
 
             return adminDashboardViewModel;
         }
-        //public AdminDashboardViewModel GetAdminDashboardViewModel()
-        //{
-        //    if (_userRepository == null || _bookRepository == null || _genreRepository == null || _mapper == null)
-        //        throw new Exception("One or more dependencies are null.");
-
-        //    var adminDashboardViewModel = new AdminDashboardViewModel();
-
-        //    adminDashboardViewModel.UserCount = _userRepository.GetActiveUserCount();
-        //    adminDashboardViewModel.BookCount = _bookRepository.GetActiveBookCount();
-        //    adminDashboardViewModel.GenreCount = _genreRepository.GetActiveGenreCount();
-
-        //    var queryableTopReviewers = _userRepository.GetTopReviewers(5) ?? Enumerable.Empty<User>().AsQueryable();
-        //    var listTopReviewers = queryableTopReviewers.ToList();
-        //    adminDashboardViewModel.TopReviewers = _mapper.Map<List<UserListItemViewModel>>(listTopReviewers);
-
-        //    var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5) ?? new Dictionary<Genre, int>();
-        //    var listMostUsedGenres = queryableMostUsedGenres.ToList();
-        //    adminDashboardViewModel.MostUsedGenres = listMostUsedGenres
-        //        .Where(kvp => kvp.Key != null)
-        //        .ToDictionary(
-        //            kvp => _mapper.Map<GenreListItemViewModel>(kvp.Key),
-        //            kvp => kvp.Value
-        //        );
-
-        //    return adminDashboardViewModel;
-        //}
-
     }
 }
