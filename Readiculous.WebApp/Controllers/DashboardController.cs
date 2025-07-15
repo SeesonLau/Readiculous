@@ -127,27 +127,45 @@ namespace Readiculous.WebApp.Controllers
                 )
                 .Take(5)
                 .ToList();
-
+                
             return View(dashboardViewModel);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ViewNewBooks()
+        public IActionResult ViewNewBooks(string keyword = "")
         {
-            var now = DateTime.UtcNow;
+            var allBooks = _bookService.GetBookList(
+                "", // leave search string blank — we’ll filter it ourselves
+                new List<GenreViewModel>(),
+                "",
+                BookSortType.Latest
+            );
 
-            var newBooks = _bookService.GetBookList(
-                searchString: "",
-                genres: new List<GenreViewModel>(),
-                userID: null,
-                sortType: BookSortType.Latest
-            ).Where(b => b.CreatedTime >= now.AddDays(-14))
-             .OrderByDescending(b => b.CreatedTime)
-             .ToList();
+            List<BookListItemViewModel> filteredBooks;
 
-            return View(newBooks);
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                // ONLY search by keyword — DO NOT filter by CreatedTime
+                filteredBooks = allBooks
+                    .Where(b => !string.IsNullOrWhiteSpace(b.Title)
+                        && b.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+            else
+            {
+                // If no keyword, show books from the last 2 weeks only
+                filteredBooks = allBooks
+                    .Where(b => b.CreatedTime >= DateTime.UtcNow.AddDays(-14))
+                    .ToList();
+            }
+
+            ViewBag.Keyword = keyword;
+            return View("ViewNewBooks", filteredBooks);
         }
+
+
+
 
         [HttpGet]
         [AllowAnonymous]
@@ -166,14 +184,17 @@ namespace Readiculous.WebApp.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult GenreScreen()
+        public IActionResult GenreScreen(string selectedGenres, GenreSortType sortType = GenreSortType.Latest)
         {
-            var allBooks = _bookService.GetBookList(
-                searchString: "",
-                genres: new List<GenreViewModel>(),
-                userID: null,
-                sortType: BookSortType.Latest
-            );
+            var selected = string.IsNullOrEmpty(selectedGenres)
+                ? new List<string>()
+                : selectedGenres.Split(',').ToList();
+
+            var allBooks = _bookService.GetBookList("", new List<GenreViewModel>(), null, BookSortType.Latest);
+
+            var filteredBooks = selected.Any()
+                ? allBooks.Where(book => book.Genres != null && book.Genres.Any(g => selected.Contains(g))).ToList()
+                : allBooks;
 
             var allGenres = allBooks
                 .SelectMany(b => b.Genres ?? new List<string>())
@@ -181,10 +202,47 @@ namespace Readiculous.WebApp.Controllers
                 .OrderBy(g => g)
                 .ToList();
 
-            ViewBag.AllGenres = allGenres;
+            // Prepare SelectListItem for sort dropdown
+            var sortOptions = Enum.GetValues(typeof(GenreSortType))
+                .Cast<GenreSortType>()
+                .Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = e.ToString(),
+                    Text = e.ToString(),
+                    Selected = (e == sortType)
+                })
+                .ToList();
 
-            return View(allBooks);
+            ViewBag.AllGenres = allGenres;
+            ViewBag.SelectedGenres = selected;
+            ViewBag.SortOptions = sortOptions;
+
+            return View(filteredBooks);
         }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GenreBooksPartial(string selectedGenres, GenreSortType sortType = GenreSortType.Latest)
+        {
+            var selected = string.IsNullOrEmpty(selectedGenres)
+                ? new List<string>()
+                : selectedGenres.Split(',').ToList();
+
+            var allBooks = _bookService.GetBookList("", new List<GenreViewModel>(), null, BookSortType.Latest);
+
+            var filteredBooks = selected.Any()
+                ? allBooks.Where(book => book.Genres != null && book.Genres.Any(g => selected.Contains(g))).ToList()
+                : allBooks;
+
+            return PartialView("_BookGridPartial", filteredBooks);
+        }
+
+
+
+
+
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult BookDetailScreen(string id)
@@ -193,34 +251,55 @@ namespace Readiculous.WebApp.Controllers
             if (book == null)
                 return NotFound();
 
-            // We set a clear role string for clarity
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity.IsAuthenticated && User.IsInRole("Reviewer"))
             {
-                if (User.IsInRole("Reviewer"))
-                {
-                    ViewBag.UserRole = "Reviewer";
-                }
-                else
-                {
-                    ViewBag.UserRole = "User";
-                }
-
-                var userId = this.UserId;
-                ViewBag.UserId = userId;
+                ViewBag.IsReviewer = true;
+                ViewBag.UserId = this.UserId;
                 ViewBag.UserName = this.UserName;
-                ViewBag.UserEmail = _userService.GetEmailByUserId(userId);
+                ViewBag.UserEmail = _userService.GetEmailByUserId(this.UserId);
             }
             else
             {
-                ViewBag.UserRole = "Anonymous";
+                ViewBag.IsReviewer = false;
             }
 
             return View(book);
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Reviewer")]
         public IActionResult AddToFavoritesBook(string bookId)
         {
             _bookService.AddBookToFavorites(bookId, this.UserId);
-            return RedirectToAction("BookDetailsScreen", "Dashboard");
+            return RedirectToAction("BookDetailScreen", new { id = bookId });
+        }
+
+        [HttpGet]
+        public IActionResult SearchBooks(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Json(new List<object>());
+            }
+
+            var books = _bookService.GetBookList(
+                query,                        
+                new List<GenreViewModel>(),    
+                "",                            
+                BookSortType.Latest,           
+                null                          
+            );
+
+            var filtered = books
+                .Take(10)
+                .Select(b => new
+                {
+                    id = b.BookId,
+                    title = b.Title,
+                    cover = string.IsNullOrEmpty(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
+                });
+
+            return Json(filtered);
         }
 
 

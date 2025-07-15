@@ -33,7 +33,18 @@
     opacity: 0.5;
 }
 
-/* ✅ Distinct border and background for sections */
+
+
+.book-wrapper {
+    background-color: #fff;
+    border: 2px solid #e3d5ec;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+
+/* Distinct border and background for sections */
 .section-box {
     background-color: #fffdf9;
     border: 2px solid #c7a8c7;
@@ -145,4 +156,119 @@
     font-size: 0.75rem;
     margin: 0.15rem 0 0 0;
     opacity: 0.7;
+}
+
+.favorite-books {
+    background-color: #fff8f4;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 300px;
+    border: 1px solid #e2d3c3;
+    border-radius: 12px;
+    position: relative;
+}
+
+.favorite-book-list {
+    min-height: 200px;
+    padding: 10px 5px;
+}
+
+.favorite-book-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-bottom: 1px solid #e8ddd4;
+}
+
+    .favorite-book-card img {
+        width: 35px;
+        height: 55px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+.favorite-book-info {
+    font-size: 0.85rem;
+    color: #333;
+}
+
+    .favorite-book-info .book-title {
+        font-weight: 600;
+    }
+
+    .favorite-book-info .book-author {
+        font-size: 0.75rem;
+        color: #777;
+    }
+
+.favorite-cat {
+    text-align: center;
+    margin-top: 15px;
+}
+
+    .favorite-cat img {
+        max-width: 60px;
+    }
+
+
+.favorite-cat-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -30px;
+    margin-bottom: 10px;
+}
+
+    .favorite-cat-icon img {
+        max-width: 200px;
+    }
+
+.favorite-books h5 {
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #3d2b1f;
+}
+.favorite-book-list {
+    min-height: 200px;
+    padding: 10px 5px;
+}
+
+.star-icon {
+    font-size: 1.1rem;
+    margin-right: 2px;
+}
+
+.star-filled {
+    color: #ffc107; /* Yellow for rated */
+}
+
+.star-empty {
+    color: #adb5bd; /* Gray for unrated */
+}
+
+.rating-value {
+    font-size: 0.9rem;
+    margin-left: 4px;
+}
+
+/* Cat Image Styling */
+.favorite-cat-icon {
+    text-align: center;
+}
+
+    .favorite-cat-icon img {
+        width: 120px;
+        height: auto;
+    }
+
+/*  Favorite Books Box */
+.favorite-books {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+.filled-star {
+    color: #fbc02d;
 }

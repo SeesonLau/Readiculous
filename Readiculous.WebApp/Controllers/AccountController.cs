@@ -238,7 +238,7 @@ namespace Readiculous.WebApp.Controllers
             HttpContext.Session.Clear();
 
             // Redirect to landing page (adjust as needed)
-            return RedirectToAction("LandingScreen", "Home");
+            return RedirectToAction("Login", "Account");
         }
 
         [HttpPost]

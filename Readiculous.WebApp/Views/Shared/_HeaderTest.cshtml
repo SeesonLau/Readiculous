@@ -1,96 +1,69 @@
 ﻿@using Microsoft.AspNetCore.Http
-@using System.Security.Claims
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
-    var userRole = User.FindFirst("UserRole")?.Value; // Use user Identity Claims instead of this
-    var userName = User.FindFirst("UserName")?.Value;
-    var isLoggedIn = !string.IsNullOrEmpty(userRole);
-    var isAdmin = userRole == "Admin";
-    var isReviewer = userRole == "Reviewer";
+    var userName = User.FindFirst("UserName")?.Value ?? "Reviewer";
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
 }
 
 <header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")"
-        style="background-color: var(--color-header); color: var(--color-text);">
-    <div class="logosec hover-pointer" style="display: flex; align-items: center; gap: 10px;">
+        style="background-color: var(--color-header); color: var(--color-text); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+
+    <!-- Left: Logo -->
+    <div class="d-flex align-items-center gap-2">
         <img src="~/img/readiculous-logo.svg"
-             style="width: 40px; height: 40px;" alt="logo"
-             onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">
-        <span style="font-weight: bold; font-size: 1.2rem;"
+             style="width: 40px; height: 40px; cursor: pointer;"
+             alt="logo"
+             onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';" />
+        <span style="font-weight: bold; font-size: 1.2rem; cursor: pointer;"
               onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">Readiculous</span>
     </div>
 
-    <div class="logosec" style="display: flex; align-items: center; gap: 20px;">
-        @* Show links for guest and reviewer *@
-        @if (!isLoggedIn || isReviewer)
-        {
-            <a class="nav-link" href="/Dashboard/ViewNewBooks">New Book</a>
-            <a class="nav-link" href="/Dashboard/ViewTopBooks">Top Book</a>
-            <a class="nav-link" href="/Dashboard/GenreScreen">Genre</a>
-        }
+    <!-- Center: Search -->
+    <div class="flex-grow-1 d-flex justify-content-center">
+        <input type="text"
+               id="headerSearch"
+               class="form-control w-50"
+               placeholder="🔍 Search books..."
+               autocomplete="off" />
+    </div>
+
+    <!-- Right: Links + Profile -->
+    <div class="d-flex align-items-center gap-3">
+        <a class="nav-link" href="/Dashboard/ViewNewBooks">New Book</a>
+        <a class="nav-link" href="/Dashboard/ViewTopBooks">Top Book</a>
+        <a class="nav-link" href="/Dashboard/GenreScreen">Genre</a>
+
 
         @if (isLoggedIn)
         {
-            <span>@userName</span>
-        }
+            <!-- Reviewer Name and Profile Dropdown -->
+            <div class="d-flex align-items-center position-relative gap-2">
+                <span>@userName</span>
+                <img src="~/img/profile-logo.png"
+                     class="dpicn"
+                     alt="dp"
+                     style="width: 40px; height: 40px; cursor: pointer;"
+                     onclick="toggleDropdown()" />
 
-        <div class="mr-20 hover-pointer" style="position: relative">
-            <div class="dp">
-                @if (!isLoggedIn)
-                {
-                    <img src="~/img/profile-logo.png"
-                         class="dpicn hover-pointer"
-                         alt="dp"
-                         data-bs-toggle="modal"
-                         data-bs-target="#loginModal">
-                }
-                else
-                {
-                    <img src="~/img/profile-logo.png"
-                         class="dpicn hover-pointer"
-                         alt="dp"
-                         onclick="toggleDropdown()">
-                }
-            </div>
-
-            @if (isLoggedIn)
-            {
-                <div id="userDropdown" class="dropdown" style="background-color: var(--color-modal); display: none;">
-                    <ul>
-                        @if (isReviewer)
-                        {
-                            <li>
-                                <i class="fa-solid fa-gear"></i>
-                                <a class="open-edit-profile">Edit Profile</a>
-                            </li>
-                            <li>
-                                <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
-                                    <button type="submit" style="border: none; background: none; padding: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
-                                        <i class="fa-solid fa-right-from-bracket"></i>
-                                        <span>Logout</span>
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                        else if (isAdmin)
-                        {
-                            <li><i class="fa-solid fa-users"></i><a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a></li>
-                            <li><i class="fa-solid fa-book"></i><a asp-controller="BookMaster" asp-action="BookMasterScreen">Book Master</a></li>
-                            <li><i class="fa-solid fa-list"></i><a asp-controller="GenreMaster" asp-action="GenreMasterScreen">Genre Master</a></li>
-                            <li><i class="fa-solid fa-users"></i><a asp-controller="User" asp-action="Index">User</a></li>
-                            <li><i class="fa-solid fa-book"></i><a asp-controller="Book" asp-action="Index">Book</a></li>
-                            <li>
-                                <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
-                                    <button type="submit" class="dropdown-item" style="border: none; background: none; padding: 0;">
-                                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                    </ul>
+                <div id="userDropdown" class="dropdown-menu dropdown-menu-end mt-2"
+                     style="display: none; position: absolute; right: 0; background: var(--color-modal); border: 1px solid #ccc; padding: 10px; border-radius: 6px;">
+                    <div class="dropdown-item">
+                        <i class="fa-solid fa-user-edit me-2"></i>
+                        <a class="open-edit-profile" style="cursor: pointer;">Edit Profile</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
+                            <button type="submit"
+                                    style="border: none; background: none; padding: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 </header>
 
@@ -100,8 +73,11 @@
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
 
-    function openLoginModal() {
-        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-        loginModal.show();
-    }
+    document.addEventListener("click", function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const trigger = document.querySelector('.dpicn');
+        if (dropdown && trigger && !dropdown.contains(event.target) && event.target !== trigger) {
+            dropdown.style.display = 'none';
+        }
+    });
 </script>

@@ -20,6 +20,8 @@ namespace Readiculous.Services.ServiceModels
         public bool IsReviewed { get; set; }
         public string CreatedByUserName { get; set; }
         public DateTime CreatedTime { get; set; }
+
+        public int TotalReviews { get; set; }
         public string UpdatedByUserName { get; set; }
         public DateTime UpdatedTime { get; set; }
     }
