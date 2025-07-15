@@ -70,6 +70,7 @@ namespace Readiculous.WebApp
                     .ForMember(dest => dest.Description,
                                opt => opt.MapFrom(src => src.Description.Trim()));
                 CreateMap<Genre, GenreViewModel>();
+                CreateMap<GenreListItemViewModel, GenreViewModel>();
 
                 // Book Mappings
                 CreateMap<Book, BookDetailsViewModel>()

@@ -76,10 +76,11 @@ namespace Readiculous.Data.Repositories
         public IQueryable<Genre> GetGenresByName(string genreName)
         {
             var data = this.GetDbSet<Genre>()
+                .Where(g => g.DeletedTime == null &&
+                            g.Name.ToLower().Contains(genreName.ToLower()))
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
-                .Where(g => g.DeletedTime == null &&
-                            g.Name.ToLower().Contains(genreName.ToLower()));
+                .AsNoTracking();
 
             return data;
         }
@@ -135,7 +136,7 @@ namespace Readiculous.Data.Repositories
             return data;
         }
 
-        public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookId(List<string> bookIds)
+        public IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookIds(List<string> bookIds)
         {
             var data = this.GetDbSet<BookGenreAssignment>()
                 .Where(bga => bga.Book.DeletedTime == null &&
@@ -173,6 +174,25 @@ namespace Readiculous.Data.Repositories
                 .OrderByDescending(g => g.Count)
                 .Take(numberOfGenres)
                 .ToDictionary(g => g.Genre, g => g.Count);
+        }
+
+        public List<string> GetTopGenresFromBookIds(List<string> bookIds)
+        {
+            var genreFrequencies = this.GetDbSet<BookGenreAssignment>()
+                .Where(bga => bookIds.Contains(bga.BookId) && bga.Genre.DeletedTime == null)
+                .Select(bga => bga.Genre.Name)
+                .GroupBy(name => name)
+                .Select(group => new { Genre = group.Key, Count = group.Count() })
+                .ToList();
+
+            int maxCount = genreFrequencies.Any() ? genreFrequencies.Max(g => g.Count) : 0;
+
+            var topGenres = genreFrequencies
+                .Where(g => g.Count == maxCount)
+                .Select(g => g.Genre)
+                .ToList();
+
+            return topGenres;
         }
     }
 }
