@@ -140,5 +140,19 @@ namespace Readiculous.Data.Repositories
                 .FirstOrDefault(u => u.DeletedTime == null &&
                                      u.Email.ToLower() == email.ToLower());
         }
+        
+        public int GetActiveUserCount()
+        {
+            return this.GetDbSet<User>()
+                .Count(u => u.DeletedTime != null);
+        }
+        public IQueryable<User> GetTopReviewers(int numberOfUsers)
+        {
+            return this.GetDbSet<User>()
+                .Where(u => u.DeletedTime == null)
+                .OrderBy(u => u.UserReviews.Count())
+                .Take(numberOfUsers)
+                .AsNoTracking();
+        }
     }
 }
