@@ -1,0 +1,29 @@
+@model Readiculous.WebApp.Models.LoginViewModel
+@using static Readiculous.Resources.Views.Screen
+<form method="post" action="/Account/Login" id="loginForm">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label" for="emailInput">@Email</label>
+        <input type="text" id="emailInput" class="form-control" asp-for="Email" placeholder="Enter email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="passwordInput">@Password</label>
+        <input type="password" id="passwordInput" class="form-control" asp-for="Password" placeholder="Enter password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div style="display: flex; justify-content: center;">
+        <button class="btn login-btn" type="submit">@Login</button>
+    </div>
+    <div style="display: flex; justify-content: center; margin-top: 1.2rem;">
+        <a href="#" class="login-link" id="show-forgot">@ForgotPass</a>
+    </div>
+    <div style="display: flex; justify-content: center; align-items: center; margin: 1.2rem 0;">
+        <div style="flex: 1; height: 1px; background: #fff; opacity: 0.5;"></div>
+        <span style="margin: 0 12px; color: #fff; opacity: 0.7;">or</span>
+        <div style="flex: 1; height: 1px; background: #fff; opacity: 0.5;"></div>
+    </div>
+    <div style="display: flex; justify-content: center;">
+        <a href="#" class="login-link" id="show-signup" style="font-weight: bold;">Sign Up</a>
+    </div>
+</form> 

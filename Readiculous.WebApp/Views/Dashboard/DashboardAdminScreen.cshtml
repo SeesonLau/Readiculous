@@ -1,0 +1,81 @@
+@model Readiculous.WebApp.Models.DashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<main class="container py-4" style="background: #ffebee; border: 4px solid #b71c1c;">
+    <!-- New Books Section -->
+    <section class="mb-5">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0" style="color: #b71c1c; background: #ffcdd2; padding: 0.5rem 1.5rem; border-radius: 8px; border: 2px solid #b71c1c;">NEW BOOKS (ADMIN)</h2>
+        </div>
+        <div class="section-box p-3" style="background: #ffcdd2; border: 3px solid #b71c1c;">
+            <div class="row g-4 justify-content-center">
+                @if (Model.NewBooks != null && Model.NewBooks.Any())
+                {
+                    foreach (var book in Model.NewBooks)
+                    {
+                        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                            <div class="book-card h-100 text-center" style="border: 2.5px solid #b71c1c; background: #ffebee;">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                     class="book-image mb-3"
+                                     alt="@book.Title" style="border: 2px solid #b71c1c; background: #ffcdd2;" />
+                                <h6 class="book-title mb-1" style="color: #b71c1c; font-weight: bold;">@book.Title</h6>
+                                <p class="book-author mb-1 small" style="color: #d32f2f;">@book.Author, @book.PublicationYear</p>
+                                <p class="book-rating mb-0" style="color: #d32f2f; font-size: 1.2rem; font-weight: bold;">⭐ @book.AverageRating</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center" style="color: #b71c1c; font-weight: bold;">No new books available.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Books Section -->
+    <section class="mb-5">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0" style="color: #b71c1c; background: #ffcdd2; padding: 0.5rem 1.5rem; border-radius: 8px; border: 2px solid #b71c1c;">TOP BOOKS (ADMIN)</h2>
+        </div>
+        <div class="section-box p-4" style="background: #ffcdd2; border: 3px solid #b71c1c;">
+            <div class="row g-4 justify-content-center">
+                @if (Model.TopBooks != null && Model.TopBooks.Any())
+                {
+                    foreach (var book in Model.TopBooks)
+                    {
+                        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                            <div class="book-card h-100 text-center" style="border: 2.5px solid #b71c1c; background: #ffebee;">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                     class="book-image mb-3"
+                                     alt="@book.Title" style="border: 2px solid #b71c1c; background: #ffcdd2;" />
+                                <h6 class="book-title mb-1" style="color: #b71c1c; font-weight: bold;">@book.Title</h6>
+                                <p class="book-author mb-1 small" style="color: #d32f2f;">@book.Author, @book.PublicationYear</p>
+                                <p class="book-rating mb-0" style="color: #d32f2f; font-size: 1.2rem; font-weight: bold;">⭐ @book.AverageRating</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center" style="color: #b71c1c; font-weight: bold;">No top-rated books available.</p>
+                }
+            </div>
+        </div>
+    </section>
+</main>
+
+@section Styles {
+    <style>
+        .section-title { color: #b71c1c !important; background: #ffcdd2 !important; border-color: #b71c1c !important; }
+        .section-box { background: #ffcdd2 !important; border-color: #b71c1c !important; }
+        .book-card { border-color: #b71c1c !important; background: #ffebee !important; }
+        .book-title { color: #b71c1c !important; font-weight: bold !important; }
+        .book-rating { color: #d32f2f !important; font-weight: bold !important; }
+        main.container { background: #ffebee !important; border: 4px solid #b71c1c !important; }
+    </style>
+} 
