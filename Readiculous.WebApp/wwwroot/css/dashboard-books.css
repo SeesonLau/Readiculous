@@ -1,0 +1,73 @@
+﻿body {
+    background-color: #f6f1f4;
+}
+
+.section-title {
+    font-weight: bold;
+    color: #3d2c40;
+    border-bottom: 2px solid #b089a5;
+    display: inline-block;
+    padding-bottom: 6px;
+}
+
+.book-wrapper {
+    background-color: #fff;
+    border: 1px solid #ecd6e0;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.book-card {
+    border: 1px solid #ecd6e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .book-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+.book-image {
+    height: 220px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #3d2c40;
+}
+
+.card-author {
+    font-size: 0.85rem;
+}
+
+.pagination .page-link {
+    color: #b089a5;
+    border: 1px solid #ecd6e0;
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #b089a5;
+    color: white;
+    border: none;
+}
+
+.pagination .page-link:hover {
+    background-color: #edaec0;
+    color: white;
+}
+
+#searchResultsNewBook {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+    #searchResultsNewBook .list-group-item {
+        padding: 8px 12px;
+    }

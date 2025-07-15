@@ -36,3 +36,10 @@
         flex-grow: 1;
         overflow-y: auto;
     }
+.section-title {
+    font-weight: bold;
+    color: #3d2c40;
+    border-bottom: 2px solid #b089a5;
+    display: inline-block;
+    padding-bottom: 6px;
+}
