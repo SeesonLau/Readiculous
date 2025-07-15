@@ -24,5 +24,6 @@ namespace Readiculous.Services.Interfaces
         void RemoveBookFromFavorites(string bookId, string userId);
 
         string GetTitleByBookId(string bookId);
+        
     }
 }
