@@ -121,10 +121,13 @@ namespace Readiculous.Data.Repositories
         public User GetUserWithNavigationPropertiesById(string id)
         {
             return this.GetDbSet<User>()
+                .Where(u => u.DeletedTime == null &&
+                            u.UserId == id)
+                .Include(u => u.UserFavoriteBooks)
+                .Include(u => u.UserReviews)
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
-                .FirstOrDefault(u => u.DeletedTime == null &&
-                                     u.UserId == id);
+                .FirstOrDefault();
         }
         public User GetUserByEmailAndPassword(string email, string password)
         {
@@ -139,6 +142,20 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<User>()
                 .FirstOrDefault(u => u.DeletedTime == null &&
                                      u.Email.ToLower() == email.ToLower());
+        }
+        
+        public int GetActiveUserCount()
+        {
+            return this.GetDbSet<User>()
+                .Count(u => u.DeletedTime == null);
+        }
+        public IQueryable<User> GetTopReviewers(int numberOfUsers)
+        {
+            return this.GetDbSet<User>()
+                .Where(u => u.DeletedTime == null)
+                .OrderBy(u => u.UserReviews.Count())
+                .Take(numberOfUsers)
+                .AsNoTracking();
         }
     }
 }

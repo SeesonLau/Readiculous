@@ -71,8 +71,11 @@ namespace Readiculous.Data.Interfaces
         /// <returns></returns>
         Genre GetGenreById(string id);
         Genre GetGenreWithBooksPropertiesById(string id);
-        IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookId(List<string> bookIds);
+        IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByBookIds(List<string> bookIds);
         IQueryable<BookGenreAssignment> GetAllGenreAssignmentsByGenreIds(List<string> genreIds);
 
-	}
+        int GetActiveGenreCount();
+        Dictionary<Genre, int> GetMostUsedGenresWithCount(int numberOfGenres);
+        List<string> GetTopGenresFromBookIds(List<string> bookIds);
+    }
 }

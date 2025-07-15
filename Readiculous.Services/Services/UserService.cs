@@ -309,7 +309,26 @@ namespace Readiculous.Services.Services
         public UserDetailsViewModel GetUserDetailsById(string userId)
         {
             User user = _userRepository.GetUserWithNavigationPropertiesById(userId);
+            if (user == null)
+                throw new KeyNotFoundException("User not found");
 
+            UserDetailsViewModel userDetails = new();
+            _mapper.Map(user, userDetails);
+
+            userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(user.UserFavoriteBooks);
+            userDetails.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(user.UserReviews);
+
+            var bookIds = userDetails.FavoriteBookModels
+                .Select(x => x.BookId)
+                .ToList();
+            userDetails.TopGenres = _genreRepository.GetTopGenresFromBookIds(bookIds);
+
+            userDetails.AverageRating = userDetails.UserReviewModels.Count > 0
+                ? Math.Round(userDetails.UserReviewModels.Average(r => r.Rating), 2)
+                : 0;
+
+            return userDetails;
+            /*
             if (user != null)
             {
                 UserDetailsViewModel userViewModel = new();
@@ -321,7 +340,7 @@ namespace Readiculous.Services.Services
                 var bookIds = favoriteBooks
                     .Select(fb => fb.BookId)
                     .ToList();
-                var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+                var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
                 var favoriteBookMapModels = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
                 foreach(var model in favoriteBookMapModels)
                 {
@@ -365,6 +384,7 @@ namespace Readiculous.Services.Services
             {
                 throw new KeyNotFoundException(Errors.UserNotFound);
             }
+            */
         }
         public User GetUserById(string userId)
         {
