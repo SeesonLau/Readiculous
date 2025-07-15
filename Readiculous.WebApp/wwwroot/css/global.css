@@ -83,10 +83,10 @@ body {
 /* ================ */
 /* Scrollbar Styles (from layout.cshtml) */
 /* ================ */
-/* Enhanced scrollbar styling */
+
 ::-webkit-scrollbar {
-    width: 12px; /* Slightly wider scrollbar */
-    height: 12px;
+    width: 6px; 
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -105,12 +105,6 @@ body {
         border: 2px solid var(--color-background);
     }
 
-/* For Firefox */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-header) transparent;
-    scrollbar-gutter: stable; /* Prevents content shift when scrollbar appears */
-}
 
 /* ================ */
 /* Layout & Structure */
