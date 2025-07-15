@@ -4,81 +4,96 @@
     Layout = "_Layout";
     ViewData["Title"] = "Top Books";
 
-    var validBooks = Model?
-        .Where(b => !string.IsNullOrWhiteSpace(b.Title))
-        .OrderByDescending(b => b.AverageRating)
-        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+    string keyword = ViewBag.Keyword as string ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
 }
 
-<section class="container py-4">
-    <!-- ✅ Matching header style -->
-    <div class="section-header d-flex justify-content-between align-items-center mb-4">
-        <h2 class="section-title section-title-border mb-0">TOP BOOKS</h2>
+<div class="container py-4">
+    <!-- Search and Back -->
+    <div class="row mb-4 justify-content-between align-items-end">
+        <div class="col-md-9">
+            <label for="searchTopBooks" class="form-label">Search Books</label>
+            <form method="get" asp-action="ViewTopBooks" asp-controller="Dashboard" class="d-flex">
+                <input type="text" id="searchTopBooks" name="keyword" value="@keyword" class="form-control me-2" placeholder="🔍 Search books..." />
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        <div class="col-md-3 text-end mt-3 mt-md-0">
+            <a href="@Url.Action("DashboardScreen", "Dashboard")" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
     </div>
 
-    @if (validBooks.Any())
-    {
-        <div class="book-wrapper p-4 mb-4">
+    <!-- Book Section -->
+    <div class="section-box p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">TOP BOOKS</h2>
+        </div>
+
+        @if (Model.Any())
+        {
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-                @foreach (var book in validBooks)
+                @foreach (var book in Model)
                 {
                     var filledStars = (int)Math.Floor((double)book.AverageRating);
                     bool hasReview = book.AverageRating > 0;
 
                     <div class="col">
                         <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none text-reset">
-                            <div class="card book-card h-100 text-center">
-                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)" class="card-img-top book-image" alt="@book.Title" />
-                                <div class="card-body">
-                                    <h6 class="card-title">@book.Title</h6>
-                                    <p class="card-author small text-muted">@book.Author</p>
-                                    <div class="card-rating mb-1">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <span class="star @(i <= filledStars && hasReview ? "filled-star" : "empty-star")">&#9733;</span>
-                                        }
-                                        <span class="rating-value @(hasReview ? "text-warning" : "text-secondary")">
-                                            @book.AverageRating.ToString("0.0")
-                                        </span>
-                                    </div>
-                                    <div class="review-count small text-muted">
-                                        (@book.TotalReviews reviews)
-                                    </div>
+                            <div class="book-card h-100 text-center">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                     class="book-image mb-3 img-fluid"
+                                     alt="@book.Title"
+                                     style="height: 220px; object-fit: contain;" />
+                                <h6 class="book-title mb-1">@book.Title</h6>
+                                <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                <div class="book-rating mb-0">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="star-icon @(i <= filledStars && hasReview ? "star-filled" : "star-empty")">☆</span>
+                                    }
+                                    <span class="rating-value d-block @(hasReview ? "text-warning" : "text-secondary")">
+                                        (@book.AverageRating.ToString("0.0"))
+                                    </span>
+                                    <span class="review-count small text-muted d-block">
+                                        (@(book.TotalReviews) review@(book.TotalReviews == 1 ? "" : "s"))
+                                    </span>
                                 </div>
                             </div>
                         </a>
                     </div>
                 }
             </div>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-warning text-center">No top books found.</div>
-    }
-
-    <!-- JSON for search -->
-    <input type="hidden" id="booksJsonTopBooks" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-        validBooks.Select(b => new {
-            id = b.BookId,
-            title = b.Title.Trim(),
-            cover = string.IsNullOrEmpty(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
-        })
-    ))' />
+        }
+        else
+        {
+            <div class="alert alert-warning text-center mt-3">No top books found.</div>
+        }
+    </div>
 
     <!-- Pagination -->
-    <div class="mt-5 d-flex justify-content-center">
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-rounded">
-                <li class="page-item disabled"><a class="page-link" href="#">«</a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">»</a></li>
-            </ul>
-        </nav>
-    </div>
-</section>
+    @if (totalPages > 1)
+    {
+        <div class="mt-5 d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-rounded">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("ViewTopBooks", new { keyword = keyword, page = currentPage - 1 })">«</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("ViewTopBooks", new { keyword = keyword, page = i })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("ViewTopBooks", new { keyword = keyword, page = currentPage + 1 })">»</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
 
 @section Styles {
     <link rel="stylesheet" href="~/css/dashboard-screen.css" asp-append-version="true" />

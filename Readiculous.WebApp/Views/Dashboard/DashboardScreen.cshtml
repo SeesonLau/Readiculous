@@ -1,4 +1,4 @@
-﻿@model Readiculous.WebApp.Models.DashboardViewModel
+﻿@model Readiculous.Services.ServiceModels.UserDashboardViewModel
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -11,30 +11,47 @@
     var sortedTopBooks = Model.TopBooks?
         .OrderByDescending(b => b.AverageRating)
         .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+
+    string keyword = ViewBag.Keyword as string ?? "";
 }
 
 <div class="container py-4">
-    <div class="row">
-        <!-- Main Content -->
+    <!-- Search Bar (Matches ViewNewBooks style) -->
+    <div class="row mb-4 align-items-end">
         <div class="col-lg-9">
-            <section class="mb-5">
-                <div class="section-header d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="section-title mb-0">NEW BOOKS</h2>
-                    <a class="view-more-link"
-                       href="@Url.Action("ViewNewBooks", "Dashboard")">View More</a>
-                </div>
+            <label for="searchDashboard" class="form-label">Search Books</label>
+            <form method="get" asp-action="ViewNewBooks" asp-controller="Dashboard" class="d-flex">
+                <input type="text"
+                       id="searchDashboard"
+                       name="keyword"
+                       value="@keyword"
+                       class="form-control me-2"
+                       placeholder="🔍 Search books..." />
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
 
-                <div class="section-box p-3">
-                    <div class="row g-4 justify-content-center">
+    <!-- NEW BOOKS + FAVORITE BOOKS -->
+    <div class="row mb-5">
+        <!-- NEW BOOKS -->
+        <div class="col-lg-9">
+            <section class="h-100">
+                <div class="section-box p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="section-title mb-0">NEW BOOKS</h2>
+                        <a class="view-more-link" href="@Url.Action("ViewNewBooks", "Dashboard")">View More</a>
+                    </div>
+                    <div class="row row-cols-5 g-4">
                         @if (sortedNewBooks.Any())
                         {
-                            foreach (var book in sortedNewBooks)
+                            foreach (var book in sortedNewBooks.Take(5))
                             {
-                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                <div class="col">
                                     <div class="book-card h-100 text-center">
                                         <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
                                             <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
-                                                 class="book-image mb-3" alt="@book.Title" />
+                                                 class="book-image mb-3 img-fluid" alt="@book.Title" style="height: 220px; object-fit: contain;" />
                                             <h6 class="book-title mb-1">@book.Title</h6>
                                             <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
                                             <div class="book-rating mb-0">
@@ -65,24 +82,60 @@
                     </div>
                 </div>
             </section>
+        </div>
 
-            <section class="mb-5">
-                <div class="section-header d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="section-title mb-0">TOP BOOKS</h2>
-                    <a class="view-more-link" href="@Url.Action("ViewTopBooks", "Dashboard")">View More</a>
+        <!-- FAVORITE BOOKS -->
+        <div class="col-lg-3">
+            <section class="h-100">
+                <div class="section-box p-3 h-100 d-flex flex-column">
+                    <div class="favorite-cat-icon text-center mb-3 mt-2">
+                        <img src="~/img/cats.png" alt="Cat Icon" style="max-width: 80%; height: auto; margin-top: 10px;" />
+                    </div>
+                    <h5 class="text-center mb-3">Your Favorite Books</h5>
+                    <div class="favorite-book-list w-100 flex-grow-1">
+                        @if (Model.FavoriteBooks != null && Model.FavoriteBooks.Any())
+                        {
+                            <ul class="list-unstyled">
+                                @foreach (var book in Model.FavoriteBooks)
+                                {
+                                    <li class="mb-2">
+                                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })"
+                                           class="text-decoration-none small">
+                                            @book.Title
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-center text-muted mt-3">You have no favorite books yet.</p>
+                        }
+                    </div>
                 </div>
+            </section>
+        </div>
+    </div>
 
+    <!-- TOP BOOKS -->
+    <div class="row mb-5">
+        <div class="col-lg-9">
+            <section>
                 <div class="section-box p-4">
-                    <div class="row g-4 justify-content-center">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="section-title mb-0">TOP BOOKS</h2>
+                        <a class="view-more-link" href="@Url.Action("ViewTopBooks", "Dashboard")">View More</a>
+                    </div>
+                    <div class="row row-cols-5 g-4">
                         @if (sortedTopBooks.Any())
                         {
-                            foreach (var book in sortedTopBooks)
+                            foreach (var book in sortedTopBooks.Take(5))
                             {
-                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                <div class="col">
                                     <div class="book-card h-100 text-center">
                                         <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
                                             <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
-                                                 class="book-image mb-3" alt="@book.Title" />
+                                                 class="book-image mb-3 img-fluid" alt="@book.Title" style="height: 220px; object-fit: contain;" />
                                             <h6 class="book-title mb-1">@book.Title</h6>
                                             <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
                                             <div class="book-rating mb-0">
@@ -114,18 +167,8 @@
                 </div>
             </section>
         </div>
-
-        <!-- Right Sidebar -->
         <div class="col-lg-3">
-            <div class="favorite-cat-icon text-center">
-                <img src="~/img/cats.png" alt="Cat Icon" />
-            </div>
-            <div class="favorite-books position-relative p-3 bg-white border">
-                <h5 class="text-center mt-2 mb-3">Your Favorite Books</h5>
-                <div class="favorite-book-list">
-                    <p class="text-center text-muted">You have no favorite books yet.</p>
-                </div>
-            </div>
+            <!-- Empty column for alignment -->
         </div>
     </div>
 </div>

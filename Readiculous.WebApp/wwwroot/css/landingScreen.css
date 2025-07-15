@@ -1,15 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
 :root {
     --color-text: #2C2133;
     --color-header: #B089A5;
     --color-btn: #EDAEC0;
     --color-modal: #F8ECE9;
     --color-background: #E1DACD;
-    --font-primary: 'Gentium Book Plus', serif;
+    --font-primary: 'Noto Sans', sans-serif;
+    --font-secondary: 'Roboto Slab', serif;
 }
 html, body {
     height: 100%;
     margin: 0;
-    font-family: var(--font-primary);
     background: var(--color-background) !important;
     overflow: hidden;
 }
@@ -63,6 +64,7 @@ html, body {
     margin-bottom: 10px;
     color: #fff;
     text-align: center;
+    font-family: var(--font-secondary) !important;
 }
 .hero-desc {
     font-size: 1.12rem;
@@ -70,6 +72,7 @@ html, body {
     margin-bottom: 0;
     text-align: center;
     max-width: 520px;
+    font-family: var(--font-primary);
 }
 .brand-logo {
     width: 60px;
@@ -143,15 +146,15 @@ html, body {
     font-weight: bold;
     color: #b089a5;
     letter-spacing: 1px;
+    font-family: var(--font-secondary);
 }
 .welcome-subtitle {
     font-size: 1.3rem;
     color: #2c2133;
     margin-top: 0.1rem;
+    font-family: var(--font-primary);
 }
-.login-link, .login-btn, .form-label, .form-control, .welcome-title, .welcome-subtitle, .hero-title, .hero-desc {
-    font-family: var(--font-primary) !important;
-} 
+
 /* Responsive Breakpoints */
 @media (max-width: 1200px) {
     .split-container {
@@ -272,4 +275,25 @@ html, body {
     .welcome-subtitle {
         font-size: 0.9rem;
     }
-} 
+}
+
+.center-viewport {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.split-container {
+    display: flex;
+    flex-direction: row;
+    max-width: 1300px;
+    width: 100%;
+    margin: auto;
+    box-shadow: 0 4px 24px rgba(44,33,51,0.10);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    padding: 0;
+}

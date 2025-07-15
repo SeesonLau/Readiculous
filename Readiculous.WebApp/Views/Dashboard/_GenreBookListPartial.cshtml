@@ -1,0 +1,41 @@
+﻿@model List<Readiculous.Services.ServiceModels.BookListItemViewModel>
+
+@if (Model.Any())
+{
+    <div class="section-box p-4 mb-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+            @foreach (var book in Model)
+            {
+                <div class="col">
+                    <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })"
+                       class="text-decoration-none text-reset">
+                        <div class="book-card h-100 text-center">
+                            <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                 class="book-image mb-3 img-fluid"
+                                 style="height: 220px; object-fit: contain;" />
+                            <h6 class="book-title mb-1">@book.Title</h6>
+                            <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                            <div class="book-rating mb-0">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    var filled = i <= (int)Math.Floor(book.AverageRating);
+                                    <span class="star-icon @(filled ? "star-filled" : "star-empty")">☆</span>
+                                }
+                                <span class="rating-value d-block text-warning">
+                                    (@book.AverageRating.ToString("0.0"))
+                                </span>
+                                <span class="review-count small text-muted d-block">
+                                    (@book.TotalReviews review@(book.TotalReviews == 1 ? "" : "s"))
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning text-center mt-3">No books found for selected genres.</div>
+}

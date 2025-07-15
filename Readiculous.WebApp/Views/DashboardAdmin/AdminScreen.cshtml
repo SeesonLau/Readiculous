@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Readiculous.Services.ServiceModels.AdminDashboardViewModel;
+
+@{
     ViewData["Title"] = "Dashboard";
 }
 
@@ -9,19 +11,19 @@
         <div class="col-12 col-sm-4 mb-4">
             <div class="summary-card">
                 <h5>Total Users</h5>
-                <h2>120</h2>
+                <h2>@Model.UserCount</h2>
             </div>
         </div>
         <div class="col-12 col-sm-4 mb-4">
             <div class="summary-card">
                 <h5>Total Books</h5>
-                <h2>350</h2>
+                <h2>@Model.BookCount</h2>
             </div>
         </div>
         <div class="col-12 col-sm-4 mb-4">
             <div class="summary-card">
                 <h5>Total Genres</h5>
-                <h2>28</h2>
+                <h2>@Model.GenreCount</h2>
             </div>
         </div>
     </div>
@@ -31,54 +33,32 @@
         <!-- Most Used Genre -->
         <div class="col-12 col-lg-8 mb-4 mb-lg-0">
             <div class="chart-container h-100">
-                <h5 class="section-title">Most Used Genre</h5>
+                <h5 class="section-title">Most Used Genres</h5>
                 <div class="bar-chart">
-                    <!-- Dummy data for genres -->
-                    <div class="bar-item">
-                        <div class="bar-label">
-                            <span>Fantasy</span>
-                            <span>142</span>
-                        </div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: 95%"></div>
-                        </div>
-                    </div>
-                    <div class="bar-item">
-                        <div class="bar-label">
-                            <span>Science Fiction</span>
-                            <span>118</span>
-                        </div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: 80%"></div>
-                        </div>
-                    </div>
-                    <div class="bar-item">
-                        <div class="bar-label">
-                            <span>Mystery</span>
-                            <span>92</span>
-                        </div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: 65%"></div>
-                        </div>
-                    </div>
-                    <div class="bar-item">
-                        <div class="bar-label">
-                            <span>Romance</span>
-                            <span>75</span>
-                        </div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: 50%"></div>
-                        </div>
-                    </div>
-                    <div class="bar-item">
-                        <div class="bar-label">
-                            <span>Historical Fiction</span>
-                            <span>58</span>
-                        </div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: 40%"></div>
-                        </div>
-                    </div>
+                    @if (Model.MostUsedGenres != null && Model.MostUsedGenres.Any())
+                    {
+                        // Get the maximum count for percentage calculation
+                        var maxCount = Model.MostUsedGenres.Max(g => g.Value);
+
+                        foreach (var genre in Model.MostUsedGenres)
+                        {
+                            var percentage = maxCount > 0 ? (genre.Value * 100) / maxCount : 0;
+
+                            <div class="bar-item">
+                                <div class="bar-label">
+                                    <span>@genre.Key.Name</span>
+                                    <span>@genre.Value</span>
+                                </div>
+                                <div class="bar-bg">
+                                    <div class="bar-fill" style="width: @percentage%"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">No genre data available</div>
+                    }
                 </div>
             </div>
         </div>
@@ -152,3 +132,50 @@
         </div>
     </div>
 </div>
+
+@* 
+<!-- Top 5 Reviewers -->
+<div class="col-12 col-lg-4">
+    <div class="reviewer-container h-100">
+        <h5 class="section-title text-center">Top 5 Reviewers</h5>
+        <!-- Reviewer cards -->
+        @if (Model.TopReviewers != null && Model.TopReviewers.Any())
+        {
+            var rank = 1;
+            foreach (var reviewer in Model.TopReviewers)
+            {
+                <div class="reviewer-card d-flex align-items-center">
+                    <div class="rank-number">@rank</div>
+                    <div class="user-avatar">@GetInitials(reviewer.DisplayName)</div>
+                    <div class="flex-grow-1">
+                        <div>@reviewer.DisplayName</div>
+                        <div class="d-flex align-items-center gap-2 small">
+                            <span><i class="bi bi-star-fill text-warning"></i> @reviewer.AverageRating.ToString("0.0")</span>
+                            <span>|</span>
+                            <span>@reviewer.TotalReviews Reviews</span>
+                        </div>
+                    </div>
+                </div>
+                rank++;
+            }
+        }
+        else
+        {
+            <div class="text-center py-3">No reviewers found</div>
+        }
+    </div>
+</div>
+
+@functions {
+    string GetInitials(string displayName)
+    {
+        if (string.IsNullOrEmpty(displayName))
+            return "NA";
+
+        var names = displayName.Split(' ');
+        if (names.Length == 1)
+            return names[0].Length >= 2 ? names[0].Substring(0, 2).ToUpper() : names[0].ToUpper();
+
+        return $"{names[0][0]}{names[1][0]}".ToUpper();
+    }
+} *@

@@ -5,70 +5,111 @@
     Layout = "_Layout";
     ViewData["Title"] = "Genres";
     ViewBag.ShowReviewerNav = true;
+
     var allGenres = ViewBag.AllGenres as List<string> ?? new List<string>();
     var selectedGenres = ViewBag.SelectedGenres as List<string> ?? new List<string>();
-    var sortOptions = ViewBag.SortOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
-    var title = selectedGenres.Count == 1 ? $"{selectedGenres[0]} Books" :
-                 selectedGenres.Count > 1 ? string.Join(", ", selectedGenres) + " Books" : "All Books";
+
+    var title = selectedGenres.Count == 1
+        ? selectedGenres[0].ToUpper()
+        : selectedGenres.Count > 1
+            ? string.Join(", ", selectedGenres).ToUpper()
+            : "";
 }
 
-<section class="container py-4 genre-main-container">
-    <div class="section-header d-flex justify-content-between align-items-center mb-4">
-        <h2 class="section-title section-title-border mb-0">Explore by Genre</h2>
-    </div>
+<div class="container py-4">
 
-    <form id="genreForm">
-        <input type="hidden" name="selectedGenres" id="selectedGenresInput" value="@string.Join(",", selectedGenres)" />
-
-        <div class="border rounded p-3 bg-light shadow-sm mb-4">
-            <div class="row align-items-center">
-                <!-- Genres Dropdown -->
-                <div class="col-md-6">
-                    <label class="fw-bold mb-2">Genres</label>
-                    <div class="position-relative">
-                        <button type="button" class="form-select" id="genreToggle">Select genres…</button>
-                        <div class="dropdown-menu p-3 mt-1 w-100" id="genreMenu">
-                            <div class="row">
-                                @foreach (var genre in allGenres)
-                                {
-                                    var isChecked = selectedGenres.Contains(genre);
-                                    <div class="col-6 col-sm-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input genre-checkbox" type="checkbox"
-                                                   id="chk_@genre" value="@genre" @(isChecked ? "checked" : "") />
-                                            <label class="form-check-label" for="chk_@genre">@genre</label>
-                                        </div>
+    <!-- Header: Dropdown + Back -->
+    <div class="d-flex justify-content-between flex-wrap align-items-end mb-4">
+        <!-- Genre Dropdown -->
+        <div class="me-3" style="flex-grow: 1; max-width: 400px;">
+            <form id="genreForm">
+                <input type="hidden" name="selectedGenres" id="selectedGenresInput" value="@string.Join(",", selectedGenres)" />
+                <label class="fw-bold mb-2">Explore by Genre</label>
+                <div class="position-relative">
+                    <button type="button" class="form-select" id="genreToggle">Select Genres…</button>
+                    <div class="dropdown-menu p-3 mt-1 w-100" id="genreMenu">
+                        <div class="row">
+                            @foreach (var genre in allGenres)
+                            {
+                                var isChecked = selectedGenres.Contains(genre);
+                                <div class="col-6 col-sm-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input genre-checkbox" type="checkbox"
+                                               id="chk_@genre" value="@genre" @(isChecked ? "checked" : "") />
+                                        <label class="form-check-label" for="chk_@genre">@genre</label>
                                     </div>
-                                }
-                            </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
+            </form>
+        </div>
 
-                <!-- Sort Dropdown -->
-                <div class="col-md-4">
-                    <label class="fw-bold mb-2">Sort By</label>
-                    <select class="form-select" id="sortTypeSelect" name="sortType">
-                        @foreach (var opt in sortOptions)
-                        {
-                            <option value=@(opt.Selected ? "selected" : "")>@opt.Text</option>
-                        }
-                    </select>
-                </div>
+        <!-- Back to Dashboard Button -->
+        <div class="mt-4 mt-md-0">
+            <a href="@Url.Action("DashboardScreen", "Dashboard")" class="btn btn-outline-secondary">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Genre Title -->
+    @if (!string.IsNullOrEmpty(title))
+    {
+        <div class="text-center mt-2 mb-4">
+            <h4 class="display-title-highlight genre-title-bordered stroke-text">@title</h4>
+        </div>
+    }
+
+    <!-- Book Grid -->
+    @if (Model.Any())
+    {
+        <div class="section-box p-4 mb-4">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+                @foreach (var book in Model)
+                {
+                    var filledStars = (int)Math.Floor((double)book.AverageRating);
+                    bool hasReview = book.AverageRating > 0;
+
+                    <div class="col">
+                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })"
+                           class="text-decoration-none text-reset">
+                            <div class="book-card h-100 text-center">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                     class="book-image mb-3 img-fluid"
+                                     alt="@book.Title"
+                                     style="height: 220px; object-fit: contain;" />
+                                <h6 class="book-title mb-1">@book.Title</h6>
+                                <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                <div class="book-rating mb-0">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="star-icon @(i <= filledStars && hasReview ? "star-filled" : "star-empty")">☆</span>
+                                    }
+                                    <span class="rating-value d-block @(hasReview ? "text-warning" : "text-secondary")">
+                                        (@book.AverageRating.ToString("0.0"))
+                                    </span>
+                                    <span class="review-count small text-muted d-block">
+                                        (@(book.TotalReviews) review@(book.TotalReviews == 1 ? "" : "s"))
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
             </div>
         </div>
-    </form>
+    }
+    else if (selectedGenres.Any())
+    {
+        <div class="alert alert-warning text-center mt-3">No books found for selected genres.</div>
+    }
 
-    <div class="text-center mt-3 mb-4">
-        <h4 id="displayTitle" class="display-title-highlight genre-title-bordered stroke-text">@title</h4>
-    </div>
-
-    <div id="bookResults">
-        @await Html.PartialAsync("_BookGridPartial", Model)
-    </div>
-</section>
+</div>
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/dashboard-screen.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/genre-screen.css" asp-append-version="true" />
 }
 

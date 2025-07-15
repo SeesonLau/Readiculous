@@ -7,7 +7,8 @@
 }
 
 <header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")"
-        style="background-color: var(--color-header); color: var(--color-text); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+        style="background-color: var(--color-header); color: var(--color-text); padding: 10px 20px;
+               display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1000;">
 
     <!-- Left: Logo -->
     <div class="d-flex align-items-center gap-2">
@@ -19,25 +20,15 @@
               onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">Readiculous</span>
     </div>
 
-    <!-- Center: Search -->
-    <div class="flex-grow-1 d-flex justify-content-center">
-        <input type="text"
-               id="headerSearch"
-               class="form-control w-50"
-               placeholder="🔍 Search books..."
-               autocomplete="off" />
-    </div>
-
-    <!-- Right: Links + Profile -->
-    <div class="d-flex align-items-center gap-3">
+    <!-- ✅ Right: Navigation and Profile (Moved a bit left with margin-end) -->
+    <div class="d-flex align-items-center gap-3 me-3">
+        <!-- Added me-3 for spacing -->
         <a class="nav-link" href="/Dashboard/ViewNewBooks">New Book</a>
         <a class="nav-link" href="/Dashboard/ViewTopBooks">Top Book</a>
         <a class="nav-link" href="/Dashboard/GenreScreen">Genre</a>
 
-
         @if (isLoggedIn)
         {
-            <!-- Reviewer Name and Profile Dropdown -->
             <div class="d-flex align-items-center position-relative gap-2">
                 <span>@userName</span>
                 <img src="~/img/profile-logo.png"
@@ -46,8 +37,12 @@
                      style="width: 40px; height: 40px; cursor: pointer;"
                      onclick="toggleDropdown()" />
 
+                <!-- Dropdown Menu -->
                 <div id="userDropdown" class="dropdown-menu dropdown-menu-end mt-2"
-                     style="display: none; position: absolute; right: 0; background: var(--color-modal); border: 1px solid #ccc; padding: 10px; border-radius: 6px;">
+                     style="display: none; position: absolute; top: 100%; right: 0;
+                            background: var(--color-modal); border: 1px solid #ccc;
+                            padding: 10px; border-radius: 6px; min-width: 160px; z-index: 1050;">
+
                     <div class="dropdown-item">
                         <i class="fa-solid fa-user-edit me-2"></i>
                         <a class="open-edit-profile" style="cursor: pointer;">Edit Profile</a>
@@ -55,7 +50,8 @@
                     <div class="dropdown-item">
                         <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
                             <button type="submit"
-                                    style="border: none; background: none; padding: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
+                                    style="border: none; background: none; padding: 0;
+                                           display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
                                 <i class="fa-solid fa-right-from-bracket"></i>
                                 <span>Logout</span>
                             </button>
@@ -70,13 +66,13 @@
 <script>
     function toggleDropdown() {
         const dropdown = document.getElementById('userDropdown');
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
     }
 
     document.addEventListener("click", function (event) {
         const dropdown = document.getElementById('userDropdown');
         const trigger = document.querySelector('.dpicn');
-        if (dropdown && trigger && !dropdown.contains(event.target) && event.target !== trigger) {
+        if (dropdown && trigger && !dropdown.contains(event.target) && !trigger.contains(event.target)) {
             dropdown.style.display = 'none';
         }
     });

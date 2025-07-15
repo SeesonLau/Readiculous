@@ -2,8 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
-/* ================ */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
 /* Global Reset & Variables */
 /* ================ */
 * {
@@ -18,7 +17,8 @@
     --color-header: #B089A5;
     --color-btn: #EDAEC0;
     --color-modal: #F8ECE9;
-    --color-background: linear-gradient(150deg, var(--color-text) 0%, #4A3542 35%, var(--color-secondary) 75%, var(--color-text) 100%);
+    /*--color-background: linear-gradient(150deg, var(--color-text) 0%, #4A3542 35%, var(--color-secondary) 75%, var(--color-text) 100%);*/
+    --color-background: #E1DACD;
     /* --color-background: #F2EFF1;*/
     --color-accent: #D4A5A5;
     --color-secondary: #8B5E83;
@@ -31,6 +31,7 @@
     --font-primary: 'Gentium Book Plus', serif;
     --font-secondary: 'Playfair Display', serif;
     --font-ui: 'Poppins', sans-serif;
+    --font-message: 'Noto Sans', sans-serif;
     /* Greyed Out Colors */
     --color-greyed-out-bg: #d6d8db;
     --color-greyed-out-text: #495057;
@@ -43,7 +44,8 @@
     --color-subtle-focus-border: #adb5bd;
     --color-subtle-focus-text: #495057;
     /* Dashboard Admin */
-    --color-header-bg: linear-gradient(150deg, var(--color-text) 0%, #4A3542 35%, var(--color-secondary) 75%, var(--color-text) 100%);
+    /* --color-header-bg: linear-gradient(150deg, var(--color-text) 0%, #4A3542 35%, var(--color-secondary) 75%, var(--color-text) 100%);*/
+    --color-header-bg: #B089A5;
     --color-nav-slider: rgba(139, 94, 131, 0.85);
     --color-text-light: #F5F5F5;
     --color-text-dark: #2C2133;
@@ -83,10 +85,10 @@ body {
 /* ================ */
 /* Scrollbar Styles (from layout.cshtml) */
 /* ================ */
-/* Enhanced scrollbar styling */
+
 ::-webkit-scrollbar {
-    width: 12px; /* Slightly wider scrollbar */
-    height: 12px;
+    width: 6px; 
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -105,12 +107,6 @@ body {
         border: 2px solid var(--color-background);
     }
 
-/* For Firefox */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-header) transparent;
-    scrollbar-gutter: stable; /* Prevents content shift when scrollbar appears */
-}
 
 /* ================ */
 /* Layout & Structure */

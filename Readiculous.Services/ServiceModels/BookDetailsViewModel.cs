@@ -19,6 +19,8 @@ namespace Readiculous.Services.ServiceModels
         public string CoverImageUrl { get; set; }
         public List<string> Genres { get; set; } = [];
         public List<BookListItemViewModel> SimilarBooks { get; set; } = [];
+        public bool IsFavorite { get; set; }
+        public bool IsReviewed { get; set; }
         public decimal AverageRating { get; set; }  
         public List<ReviewListItemViewModel> Reviews { get; set; } = [];
         public DateTime CreatedTime { get; set; }
