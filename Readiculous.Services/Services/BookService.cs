@@ -373,7 +373,7 @@ namespace Readiculous.Services.Services
                     : 0);
             }
 
-            var result = bookMapModels.OrderByDescending(o => o.CreatedTime).ToList();
+            var result = bookMapModels.OrderByDescending(o => o.UpdatedTime).ToList();
             return result;
         }
         private IPagedList<BookListItemViewModel> ListAllPaginatedActiveBooks(string userId, int pageNumber, int pageSize)

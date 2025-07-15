@@ -67,6 +67,7 @@ namespace Readiculous.Data.Repositories
             data = data
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
+                .OrderByDescending(g => g.UpdatedTime)
                 .Include(g => g.CreatedByUser)
                 .Include(g => g.UpdatedByUser)
                 .AsNoTracking();
@@ -84,7 +85,7 @@ namespace Readiculous.Data.Repositories
 
             return data;
         }
-        public (IQueryable<Genre>, int) GetPaginatedGenresByName(string genreName, int pageNumber, int pageSize)
+        public (IQueryable<Genre>, int) GetPaginatedGenresByName(string genreName, int pageNumber, int pageSize, GenreSortType sortType)
         {
             var data = this.GetDbSet<Genre>()
                 .Where(g => g.DeletedTime == null &&
