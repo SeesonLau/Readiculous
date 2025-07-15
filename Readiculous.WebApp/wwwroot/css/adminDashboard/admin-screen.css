@@ -1,0 +1,254 @@
+﻿:root {
+    --color-card-bg: rgba(248, 236, 233, 0.9);
+    --color-card-text: var(--color-text);
+    --color-chart-bg: var(--color-card-bg);
+    --color-bar-primary: var(--color-secondary);
+    --color-bar-secondary: var(--color-accent);
+    --color-rank-bg: var(--color-secondary);
+    --color-rank-text: var(--color-text-light);
+    --color-section-title: var(--color-secondary);
+    --base-font-size: 1rem;
+}
+
+/* Base Styles */
+.summary-card {
+    background-color: var(--color-card-bg);
+    color: var(--color-card-text);
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    padding: 1.5rem;
+}
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .summary-card h5 {
+        color: var(--color-secondary);
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .summary-card h2 {
+        font-size: 2.2rem;
+        margin-top: 0.5rem;
+    }
+
+.content-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.chart-container, .reviewer-container {
+    background-color: var(--color-chart-bg);
+    border-radius: 10px;
+    padding: 1.5rem;
+    height: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.bar-chart {
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.bar-item {
+    margin-bottom: 1.25rem;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--color-card-text);
+    font-size: 1.1rem;
+}
+
+.bar-bg {
+    height: 24px;
+    background-color: var(--color-subtle-bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-bar-primary), var(--color-bar-secondary));
+    border-radius: 10px;
+    transition: width 1s ease-out;
+}
+
+.reviewer-card {
+    background-color: var(--color-card-bg);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    padding: 12px;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+    .reviewer-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+.rank-number {
+    background-color: var(--color-rank-bg);
+    color: var(--color-rank-text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: var(--color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin: 0 12px;
+}
+
+.section-title {
+    color: var(--color-section-title);
+    font-weight: 600;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+
+    .summary-card h2 {
+        font-size: 2rem;
+    }
+
+    .bar-label, .reviewer-card {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .container-fluid {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .summary-card {
+        padding: 1rem;
+    }
+
+        .summary-card h2 {
+            font-size: 1.8rem;
+        }
+
+    .section-title {
+        font-size: 1.2rem;
+    }
+
+    .bar-bg {
+        height: 22px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        margin: 0 10px;
+    }
+
+    .rank-number {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-card h5 {
+        font-size: 1.1rem;
+    }
+
+    .summary-card h2 {
+        font-size: 1.6rem;
+    }
+
+    .chart-container, .reviewer-container {
+        padding: 0.95px;
+    }
+
+    .bar-item {
+        margin-bottom: 12px;
+    }
+
+    .bar-label {
+        font-size: 0.8rem;
+    }
+
+    .reviewer-card {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .summary-card {
+        padding: 0.8rem;
+    }
+
+        .summary-card h2 {
+            font-size: 1.4rem;
+        }
+
+    .section-title {
+        font-size: 1.1rem;
+    }
+
+    .bar-bg {
+        height: 20px;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.7rem;
+        margin: 0 8px;
+    }
+
+    .rank-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+
+    .reviewer-card {
+        font-size: 0.8rem;
+    }
+}
+
+.genre-name {
+    flex: 1; /* Allow genre name to take more space */
+    min-width: 150px; /* Minimum width for genre names */
+}
+
+.genre-count {
+    margin-left: 1rem; /* Space between name and count */
+}

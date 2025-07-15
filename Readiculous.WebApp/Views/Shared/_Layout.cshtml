@@ -24,27 +24,7 @@
     @RenderSection("Styles", required: false)
 
     <style>
-        :root {
-            --color-text: #2C2133;
-            --color-header: #B089A5;
-            --color-btn: #EDAEC0;
-            --color-modal: #F8ECE9;
-            --color-background: #F2EFF1;
-            --font-primary: 'Gentium Book Plus', serif;
-            --color-text-placeholder: rgba(39, 39, 42, 0.6);
-        }
-
-        /* Reset defaults */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden;
-            font-family: var(--font-primary);
-            background: var(--color-background);
-        }
-
-        /* Scrollbar styling */
+           /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -68,26 +48,24 @@
             scrollbar-color: var(--color-header) var(--color-background);
         }
 
-        /* Layout */
-        .flex-column {
-            height: 100vh;
-        }
-
-        main {
-            flex: 1;
-            overflow-y: auto;
-            max-height: calc(100vh - 120px - 60px); /* Adjust heights */
-        }
     </style>
 </head>
 <body class="d-flex flex-column" style="height: 100vh; margin: 0; padding: 0;">
     <div class="d-flex flex-column" style="height: 100vh;">
-        <partial name="_HeaderTest" />
+        @if (User.IsInRole("Admin"))
+        {
+            <partial name="_HeaderAdmin" />
+        }
+        else
+        {
+            <partial name="_HeaderTest" />
+        }
         <main role="main" class="container-xxl py-4 px-3 px-sm-4 px-xxl-0 mx-auto">
             @RenderBody()
         </main>
         <partial name="_Footer" />
     </div>
+
     <!-- Removed registrationModal and editProfileModal, as their partials are now loaded via AJAX or have been moved/deleted. -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -180,15 +158,7 @@
         });
     </script>
 
-    <!-- Removed deleted modal partials: _LoginModal, _OTPModal, _ForgotPasswordModal, _ForgotPasswordOtpModal, _ResetPasswordModal, _AllDoneModal -->
-    @await RenderSectionAsync("Scripts", required: false)
-    <!-- Authentication partials for AJAX/modal use -->
-    @await Html.PartialAsync("_LoginPartial", new Readiculous.WebApp.Models.LoginViewModel())
-    @await Html.PartialAsync("_RegisterPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
-    @await Html.PartialAsync("_ForgotPasswordPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
-    @await Html.PartialAsync("_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
-    @await Html.PartialAsync("_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
-    @await Html.PartialAsync("_SuccessPartial")
+   
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -241,41 +211,3 @@
 
 
 
-<style>
-    /* Reset default margins/paddings */
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        width: 100%;
-        overflow: hidden; /* Prevent scrollbar */
-    }
-
-    /* Ensure flex container takes full height */
-    .flex-column {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Prevent <main> from overflowing */
-    main {
-        flex: 1;
-        overflow: auto; /* Only scrolls internally if needed */
-    }
-
-    /* Tight footer with centered content */
-    footer {
-        flex-shrink: 0; /* Prevents footer from shrinking */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 60px; /* Adjust as needed */
-        border-top: 1px solid #dee2e6; /* Bootstrap's border color */
-    }
-
-        /* Remove extra spacing in footer links */
-        footer a {
-            margin: 0 5px;
-        }
-</style>
