@@ -197,6 +197,7 @@ namespace Readiculous.Services.Services
             var userViewModel = new UserViewModel();
 
             _mapper.Map(editProfileViewModel, userViewModel);
+            userViewModel.AccessStatus = user.AccessStatus;
             if (string.IsNullOrEmpty(editProfileViewModel.NewPassword))
             {
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
