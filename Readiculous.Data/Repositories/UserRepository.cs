@@ -144,7 +144,7 @@ namespace Readiculous.Data.Repositories
         public int GetActiveUserCount()
         {
             return this.GetDbSet<User>()
-                .Count(u => u.DeletedTime != null);
+                .Count(u => u.DeletedTime == null);
         }
         public IQueryable<User> GetTopReviewers(int numberOfUsers)
         {

@@ -1,4 +1,4 @@
-﻿
+﻿@model Readiculous.Services.ServiceModels.AdminDashboardViewModel;
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -11,19 +11,19 @@
         <div class="col-12 col-sm-4 mb-4">
             <div class="summary-card">
                 <h5>Total Users</h5>
-                <h2>120</h2>
+                <h2>@Model.UserCount</h2>
             </div>
         </div>
         <div class="col-12 col-sm-4 mb-4">
             <div class="summary-card">
                 <h5>Total Books</h5>
-                <h2>350</h2>
+                <h2>@Model.BookCount</h2>
             </div>
         </div>
         <div class="col-12 col-sm-4 mb-4">
             <div class="summary-card">
                 <h5>Total Genres</h5>
-                <h2>28</h2>
+                <h2>@Model.GenreCount</h2>
             </div>
         </div>
     </div>
