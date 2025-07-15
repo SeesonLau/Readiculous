@@ -1,10 +1,11 @@
-﻿using Readiculous.Data.Interfaces;
+﻿using Basecode.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
-using Basecode.Data.Repositories;
 using System;
 using System.Linq;
+using ZXing;
 using static Readiculous.Resources.Constants.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace Readiculous.Data.Repositories
 {
@@ -66,13 +67,13 @@ namespace Readiculous.Data.Repositories
 
             return users;
         }
-        public (IQueryable<User>, int) GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize)
+        public (IQueryable<User>, int) GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize, UserSortType sortType)
         {
             var data = this.GetDbSet<User>()
                 .Where(u => u.DeletedTime == null &&
                             u.Username.ToLower().Contains(username.ToLower()));
             var dataCount = data.Count();
-            data = data
+            data = SortUsers(data, sortType)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(u => u.CreatedByUser)
@@ -94,14 +95,14 @@ namespace Readiculous.Data.Repositories
             return users;
         }
 
-        public (IQueryable<User>, int) GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize)
+        public (IQueryable<User>, int) GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize = 10, UserSortType sortType = UserSortType.Latest)
         {
             var data = this.GetDbSet<User>()
                 .Where(u => u.DeletedTime == null &&
                             u.Username.ToLower().Contains(username.ToLower()) &&
                             u.Role == role);
             var dataCount = data.Count();
-            data = data
+            data = SortUsers(data, sortType)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(u => u.CreatedByUser)
@@ -158,6 +159,18 @@ namespace Readiculous.Data.Repositories
                 .Include(u => u.UserReviews)
                 .Take(numberOfUsers)
                 .AsNoTracking();
+        }
+
+        private IQueryable<User> SortUsers(IQueryable<User> users, UserSortType sortType)
+        {
+            return sortType switch
+            {
+                UserSortType.UsernameAscending => users.OrderBy(u => u.Username),
+                UserSortType.UsernameDescending => users.OrderByDescending(u => u.Username),
+                UserSortType.Oldest => users.OrderBy(u => u.UpdatedTime),
+                UserSortType.Latest => users.OrderByDescending(u => u.UpdatedTime),
+                _ => users.OrderByDescending(u => u.UpdatedTime),
+            };
         }
     }
 }

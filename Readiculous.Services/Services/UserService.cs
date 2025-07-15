@@ -391,12 +391,12 @@ namespace Readiculous.Services.Services
 
             return result;
         }
-        private IPagedList<UserListItemViewModel> GetAllPaginatedActiveUsers(int pageNumber, int pageSize)
+        private IPagedList<UserListItemViewModel> GetAllPaginatedActiveUsers(int pageNumber, int pageSize, UserSortType sortType = UserSortType.Latest)
         {
             IQueryable<User> queryableUserListItems;
             int userCount;
 
-            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(string.Empty, pageNumber, pageSize);
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(string.Empty, pageNumber, pageSize, sortType);
             var listUserListItems = queryableUserListItems.ToList();
 
             var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
@@ -425,12 +425,12 @@ namespace Readiculous.Services.Services
             };
         }
 
-        private IPagedList<UserListItemViewModel> GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize, UserSortType sortType)
+        private IPagedList<UserListItemViewModel> GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize, UserSortType sortType = UserSortType.Latest)
         {
             IQueryable<User> queryableUserListItems;
             int userCount;
 
-            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(username, pageNumber, pageSize);
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(username, pageNumber, pageSize, sortType);
             var listUserListItems = queryableUserListItems.ToList();
 
             var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
@@ -458,12 +458,12 @@ namespace Readiculous.Services.Services
             };
         }
 
-        private IPagedList<UserListItemViewModel> GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize, UserSortType sortType)
+        private IPagedList<UserListItemViewModel> GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize = 10, UserSortType sortType = UserSortType.Latest)
         {
             IQueryable<User> queryableUserListItems;
             int userCount;
 
-            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByRoleAndUsername(role, username, pageNumber, pageSize);
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByRoleAndUsername(role, username, pageNumber, pageSize, sortType);
             var listUserListItems = queryableUserListItems.ToList();
 
             var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
