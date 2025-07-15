@@ -1,0 +1,18 @@
+@model Readiculous.Services.ServiceModels.EmailRequestModel
+<div>
+    <div class="login-title">Sign Up</div>
+    <form method="post" action="/Account/RequestOtp" id="registerForm">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label" for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" class="form-control" asp-for="Email" placeholder="Email Address" autocomplete="off" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <button class="btn login-btn" type="submit">Sign Up</button>
+        </div>
+        <div style="display: flex; justify-content: center; margin-top: 1.2rem;">
+            <a href="#" class="login-link" id="show-login">Back to Login</a>
+        </div>
+    </form>
+</div> 

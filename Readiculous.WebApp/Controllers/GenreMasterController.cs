@@ -76,7 +76,7 @@ namespace Readiculous.WebApp.Controllers
                     // AJAX support
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
-                        return Json(new { success = true });
+                        return Json(new { success = true, message = "Genre Successfully Created!" });
                     }
                     return RedirectToAction("Index");
                 }
@@ -125,7 +125,7 @@ namespace Readiculous.WebApp.Controllers
                     _genreService.UpdateGenre(model, this.UserId);
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
-                        return Json(new { success = true });
+                        return Json(new { success = true, message = "Genre Details Successfully Edited!" });
                     }
                     // No redirect
                 }
@@ -160,7 +160,8 @@ namespace Readiculous.WebApp.Controllers
             try
             {
                 _genreService.DeleteGenre(id, this.UserId);
-                return Json(new { success = true });
+                TempData["SuccessMessage"] = "Genre Successfully Deleted!";
+                return Json(new { success = true, message = "Genre Successfully Deleted!" });
             }
             catch (InvalidOperationException ex)
             {

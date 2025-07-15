@@ -27,16 +27,6 @@
     --font-primary: 'Gentium Book Plus', serif;
     --font-secondary: 'Playfair Display', serif;
     --font-ui: 'Poppins', sans-serif;
-    --color-greyed-out-bg: #d6d8db;
-    --color-greyed-out-text: #495057;
-    /* Subtle */
-    --color-subtle-bg: #f8f9fa;
-    --color-subtle-text: #6c757d;
-    --color-subtle-border: #ced4da;
-    --color-subtle-placeholder: #adb5bd;
-    --color-subtle-focus-bg: #f1f3f5;
-    --color-subtle-focus-border: #adb5bd;
-    --color-subtle-focus-text: #495057;
 }
 
 /* Base HTML & Body Styles */
@@ -186,7 +176,7 @@ header {
     z-index: 1000;
     border-radius: 8px;
     overflow: hidden;
-    min-width: 180px; 
+    min-width: 180px;
 }
 
     .dropdown ul {
@@ -196,10 +186,10 @@ header {
     }
 
         .dropdown ul li {
-            padding: 8px 20px; 
+            padding: 8px 20px;
             transition: all 0.2s ease;
             display: flex;
-            align-items: center; 
+            align-items: center;
             gap: 12px;
         }
 
@@ -674,6 +664,7 @@ header {
     .delete-modal .modal-body {
         padding: 1.5rem;
     }
+
     header {
         padding: 0 15px;
     }
@@ -728,6 +719,7 @@ header {
     .delete-modal .btn {
         width: 100%;
     }
+
     html {
         font-size: 13px;
     }
@@ -761,43 +753,37 @@ header {
     }
 }
 
-.input-greyed-out {
-    background-color: var(--color-greyed-out-bg);
-    color: var(--color-greyed-out-text);
-    cursor: not-allowed;
+/* OTP Input Styles for Modal Registration */
+.otp-input {
+    border: 2px solid var(--color-border) !important;
+    background-color: var(--color-modal) !important;
+    color: var(--color-text) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
 }
 
-input.form-control.input-greyed-out {
-    background-color: var(--color-greyed-out-bg) !important;
-    color: var(--color-greyed-out-text) !important;
+    .otp-input:focus {
+        border-color: var(--color-focus) !important;
+        background-color: #fff !important;
+        box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25) !important;
+    }
+
+.otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-.input-greyed-out::placeholder {
+/* Auth Modal Styles */
+.auth-icon {
+    width: 60px;
+    height: auto;
+}
+
+#registerError,
+#otpError {
+    color: var(--color-danger);
     font-size: 0.875rem;
-    font-style: italic;
-    color: var(--color-greyed-out-text);
-    opacity: 1;
-}
-
-
-.input-subtle {
-    background-color: var(--color-subtle-bg);
-    color: var(--color-subtle-text);
-    border-color: var(--color-subtle-border);
-    font-style: italic;
-}
-
-input.form-control.input-subtle::placeholder {
-    color: var(--color-subtle-placeholder);
-    font-size: 0.875rem;
-    font-style: italic;
-    opacity: 1;
-}
-
-.input-subtle:focus {
-    background-color: var(--color-subtle-focus-bg);
-    border-color: var(--color-subtle-focus-border);
-    color: var(--color-subtle-focus-text);
-    outline: none;
-    box-shadow: none;
+    margin-bottom: 0.5rem;
 }

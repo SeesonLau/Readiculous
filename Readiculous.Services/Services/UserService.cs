@@ -106,18 +106,8 @@ namespace Readiculous.Services.Services
                 user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
             }
 
-            // If the creator is not the same as the new user (admin creation), generate a temp password
-            /*bool isAdminCreated = creatorId != model.UserId;
-            string tempPassword = null;
-            if (isAdminCreated)
-            {
-                tempPassword = OtpManager.GenerateTempPassword();
-                user.Password = PasswordManager.EncryptPassword(tempPassword);
-            }
-            else
-            {
-                user.Password = PasswordManager.EncryptPassword(model.Password);
-            }*/
+            // Encrypt the password before saving
+            user.Password = PasswordManager.EncryptPassword(model.Password);
 
             //Add User
             _userRepository.AddUser(user, creatorId);
@@ -608,6 +598,11 @@ namespace Readiculous.Services.Services
             {
                 return false;
             }
+        }
+
+        public bool EmailExists(string email)
+        {
+            return _userRepository.EmailExists(email.Trim(), string.Empty);
         }
 
     }

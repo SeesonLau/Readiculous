@@ -40,6 +40,7 @@ namespace Readiculous.WebApp.Controllers
             _bookService = bookService;
             _genreService = genreService;
             _userService = userService;
+            _signInManager = signInManager;
             _mapper = mapper;
         }
 
@@ -51,7 +52,7 @@ namespace Readiculous.WebApp.Controllers
             {
                 return NotFound();
             }
-            return PartialView("_EditProfileModal", model);
+            return PartialView("~/Views/Shared/_EditProfileModal.cshtml", model);
         }
         [HttpPost]
         public async Task<IActionResult> EditProfile(EditProfileViewModel editProfileViewModel)
@@ -92,7 +93,7 @@ namespace Readiculous.WebApp.Controllers
                 }
                 return Json(new { success = true });
             }
-            catch
+            catch (Exception ex)
             {
                 return PartialView("_EditProfileModal", editProfileViewModel);
             }
