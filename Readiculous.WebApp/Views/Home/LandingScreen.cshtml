@@ -29,7 +29,7 @@
             </div>
             <!-- Right Side: Login Form -->
             <div class="right-half">
-                <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; margin-bottom: 18px; gap: 10px; width: 100%; max-width: 480px;">
+                <div class="header-section" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; margin-bottom: 18px; gap: 10px; width: 100%; max-width: 480px;">
                     <img src="@Url.Content("~/img/readiculous-logo.svg")" style="width: 80px; height: 80px; display: block;" alt="Logo" />
                     <div style="text-align: left; margin-left: 20px;">
                         <div class="welcome-title">Welcome Back, Reader!</div>
@@ -51,7 +51,7 @@
         toastr.options = {
             "closeButton": true,
             "progressBar": true,
-            "positionClass": "toast-top-right",
+            "positionClass": "toast-top-center",
             "timeOut": "5000"
         };
         var errorMessage = '@TempData["ErrorMessage"]';
