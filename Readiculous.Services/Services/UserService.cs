@@ -2,11 +2,11 @@
 using AutoMapper.Configuration.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Readiculous.Resources.Messages;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
+using Readiculous.Resources.Messages;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.Manager;
 using Readiculous.Services.ServiceModels;
@@ -19,6 +19,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using X.PagedList;
+using ZXing;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -259,6 +261,25 @@ namespace Readiculous.Services.Services
             return userViewModels;
 
         }
+        public IPagedList<UserListItemViewModel> GetPaginatedUserList(RoleType? role, string username, int pageNumber, int pageSize = 10, UserSortType sortType = UserSortType.Latest)
+        {
+            if (!role.HasValue && string.IsNullOrEmpty(username) && sortType == UserSortType.Latest)
+            {
+                return GetAllPaginatedActiveUsers(pageNumber, pageSize);
+            }
+            else if(string.IsNullOrEmpty(username))
+            {
+                return GetPaginatedUsersByRoleAndUsername(role.Value, string.Empty, pageNumber, pageSize, sortType);
+            }
+            else if(!role.HasValue)
+            {
+                return GetPaginatedUsersByUsername(username, pageNumber, pageSize, sortType);
+            }
+            else
+            {
+                return GetPaginatedUsersByRoleAndUsername(role.Value, username, pageNumber, pageSize, sortType);
+            }
+        }
 
         // Single User Retrieval Methods
         public UserViewModel GetUserEditById(string userId)
@@ -401,6 +422,25 @@ namespace Readiculous.Services.Services
 
             return result;
         }
+        private IPagedList<UserListItemViewModel> GetAllPaginatedActiveUsers(int pageNumber, int pageSize)
+        {
+            IQueryable<User> queryableUserListItems;
+            int userCount;
+
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(string.Empty, pageNumber, pageSize);
+            var listUserListItems = queryableUserListItems.ToList();
+
+            var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
+            var result = userMapModels
+                .OrderByDescending(u => u.UpdatedTime);
+
+            return new StaticPagedList<UserListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                userCount);
+        }
+
         private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType sortType)
         {
             var usersByUsername = _userRepository.GetUsersByUsername(username.Trim());
@@ -415,6 +455,25 @@ namespace Readiculous.Services.Services
                 _ => result.OrderByDescending(u => u.UpdatedTime).ToList()
             };
         }
+
+        private IPagedList<UserListItemViewModel> GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize, UserSortType sortType)
+        {
+            IQueryable<User> queryableUserListItems;
+            int userCount;
+
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(username, pageNumber, pageSize);
+            var listUserListItems = queryableUserListItems.ToList();
+
+            var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
+            var result = SortUsers(userMapModels, sortType);
+
+            return new StaticPagedList<UserListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                userCount);
+        }
+
         private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
         {
             var usersByRoleAndUsername = _userRepository.GetUsersByRoleAndUsername(role, username.Trim());
@@ -429,6 +488,25 @@ namespace Readiculous.Services.Services
                 _ => result.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
         }
+
+        private IPagedList<UserListItemViewModel> GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize, UserSortType sortType)
+        {
+            IQueryable<User> queryableUserListItems;
+            int userCount;
+
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByRoleAndUsername(role, username, pageNumber, pageSize);
+            var listUserListItems = queryableUserListItems.ToList();
+
+            var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
+            var result = SortUsers(userMapModels, sortType);
+
+            return new StaticPagedList<UserListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                userCount);
+        }
+
         // Helper methods for profile picture management
         private async Task DeleteProfilePicture(string pictureUrl)
         {
@@ -472,6 +550,18 @@ namespace Readiculous.Services.Services
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
+        private IEnumerable<UserListItemViewModel> SortUsers(IEnumerable<UserListItemViewModel> userViewModels, UserSortType sortType)
+        {
+            return sortType switch
+            {
+                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName),
+                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName),
+                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime),
+                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime),
+                _ => userViewModels.OrderByDescending(u => u.UpdatedTime)
+            };
+        }
+
         // OTP Methods
         public async Task<bool> SendOtpForRegistrationAsync(string email)
         {

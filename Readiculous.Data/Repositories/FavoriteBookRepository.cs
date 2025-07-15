@@ -1,4 +1,5 @@
 ﻿using Basecode.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using System;
@@ -35,18 +36,35 @@ namespace Readiculous.Data.Repositories
         public IQueryable<FavoriteBook> GetFavoriteBooksByUserId(string userId)
         {
             return this.GetDbSet<FavoriteBook>()
-                .Where(fb => fb.UserId == userId);
+                .Where(fb => fb.UserId == userId)
+                .Include(fb => fb.Book);
         }
         public IQueryable<FavoriteBook> GetFavoriteBooksByBookId(string bookId)
         {
             return this.GetDbSet<FavoriteBook>()
-                .Where(fb => fb.BookId == bookId);
+                .Where(fb => fb.BookId == bookId)
+                .Include(fb => fb.Book);
+        }
+        public (IQueryable<FavoriteBook>, int) GetPaginatedFavoriteBooksByUserId(string userId, int pageNumber, int pageSize)
+        {
+            var data = this.GetDbSet<FavoriteBook>()
+                .Where(FavoriteBook => FavoriteBook.UserId == userId);
+            var dataCount = data.Count();
+
+            data = data
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(fb => fb.Book)
+                .OrderByDescending(fb => fb.CreatedTime)
+                .AsNoTracking();
+
+            return (data, dataCount);
         }
         public FavoriteBook GetFavoriteBookByBookIdAndUserId(string bookId, string userId)
         {
             return this.GetDbSet<FavoriteBook>()
                 .FirstOrDefault(fb => fb.BookId == bookId 
-                                    && fb.UserId == userId );
+                                    && fb.UserId == userId);
         }
     }
 }

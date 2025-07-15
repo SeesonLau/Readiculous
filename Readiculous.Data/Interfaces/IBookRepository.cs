@@ -91,6 +91,22 @@ namespace Readiculous.Data.Interfaces
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        (IQueryable<Book>, int) GetPaginatedNewBooks(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        (IQueryable<Book>, int) GetPaginatedTopBooks(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Book GetBookById(string id);
@@ -101,6 +117,7 @@ namespace Readiculous.Data.Interfaces
         /// <param name="genreId"></param>
         /// <returns></returns>
         int GetBookCountByGenreId(string genreId);
+
         /// <summary>
         /// 
         /// </summary>

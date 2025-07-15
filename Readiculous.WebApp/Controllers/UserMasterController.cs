@@ -59,6 +59,11 @@ namespace Readiculous.WebApp.Controllers
                 role: roleType,
                 sortType: sortOrder);
 
+            // var users = _userService.GetPaginatedUserList(role: roleType, username: searchString, pageNumber: pageNumber, pageSize: pageSize, sortType: searchType);
+            // return View(users);
+
+            // TotalItems, PaginatedUsers, and PageSize is now defined in the IPageList<>
+
             var totalItems = allUsers.Count;
             var paginatedUsers = allUsers
                 .Skip((page - 1) * pageSize)

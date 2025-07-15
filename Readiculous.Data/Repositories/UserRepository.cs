@@ -66,6 +66,21 @@ namespace Readiculous.Data.Repositories
 
             return users;
         }
+        public (IQueryable<User>, int) GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize)
+        {
+            var data = this.GetDbSet<User>()
+                .Where(u => u.DeletedTime == null &&
+                            u.Username.ToLower().Contains(username.ToLower()));
+            var dataCount = data.Count();
+            data = data
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(u => u.CreatedByUser)
+                .Include(u => u.UpdatedByUser)
+                .AsNoTracking();
+
+            return (data, dataCount);
+        }
 
         public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
         {
@@ -77,6 +92,23 @@ namespace Readiculous.Data.Repositories
                             u.Role == role);
 
             return users;
+        }
+
+        public (IQueryable<User>, int) GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize)
+        {
+            var data = this.GetDbSet<User>()
+                .Where(u => u.DeletedTime == null &&
+                            u.Username.ToLower().Contains(username.ToLower()) &&
+                            u.Role == role);
+            var dataCount = data.Count();
+            data = data
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(u => u.CreatedByUser)
+                .Include(u => u.UpdatedByUser)
+                .AsNoTracking();
+
+            return (data, dataCount);
         }
         public User GetUserById(string id)
         {

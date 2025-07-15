@@ -211,6 +211,51 @@ namespace Readiculous.Data.Repositories
             return (data, dataCount);
         }
 
+        public (IQueryable<Book>, int) GetPaginatedNewBooks(int pageNumber, int pageSize)
+        {
+            var twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
+            var data = this.GetDbSet<Book>()
+                .Where(b => b.DeletedTime == null &&
+                            b.CreatedTime >= twoWeeksAgo);
+            var dataCount = data.Count();
+            data = data
+                .Skip((pageNumber - 1) + pageSize)
+                .Take(pageSize)
+                .Include(b => b.CreatedByUser)
+                .Include(b => b.UpdatedByUser)
+                .AsNoTracking();
+
+            return (data, dataCount);
+        }
+
+        public (IQueryable<Book>, int) GetPaginatedTopBooks(int pageNumber, int pageSize)
+        {
+            var booksWithAverageRatings = this.GetDbSet<Book>()
+                .Where(b => b.DeletedTime == null)
+                .Select(b => new
+                {
+                    Book = b,
+                    AverageRating = b.BookReviews
+                        .Where(r => r.DeletedTime == null)
+                        .Select(r => (double?)r.Rating)
+                        .DefaultIfEmpty(0)
+                        .Average()
+                })
+                .OrderByDescending(x => x.AverageRating);
+
+            var dataCount = booksWithAverageRatings.Count();
+
+            var data = booksWithAverageRatings
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => x.Book)
+                .Include(b => b.CreatedByUser)
+                .Include(b => b.UpdatedByUser)
+                .AsNoTracking();
+
+            return (data, dataCount);
+        }
+
         public Book GetBookById(string id)
         {
             return this.GetDbSet<Book>()
