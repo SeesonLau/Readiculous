@@ -309,7 +309,7 @@ namespace Readiculous.Services.Services
         {
             User user = _userRepository.GetUserWithNavigationPropertiesById(userId);
             if (user == null)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(Errors.UserNotFound);
 
             UserDetailsViewModel userDetails = new();
             _mapper.Map(user, userDetails);
@@ -327,63 +327,6 @@ namespace Readiculous.Services.Services
                 : 0;
 
             return userDetails;
-            /*
-            if (user != null)
-            {
-                UserDetailsViewModel userViewModel = new();
-
-                _mapper.Map(user, userViewModel);
-
-                var favoriteBooks = _favoriteBookRepository.GetFavoriteBooksByUserId(userId).ToList();
-
-                var bookIds = favoriteBooks
-                    .Select(fb => fb.BookId)
-                    .ToList();
-                var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
-                var favoriteBookMapModels = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
-                foreach(var model in favoriteBookMapModels)
-                {
-                    model.BookGenres = genres
-                        .Where(g => g.BookId == model.BookId)
-                        .Select(g => g.Genre.Name)
-                        .ToList();
-                }
-
-                var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
-                userViewModel.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewsByUser);
-
-                var genreFrequency = userViewModel.FavoriteBookModels
-                    .Where(b => b.BookGenres != null && b.BookGenres.Any())
-                    .SelectMany(b => b.BookGenres)
-                    .GroupBy(genre => genre)
-                    .Select(g => new { Genre = g.Key, Count = g.Count() })
-                    .ToList();
-
-                if (genreFrequency.Any())
-                {
-                    var maxCount = genreFrequency.Max(g => g.Count);
-
-                    userViewModel.TopGenres = genreFrequency
-                        .Where(g => g.Count == maxCount)
-                        .Select(g => g.Genre)
-                        .ToList();
-                }
-                else
-                {
-                    userViewModel.TopGenres = new List<string> { "-" };
-                }
-
-
-                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2): 0;
-
-
-                return userViewModel;
-            }
-            else
-            {
-                throw new KeyNotFoundException(Errors.UserNotFound);
-            }
-            */
         }
         public User GetUserById(string userId)
         {
