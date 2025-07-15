@@ -333,15 +333,27 @@ namespace Readiculous.Services.Services
                 var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
                 userViewModel.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewsByUser);
 
-                userViewModel.TopGenres = userViewModel.FavoriteBookModels
+                var genreFrequency = userViewModel.FavoriteBookModels
+                    .Where(b => b.BookGenres != null && b.BookGenres.Any())
                     .SelectMany(b => b.BookGenres)
                     .GroupBy(genre => genre)
                     .Select(g => new { Genre = g.Key, Count = g.Count() })
-                    .GroupBy(g => g.Count)
-                    .OrderByDescending(g => g.Key)
-                    .FirstOrDefault()?
-                    .Select(g => g.Genre)
-                    .ToList() ?? new List<string>() { "No genres available" };
+                    .ToList();
+
+                if (genreFrequency.Any())
+                {
+                    var maxCount = genreFrequency.Max(g => g.Count);
+
+                    userViewModel.TopGenres = genreFrequency
+                        .Where(g => g.Count == maxCount)
+                        .Select(g => g.Genre)
+                        .ToList();
+                }
+                else
+                {
+                    userViewModel.TopGenres = new List<string> { "-" };
+                }
+
 
                 userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2): 0;
 

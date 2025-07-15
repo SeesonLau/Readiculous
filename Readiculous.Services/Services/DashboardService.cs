@@ -24,9 +24,9 @@ namespace Readiculous.Services.Services
             _mapper = mapper;
         }
 
-        public DashboardViewModel GetUserDashboardViewModel(string userId)
+        public UserDashboardViewModel GetUserDashboardViewModel(string userId)
         {
-            var dashboardViewModel = new DashboardViewModel();
+            var dashboardViewModel = new UserDashboardViewModel();
 
             IQueryable<Book> newBooks;
             IQueryable<Book> topBooks;
@@ -41,7 +41,6 @@ namespace Readiculous.Services.Services
             dashboardViewModel.FavoriteBooks = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
 
             return dashboardViewModel;
-
         }
     }
 }

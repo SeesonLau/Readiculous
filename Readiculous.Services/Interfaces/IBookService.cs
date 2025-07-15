@@ -20,7 +20,7 @@ namespace Readiculous.Services.Interfaces
         IPagedList<BookListItemViewModel> GetPaginatedBookList(string searchString, List<GenreViewModel> genres, string userId, int pageNumber, int pageSize = 10, BookSortType sortType = BookSortType.Latest, string? genreFilter = null);
         BookDetailsViewModel GetBookDetailsById(string id);
         BookViewModel GetBookEditById(string id);
-        DashboardViewModel GetDashboardViewModel();
+        UserDashboardViewModel GetDashboardViewModel();
         List<SelectListItem> GetBookSortTypes(BookSortType sortType);
 
         void AddBookToFavorites(string bookId, string userId);

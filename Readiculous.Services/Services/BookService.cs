@@ -327,9 +327,9 @@ namespace Readiculous.Services.Services
         }
 
         // Dashboard Book Retrieval Functions
-        public DashboardViewModel GetDashboardViewModel()
+        public UserDashboardViewModel GetDashboardViewModel()
         {
-            DashboardViewModel dashboardViewModel = new();
+            UserDashboardViewModel dashboardViewModel = new();
             DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
 
             var allBooks = _bookRepository.GetAllActiveBooks();

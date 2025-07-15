@@ -3,7 +3,7 @@
 namespace Readiculous.Services.ServiceModels
 {
 
-    public class DashboardViewModel
+    public class UserDashboardViewModel
     {
         public List<BookListItemViewModel> NewBooks { get; set; }
         public List<BookListItemViewModel> TopBooks { get; set; }
