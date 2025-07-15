@@ -353,7 +353,7 @@ namespace Readiculous.Services.Services
         {
             var allActiveBooks = _bookRepository.GetAllActiveBooks();
             var bookIds = allActiveBooks.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(allActiveBooks);
@@ -384,7 +384,7 @@ namespace Readiculous.Services.Services
             (queryableBookListItems, bookCount) = _bookRepository.GetAllPaginatedBooks(pageNumber, pageSize);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
@@ -403,7 +403,7 @@ namespace Readiculous.Services.Services
         {
             var booksByTitle = _bookRepository.GetBooksByTitle(bookTitle);
             var bookIds = booksByTitle.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -438,7 +438,7 @@ namespace Readiculous.Services.Services
             (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitle(bookTitle, pageNumber, pageSize);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userId);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -465,7 +465,7 @@ namespace Readiculous.Services.Services
             var booksByGenre = _bookRepository.GetBooksByGenreList(bookGenres);
             var bookIds = booksByGenre
                 .Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -501,7 +501,7 @@ namespace Readiculous.Services.Services
             (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByGenreList(bookGenres, pageNumber, pageSize);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
@@ -523,7 +523,7 @@ namespace Readiculous.Services.Services
             var bookIds = booksByTitleAndGenre
                 .Select(book => book.BookId)
                 .ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookViewModels = _mapper.Map<List<BookListItemViewModel>>(booksByTitleAndGenre);
@@ -557,7 +557,7 @@ namespace Readiculous.Services.Services
             (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitleAndGenres(bookTitle, bookGenres, pageNumber, pageSize);
             var listBookListItems = queryableBookListItems.ToList();
             var bookIds = listBookListItems.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);

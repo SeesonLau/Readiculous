@@ -11,7 +11,7 @@ namespace Readiculous.Services.ServiceModels
         public int UserCount { get; set; }
         public int BookCount { get; set; }
         public int GenreCount { get; set; }
-        public List<UserListItemViewModel> TopReviewers { get; set; }
+        public List<UserDetailsViewModel> TopReviewers { get; set; }
         public Dictionary<GenreListItemViewModel, int> MostUsedGenres { get; set; }
     }
 }
