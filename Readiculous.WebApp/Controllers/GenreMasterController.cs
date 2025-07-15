@@ -41,16 +41,13 @@ namespace Readiculous.WebApp.Controllers
                 searchString,
                 sortType : sortOrder);
 
-            var totalItems = allGenres.Count;
-            var paginatedGenres = allGenres
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var genres = _genreService.GetPaginatedGenreList(
+                genreName: searchString,
+                sortType: sortOrder,
+                pageNumber: page,
+                pageSize: pageSize);
 
-            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
-            ViewBag.PageSize = pageSize;
-
-            return View(paginatedGenres);
+            return View(genres);
         }
 
 
