@@ -49,3 +49,19 @@
     border-radius: 10px;
     padding: 10px 20px;
 }
+
+#searchSuggestionsNewBooks img {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 10px;
+    border-radius: 4px;
+}
+
+#searchSuggestionsNewBooks li {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+}
+

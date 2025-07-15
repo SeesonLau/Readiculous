@@ -7,40 +7,52 @@
     var newestBooks = Model?
         .Where(b => !string.IsNullOrWhiteSpace(b.Title))
         .OrderByDescending(b => b.CreatedTime)
-        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+        .ToList() ?? new();
 
     string keyword = ViewBag.Keyword as string ?? "";
     int currentPage = ViewBag.CurrentPage ?? 1;
-    int pageSize = 10;
-    int totalPages = (int)Math.Ceiling((double)newestBooks.Count / pageSize);
-    var booksToDisplay = newestBooks.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+    int totalPages = (int)Math.Ceiling((double)newestBooks.Count / 10);
+
+    var booksJson = newestBooks.Select(b => new
+    {
+        id = b.BookId,
+        title = b.Title,
+        cover = string.IsNullOrWhiteSpace(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
+    });
 }
 
+<input type="hidden" id="booksJsonTopBooks" value='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(booksJson))' />
+
 <div class="container py-4">
-    <!-- Search and Back -->
-    <div class="row mb-4 justify-content-between align-items-end">
+    <div class="row mb-4 justify-content-between align-items-end position-relative">
         <div class="col-md-9">
-            <label for="searchNewBooks" class="form-label">Search Books</label>
-            <form method="get" asp-action="ViewNewBooks" asp-controller="Dashboard" class="d-flex">
-                <input type="text" id="searchNewBooks" name="keyword" value="@keyword" class="form-control me-2" placeholder="🔍 Search books..." />
+            <label for="bookSearchTopBooks" class="form-label">Search Books</label>
+            <form method="get" asp-action="ViewNewBooks" asp-controller="Dashboard" class="d-flex position-relative">
+                <input type="text"
+                       id="bookSearchTopBooks"
+                       name="keyword"
+                       value="@keyword"
+                       class="form-control me-2"
+                       placeholder="🔍 Search books..."
+                       autocomplete="off" />
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
+            <ul id="searchResultsTopBooks" class="list-group position-absolute w-100 mt-1 shadow" style="z-index: 999;"></ul>
         </div>
         <div class="col-md-3 text-end mt-3 mt-md-0">
             <a href="@Url.Action("DashboardScreen", "Dashboard")" class="btn btn-outline-secondary">← Back to Dashboard</a>
         </div>
     </div>
 
-    <!-- Book Section -->
     <div class="section-box p-4 mb-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="section-title mb-0">NEW BOOKS</h2>
         </div>
 
-        @if (booksToDisplay.Any())
+        @if (newestBooks.Any())
         {
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-                @foreach (var book in booksToDisplay)
+                @foreach (var book in newestBooks.Skip((currentPage - 1) * 10).Take(10))
                 {
                     var filledStars = (int)Math.Floor((double)book.AverageRating);
                     bool hasReview = book.AverageRating > 0;
@@ -78,7 +90,6 @@
         }
     </div>
 
-    <!-- Pagination -->
     @if (totalPages > 1)
     {
         <div class="mt-5 d-flex justify-content-center">
@@ -104,8 +115,71 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/dashboard-screen.css" asp-append-version="true" />
+    <style>
+        #searchResultsTopBooks li {
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        #searchResultsTopBooks img {
+            width: 30px;
+            height: 45px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+    </style>
 }
 
 @section Scripts {
-    <script src="~/js/headerSearch.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const input = document.getElementById("bookSearchTopBooks");
+            const suggestions = document.getElementById("searchResultsTopBooks");
+            const rawData = document.getElementById("booksJsonTopBooks");
+
+            if (!input || !suggestions || !rawData) return;
+
+            const books = JSON.parse(rawData.value || "[]");
+
+            input.addEventListener("input", () => {
+                const query = input.value.toLowerCase();
+                suggestions.innerHTML = "";
+
+                if (!query) return;
+
+                const matches = books.filter(b => b.title.toLowerCase().includes(query)).slice(0, 5);
+
+                matches.forEach(book => {
+                    const li = document.createElement("li");
+                    li.className = "list-group-item list-group-item-action";
+
+                    const container = document.createElement("div");
+                    container.className = "d-flex align-items-center";
+
+                    const img = document.createElement("img");
+                    img.src = book.cover;
+                    img.alt = book.title;
+
+                    const span = document.createElement("span");
+                    span.textContent = book.title;
+
+                    container.appendChild(img);
+                    container.appendChild(span);
+                    li.appendChild(container);
+
+                    li.onclick = () => window.location.href = `/Dashboard/BookDetailScreen/${book.id}`;
+                    suggestions.appendChild(li);
+                });
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!suggestions.contains(e.target) && e.target !== input) {
+                    suggestions.innerHTML = "";
+                }
+            });
+        });
+    </script>
 }

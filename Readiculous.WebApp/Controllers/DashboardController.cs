@@ -161,10 +161,6 @@ namespace Readiculous.WebApp.Controllers
             return View("ViewNewBooks", pagedBooks);
         }
 
-
-
-
-
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ViewTopBooks()
@@ -179,6 +175,7 @@ namespace Readiculous.WebApp.Controllers
 
             return View(topBooks);
         }
+
         [HttpGet]
         public IActionResult GenreScreen()
         {
@@ -238,24 +235,28 @@ namespace Readiculous.WebApp.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("Dashboard/BookDetailScreen/{id}")]
         [AllowAnonymous]
         public IActionResult BookDetailScreen(string id)
         {
+            // Validate ID
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Invalid book ID.");
+
+            // Get book details
             var book = _bookService.GetBookDetailsById(id);
             if (book == null)
-                return NotFound();
+                return NotFound("Book not found.");
 
-            if (User.Identity.IsAuthenticated && User.IsInRole("Reviewer"))
+            // Check if user is authenticated and is a Reviewer
+            bool isReviewer = User.Identity?.IsAuthenticated == true && User.IsInRole("Reviewer");
+            ViewBag.IsReviewer = isReviewer;
+
+            if (isReviewer)
             {
-                ViewBag.IsReviewer = true;
                 ViewBag.UserId = this.UserId;
                 ViewBag.UserName = this.UserName;
                 ViewBag.UserEmail = _userService.GetEmailByUserId(this.UserId);
-            }
-            else
-            {
-                ViewBag.IsReviewer = false;
             }
 
             return View(book);

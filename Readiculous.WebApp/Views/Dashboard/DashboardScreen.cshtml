@@ -4,37 +4,54 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Dashboard";
 
-    var sortedNewBooks = Model.NewBooks?
-        .OrderByDescending(b => b.CreatedTime)
-        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
-
-    var sortedTopBooks = Model.TopBooks?
-        .OrderByDescending(b => b.AverageRating)
-        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
-
+    var sortedNewBooks = Model.NewBooks?.OrderByDescending(b => b.CreatedTime).ToList() ?? new();
+    var sortedTopBooks = Model.TopBooks?.OrderByDescending(b => b.AverageRating).ToList() ?? new();
     string keyword = ViewBag.Keyword as string ?? "";
+
+    // Combine all books (new, top, favorite) and remove duplicates by BookId
+    var allBooks = (Model.NewBooks ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>())
+        .Concat(Model.TopBooks ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>())
+        .Where(b => !string.IsNullOrWhiteSpace(b.Title))
+        .GroupBy(b => b.BookId)
+        .Select(g => g.First())
+        .ToList();
+
+    var dashboardJson = allBooks
+        .Select(b => new
+        {
+            id = b.BookId,
+            title = b.Title,
+            cover = string.IsNullOrWhiteSpace(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl,
+            createdTime = b.CreatedTime.ToString("o")
+        });
 }
 
+<input type="hidden" id="booksJsonDashboard" value='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(dashboardJson))' />
+
 <div class="container py-4">
-    <!-- Search Bar (Matches ViewNewBooks style) -->
-    <div class="row mb-4 align-items-end">
+    <!-- Search Bar with Autocomplete -->
+    <div class="row mb-4 align-items-end position-relative">
         <div class="col-lg-9">
             <label for="searchDashboard" class="form-label">Search Books</label>
-            <form method="get" asp-action="ViewNewBooks" asp-controller="Dashboard" class="d-flex">
+            <form method="get" asp-action="ViewNewBooks" asp-controller="Dashboard" class="d-flex position-relative">
                 <input type="text"
                        id="searchDashboard"
                        name="keyword"
                        value="@keyword"
                        class="form-control me-2"
+                       autocomplete="off"
                        placeholder="🔍 Search books..." />
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
+            <ul id="searchSuggestions"
+                class="list-group position-absolute w-100 mt-1 shadow"
+                style="z-index: 999;">
+            </ul>
         </div>
     </div>
 
-    <!-- NEW BOOKS + FAVORITE BOOKS -->
+    <!-- NEW BOOKS Section -->
     <div class="row mb-5">
-        <!-- NEW BOOKS -->
         <div class="col-lg-9">
             <section class="h-100">
                 <div class="section-box p-3 h-100">
@@ -51,7 +68,9 @@
                                     <div class="book-card h-100 text-center">
                                         <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
                                             <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
-                                                 class="book-image mb-3 img-fluid" alt="@book.Title" style="height: 220px; object-fit: contain;" />
+                                                 class="book-image mb-3 img-fluid"
+                                                 alt="@book.Title"
+                                                 style="height: 220px; object-fit: contain;" />
                                             <h6 class="book-title mb-1">@book.Title</h6>
                                             <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
                                             <div class="book-rating mb-0">
@@ -89,7 +108,7 @@
             <section class="h-100">
                 <div class="section-box p-3 h-100 d-flex flex-column">
                     <div class="favorite-cat-icon text-center mb-3 mt-2">
-                        <img src="~/img/cats.png" alt="Cat Icon" style="max-width: 80%; height: auto; margin-top: 10px;" />
+                        <img src="~/img/cats.png" alt="Cat Icon" style="max-width: 80%; height: auto;" />
                     </div>
                     <h5 class="text-center mb-3">Your Favorite Books</h5>
                     <div class="favorite-book-list w-100 flex-grow-1">
@@ -135,7 +154,9 @@
                                     <div class="book-card h-100 text-center">
                                         <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
                                             <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
-                                                 class="book-image mb-3 img-fluid" alt="@book.Title" style="height: 220px; object-fit: contain;" />
+                                                 class="book-image mb-3 img-fluid"
+                                                 alt="@book.Title"
+                                                 style="height: 220px; object-fit: contain;" />
                                             <h6 class="book-title mb-1">@book.Title</h6>
                                             <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
                                             <div class="book-rating mb-0">
@@ -168,7 +189,7 @@
             </section>
         </div>
         <div class="col-lg-3">
-            <!-- Empty column for alignment -->
+            <!-- Empty column for layout balance -->
         </div>
     </div>
 </div>
@@ -178,5 +199,5 @@
 }
 
 @section Scripts {
-    <script src="~/js/headerSearch.js"></script>
+    <script src="~/js/searchBar.js" asp-append-version="true"></script>
 }

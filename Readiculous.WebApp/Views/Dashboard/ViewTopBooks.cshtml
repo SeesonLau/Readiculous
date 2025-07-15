@@ -7,17 +7,36 @@
     string keyword = ViewBag.Keyword as string ?? "";
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
+
+    // Prepare a list for autocomplete
+    var jsonBooks = Model.Select(b => new
+    {
+        id = b.BookId,
+        title = b.Title,
+        cover = string.IsNullOrEmpty(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
+    });
 }
+
+<!-- Hidden JSON for JS use -->
+<input type="hidden" id="booksJsonTopBooks" value='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(jsonBooks))' />
 
 <div class="container py-4">
     <!-- Search and Back -->
-    <div class="row mb-4 justify-content-between align-items-end">
+    <div class="row mb-4 justify-content-between align-items-end position-relative">
         <div class="col-md-9">
-            <label for="searchTopBooks" class="form-label">Search Books</label>
-            <form method="get" asp-action="ViewTopBooks" asp-controller="Dashboard" class="d-flex">
-                <input type="text" id="searchTopBooks" name="keyword" value="@keyword" class="form-control me-2" placeholder="🔍 Search books..." />
+            <label for="bookSearchTopBooks" class="form-label">Search Books</label>
+            <form method="get" asp-action="ViewTopBooks" asp-controller="Dashboard" class="d-flex position-relative">
+                <input type="text"
+                       id="bookSearchTopBooks"
+                       name="keyword"
+                       value="@keyword"
+                       class="form-control me-2"
+                       placeholder="🔍 Search books..."
+                       autocomplete="off" />
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
+            <!-- Autocomplete dropdown -->
+            <ul id="searchResultsTopBooks" class="list-group position-absolute w-100 mt-1 shadow" style="z-index: 999;"></ul>
         </div>
         <div class="col-md-3 text-end mt-3 mt-md-0">
             <a href="@Url.Action("DashboardScreen", "Dashboard")" class="btn btn-outline-secondary">← Back to Dashboard</a>
@@ -33,7 +52,7 @@
         @if (Model.Any())
         {
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-                @foreach (var book in Model)
+                @foreach (var book in Model.OrderByDescending(b => b.AverageRating))
                 {
                     var filledStars = (int)Math.Floor((double)book.AverageRating);
                     bool hasReview = book.AverageRating > 0;
@@ -100,5 +119,5 @@
 }
 
 @section Scripts {
-    <script src="~/js/topBook.js"></script>
+    <script src="~/js/searchBar.js" asp-append-version="true"></script>
 }
