@@ -1,17 +1,11 @@
 ﻿using AutoMapper;
-using NetTopologySuite.Index.HPRtree;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
-using Supabase.Gotrue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using X.PagedList;
-using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
 {

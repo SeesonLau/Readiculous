@@ -120,35 +120,12 @@ namespace Readiculous.WebApp.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ViewNewBooks(string keyword = "")
+        public IActionResult ViewNewBooks(string keyword, int pageNumber = 1, int pageSize = 10)
         {
-            var allBooks = _bookService.GetBookList(
-                "", // leave search string blank — we’ll filter it ourselves
-                new List<GenreViewModel>(),
-                "",
-                BookSortType.Latest
-            );
-
-            List<BookListItemViewModel> filteredBooks;
-
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                // ONLY search by keyword — DO NOT filter by CreatedTime
-                filteredBooks = allBooks
-                    .Where(b => !string.IsNullOrWhiteSpace(b.Title)
-                        && b.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-            else
-            {
-                // If no keyword, show books from the last 2 weeks only
-                filteredBooks = allBooks
-                    .Where(b => b.CreatedTime >= DateTime.UtcNow.AddDays(-14))
-                    .ToList();
-            }
+            var newBookViewModel = _bookService.GetPaginatedBookList(searchString: keyword, genres: null, this.UserId, pageNumber, pageSize, sortType: BookSortType.NewBooksDescending);
 
             ViewBag.Keyword = keyword;
-            return View("ViewNewBooks", filteredBooks);
+            return View("ViewNewBooks", newBookViewModel);
         }
 
 
