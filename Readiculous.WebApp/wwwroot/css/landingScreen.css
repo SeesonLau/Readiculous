@@ -68,7 +68,6 @@ html, body {
     max-width: 480px;
     margin-bottom: 32px;
     overflow-y: auto;
-    /* Take up remaining space below header, but not more */
     min-height: 0;
 }
 
