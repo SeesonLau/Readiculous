@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using NetTopologySuite.Index.HPRtree;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
@@ -39,6 +40,28 @@ namespace Readiculous.Services.Services
             dashboardViewModel.NewBooks = _mapper.Map<List<BookListItemViewModel>>(newBooks);
             dashboardViewModel.TopBooks = _mapper.Map<List<BookListItemViewModel>>(topBooks);
             dashboardViewModel.FavoriteBooks = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
+
+            foreach(var model in  dashboardViewModel.NewBooks)
+            {
+                var book = newBooks.FirstOrDefault(b => b.BookId == model.BookId);
+                if (book != null)
+                {
+                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
+                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
+                    model.TotalReviews = validReviews.Count;
+                }
+            }
+
+            foreach (var model in dashboardViewModel.TopBooks)
+            {
+                var book = topBooks.FirstOrDefault(b => b.BookId == model.BookId);
+                if (book != null)
+                {
+                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
+                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
+                    model.TotalReviews = validReviews.Count;
+                }
+            }
 
             return dashboardViewModel;
         }
