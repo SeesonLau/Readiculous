@@ -141,14 +141,14 @@ namespace Readiculous.WebApp.Controllers
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         var redirectUrl = isAdmin
-                            ? Url.Action("DashboardScreen", "DashboardAdmin")
+                            ? Url.Action("AdminScreen", "DashboardAdmin")
                             : Url.Action("DashboardScreen", "Dashboard");
                         return Json(new { success = true, redirectUrl });
                     }
                     else
                     {
                         if (isAdmin)
-                            return RedirectToAction("DashboardScreen", "DashboardAdmin");
+                            return RedirectToAction("AdminScreen", "DashboardAdmin");
                         else
                             return RedirectToAction("DashboardScreen", "Dashboard");
                     }
