@@ -11,19 +11,12 @@
         <label class="form-label" for="passwordInput">@Password</label>
         <input type="password" id="passwordInput" class="form-control" asp-for="Password" placeholder="Enter password" />
         <span asp-validation-for="Password" class="text-danger"></span>
+        <div style="display: flex; justify-content: flex-end; margin-top: 0.3rem;">
+            <a href="#" class="login-link forgot-link" id="show-forgot" style="font-size: 0.95rem; font-weight: 400; color: #fff; opacity: 0.85;">@ForgotPass</a>
+        </div>
     </div>
-    <div style="display: flex; justify-content: center;">
+    <div style="display: flex; justify-content: center; gap: 12px; margin-top: 1.2rem;">
         <button class="btn login-btn" type="submit">@Login</button>
-    </div>
-    <div style="display: flex; justify-content: center; margin-top: 1.2rem;">
-        <a href="#" class="login-link" id="show-forgot">@ForgotPass</a>
-    </div>
-    <div style="display: flex; justify-content: center; align-items: center; margin: 1.2rem 0;">
-        <div style="flex: 1; height: 1px; background: #fff; opacity: 0.5;"></div>
-        <span style="margin: 0 12px; color: #fff; opacity: 0.7;">or</span>
-        <div style="flex: 1; height: 1px; background: #fff; opacity: 0.5;"></div>
-    </div>
-    <div style="display: flex; justify-content: center;">
-        <a href="#" class="login-link" id="show-signup" style="font-weight: bold;">Sign Up</a>
+        <button type="button" class="btn login-btn signup-btn" id="show-signup" style="font-weight: bold; background: #fff; color: #b089a5; border: 2px solid #b089a5;">Sign Up</button>
     </div>
 </form> 

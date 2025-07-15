@@ -118,12 +118,13 @@ namespace Readiculous.WebApp.Controllers
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
                             return Json(new { success = true, firstTime = true });
-            }
-            else
-            {
+                        }
+                        else
+                        {
                             return RedirectToAction("FirstTimeProfile");
                         }
                     }
+                    // Only allow login if AccessStatus is Verified
                     if (user.AccessStatus != AccessStatus.Verified)
                     {
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -361,7 +362,8 @@ namespace Readiculous.WebApp.Controllers
                 user.ProfilePicture = ProfilePicture;
             user.AccessStatus = AccessStatus.Verified;
             await _userService.UpdateUserAsync(user, userId);
-            return Ok();
+            await this._signInManager.SignInAsync(_userService.GetUserById(userId), isPersistent: true);
+            return Json(new { success = true, redirectUrl = Url.Action("DashboardScreen", "Dashboard") });
         }
 
 
