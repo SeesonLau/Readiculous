@@ -1,0 +1,67 @@
+﻿@model Readiculous.WebApp.Models.LoginViewModel
+@using static Readiculous.Resources.Views.Screen
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Readiculous - Landing Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/landingScreen.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+</head>
+<body style="background: #f2eff1;">
+    <div class="center-viewport">
+        <!-- Centered Welcome Message -->
+        <div class="welcome-message">
+            <div class="welcome-title">Welcome Back, Reader!</div>
+            <div class="welcome-subtitle">Log in to join the readiculous fun.</div>
+        </div>
+        <div class="split-container">
+            <!-- Left Side: Image and Text -->
+            <div class="left-half">
+                <img src="@Url.Content("~/img/download.png")" alt="Reading Illustration" />
+                <div class="hero-title">Where Book Reviews are Seriously Readiculous!</div>
+                <div class="hero-desc">
+                    Discover new books worth reading, share your honest thoughts, and explore what others are saying.<br>
+                    Whether you're a casual reader or a dedicated bookworm, join a community that takes book reviewing to the next level with a touch of fun, flair, and readiculous passion.
+                </div>
+            </div>
+            <!-- Right Side: Login Form -->
+            <div class="right-half">
+                <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 18px; gap: 10px;">
+                    <img src="@Url.Content("~/img/readiculous-logo.svg")" style="width: 80px; height: 80px; display: block; margin: 0 auto;" alt="Logo" />
+                </div>
+                <div class="login-card">
+                    <div id="auth-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="~/js/auth.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "5000"
+        };
+        var errorMessage = '@TempData["ErrorMessage"]';
+        var successMessage = '@TempData["SuccessMessage"]';
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
+        if (successMessage) {
+            toastr.success(successMessage);
+        }
+    </script>
+</body>
+</html>

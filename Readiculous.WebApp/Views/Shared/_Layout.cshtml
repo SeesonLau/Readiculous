@@ -16,9 +16,9 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5.0.2/dist/css/coreui.min.css" />
-    
+
     <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
-   
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
     @RenderSection("Styles", required: false)
@@ -88,22 +88,7 @@
         </main>
         <partial name="_Footer" />
     </div>
-
-    <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" id="registrationModalContent">
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" id="editProfileModalContent">
-            </div>
-        </div>
-    </div>
-
-
+    <!-- Removed registrationModal and editProfileModal, as their partials are now loaded via AJAX or have been moved/deleted. -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -133,6 +118,23 @@
     </script>
 
     <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-center",
+            "timeOut": "5000"
+        };
+        var errorMessage = '@TempData["ErrorMessage"]';
+        var successMessage = '@TempData["SuccessMessage"]';
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
+        if (successMessage) {
+            toastr.success(successMessage);
+        }
+    </script>
+
+    <script>
         //For Header, Footer, and Main to take full height of the viewport
         document.querySelector('main').style.maxHeight = `calc(100vh - ${document.querySelector('header').offsetHeight}px - ${document.querySelector('footer').offsetHeight}px)`;
         // DO NOT REMOVE
@@ -140,7 +142,7 @@
             e.preventDefault();
 
             $.ajax({
-                url: '@Url.Action("EditProfile", "Home")',
+                url: '@Url.Action("EditProfile", "Dashboard")',
                 type: 'GET',
                 success: function (result) {
                     $('#editProfileModalContent').html(result);
@@ -177,9 +179,67 @@
             });
         });
     </script>
+
+    <!-- Removed deleted modal partials: _LoginModal, _OTPModal, _ForgotPasswordModal, _ForgotPasswordOtpModal, _ResetPasswordModal, _AllDoneModal -->
     @await RenderSectionAsync("Scripts", required: false)
+    <!-- Authentication partials for AJAX/modal use -->
+    @await Html.PartialAsync("_LoginPartial", new Readiculous.WebApp.Models.LoginViewModel())
+    @await Html.PartialAsync("_RegisterPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("_ForgotPasswordPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
+    @await Html.PartialAsync("_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
+    @await Html.PartialAsync("_SuccessPartial")
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="editProfileModalContent">
+          <!-- AJAX content will be loaded here -->
+        </div>
+      </div>
+    </div>
 </body>
 </html>
+<!-- Removed deleted scripts: login.js, register.js, forgotPassword.js -->
+
+
+<script>
+    function switchModal(currentModalId, targetModalId) {
+      const currentModalEl = document.querySelector(currentModalId);
+      const targetModalEl = document.querySelector(targetModalId);
+
+      if (currentModalEl && targetModalEl) {
+        const currentModal = bootstrap.Modal.getInstance(currentModalEl);
+        const targetModal = new bootstrap.Modal(targetModalEl);
+
+        if (currentModal) {
+          currentModal.hide();
+        }
+
+        setTimeout(() => {
+          targetModal.show();
+        }, 150);
+      }
+    }
+
+    function showAllDoneModal(message) {
+        const allDoneModal = document.getElementById('allDoneModal');
+        const messageElement = document.getElementById('allDoneMessage');
+
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+
+        const modal = new bootstrap.Modal(allDoneModal);
+        modal.show();
+    }
+
+    function goToLandingPage() {
+        window.location.href = '/Home/LandingScreen';
+    }
+</script>
+
+
+
 
 <style>
     /* Reset default margins/paddings */

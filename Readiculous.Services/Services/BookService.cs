@@ -115,7 +115,8 @@ namespace Readiculous.Services.Services
 
             if (model.CoverImage != null && model.CoverImage.Length > 0)
             {
-                await DeleteCoverImage(book.CoverImageUrl);
+                if(!string.IsNullOrEmpty(book.CoverImageUrl))
+                    await DeleteCoverImage(book.CoverImageUrl);
 
                 book.CoverImageUrl = await UploadCoverImage(model.CoverImage, book.BookId);
             }

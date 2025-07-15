@@ -73,11 +73,25 @@ namespace Readiculous.WebApp.Controllers
         }
 
         /// <summary>
+        /// Register Method - Shows registration page
+        /// </summary>
+        /// <returns>Registration view</returns>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            return View(new EmailRequestModel());
+        }
+
+        /// <summary>
         /// Authenticate user and signs the user in when successful.
         /// </summary>
         /// <param name="model">The model.</param>
         /// <param name="returnUrl">The return URL.</param>
         /// <returns> Created response view </returns>
+        /// 
+
+
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
@@ -85,7 +99,104 @@ namespace Readiculous.WebApp.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Invalid input." });
                 return View(model);
+            }
+
+            try
+            {
+                User user = null;
+                var loginResult = _userService.AuthenticateUserByEmail(model.Email, model.Password, ref user);
+                if (loginResult == LoginResult.Success)
+                {
+                    if (user.AccessStatus == AccessStatus.FirstTime)
+                    {
+                        await this._signInManager.SignInAsync(user, isPersistent: true);
+                        this._session.SetString("UserName", user.Username);
+                        TempData["AccessStatus"] = user.AccessStatus.ToString();
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Json(new { success = true, firstTime = true });
+            }
+            else
+            {
+                            return RedirectToAction("FirstTimeProfile");
+                        }
+                    }
+                    if (user.AccessStatus != AccessStatus.Verified)
+                    {
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                            return Json(new { success = false, message = "Your account is not allowed to login. Please contact support." });
+                        TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
+                        return View();
+                    }
+
+                    await this._signInManager.SignInAsync(user, isPersistent: true);
+                    this._session.SetString("UserName", user.Username);
+                    TempData["AccessStatus"] = user.AccessStatus.ToString();
+
+                    // Redirect based on role
+                    var isAdmin = user.Role == RoleType.Admin;
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        var redirectUrl = isAdmin
+                            ? Url.Action("DashboardScreen", "DashboardAdmin")
+                            : Url.Action("DashboardScreen", "Dashboard");
+                        return Json(new { success = true, redirectUrl });
+                    }
+                    else
+                    {
+                        if (isAdmin)
+                            return RedirectToAction("DashboardScreen", "DashboardAdmin");
+                        else
+                            return RedirectToAction("DashboardScreen", "Dashboard");
+                    }
+                }
+                else
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Wrong Email or Password" });
+                    TempData["ErrorMessage"] = "Wrong Email or Password";
+                    return View(model);
+                }
+            }
+            catch (InvalidDataException ex)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = ex.Message });
+                TempData["ErrorMessage"] = ex.Message;
+                return View(model);
+            }
+            catch (Exception)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "A server error occurred. Please try again later." });
+                TempData["ErrorMessage"] = "A server error occurred. Please try again later.";
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult FirstTimeProfile()
+        {
+            // Return a partial/modal for first time profile completion
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var user = _userService.GetUserEditById(userId);
+            return PartialView("~/Views/Shared/_FirstTimeProfilePartial.cshtml", user);
+        }
+
+        [HttpPost]
+
+        public async Task<IActionResult> LoginAjax([FromForm] LoginViewModel model)
+        {
+            _session.SetString("HasSession", "Exist");
+
+            if (!ModelState.IsValid)
+            {
+                return Json(new { success = false, message = "Invalid input." });
             }
 
             try
@@ -96,112 +207,113 @@ namespace Readiculous.WebApp.Controllers
                 {
                     if (user.AccessStatus != AccessStatus.FirstTime && user.AccessStatus != AccessStatus.Verified)
                     {
-                        TempData["ErrorMessage"] = "Your account is not allowed to login. Please contact support.";
-                        return View();
+                        return Json(new { success = false, message = "Your account is not allowed to login. Please contact support." });
                     }
 
-                    await this._signInManager.SignInAsync(user);
-                    this._session.SetString("UserName", user.Username);
-                    // Pass AccessStatus to the view for modal logic
-                    TempData["AccessStatus"] = user.AccessStatus.ToString();
-                    return RedirectToAction("Index", "Home");
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    _session.SetString("UserRole", user.Role.ToString());
+
+                    // Redirect based on role
+                    var isAdmin = user.Role == RoleType.Admin;
+                    var redirectUrl = isAdmin
+                        ? Url.Action("DashboardScreen", "DashboardAdmin")
+                        : Url.Action("DashboardScreen", "Dashboard");
+                    return Json(new { success = true, redirectUrl });
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = Resources.Messages.Errors.IncorrectLoginCredentials;
-                    return View(model);
+                    return Json(new { success = false, message = "Wrong Email or Password" });
                 }
             }
             catch (InvalidDataException ex)
             {
-                TempData["ErrorMessage"] = ex.Message;
-                return View(model);
+                return Json(new { success = false, message = ex.Message });
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
-                // Optionally log ex.Message
-                return View(model);
+                return Json(new { success = false, message = "A server error occurred. Please try again later." });
             }
         }
 
 
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View(new EmailRequestModel());
-        }
 
         [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> RequestOtp(EmailRequestModel model)
+
+        public async Task<IActionResult> RegisterAjax([FromForm] EmailRequestModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View("Register", model);
+                return Json(new { success = false, message = "Valid email required." });
             }
 
-            var success = await _userService.SendOtpForRegistrationAsync(model.Email);
-            if (success)
+            var success = await _userService.SendOtpForRegistrationAsync(model.Email.Trim());
+            return Json(new
             {
-                TempData["SuccessMessage"] = "OTP has been sent to your email address.";
-                TempData["EmailForOtp"] = model.Email;
-                return RedirectToAction("VerifyOtp");
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Email already exists or failed to send OTP.";
-                return View("Register", model);
-            }
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult VerifyOtp()
-        {
-            var email = TempData["EmailForOtp"]?.ToString();
-            if (string.IsNullOrEmpty(email))
-            {
-                return RedirectToAction("Register");
-            }
-
-            var model = new OtpVerificationModel { Email = email };
-            return View(model);
+                success = success,
+                message = success ? "OTP sent!" : "Email exists or failed to send OTP."
+            });
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> VerifyOtp(OtpVerificationModel model)
+
+        public async Task<IActionResult> VerifyOtpAjax([FromForm] OtpVerificationModel model)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Otp))
             {
-                return View(model);
+                Console.WriteLine("Invalid input: Email or OTP is empty.");
+                return Json(new { success = false, message = "Invalid input." });
             }
 
-            var isValid = _userService.ValidateOtpForRegistration(model.Email, model.Otp);
+            var isValid = _userService.ValidateOtpForRegistration(model.Email.Trim(), model.Otp.Trim());
+            Console.WriteLine($"OTP validation for {model.Email}: {isValid}");
+
             if (isValid)
             {
-                // Generate temp password, create user, and send temp password email
-                var tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
-                var userModel = new UserViewModel
+                try
                 {
-                    UserId = Guid.NewGuid().ToString(),
-                    Email = model.Email,
-                    Username = model.Email,
-                    Password = tempPassword,
-                    Role = RoleType.Reviewer
-                };
-                await _userService.AddUserAsync(userModel, userModel.UserId);
-                await _userService.SendTempPasswordEmailAsync(model.Email, tempPassword);
-                // Show the registration success screen
-                return View("RegisterSuccess");
+                    var tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
+                    var userModel = new UserViewModel
+                    {
+                        UserId = Guid.NewGuid().ToString(),
+                        Email = model.Email,
+                        Username = model.Email,
+                        Password = tempPassword,
+                        Role = RoleType.Reviewer
+                    };
+                    Console.WriteLine($"Attempting to create user: {model.Email}");
+                    await _userService.AddUserAsync(userModel, userModel.UserId);
+                    Console.WriteLine($"User created: {model.Email}. Sending temp password...");
+                    await _userService.SendTempPasswordEmailAsync(model.Email, tempPassword);
+                    Console.WriteLine($"Temp password sent to: {model.Email}");
+
+                    return Json(new { success = true, message = "OTP verified! Check your email for your temporary password." });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception during user creation or email sending: {ex.Message}");
+                    return Json(new { success = false, message = "Failed to create user or send email. " + ex.Message });
+                }
             }
             else
             {
-                TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
-                return View(model);
+                Console.WriteLine("Invalid OTP entered.");
+                return Json(new { success = false, message = "Invalid OTP. Please try again." });
             }
         }
+
+
+        [HttpPost]
+
+        public async Task<IActionResult> ResendOtpAjax([FromBody] EmailRequestModel model)
+        {
+            var success = await _userService.SendOtpForRegistrationAsync(model.Email.Trim());
+            return Json(new
+            {
+                success = success,
+                message = success ? "OTP resent!" : "Failed to resend OTP."
+            });
+        }
+
 
         [HttpPost]
         [AllowAnonymous]
@@ -216,19 +328,20 @@ namespace Readiculous.WebApp.Controllers
             {
                 TempData["ErrorMessage"] = "Failed to resend OTP. Please try again.";
             }
-            
+
             var model = new OtpVerificationModel { Email = email };
             return View("VerifyOtp", model);
         }
 
         /// <summary>
-        /// Sign Out current account and return login view.
+        /// Sign Out current account and return landing page view.
         /// </summary>
         /// <returns>Created response view</returns>
         public async Task<IActionResult> SignOutUser()
         {
             await this._signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            HttpContext.Session.Clear(); // Clear session data on logout
+            return RedirectToAction("LandingScreen", "Home");
         }
 
         [HttpPost]
@@ -261,14 +374,63 @@ namespace Readiculous.WebApp.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        public async Task<IActionResult> RequestSignupOtp(EmailRequestModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Valid email required." });
+                return View("Register", model);
+            }
+
+            // Signup: Email must NOT exist
+            if (_userService.EmailExists(model.Email.Trim()))
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Email already exists." });
+                TempData["ErrorMessage"] = "Email already exists.";
+                return View("Register", model);
+            }
+
+            var success = await _userService.SendOtpForRegistrationAsync(model.Email.Trim());
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { success = success, message = success ? "OTP sent!" : "Failed to send OTP." });
+            if (success)
+            {
+                TempData["SuccessMessage"] = "OTP has been sent to your email address.";
+                TempData["EmailForOtp"] = model.Email;
+                return RedirectToAction("VerifyOtp");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to send OTP.";
+                return View("Register", model);
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> RequestForgotPasswordOtp(EmailRequestModel model)
         {
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Valid email required." });
                 return View("ForgotPassword", model);
             }
 
-            var success = await _userService.SendOtpForForgotPasswordAsync(model.Email);
+            // Forgot password: Email must exist
+            if (!_userService.EmailExists(model.Email.Trim()))
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Email does not exist." });
+                TempData["ErrorMessage"] = "Email does not exist.";
+                return View("ForgotPassword", model);
+            }
+
+            var success = await _userService.SendOtpForForgotPasswordAsync(model.Email.Trim());
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { success = success, message = success ? "OTP sent!" : "Failed to send OTP." });
             if (success)
             {
                 TempData["SuccessMessage"] = "OTP has been sent to your email address.";
@@ -277,23 +439,74 @@ namespace Readiculous.WebApp.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = Errors.ForgotPasswordEmailFailed;
+                TempData["ErrorMessage"] = "Failed to send OTP.";
                 return View("ForgotPassword", model);
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
-        public IActionResult ForgotPasswordOtp()
+        public async Task<IActionResult> VerifySignupOtp(OtpVerificationModel model)
         {
-            var email = TempData["EmailForForgotPasswordOtp"]?.ToString();
-            if (string.IsNullOrEmpty(email))
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction("ForgotPassword");
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Invalid input." });
+                return View(model);
             }
 
-            var model = new OtpVerificationModel { Email = email };
+            // Signup: Email must NOT exist (should not happen, but double check)
+            if (_userService.EmailExists(model.Email.Trim()))
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Email already exists." });
+                TempData["ErrorMessage"] = "Email already exists.";
+                return View(model);
+            }
+
+            var isValid = _userService.ValidateOtpForRegistration(model.Email.Trim(), model.Otp.Trim());
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (isValid)
+                {
+                    // Create user and send temp password
+                    try
+                    {
+                        var tempPassword = Readiculous.Services.Manager.OtpManager.GenerateTempPassword();
+                        var userModel = new UserViewModel
+                        {
+                            UserId = Guid.NewGuid().ToString(),
+                            Email = model.Email,
+                            Username = model.Email,
+                            Password = tempPassword,
+                            Role = RoleType.Reviewer
+                        };
+                        await _userService.AddUserAsync(userModel, userModel.UserId);
+                        await _userService.SendTempPasswordEmailAsync(model.Email, tempPassword);
+                        TempData["SuccessMessage"] = "Registration complete! Check your email for your temporary password.";
+                        return Json(new { success = true });
+                    }
+                    catch (Exception ex)
+                    {
+                        return Json(new { success = false, message = "Failed to create user or send email. " + ex.Message });
+                    }
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Invalid OTP. Please try again." });
+                }
+            }
+            if (isValid)
+            {
+                // ... (non-AJAX, not used in SPA)
+                TempData["SuccessMessage"] = "Registration complete! Check your email for your temporary password.";
+                return RedirectToAction("LandingScreen", "Home");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
             return View(model);
+            }
         }
 
         [HttpPost]
@@ -302,10 +515,32 @@ namespace Readiculous.WebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Invalid input." });
+                return View("ForgotPasswordOtp", model);
+            }
+
+            // Forgot password: Email must exist
+            if (!_userService.EmailExists(model.Email.Trim()))
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Email does not exist." });
+                TempData["ErrorMessage"] = "Email does not exist.";
                 return View("ForgotPasswordOtp", model);
             }
 
             var isValid = _userService.ValidateOtpForForgotPassword(model.Email, model.Otp);
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (isValid)
+                {
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Invalid OTP. Please try again." });
+                }
+            }
             if (isValid)
             {
                 TempData["EmailForPasswordReset"] = model.Email;
@@ -316,14 +551,6 @@ namespace Readiculous.WebApp.Controllers
                 TempData["ErrorMessage"] = "Invalid OTP. Please try again.";
                 return View("ForgotPasswordOtp", model);
             }
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> ResendForgotPasswordOtp([FromBody] EmailRequestModel model)
-        {
-            var success = await _userService.ResendOtpForForgotPasswordAsync(model.Email);
-            return Json(new { success = success });
         }
 
         [HttpGet]
@@ -346,14 +573,29 @@ namespace Readiculous.WebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Invalid input." });
                 return View(model);
             }
 
             var success = await _userService.UpdatePasswordAsync(model.Email, model.NewPassword);
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Your password has been successfully reset!";
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to update password. Please try again." });
+                }
+            }
             if (success)
             {
-                // Use the registration success screen for "All done"
-                return View("RegisterSuccess");
+                // Store success message for landing page
+                TempData["SuccessMessage"] = "Password reset successful! You can now sign in with your new password.";
+                return RedirectToAction("LandingScreen", "Home");
             }
             else
             {
@@ -361,6 +603,53 @@ namespace Readiculous.WebApp.Controllers
                 return View(model);
             }
         }
+
+        /// <summary>
+        /// Forgot Password Success page
+        /// </summary>
+        /// <returns>Forgot password success view</returns>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordSuccess()
+        {
+            return View();
+        }
+
+        // Unified AJAX auth partial loader
+        [HttpGet]
+        public IActionResult AuthPartial(string view, string email = null, string flow = null)
+        {
+            switch (view)
+            {
+                case "login":
+                    return PartialView("~/Views/Shared/_LoginPartial.cshtml", new LoginViewModel());
+                case "register":
+                    return PartialView("~/Views/Shared/_RegisterPartial.cshtml", new EmailRequestModel());
+                case "forgot":
+                    return PartialView("~/Views/Shared/_ForgotPasswordPartial.cshtml", new EmailRequestModel());
+                case "otp":
+                    ViewBag.OtpFlow = (flow == "forgot") ? "forgot" : "signup";
+                    return PartialView("~/Views/Shared/_OtpPartial.cshtml", new OtpVerificationModel { Email = email });
+                case "reset":
+                    return PartialView("~/Views/Shared/_ResetPasswordPartial.cshtml", new ForgotPasswordModel { Email = email });
+                case "success":
+                    if (flow == "signup") {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = "Check your email for your temporary password.";
+                    } else if (flow == "forgot") {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = "Your password has been reset.";
+                    } else if (flow == "firsttime") {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = "Welcome to Readiculous";
+                    } else {
+                        ViewBag.Title = "All done";
+                        ViewBag.Message = TempData["SuccessMessage"] ?? "Success!";
+                    }
+                    return PartialView("~/Views/Shared/_SuccessPartial.cshtml");
+                default:
+                    return PartialView("~/Views/Shared/_LoginPartial.cshtml", new LoginViewModel());
+            }
+        }
     }
 }
-    

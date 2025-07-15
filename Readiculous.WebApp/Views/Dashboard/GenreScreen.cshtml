@@ -1,0 +1,207 @@
+﻿@using Readiculous.Services.ServiceModels
+@model List<BookListItemViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Genres";
+    ViewBag.ShowReviewerNav = true;
+
+    var allGenres = ViewBag.AllGenres as List<string> ?? new List<string>();
+}
+
+<style>
+    #genreToggle {
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        height: 45px;
+        width: 100%;
+        text-align: left;
+        padding-left: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #495057;
+    }
+
+        #genreToggle::after {
+            content: "\25BC";
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+    #genreMenu {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        max-height: 250px;
+        overflow-y: auto;
+        background: #fff;
+        z-index: 1000;
+    }
+
+    #selectedGenresDisplay .badge {
+        font-size: 0.85rem;
+    }
+
+    .display-title-highlight {
+        color: #4a148c;
+        font-weight: 600;
+    }
+
+    .card {
+        transition: transform 0.2s ease-in-out;
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .btn-outline-primary {
+        border-width: 2px;
+    }
+
+    a.text-card-link {
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
+
+<section class="container py-4">
+    <h2 class="mb-4">Explore by Genre</h2>
+
+    <form id="genreForm">
+        <div class="border rounded p-3 bg-light shadow-sm mb-4">
+            <div class="row align-items-center">
+                <!-- Dropdown -->
+                <div class="col-md-6">
+                    <label class="fw-bold mb-2">Genres</label>
+                    <div class="position-relative">
+                        <button type="button" class="form-select" id="genreToggle">
+                            Select genres…
+                        </button>
+                        <div class="dropdown-menu p-3 mt-1 w-100" id="genreMenu">
+                            <div class="row">
+                                @for (int i = 0; i < allGenres.Count; i++)
+                                {
+                                    <div class="col-6 col-sm-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input genre-checkbox" type="checkbox" id="chk_@allGenres[i]" value="@allGenres[i]" />
+                                            <label class="form-check-label" for="chk_@allGenres[i]">@allGenres[i]</label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div id="selectedGenresDisplay" class="mt-2"></div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary" onclick="submitGenre('Top')">Top</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="submitGenre('New')">New</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="selectedGenres" id="selectedGenresInput" />
+        <input type="hidden" name="filterType" id="filterType" />
+    </form>
+
+    <div class="text-center mt-3 mb-4">
+        <h4 id="displayTitle" class="display-title-highlight">All Books</h4>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-5 g-4" id="bookResults">
+        @foreach (var book in Model)
+        {
+            <div class="col">
+                <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-card-link">
+                    <div class="card h-100 text-center">
+                        <img src="@(book.CoverImageUrl ?? "/img/placeholder.png")" class="card-img-top" alt="@book.Title" />
+                        <div class="card-body">
+                            <h5 class="card-title">@book.Title</h5>
+                            <p class="card-text text-muted">@book.Author</p>
+                            <p class="card-text text-warning fw-bold">⭐ @book.AverageRating</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleButton = document.getElementById('genreToggle');
+        const genreMenu = document.getElementById('genreMenu');
+        const checkboxes = document.querySelectorAll('.genre-checkbox');
+        const selectedDisplay = document.getElementById('selectedGenresDisplay');
+        const hiddenGenreInput = document.getElementById('selectedGenresInput');
+        const filterTypeInput = document.getElementById('filterType');
+        const displayTitle = document.getElementById('displayTitle');
+
+        // Toggle dropdown
+        toggleButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            genreMenu.classList.toggle('show');
+        });
+
+        // Hide dropdown on outside click
+        document.addEventListener('click', function (event) {
+            if (!toggleButton.contains(event.target) && !genreMenu.contains(event.target)) {
+                genreMenu.classList.remove('show');
+            }
+        });
+
+        // Checkbox behavior
+        checkboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                updateSelectedGenres();
+                genreMenu.classList.remove('show');
+            });
+        });
+
+        function updateSelectedGenres() {
+            const selected = Array.from(checkboxes)
+                .filter(c => c.checked)
+                .map(c => c.value);
+
+            hiddenGenreInput.value = selected.join(',');
+            selectedDisplay.innerHTML = "";
+
+            selected.forEach(function (genre) {
+                const badge = document.createElement('span');
+                badge.className = "badge bg-primary me-1 mb-1";
+                badge.textContent = genre;
+                selectedDisplay.appendChild(badge);
+            });
+        }
+
+        // Handle Top/New filter button
+        window.submitGenre = function (type) {
+            const selected = Array.from(checkboxes)
+                .filter(c => c.checked)
+                .map(c => c.value);
+
+            filterTypeInput.value = type;
+            hiddenGenreInput.value = selected.join(',');
+
+            const genrePart = selected.length ? ` - ${selected.join(', ')}` : '';
+            displayTitle.textContent = `${type} Books${genrePart}`;
+
+            // Optional: Send to server or AJAX
+        };
+    });
+</script>
