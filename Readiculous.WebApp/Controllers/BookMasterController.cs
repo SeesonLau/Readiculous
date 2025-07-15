@@ -103,7 +103,7 @@ namespace Readiculous.WebApp.Controllers
 
             // If validation fails or error occurs, re-populate genres
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.AllAvailableGenres = _mapper.Map<List<GenreViewModel>>(allGenres);
             return PartialView("BookAddModal", model);
         }
 
@@ -113,7 +113,7 @@ namespace Readiculous.WebApp.Controllers
         {
             var model = _bookService.GetBookEditById(id);
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres).OrderBy(g => g.Name) .ToList();
+            model.AllAvailableGenres = _mapper.Map<List<GenreViewModel>>(allGenres).OrderBy(g => g.Name) .ToList();
             model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
             return PartialView(model);
         }
@@ -136,7 +136,7 @@ namespace Readiculous.WebApp.Controllers
             }
 
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.AllAvailableGenres = _mapper.Map<List<GenreViewModel>>(allGenres);
             return PartialView("BookEditModal", model);
         }
 

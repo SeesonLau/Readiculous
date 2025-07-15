@@ -38,9 +38,9 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
-                .Where(r => r.BookId == bookId &&
+                .Where(r => r.DeletedTime == null &&
                             r.User.DeletedTime == null &&
-                            r.DeletedTime == null);
+                            r.BookId == bookId);
         }
 
         public IQueryable<Review> GetReviewsWithNavigationPropertiesByUserId(string userId)
@@ -48,9 +48,9 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
-                .Where(r => r.UserId == userId &&
+                .Where(r => r.DeletedTime == null &&
                             r.Book.DeletedTime == null &&
-                            r.DeletedTime == null);
+                            r.UserId == userId);
         }
         public IQueryable<Review> GetReviewsByGenreId(string genreId) 
         {
@@ -72,16 +72,16 @@ namespace Readiculous.Data.Repositories
             return this.GetDbSet<Review>()
                 .Include(r => r.Book)
                 .Include(r => r.User)
-                .FirstOrDefault(r => r.BookId == bookId && 
+                .FirstOrDefault(r => r.DeletedTime == null && 
                                      r.UserId == userId &&
-                                     r.DeletedTime == null );
+                                     r.BookId == bookId);
         }
 
         public bool ReviewExists(string bookId, string userId)
         {
-            return this.GetDbSet<Review>().Any(r => r.BookId == bookId && 
-                                                  r.UserId == userId &&
-                                                  r.DeletedTime == null);
+            return this.GetDbSet<Review>().Any(r => r.DeletedTime == null && 
+                                                    r.UserId == userId &&
+                                                    r.BookId == bookId);
         }
     }
 }
