@@ -58,7 +58,6 @@ html, body {
     flex: 0 0 auto;
     width: 100%;
     max-width: 480px;
-    /* No scrolling here */
     overflow: visible !important;
 }
 
@@ -69,6 +68,12 @@ html, body {
     margin-bottom: 32px;
     overflow-y: auto;
     min-height: 0;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+}
+
+.login-card::-webkit-scrollbar {
+    display: none; 
 }
 
 .left-half img {
