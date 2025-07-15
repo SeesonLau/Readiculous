@@ -31,6 +31,10 @@
     {
         routeValues["sortOrder"] = ViewData["sortOrder"];
     }
+    if (ViewData["genreFilter"] != null)
+    {
+        routeValues["genreFilter"] = ViewData["genreFilter"];
+    }
 }
 
 <div class="pagination-container">

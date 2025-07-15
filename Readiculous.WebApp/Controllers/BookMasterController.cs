@@ -44,29 +44,28 @@ namespace Readiculous.WebApp.Controllers
             ViewBag.SelectedGenreIds = _genreService.GetSelectedGenreIds(genres);
             ViewBag.BookSortTypes = _bookService.GetBookSortTypes(sortOrder);
 
-            var allBooks = _bookService.GetBookList(
-                searchString: searchString,
-                genres: genres,
-                userID: this.UserId,
-                sortType: sortOrder,
-                genreFilter: genreFilter);
-
-            // For client-side caching
             if (pageSize == -1 || pageSize.ToString().ToLower() == "all")
             {
+                var allBooks = _bookService.GetBookList(
+                    searchString: searchString,
+                    genres: genres,
+                    userID: this.UserId,
+                    sortType: sortOrder,
+                    genreFilter: genreFilter);
+
                 return View(allBooks);
             }
 
-            var totalItems = allBooks.Count;
-            var paginatedBooks = allBooks
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var books = _bookService.GetPaginatedBookList(
+                searchString: searchString,
+                genres: genres,
+                userId: this.UserId,
+                sortType: sortOrder,
+                genreFilter: genreFilter,
+                pageNumber: page,
+                pageSize: pageSize);
 
-            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
-            ViewBag.PageSize = pageSize;
-
-            return View(paginatedBooks);
+            return View(books);
         }
         [HttpGet]
         public IActionResult BookAddModal()

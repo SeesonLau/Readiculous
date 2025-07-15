@@ -16,7 +16,8 @@ namespace Readiculous.WebApp.ViewComponents
             string routeBookSearch = null,
             string searchString = null,
             string searchType = null,
-            string sortOrder = null)
+            string sortOrder = null,
+            string genreFilter = null)
         {
             // Create the PaginationModel instance using the passed parameters
             var model = new PaginationModel(totalItems, currentPage, pageSize);
@@ -30,6 +31,7 @@ namespace Readiculous.WebApp.ViewComponents
             ViewData["searchString"] = searchString;
             ViewData["searchType"] = searchType;
             ViewData["sortOrder"] = sortOrder;
+            ViewData["genreFilter"] = genreFilter;
 
             return View(model); // Pass the constructed model to the default view (_Pagination.cshtml)
         }
