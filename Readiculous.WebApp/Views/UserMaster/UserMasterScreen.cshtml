@@ -75,7 +75,8 @@
                         action = ViewContext.RouteData.Values["action"]?.ToString(),
                         controller = ViewContext.RouteData.Values["controller"]?.ToString(),
                         searchString = ViewData["CurrentFilter"],
-                        searchType = ViewData["CurrentRoleType"]
+                        roleType = ViewData["CurrentRoleType"],
+                        sortOrder = ViewData["CurrentSortOrder"]
                         })
         </div>
     </div>

@@ -27,6 +27,10 @@
     {
         routeValues["searchType"] = ViewData["searchType"];
     }
+    if (ViewData["sortOrder"] != null) 
+    {
+        routeValues["sortOrder"] = ViewData["sortOrder"];
+    }
 }
 
 <div class="pagination-container">
