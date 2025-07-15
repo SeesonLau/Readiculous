@@ -23,35 +23,9 @@
 
     @RenderSection("Styles", required: false)
 
-    <style>
-           /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--color-background);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--color-header);
-            border-radius: 4px;
-        }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: var(--color-btn);
-            }
-
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: var(--color-header) var(--color-background);
-        }
-
-    </style>
 </head>
-<body class="d-flex flex-column" style="height: 100vh; margin: 0; padding: 0;">
-    <div class="d-flex flex-column" style="height: 100vh;">
+<body class="d-flex flex-column" style="height: 100vh; margin: 0; padding-right: 16px;">
+    <div class="d-flex flex-column" style="height: 100vh; margin-right: -16px;">
         @if (User.IsInRole("Admin"))
         {
             <partial name="_HeaderAdmin" />
@@ -60,7 +34,7 @@
         {
             <partial name="_HeaderTest" />
         }
-        <main role="main" class="container-xxl py-4 px-3 px-sm-4 px-xxl-0 mx-auto">
+        <main role="main" class="container-xxl py-4 px-3 px-sm-4 px-xxl-0 mx-auto" style="padding-right: 8px;">
             @RenderBody()
         </main>
         <partial name="_Footer" />
@@ -157,8 +131,17 @@
             });
         });
     </script>
+    @await RenderSectionAsync("Scripts", required: false)
 
-   
+@*     <!-- Removed deleted modal partials: _LoginModal, _OTPModal, _ForgotPasswordModal, _ForgotPasswordOtpModal, _ResetPasswordModal, _AllDoneModal -->
+    
+    <!-- Authentication partials for AJAX/modal use -->
+    @await Html.PartialAsync("_LoginPartial", new Readiculous.WebApp.Models.LoginViewModel())
+    @await Html.PartialAsync("_RegisterPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("_ForgotPasswordPartial", new Readiculous.Services.ServiceModels.EmailRequestModel())
+    @await Html.PartialAsync("_OtpPartial", new Readiculous.Services.ServiceModels.OtpVerificationModel())
+    @await Html.PartialAsync("_ResetPasswordPartial", new Readiculous.Services.ServiceModels.ForgotPasswordModel())
+    @await Html.PartialAsync("_SuccessPartial") *@
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -170,8 +153,6 @@
 </body>
 </html>
 <!-- Removed deleted scripts: login.js, register.js, forgotPassword.js -->
-
-
 <script>
     function switchModal(currentModalId, targetModalId) {
       const currentModalEl = document.querySelector(currentModalId);

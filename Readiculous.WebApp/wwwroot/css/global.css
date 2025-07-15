@@ -83,27 +83,33 @@ body {
 /* ================ */
 /* Scrollbar Styles (from layout.cshtml) */
 /* ================ */
+/* Enhanced scrollbar styling */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px; /* Slightly wider scrollbar */
+    height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--color-background);
+    background: transparent; /* Makes track invisible */
+    margin: 8px 0; /* Creates gap at top and bottom */
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--color-header);
-    border-radius: 4px;
+    border-radius: 6px;
+    border: 3px solid var(--color-background); /* Creates gap effect */
 }
 
     ::-webkit-scrollbar-thumb:hover {
         background: var(--color-btn);
+        border: 2px solid var(--color-background);
     }
 
+/* For Firefox */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-header) var(--color-background);
+    scrollbar-color: var(--color-header) transparent;
+    scrollbar-gutter: stable; /* Prevents content shift when scrollbar appears */
 }
 
 /* ================ */
