@@ -59,27 +59,27 @@ namespace Readiculous.WebApp.Controllers
                 role: roleType,
                 sortType: sortOrder);
 
-            // var users = _userService.GetPaginatedUserList(role: roleType, username: searchString, pageNumber: pageNumber, pageSize: pageSize, sortType: searchType);
-            // return View(users);
+            var users = _userService.GetPaginatedUserList(role: roleType, username: searchString, pageNumber: page, pageSize: pageSize, sortType: sortOrder);
+            return View(users);
 
             // TotalItems, PaginatedUsers, and PageSize is now defined in the IPageList<>
 
-            var totalItems = allUsers.Count;
-            var paginatedUsers = allUsers
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            //var totalItems = allUsers.Count;
+            //var paginatedUsers = allUsers
+            //    .Skip((page - 1) * pageSize)
+            //    .Take(pageSize)
+            //    .ToList();
 
-            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
-            ViewBag.PageSize = pageSize;
+            //ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
+            //ViewBag.PageSize = pageSize;
 
-            var model = new UserMasterViewModel
-            {
-                Users = paginatedUsers,
-                Pagination = (PaginationModel)ViewBag.PaginationModel
-            };
+            //var model = new UserMasterViewModel
+            //{
+            //    Users = paginatedUsers,
+            //    Pagination = (PaginationModel)ViewBag.PaginationModel
+            //};
 
-            return View(model);
+            //return View(model);
         }
 
 

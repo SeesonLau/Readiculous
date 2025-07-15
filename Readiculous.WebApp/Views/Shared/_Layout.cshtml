@@ -25,7 +25,7 @@
     @RenderSection("Styles", required: false)
 
 </head>
-<body class="d-flex flex-column" style="height: 100vh; margin: 0; padding-right: 16px;">
+@* <body class="d-flex flex-column" style="height: 100vh; margin: 0; padding-right: 16px;">
     <div class="d-flex flex-column" style="height: 100vh; margin-right: -16px;">
         @if (User.IsInRole("Admin"))
         {
@@ -39,8 +39,22 @@
             @RenderBody()
         </main>
         <partial name="_Footer" />
+    </div> *@
+<body >
+    <div  >
+        @if (User.IsInRole("Admin"))
+        {
+            <partial name="_HeaderAdmin" />
+        }
+        else
+        {
+            <partial name="_HeaderTest" />
+        }
+        <main role="main">
+            @RenderBody()
+        </main>
+        <partial name="_Footer" />
     </div>
-
     <!-- Removed registrationModal and editProfileModal, as their partials are now loaded via AJAX or have been moved/deleted. -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
