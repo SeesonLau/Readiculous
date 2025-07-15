@@ -172,12 +172,14 @@ namespace Readiculous.Data.Repositories
         public IQueryable<User> GetTopReviewers(int numberOfUsers)
         {
             return this.GetDbSet<User>()
-                .Where(u => u.DeletedTime == null)
-                .OrderBy(u => u.UserReviews.Count())
-                .Include(u => u.UserFavoriteBooks)
-                .Include(u => u.UserReviews)
-                .Take(numberOfUsers)
-                .AsNoTracking();
+                 .Where(u => u.DeletedTime == null)
+                 .Include(u => u.UserReviews)  // Include reviews for counting
+                 .OrderByDescending(u => u.UserReviews.Count)  // Changed to Descending
+                 .Take(numberOfUsers)
+                 .Include(u => u.UserFavoriteBooks)  // Include after ordering to avoid performance impact
+                 .Include(u => u.CreatedByUser)
+                 .Include(u => u.UpdatedByUser)
+                 .AsNoTracking();
         }
     }
 }

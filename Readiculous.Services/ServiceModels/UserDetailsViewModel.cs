@@ -19,7 +19,5 @@ namespace Readiculous.Services.ServiceModels
         public List<ReviewListItemViewModel> UserReviewModels { get; set; } = [];
         public List<FavoriteBookModel> FavoriteBookModels { get; set; } = [];
 
-
-
     }
 }
