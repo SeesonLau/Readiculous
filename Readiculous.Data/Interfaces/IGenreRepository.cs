@@ -45,7 +45,7 @@ namespace Readiculous.Data.Interfaces
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        (IQueryable<Genre>, int) GetAllPaginatedActiveGenres(int pageNumber, int pageSize, GenreSortType sortType);
+        (IQueryable<Genre>, int) GetAllPaginatedActiveGenres(int pageNumber, int pageSize);
         IQueryable<Genre> GetGenresByName(string genreName);
 
         /// <summary>

@@ -92,7 +92,7 @@ namespace Readiculous.Data.Repositories
                             g.Name.ToLower().Contains(genreName.ToLower()));
             var dataCount = data.Count();
 
-            data = data
+            data = SortGenres(data, sortType)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(g => g.CreatedByUser)
@@ -195,5 +195,17 @@ namespace Readiculous.Data.Repositories
 
             return topGenres;
         }
+
+        private IQueryable<Genre> SortGenres(IQueryable<Genre> genres, GenreSortType sortType)
+        {
+            return (sortType) switch
+            {
+                GenreSortType.NameAscending => genres.OrderBy(g => g.Name),
+                GenreSortType.NameDescending => genres.OrderByDescending(g => g.Name),
+                GenreSortType.BookCountAscending => genres.OrderBy(g => g.Books.Count),
+                _ => genres, // Default case
+            };
+        }
+
     }
 }

@@ -271,7 +271,7 @@ namespace Readiculous.Services.Services
             IQueryable<Genre> queryableGenreListItems;
             int genreCount;
 
-            (queryableGenreListItems, genreCount) = _genreRepository.GetPaginatedGenresByName(genreName, pageNumber, pageSize);
+            (queryableGenreListItems, genreCount) = _genreRepository.GetPaginatedGenresByName(genreName, pageNumber, pageSize, sortType: genreSortType);
             var listGenreListItem = queryableGenreListItems.ToList();
             var genreIds = listGenreListItem.Select(g => g.GenreId).ToList();
             var genres = _genreRepository.GetAllGenreAssignmentsByGenreIds(genreIds);
