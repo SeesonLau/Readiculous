@@ -59,9 +59,9 @@ namespace Readiculous.Resources.Constants
             Latest = 0,
             [Display(Name = "Oldest")]
             Oldest = 1,
-            [Display(Name = "Username: A-Z")]
+            [Display(Name = "Genre: A-Z")]
             NameAscending = 2,
-            [Display(Name = "Username: Z-A")]
+            [Display(Name = "Genre: Z-A")]
             NameDescending = 3,
             [Display(Name = "Book Count: 🡡")]
             BookCountAscending = 4,
