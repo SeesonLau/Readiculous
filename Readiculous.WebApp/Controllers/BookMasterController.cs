@@ -12,6 +12,7 @@ using Readiculous.WebApp.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Readiculous.Resources.Constants.Enums;
@@ -33,7 +34,7 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 100)
+        public IActionResult BookMasterScreen(string searchString, List<GenreViewModel> genres, BookSortType sortOrder = BookSortType.Latest, string? genreFilter = null, int page = 1, int pageSize = 10)
         {
             ViewData["CurrentFilter"] = searchString ?? "";
             ViewData["CurrentSortOrder"] = sortOrder.ToString();
@@ -84,7 +85,7 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     await _bookService.AddBook(model, this.UserId);
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Book Successfully Created!" });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -100,17 +101,19 @@ namespace Readiculous.WebApp.Controllers
                 }
             }
 
+            // If validation fails or error occurs, re-populate genres
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.AllAvailableGenres = _mapper.Map<List<GenreViewModel>>(allGenres);
             return PartialView("BookAddModal", model);
         }
+
 
         [HttpGet]
         public IActionResult BookEditModal(string id)
         {
             var model = _bookService.GetBookEditById(id);
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres).OrderBy(g => g.Name) .ToList();
+            model.AllAvailableGenres = _mapper.Map<List<GenreViewModel>>(allGenres).OrderBy(g => g.Name) .ToList();
             model.CoverImageUrl = model.CoverImageUrl ?? string.Empty;
             return PartialView(model);
         }
@@ -124,7 +127,7 @@ namespace Readiculous.WebApp.Controllers
                 try
                 {
                     await _bookService.UpdateBook(model, this.UserId);
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Book Details Successfully Edited!" });
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -133,7 +136,7 @@ namespace Readiculous.WebApp.Controllers
             }
 
             var allGenres = _genreService.GetGenreList(genreName: string.Empty);
-            model.AllAvailableGenres = _genreService.ConvertGenreListItemViewModelToGenreViewModel(allGenres);
+            model.AllAvailableGenres = _mapper.Map<List<GenreViewModel>>(allGenres);
             return PartialView("BookEditModal", model);
         }
 
@@ -147,7 +150,7 @@ namespace Readiculous.WebApp.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             await _bookService.DeleteBook(id, this.UserId);
-            return Json(new { success = true });
+            return Json(new { success = true, message = "Book Successfully Deleted!" });
         }
 
         // Favorite Book Methods
@@ -218,5 +221,7 @@ namespace Readiculous.WebApp.Controllers
                 return View(model);
             }
         }
+
+
     }
 }

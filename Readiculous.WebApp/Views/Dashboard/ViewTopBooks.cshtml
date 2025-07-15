@@ -1,0 +1,89 @@
+﻿@model List<Readiculous.Services.ServiceModels.BookListItemViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Top Books";
+
+    var validBooks = Model?
+        .Where(b => !string.IsNullOrWhiteSpace(b.Title))
+        .OrderByDescending(b => b.AverageRating)
+        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+}
+
+<section class="container py-4">
+    <!-- ✅ Matching header style -->
+    <div class="section-header d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title section-title-border mb-0">TOP BOOKS</h2>
+    </div>
+
+    @if (validBooks.Any())
+    {
+        <div class="book-wrapper p-4 mb-4">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+                @foreach (var book in validBooks)
+                {
+                    var filledStars = (int)Math.Floor((double)book.AverageRating);
+                    bool hasReview = book.AverageRating > 0;
+
+                    <div class="col">
+                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none text-reset">
+                            <div class="card book-card h-100 text-center">
+                                <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)" class="card-img-top book-image" alt="@book.Title" />
+                                <div class="card-body">
+                                    <h6 class="card-title">@book.Title</h6>
+                                    <p class="card-author small text-muted">@book.Author</p>
+                                    <div class="card-rating mb-1">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <span class="star @(i <= filledStars && hasReview ? "filled-star" : "empty-star")">&#9733;</span>
+                                        }
+                                        <span class="rating-value @(hasReview ? "text-warning" : "text-secondary")">
+                                            @book.AverageRating.ToString("0.0")
+                                        </span>
+                                    </div>
+                                    <div class="review-count small text-muted">
+                                        (@book.TotalReviews reviews)
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center">No top books found.</div>
+    }
+
+    <!-- JSON for search -->
+    <input type="hidden" id="booksJsonTopBooks" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+        validBooks.Select(b => new {
+            id = b.BookId,
+            title = b.Title.Trim(),
+            cover = string.IsNullOrEmpty(b.CoverImageUrl) ? "/img/placeholder.png" : b.CoverImageUrl
+        })
+    ))' />
+
+    <!-- Pagination -->
+    <div class="mt-5 d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-rounded">
+                <li class="page-item disabled"><a class="page-link" href="#">«</a></li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">»</a></li>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard-screen.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/topBook.js"></script>
+}

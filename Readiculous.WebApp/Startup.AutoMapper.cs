@@ -29,6 +29,7 @@ namespace Readiculous.WebApp
             public AutoMapperProfileConfiguration()
             {
                 //User Mappings
+
                 CreateMap<User, UserListItemViewModel>()
                     .ForMember(dest => dest.CreatedByUsername,
                                opt => opt.MapFrom(src => src.CreatedByUser.Username))
@@ -50,7 +51,6 @@ namespace Readiculous.WebApp
                 CreateMap<EditProfileViewModel, User>();
                 CreateMap<User, EditProfileViewModel>();
                 CreateMap<EditProfileViewModel, UserViewModel>();
-
 
                 // Genre Mappings
                 CreateMap<Genre, GenreListItemViewModel>()
@@ -92,7 +92,17 @@ namespace Readiculous.WebApp
                     .ForMember(dest => dest.ISBN,
                                opt => opt.MapFrom(src => src.ISBN.Trim()));
                 CreateMap<Book, BookViewModel>();
-                CreateMap<Book, FavoriteBookModel>();
+                CreateMap<FavoriteBook, FavoriteBookModel>()
+                    .ForMember(dest => dest.Title,
+                               opt => opt.MapFrom(src => src.Book.Title))
+                    .ForMember(dest => dest.Description,
+                               opt => opt.MapFrom(src => src.Book.Description))
+                    .ForMember(dest => dest.Author,
+                               opt => opt.MapFrom(src => src.Book.Author))
+                    .ForMember(dest => dest.CoverImageUrl,
+                               opt => opt.MapFrom(src => src.Book.CoverImageUrl))
+                    .ForMember(dest => dest.PublicationYear,
+                               opt => opt.MapFrom(src => src.Book.PublicationYear));
 
 
                 // Review Mappings

@@ -1,21 +1,21 @@
-﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
+﻿@using X.PagedList
+@model IPagedList<Readiculous.Services.ServiceModels.UserListItemViewModel>
 @using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "User Management";
+    var queryParams = new
+    {
+        searchString = ViewData["CurrentFilter"],
+        roleType = ViewData["CurrentRoleType"],
+        searchType = ViewData["CurrentUserSearchType"]
+    };
 }
 
 @section Styles {
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/modal-styles.css" />
 }
-
-<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" id="modalContent">
-        </div>
-    </div>
-</div>
 
 <h1>User Management</h1>
 
@@ -24,7 +24,6 @@
 </p>
 
 <form asp-action="Index" method="get" class="mb-4" id="searchForm">
-
     <div class="row align-items-end">
         <div class="col-md-4">
             <label class="form-label">Search Username/Email:</label>
@@ -37,21 +36,17 @@
                 <option value="">-- Select Role --</option>
                 @foreach (var role in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.RoleTypes)
                 {
-                    <option value="@role.Value" selected="@(role.Value == (ViewData["CurrentRoleType"]?.ToString() ?? "") ? "selected" : "")">
-                        @role.Text
-                    </option>
+                    <option value="@role.Value" selected="@(role.Value == ViewData["CurrentRoleType"]?.ToString() ? "selected" : "")">@role.Text</option>
                 }
             </select>
         </div>
 
         <div class="col-md-3">
             <label class="form-label">Search Type:</label>
-            <select name="searchType" class="form-control" id="searchType">
+            <select name="searchType" class="form-control">
                 @foreach (var type in (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.UserSearchTypes)
                 {
-                    <option value="@type.Value" selected="@(type.Value == (ViewData["CurrentUserSearchType"]?.ToString() ?? "") ? "selected" : "")">
-                        @type.Text
-                    </option>
+                    <option value="@type.Value" selected="@(type.Value == ViewData["CurrentUserSearchType"]?.ToString() ? "selected" : "")">@type.Text</option>
                 }
             </select>
         </div>
@@ -95,14 +90,13 @@
                     </td>
                     <td>@item.UserName</td>
                     <td>@item.Email</td>
-                    <td>@item.Role</td>                 
+                    <td>@item.Role</td>
                     <td>@item.CreatedByUsername</td>
                     <td>@item.CreatedTime.ToString("g")</td>
                     <td>@item.UpdatedByUsername</td>
                     <td>@item.UpdatedTime.ToString("g")</td>
                     <td>
-                        <a href="javascript:void(0)" class="btn btn-sm btn-warning"
-                           onclick="openEditUserModal('@item.UserId')">Edit User</a>
+                        <a href="javascript:void(0)" class="btn btn-sm btn-warning" onclick="openEditUserModal('@item.UserId')">Edit User</a>
                         <a href="javascript:void(0)" class="btn btn-sm btn-secondary" onclick="openRegistrationModal('@item.UserId')">Details</a> |
                         <a asp-action="Delete" asp-route-userId="@item.UserId" class="btn btn-sm btn-danger">Delete</a>
                     </td>
@@ -112,9 +106,49 @@
         else
         {
             <tr>
-                <td colspan="10" class="text-center">No users found matching your criteria.</td>
+                <td colspan="10" class="text-center text-muted">No users found matching your criteria.</td>
             </tr>
         }
     </tbody>
 </table>
 
+@if (Model.Count > 0)
+{
+    <div class="d-flex justify-content-center">
+        <div class="pagination">
+            @if (Model.HasPreviousPage)
+            {
+                <a class="btn btn-outline-primary me-1" href="@Url.Action("Index", new { queryParams.searchString, queryParams.roleType, queryParams.searchType, pageNumber = Model.PageNumber - 1 })">&laquo; Prev</a>
+            }
+            else
+            {
+                <span class="btn btn-outline-secondary disabled me-1">&laquo; Prev</span>
+            }
+
+            <span class="mx-2 align-self-center">Page @Model.PageNumber of @Model.PageCount</span>
+
+            @if (Model.HasNextPage)
+            {
+                <a class="btn btn-outline-primary ms-1" href="@Url.Action("Index", new { queryParams.searchString, queryParams.roleType, queryParams.searchType, pageNumber = Model.PageNumber + 1 })">Next &raquo;</a>
+            }
+            else
+            {
+                <span class="btn btn-outline-secondary disabled ms-1">Next &raquo;</span>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function openEditUserModal(userId) {
+            // implement ajax logic here if needed
+            console.log("Edit User: " + userId);
+        }
+
+        function openRegistrationModal(userId) {
+            // implement ajax logic here if needed
+            console.log("User Details: " + userId);
+        }
+    </script>
+}

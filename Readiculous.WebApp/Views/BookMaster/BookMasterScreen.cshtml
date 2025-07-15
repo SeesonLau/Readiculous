@@ -76,15 +76,12 @@
         </div>
     </div>
 
-    <div class="row mx-0 mt-3 pagination-controls">
+    <div class="row justify-content-center">
         <div class="col-md-6 px-0 text-md-end">
             @if (ViewBag.PaginationModel != null)
             {
                 @await Component.InvokeAsync("Pagination", ViewBag.PaginationModel)
             }
-        </div>
-        <div class="col-md-6 px-0">
-            @await Component.InvokeAsync("PageSize", new { currentPageSize = ViewBag.PageSize ?? 10 })
         </div>
     </div>
 </div>

@@ -1,53 +1,83 @@
 ﻿@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
-<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")" style="background-color: var(--color-header); color: var(--color-text);">
-    <div class="logosec hover-pointer" style="display: flex; align-items: center; gap: 10px;">
+
+@{
+    var userName = User.FindFirst("UserName")?.Value ?? "Reviewer";
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+}
+
+<header class="@((ViewBag.LoginView == true) ? "hide-navbar" : "")"
+        style="background-color: var(--color-header); color: var(--color-text); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+
+    <!-- Left: Logo -->
+    <div class="d-flex align-items-center gap-2">
         <img src="~/img/readiculous-logo.svg"
-             style="width: 40px; height: 40px;" alt="logo"
-             onclick="window.location.href = '@Url.Action("Index", "Home")';">
-        <span style="font-weight: bold; font-size: 1.2rem;"
-              onclick="window.location.href = '@Url.Action("Index", "Home")';">Readiculous</span>
+             style="width: 40px; height: 40px; cursor: pointer;"
+             alt="logo"
+             onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';" />
+        <span style="font-weight: bold; font-size: 1.2rem; cursor: pointer;"
+              onclick="window.location.href = '@Url.Action("DashboardScreen", "Dashboard")';">Readiculous</span>
     </div>
-    <div class="logosec">
-        @User.FindFirst("UserName")?.Value
-        <div class="mr-20 hover-pointer" style="position: relative">
-            <div class="dp">
-                <img src="@User.FindFirst("UserProfilePictureUrl")?.Value"
-                     class="dpicn hover-pointer"
-                     alt="dp" />
+
+    <!-- Center: Search -->
+    <div class="flex-grow-1 d-flex justify-content-center">
+        <input type="text"
+               id="headerSearch"
+               class="form-control w-50"
+               placeholder="🔍 Search books..."
+               autocomplete="off" />
+    </div>
+
+    <!-- Right: Links + Profile -->
+    <div class="d-flex align-items-center gap-3">
+        <a class="nav-link" href="/Dashboard/ViewNewBooks">New Book</a>
+        <a class="nav-link" href="/Dashboard/ViewTopBooks">Top Book</a>
+        <a class="nav-link" href="/Dashboard/GenreScreen">Genre</a>
+
+
+        @if (isLoggedIn)
+        {
+            <!-- Reviewer Name and Profile Dropdown -->
+            <div class="d-flex align-items-center position-relative gap-2">
+                <span>@userName</span>
+                <img src="~/img/profile-logo.png"
+                     class="dpicn"
+                     alt="dp"
+                     style="width: 40px; height: 40px; cursor: pointer;"
+                     onclick="toggleDropdown()" />
+
+                <div id="userDropdown" class="dropdown-menu dropdown-menu-end mt-2"
+                     style="display: none; position: absolute; right: 0; background: var(--color-modal); border: 1px solid #ccc; padding: 10px; border-radius: 6px;">
+                    <div class="dropdown-item">
+                        <i class="fa-solid fa-user-edit me-2"></i>
+                        <a class="open-edit-profile" style="cursor: pointer;">Edit Profile</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <form asp-action="SignOutUser" asp-controller="Account" method="post" style="display:inline;">
+                            <button type="submit"
+                                    style="border: none; background: none; padding: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="dropdown" style="background-color: var(--color-modal);">
-                <ul>
-                    <li>
-                        <i class="fa-solid fa-gear"></i>
-                        <a class="open-edit-profile">Edit Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-users"></i>
-                        <a asp-controller="UserMaster" asp-action="UserMasterScreen">User Master</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-book"></i>
-                        <a asp-controller="BookMaster" asp-action="BookMasterScreen">Book Master</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-list"></i>
-                        <a asp-controller="GenreMaster" asp-action="GenreMasterScreen">Genre Master</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-users"></i>
-                        <a asp-controller="User" asp-action="Index">User</a>
-                    </li>
-                    <li class="nav-item">
-                        <i class="fa-solid fa-book"></i>
-                        <a asp-controller="Book" asp-action="Index">Book</a>
-                    </li>
-                    <li>
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <a asp-action="SignOutUser" asp-controller="Account">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        }
     </div>
 </header>
+
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.addEventListener("click", function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const trigger = document.querySelector('.dpicn');
+        if (dropdown && trigger && !dropdown.contains(event.target) && event.target !== trigger) {
+            dropdown.style.display = 'none';
+        }
+    });
+</script>

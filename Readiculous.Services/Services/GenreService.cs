@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using X.PagedList;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -97,6 +98,23 @@ namespace Readiculous.Services.Services
             }
         }
 
+        public IPagedList<GenreListItemViewModel> GetPaginatedGenreList(string genreName, int pageNumber, int pageSize = 10, GenreSortType sortType = GenreSortType.Latest)
+        {
+
+            if (string.IsNullOrEmpty(genreName) && sortType == GenreSortType.Latest)
+            {
+                return ListAllPaginatedActiveGenres(pageNumber, pageSize);
+            }
+            else if (string.IsNullOrEmpty(genreName))
+            {
+                return ListPaginatedGenresByName(string.Empty, pageNumber, pageSize, sortType);
+            }
+            else
+            {
+                return ListPaginatedGenresByName(genreName, pageNumber, pageSize, sortType);
+            }
+        }
+
         // Single Genre Retrieval methods
         public GenreViewModel GetGenreEditById(string id)
         {
@@ -169,6 +187,7 @@ namespace Readiculous.Services.Services
                 .ToList();
             return genres;
         }
+        
         // Helper methods for Searching genres
         private List<GenreListItemViewModel> ListAllActiveGenres()
         {
@@ -190,6 +209,33 @@ namespace Readiculous.Services.Services
 
             return genreViewModels;
         }
+        private IPagedList<GenreListItemViewModel> ListAllPaginatedActiveGenres(int pageNumber, int pageSize)
+        {
+            IQueryable<Genre> queryableGenreListItems;
+            int genreCount;
+
+            (queryableGenreListItems, genreCount) = _genreRepository.GetAllPaginatedActiveGenres(pageNumber, pageSize);
+            var listGenreListItem = queryableGenreListItems.ToList();
+            var genreIds = listGenreListItem.Select(g => g.GenreId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByGenreIds(genreIds);
+
+            var genreMapModels = _mapper.Map<List<GenreListItemViewModel>>(listGenreListItem);
+
+            foreach (var model in genreMapModels)
+            {
+                model.BookCount = genres
+                    .Where(b => b.GenreId == model.GenreId)
+                    .Count();
+            }
+
+            var result = genreMapModels
+                .OrderByDescending(o => o.CreatedTime);
+            return new StaticPagedList<GenreListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                genreCount);
+        }
         private List<GenreListItemViewModel> ListGenresByName(string genreName, GenreSortType genreSortType = GenreSortType.Latest)
         {
             var genresByName = _genreRepository.GetGenresByName(genreName);
@@ -200,8 +246,8 @@ namespace Readiculous.Services.Services
             var booksByGenreList = _genreRepository.GetAllGenreAssignmentsByGenreIds(genreIds);
 
             var genreViewModels = _mapper.Map<List<GenreListItemViewModel>>(genresByName);
-            
-            foreach(var model in genreViewModels)
+
+            foreach (var model in genreViewModels)
             {
                 model.BookCount = booksByGenreList
                     .Where(b => b.GenreId == model.GenreId)
@@ -218,6 +264,58 @@ namespace Readiculous.Services.Services
                 GenreSortType.Latest => genreViewModels.OrderByDescending(g => g.UpdatedTime).ToList(),
                 _ => genreViewModels, // Default case
             };
+        }
+        private IPagedList<GenreListItemViewModel> ListPaginatedGenresByName(string genreName,
+            int pageNumber, int pageSize = 10, GenreSortType genreSortType = GenreSortType.Latest)
+        {
+            IQueryable<Genre> queryableGenreListItems;
+            int genreCount;
+
+            (queryableGenreListItems, genreCount) = _genreRepository.GetPaginatedGenresByName(genreName, pageNumber, pageSize);
+            var listGenreListItem = queryableGenreListItems.ToList();
+            var genreIds = listGenreListItem.Select(g => g.GenreId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByGenreIds(genreIds);
+
+            var genreMapModels = _mapper.Map<List<GenreListItemViewModel>>(listGenreListItem);
+
+            foreach (var model in genreMapModels)
+            {
+                model.BookCount = genres
+                    .Where(b => b.GenreId == model.GenreId)
+                    .Count();
+            }
+
+            IEnumerable<GenreListItemViewModel> result;
+            switch(genreSortType)
+            {
+                case GenreSortType.NameAscending:
+                    result = genreMapModels.OrderBy(g => g.Name);
+                    break;
+                case GenreSortType.NameDescending:
+                    result = genreMapModels.OrderByDescending(g => g.Name);
+                    break;
+                case GenreSortType.BookCountAscending:
+                    result = genreMapModels.OrderBy(g => g.BookCount);
+                    break;
+                case GenreSortType.BookCountDescending:
+                    result = genreMapModels.OrderByDescending(g => g.BookCount);
+                    break;
+                case GenreSortType.Oldest:
+                    result = genreMapModels.OrderBy(g => g.UpdatedTime);
+                    break;
+                case GenreSortType.Latest:
+                    result = genreMapModels.OrderByDescending(g => g.UpdatedTime);
+                    break;
+                default:
+                    result = genreMapModels;
+                    break;
+            }
+
+            return new StaticPagedList<GenreListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                genreCount);
         }
 
         public List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels)

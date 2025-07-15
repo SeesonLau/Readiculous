@@ -3,6 +3,7 @@ using Readiculous.Data.Models;
 using Readiculous.Services.ServiceModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using X.PagedList;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Interfaces
@@ -22,6 +23,7 @@ namespace Readiculous.Services.Interfaces
 
         // Retrieval Methods
         List<UserListItemViewModel> GetUserList(RoleType? role, string username, UserSortType sortType = UserSortType.Latest);
+        IPagedList<UserListItemViewModel> GetPaginatedUserList(RoleType? role, string username, int pageNumber, int pageSize = 10, UserSortType sortType = UserSortType.Latest);
         UserViewModel GetUserEditById(string userId);
         EditProfileViewModel GetEditProfileById(string userId);
         UserDetailsViewModel GetUserDetailsById(string userId);
@@ -45,5 +47,8 @@ namespace Readiculous.Services.Interfaces
         bool ValidateOtpForForgotPassword(string email, string otp);
         Task<bool> ResendOtpForForgotPasswordAsync(string email);
         Task<bool> UpdatePasswordAsync(string email, string newPassword);
+
+        // Utility
+        bool EmailExists(string email);
     }
 }
