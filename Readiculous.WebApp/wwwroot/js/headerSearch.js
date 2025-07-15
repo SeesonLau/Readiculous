@@ -2,8 +2,11 @@
     const searchInput = document.getElementById('bookSearch');
     const resultsContainer = document.getElementById('searchResults');
 
+    // Return early if elements don't exist
+    if (!searchInput || !resultsContainer) return;
+
     const booksDataElement = document.getElementById('booksJson');
-    const books = booksDataElement ? JSON.parse(booksDataElement.value) : [];
+    const books = booksDataElement ? JSON.parse(booksDataElement.textContent) : [];
 
     searchInput.addEventListener('input', function () {
         const query = this.value.trim().toLowerCase();
@@ -15,8 +18,8 @@
         }
 
         const filtered = books.filter(b =>
-            b.title.toLowerCase().startsWith(query) ||
-            b.title.toLowerCase() === query
+            b.title.toLowerCase().includes(query) ||  // Changed to includes for better matching
+            b.author?.toLowerCase().includes(query)  // Added author search
         );
 
         if (filtered.length === 0) {
@@ -33,9 +36,13 @@
             html += `
                 <a href="/Dashboard/BookDetailScreen?id=${b.id}"
                    class="list-group-item list-group-item-action d-flex align-items-center">
-                    <img src="${b.cover}" alt="${b.title}"
+                    <img src="${b.cover || '/images/default-book-cover.png'}" 
+                         alt="${b.title}"
                          style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;" />
-                    <span>${b.title}</span>
+                    <div>
+                        <div>${b.title}</div>
+                        ${b.author ? `<small class="text-muted">${b.author}</small>` : ''}
+                    </div>
                 </a>`;
         });
 
