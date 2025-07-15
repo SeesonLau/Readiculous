@@ -8,17 +8,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using X.PagedList;
+using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
 {
     public class DashboardService : IDashboardService
     {
+        private readonly IUserRepository _userRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IGenreRepository _genreRepository;
         private readonly IFavoriteBookRepository _favoriteBookRepository;
         private readonly IMapper _mapper;
 
-        public DashboardService(IBookRepository bookRepository, IFavoriteBookRepository favoriteBookRepository, IMapper mapper)
+        public DashboardService(IUserRepository userRepository, IBookRepository bookRepository, IGenreRepository genreRepository, IFavoriteBookRepository favoriteBookRepository, IMapper mapper)
         {
+            _userRepository = userRepository;
             _bookRepository = bookRepository;
             _favoriteBookRepository = favoriteBookRepository;
             _mapper = mapper;
@@ -26,7 +31,7 @@ namespace Readiculous.Services.Services
 
         public UserDashboardViewModel GetUserDashboardViewModel(string userId)
         {
-            var dashboardViewModel = new UserDashboardViewModel();
+            var userDashboardViewModel = new UserDashboardViewModel();
 
             IQueryable<Book> newBooks;
             IQueryable<Book> topBooks;
@@ -36,11 +41,34 @@ namespace Readiculous.Services.Services
             (topBooks, _) = _bookRepository.GetPaginatedTopBooks(1, 5);
             (favoriteBooks, _) = _favoriteBookRepository.GetPaginatedFavoriteBooksByUserId(userId, 1, 5);
 
-            dashboardViewModel.NewBooks = _mapper.Map<List<BookListItemViewModel>>(newBooks);
-            dashboardViewModel.TopBooks = _mapper.Map<List<BookListItemViewModel>>(topBooks);
-            dashboardViewModel.FavoriteBooks = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
+            userDashboardViewModel.NewBooks = _mapper.Map<List<BookListItemViewModel>>(newBooks);
+            userDashboardViewModel.TopBooks = _mapper.Map<List<BookListItemViewModel>>(topBooks);
+            userDashboardViewModel.FavoriteBooks = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
 
-            return dashboardViewModel;
+            return userDashboardViewModel;
+        }
+
+        public AdminDashboardViewModel GetAdminDashboardViewModel()
+        {
+            var adminDashboardViewModel = new AdminDashboardViewModel();
+
+            adminDashboardViewModel.UserCount = _userRepository.GetActiveUserCount();
+            adminDashboardViewModel.BookCount = _bookRepository.GetActiveBookCount();
+            adminDashboardViewModel.GenreCount = _genreRepository.GetActiveGenreCount();
+
+            var queryableTopReviewers = _userRepository.GetTopReviewers(5);
+            var listTopReviewers = queryableTopReviewers.ToList();
+            adminDashboardViewModel.TopReviewers = _mapper.Map<List<UserListItemViewModel>>(listTopReviewers);
+
+            var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5);
+            var listMostUsedGenres = queryableMostUsedGenres.ToList();
+            adminDashboardViewModel.MostUsedGenres = listMostUsedGenres
+            .ToDictionary(
+                kvp => _mapper.Map<GenreListItemViewModel>(kvp.Key),
+                kvp => kvp.Value
+            );
+
+            return adminDashboardViewModel;
         }
     }
 }

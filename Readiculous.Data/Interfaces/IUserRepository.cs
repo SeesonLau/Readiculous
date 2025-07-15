@@ -27,5 +27,7 @@ namespace Readiculous.Data.Interfaces
         User GetUserWithNavigationPropertiesById(string id);
         User GetUserByEmailAndPassword(string email, string password);
         User GetUserByEmail(string email);
+        int GetActiveUserCount();
+        IQueryable<User> GetTopReviewers(int numberOfUsers);
     }
 }
