@@ -1,4 +1,4 @@
-﻿(function () {
+﻿function () {
     const searchInput = document.getElementById('bookSearch');
     const resultsContainer = document.getElementById('searchResults');
 

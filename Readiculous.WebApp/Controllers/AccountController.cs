@@ -141,14 +141,14 @@ namespace Readiculous.WebApp.Controllers
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         var redirectUrl = isAdmin
-                            ? Url.Action("DashboardScreen", "DashboardAdmin")
+                            ? Url.Action("AdminScreen", "DashboardAdmin")
                             : Url.Action("DashboardScreen", "Dashboard");
                         return Json(new { success = true, redirectUrl });
                     }
                     else
                     {
                         if (isAdmin)
-                            return RedirectToAction("DashboardScreen", "DashboardAdmin");
+                            return RedirectToAction("AdminScreen", "DashboardAdmin");
                         else
                             return RedirectToAction("DashboardScreen", "Dashboard");
                     }
@@ -340,13 +340,6 @@ namespace Readiculous.WebApp.Controllers
         public async Task<IActionResult> SignOutUser()
         {
             await this._signInManager.SignOutAsync();
-
-
-            // Clear session variables
-            HttpContext.Session.Clear();
-
-            // Redirect to landing page (adjust as needed)
-
             HttpContext.Session.Clear(); // Clear session data on logout
             return RedirectToAction("LandingScreen", "Home");
         }
@@ -370,6 +363,7 @@ namespace Readiculous.WebApp.Controllers
             await _userService.UpdateUserAsync(user, userId);
             return Ok();
         }
+
 
         // Forgot Password Methods
         [HttpGet]

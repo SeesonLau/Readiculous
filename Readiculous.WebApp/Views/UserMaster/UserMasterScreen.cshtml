@@ -61,12 +61,9 @@
         </div>
     </div>
 
-    <div class="pagination-controls row mb-4 mx-0 align-items-center">
+    <div class="pagination-controls row mb-4 mx-0 justify-content-center">
         <div class="col-md-6 px-0">
             @await Component.InvokeAsync("Pagination", Model.Pagination)
-        </div>
-        <div class="col-md-6 px-0 text-md-end">
-            @await Component.InvokeAsync("PageSize", new { currentPageSize = Model.Pagination.PageSize })
         </div>
     </div>
 </div>

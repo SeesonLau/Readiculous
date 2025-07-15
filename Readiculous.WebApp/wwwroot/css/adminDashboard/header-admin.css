@@ -1,0 +1,520 @@
+﻿/* header-admin.css */
+header {
+    height: 80px;
+    width: 100%;
+    padding: 0 2rem;
+    background: var(--color-header-bg);
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-secondary);
+    position: relative;
+    top: 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.header-center-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Logo Section - Non-clickable */
+.logosec {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: default;
+    flex-shrink: 0;
+}
+
+    .logosec img {
+        width: 50px;
+        height: 50px;
+        pointer-events: none;
+    }
+
+    .logosec span {
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: var(--color-text-light);
+        white-space: nowrap;
+    }
+
+/* Navigation Container */
+.header-nav-container {
+    position: relative;
+    display: flex;
+    background-color: var(--color-nav-container);
+    border-radius: 2rem;
+    height: 44px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation Slider - Behind text */
+.header-nav-slider {
+    position: absolute;
+    height: 100%;
+    background-color: var(--color-nav-slider);
+    border-radius: 2rem;
+    z-index: 1;
+    will-change: left, width;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Navigation Buttons - Above slider */
+.header-nav-buttons {
+    display: flex;
+    position: relative;
+    z-index: 2;
+    height: 100%;
+}
+
+    .header-nav-buttons .nav-btn {
+        position: relative;
+        height: 100%;
+        padding: 0 1.5rem;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--color-text-dark);
+        font-size: 0.9rem;
+        font-family: var(--font-ui);
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        min-width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+        /* Active State */
+        .header-nav-buttons .nav-btn.active {
+            color: var(--color-text-light);
+            font-weight: 600;
+        }
+
+/* User Profile Section - Non-clickable */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    background-color: var(--color-nav-container);
+    border-radius: 2rem;
+    height: 44px;
+    padding: 0 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+    .user-profile:hover {
+        background-color: var(--color-nav-slider);
+    }
+
+    .user-profile span {
+        color: var(--color-text-light);
+        font-weight: 500;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+
+.dp {
+    height: 38px;
+    width: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background-color: var(--color-secondary);
+    pointer-events: none;
+}
+
+.dpicn {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* Right-aligned elements container */
+.header-right-elements {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+/* Logout Button Container */
+.logout-container {
+    background-color: var(--color-nav-container);
+    border-radius: 2rem;
+    height: 44px;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+    .logout-container:hover {
+        background-color: var(--color-nav-slider);
+    }
+
+#logout-btn {
+    color: var(--color-text-light);
+    text-decoration: none;
+    font-size: 1.25rem;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+    #logout-btn:hover {
+        color: var(--color-danger);
+        transform: scale(1.1);
+    }
+
+    #logout-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    #logout-btn:hover i {
+        transform: translateX(2px);
+    }
+
+/* Hide Navbar Utility */
+.hide-navbar {
+    display: none !important;
+}
+
+/* Dropdown Menu Styles */
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.5rem;
+    background-color: var(--color-modal);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 180px;
+    z-index: 1000;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-profile.show-dropdown .profile-dropdown {
+    display: block;
+}
+
+.user-profile.show-dropdown {
+    background-color: var(--color-nav-slider);
+}
+
+/* Dropdown Items */
+.profile-dropdown a,
+.dropdown-nav-item {
+    display: flex;
+    align-items: center;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    background-color: var(--color-header);
+}
+
+    .profile-dropdown a:hover,
+    .dropdown-nav-item:hover {
+        background-color: var(--color-nav-slider);
+        padding-left: 1.2rem;
+    }
+
+.profile-dropdown i {
+    margin-right: 0.75rem;
+    width: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.profile-dropdown #dropdown-logout-btn {
+    display: none; /* Hide dropdown logout */
+}
+
+/* Active State for Nav Items */
+.dropdown-nav-item.active {
+    background-color: var(--color-nav-slider);
+    font-weight: 600;
+}
+
+    .dropdown-nav-item.active i {
+        color: var(--color-primary);
+    }
+
+
+/* ================= RESPONSIVE BREAKPOINTS ================= */
+/* 1200px - Large desktop */
+@media (max-width: 1200px) {
+    .logosec span {
+        font-size: 1.3rem;
+    }
+
+    .header-nav-buttons .nav-btn {
+        padding: 0 1.2rem;
+        min-width: 75px;
+        font-size: 0.85rem;
+    }
+
+    .user-profile span {
+        font-size: 0.9rem;
+    }
+}
+
+/* 992px - Tablet landscape / small desktop */
+@media (max-width: 992px) {
+    header {
+        padding: 0 1.5rem;
+    }
+
+    .logosec img {
+        width: 45px;
+        height: 45px;
+    }
+
+    .logosec span {
+        font-size: 1.2rem;
+    }
+
+    .header-nav-buttons .nav-btn {
+        padding: 0 1rem;
+        min-width: 70px;
+        font-size: 0.8rem;
+    }
+
+    .user-profile {
+        padding: 0 0.8rem;
+    }
+
+        .user-profile span {
+            font-size: 0.85rem;
+        }
+
+    .dp {
+        height: 34px;
+        width: 34px;
+    }
+}
+
+/* 768px - Tablet portrait */
+@media (max-width: 768px) {
+    header {
+        padding: 0 1rem;
+        height: 70px;
+    }
+
+    .logosec img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .logosec span {
+        font-size: 1.1rem;
+    }
+
+    .header-nav-container {
+        height: 40px;
+        margin: 0 0.5rem;
+    }
+
+    .header-nav-buttons .nav-btn {
+        padding: 0 0.8rem;
+        min-width: 65px;
+        font-size: 0.75rem;
+    }
+
+    /* Profile dropdown container */
+    .header-right-elements {
+        position: relative;
+    }
+
+    /* Hide the standalone logout button */
+    .logout-container {
+        display: none;
+    }
+
+    .profile-dropdown #dropdown-logout-btn {
+        display: flex; /* Show dropdown logout */
+    }
+
+    /* Profile dropdown styles */
+    .user-profile {
+        position: relative;
+        cursor: pointer;
+        height: 40px;
+        padding: 0 1rem;
+    }
+
+    .profile-dropdown {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 0.5rem;
+        background-color: var(--color-nav-container);
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 160px;
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-light);
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+
+
+            .profile-dropdown a:hover {
+                background-color: var(--color-nav-slider);
+            }
+
+        .profile-dropdown i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+    /* Show dropdown when profile is clicked */
+    .user-profile.show-dropdown .profile-dropdown {
+        display: block;
+    }
+
+    .user-profile.show-dropdown {
+        background-color: var(--color-nav-slider);
+    }
+}
+
+/* 576px - Mobile landscape */
+@media (max-width: 576px) {
+    header {
+        padding: 0 0.75rem;
+        height: 60px;
+    }
+
+    .logosec img {
+        width: 35px;
+        height: 35px;
+    }
+
+    .logosec span {
+        font-size: 1rem;
+    }
+
+    /* Hide the navigation bar */
+    .header-center-container {
+        display: none;
+    }
+
+    .user-profile {
+        height: 36px;
+        padding: 0 0.8rem;
+    }
+
+        .user-profile span {
+            display: none;
+        }
+
+    .dp {
+        height: 30px;
+        width: 30px;
+    }
+
+    /* Adjust profile dropdown to include nav items */
+    .profile-dropdown {
+        min-width: 150px;
+    }
+
+        .profile-dropdown a,
+        .dropdown-nav-item {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        /* Style for navigation items in dropdown */
+        .profile-dropdown .dropdown-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-light);
+            text-decoration: none;
+        }
+
+            .profile-dropdown .dropdown-nav-item i {
+                margin-right: 0.75rem;
+                width: 20px;
+                text-align: center;
+            }
+
+            /* Active state for dropdown nav items */
+            .profile-dropdown .dropdown-nav-item.active {
+                background-color: var(--color-nav-slider);
+                font-weight: 600;
+            }
+}
+
+/* Extra small screens - hide logo text */
+@media (max-width: 400px) {
+    .logosec span {
+        display: none;
+    }
+
+    .profile-dropdown {
+        min-width: 140px;
+    }
+
+        .profile-dropdown i {
+            margin-right: 0.5rem;
+        }
+}
+
+/* Dark/Light mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .header-nav-buttons .nav-btn {
+        color: var(--color-text-light);
+    }
+
+        .header-nav-buttons .nav-btn.active {
+            color: var(--color-text-dark);
+        }
+}
