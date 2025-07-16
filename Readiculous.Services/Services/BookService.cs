@@ -239,6 +239,7 @@ namespace Readiculous.Services.Services
             model.AverageRating = model.Reviews.Count != 0
                         ? (decimal)(book.BookReviews.Average(r => r.Rating))
                         : 0;
+            
             return model;
         }
         public BookViewModel GetBookEditById(string id)

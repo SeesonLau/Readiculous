@@ -15,6 +15,7 @@ using Readiculous.WebApp.Mvc;
 using static Readiculous.Resources.Constants.Enums;
 using System.Threading.Tasks;
 using Readiculous.WebApp.Authentication;
+using Readiculous.Data.Interfaces;
 
 namespace Readiculous.WebApp.Controllers
 {
@@ -24,6 +25,8 @@ namespace Readiculous.WebApp.Controllers
         private readonly IGenreService _genreService;
         private readonly IUserService _userService;
         private readonly IDashboardService _dashboardService;
+        private readonly IReviewService _reviewService;
+        private readonly IFavoriteBookRepository _favoriteBookRepository;
         private readonly SignInManager _signInManager;
 
         public DashboardController(
@@ -31,6 +34,8 @@ namespace Readiculous.WebApp.Controllers
             IGenreService genreService,
             IUserService userService,
             IDashboardService dashboardService,
+            IFavoriteBookRepository favoriteBookRepository,
+            IReviewService reviewService,
             IMapper mapper,
             SignInManager signInManager,
             IHttpContextAccessor httpContextAccessor,
@@ -42,6 +47,8 @@ namespace Readiculous.WebApp.Controllers
             _genreService = genreService;
             _userService = userService;
             _dashboardService = dashboardService;
+            _favoriteBookRepository = favoriteBookRepository;
+            _reviewService = reviewService;
             _signInManager = signInManager;
             _mapper = mapper;
         }
@@ -225,11 +232,6 @@ namespace Readiculous.WebApp.Controllers
             return PartialView("_BookGridPartial", filteredBooks);
         }
 
-
-
-
-
-
         [HttpGet]
         [AllowAnonymous]
         public IActionResult BookDetailScreen(string id)
@@ -238,16 +240,22 @@ namespace Readiculous.WebApp.Controllers
             if (book == null)
                 return NotFound();
 
+            var favBooks = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(book.BookId, this.UserId);
+
             if (User.Identity.IsAuthenticated && User.IsInRole("Reviewer"))
             {
                 ViewBag.IsReviewer = true;
                 ViewBag.UserId = this.UserId;
                 ViewBag.UserName = this.UserName;
                 ViewBag.UserEmail = _userService.GetEmailByUserId(this.UserId);
+                ViewBag.IsReviewed = book.Reviews.Any(r => r.Reviewer == this.UserName);
+                ViewBag.IsFavorited = favBooks != null;
             }
             else
             {
                 ViewBag.IsReviewer = false;
+                ViewBag.IsReviewed = false;
+                ViewBag.IsFavorited = false;
             }
 
             return View(book);
@@ -255,11 +263,115 @@ namespace Readiculous.WebApp.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Reviewer")]
-        public IActionResult AddToFavoritesBook(string bookId)
+        [ValidateAntiForgeryToken]
+        public IActionResult AddToFavoritesBook([FromForm] string bookId)
         {
+            if (string.IsNullOrEmpty(bookId))
+                return BadRequest(new { success = false, message = "Book ID is missing." });
+
             _bookService.AddBookToFavorites(bookId, this.UserId);
-            return RedirectToAction("BookDetailScreen", new { id = bookId });
+            return Json(new { success = true });
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Reviewer")]
+        public IActionResult RemoveFromFavoritesBook([FromForm] string bookId)
+        {
+            if (string.IsNullOrEmpty(bookId))
+                return BadRequest(new { success = false, message = "Book ID is missing." });
+
+            _bookService.RemoveBookFromFavorites(bookId, this.UserId);
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Reviewer")]
+        public IActionResult CreateReviewModal(string id)
+        {
+            try
+            {
+                var title = _bookService.GetTitleByBookId(id);
+                var email = _userService.GetEmailByUserId(this.UserId);
+
+                var model = new ReviewViewModel
+                {
+                    BookId = id,
+                    UserId = this.UserId,
+                    UserName = this.UserName,
+                    BookTitle = title,
+                    Email = email
+                };
+
+                return PartialView("_AddReviewModal", model);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Reviewer")]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateReview(ReviewViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_AddReviewModal", model);
+            }
+
+            try
+            {
+                _reviewService.AddReview(model);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return PartialView("_AddReviewModal", model);
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Reviewer")]
+        public IActionResult EditReviewModal(string id)
+        {
+            try
+            {
+                var model = _reviewService.GetReviewByBookIdAndUserId(id, this.UserId);
+                if (model == null)
+                    return NotFound();
+
+                return PartialView("_EditReviewModal", model);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Reviewer")]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditReview(ReviewViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_EditReviewModal", model);
+            }
+
+            try
+            {
+                _reviewService.UpdateReview(model, this.UserId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return PartialView("_EditReviewModal", model);
+            }
+        }
+
 
         [HttpGet]
         public IActionResult SearchBooks(string query)
@@ -288,7 +400,5 @@ namespace Readiculous.WebApp.Controllers
 
             return Json(filtered);
         }
-
-
     }
 }

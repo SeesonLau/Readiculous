@@ -15,6 +15,11 @@
     <h2 class="section-title section-title-border mb-0">Book Details</h2>
 </div>
 
+<form id="anti-forgery-form">
+    @Html.AntiForgeryToken()
+</form>
+
+
 <!-- ✅ Border container added here -->
 <div class="container py-5">
     <div class="border rounded p-4 shadow-sm" style="background-color: #fff;">
@@ -28,12 +33,25 @@
 
                 @if (User.Identity.IsAuthenticated && isReviewer)
                 {
-                    <button class="btn btn-outline-primary mb-2" onclick="showFavoriteMessage()">
-                        + Add to Favorites
-                    </button>
+
+                    @if (!ViewBag.IsFavorited)
+                    {
+                        <button class="btn btn-outline-primary mb-2 add-favorite-btn"
+                                data-book-id="@Model.BookId"
+                                data-title="@Model.Title"
+                                data-cover="@Model.CoverImageUrl">
+                            + Add to Favorites
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-danger mb-2 remove-favorite-btn" data-book-id="@Model.BookId">
+                            - Remove From Favorites
+                        </button>
+                    }
 
                     <div id="favoriteAlert" class="alert alert-success alert-dismissible fade show d-none text-center" role="alert" style="width: 90%;">
-                        ✅ Added to your favorite books!
+                        ✅ Favorite updated!
                         <button type="button" class="btn-close" onclick="hideFavoriteMessage()"></button>
                     </div>
                 }
@@ -62,10 +80,18 @@
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
                             <h5 class="mb-0">Reviews (<span id="review-count">@totalReviews</span>)</h5>
 
-                            @if (User.Identity.IsAuthenticated && isReviewer)
+                            @if (!ViewBag.IsReviewed)
                             {
-                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                                <button class="btn btn-sm btn-primary open-add-review"
+                                        data-book-id="@Model.BookId">
                                     + Add Review
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-primary open-edit-review"
+                                        data-book-id="@Model.BookId">
+                                    ✎ Edit Review
                                 </button>
                             }
                         </div>
@@ -107,6 +133,40 @@
 <!-- Reviewer “Add Review” Modal -->
 @if (isReviewer)
 {
+    <!-- ADD Review Modal -->
+    <div class="modal fade" id="addReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" id="addReviewModalContent">
+                @await Html.PartialAsync("~/Views/Shared/_AddReviewModal.cshtml",
+                new Readiculous.Services.ServiceModels.ReviewViewModel
+                {
+                    BookId = Model.BookId,
+                    UserId = userId,
+                    UserName = userName,
+                    Email = userEmail,
+                    BookTitle = Model.Title
+                })
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT Review Modal -->
+    <div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" id="editReviewModalContent">
+                @await Html.PartialAsync("~/Views/Shared/_EditReviewModal.cshtml",
+                new Readiculous.Services.ServiceModels.ReviewViewModel
+                {
+                    BookId = Model.BookId,
+                    UserId = userId,
+                    UserName = userName,
+                    Email = userEmail,
+                    BookTitle = Model.Title
+                })
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="addReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -119,9 +179,24 @@
                     Email = userEmail,
                     BookTitle = Model.Title
                 })
+            </div>
         </div>
     </div>
-</div>
+    <div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                @await Html.PartialAsync("~/Views/Shared/_EditReviewModal.cshtml",
+                new Readiculous.Services.ServiceModels.ReviewViewModel
+                {
+                    BookId = Model.BookId,
+                    UserId = userId,
+                    UserName = userName,
+                    Email = userEmail,
+                    BookTitle = Model.Title
+                })
+            </div>
+        </div>
+    </div>
 }
 
 @section Styles {
@@ -129,6 +204,137 @@
 }
 @section Scripts {
     <script src="~/js/bookDetail.js"></script>
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            // Add to favorites
+            document.body.addEventListener('click', function (e) {
+                if (e.target && e.target.classList.contains('add-favorite-btn')) {
+                    const button = e.target;
+                    const bookId = button.dataset.bookId;
+                    handleFavoriteChange('/Dashboard/AddToFavoritesBook', bookId);
+                }
+
+                if (e.target && e.target.classList.contains('remove-favorite-btn')) {
+                    const button = e.target;
+                    const bookId = button.dataset.bookId;
+                    handleFavoriteChange('/Dashboard/RemoveFromFavoritesBook', bookId);
+                }
+            });
+        });
+
+        async function handleFavoriteChange(url, bookId) {
+            const formData = new FormData();
+            formData.append('bookId', bookId);
+
+            // Get anti-forgery token from hidden form
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const result = await response.json();
+                    if (result.success) {
+                        showFavoriteMessage(); // your function
+                        location.reload();
+                    } else {
+                        alert(result.message || 'Failed to update favorite status.');
+                    }
+                }
+            } catch (error) {
+                console.error("Error updating favorite:", error);
+                alert("Something went wrong. Please try again.");
+            }
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ⭐ Add Review Button Click
+            document.body.addEventListener('click', async function (e) {
+                if (e.target.matches('.open-add-review')) {
+                    const bookId = e.target.dataset.bookId;
+                    try {
+                        const response = await fetch(`/Dashboard/CreateReviewModal?id=${bookId}`);
+                        const html = await response.text();
+                        const container = document.getElementById('addReviewModalContent');
+                        if (container) {
+                            container.innerHTML = html;
+                            new bootstrap.Modal(document.getElementById('addReviewModal')).show();
+                        }
+                    } catch (err) {
+                        console.error('Failed to load add review modal:', err);
+                    }
+                }
+            });
+
+            // ⭐ Edit Review Button Click
+            document.body.addEventListener('click', async function (e) {
+                if (e.target.matches('.open-edit-review')) {
+                    const bookId = e.target.dataset.bookId;
+                    try {
+                        const response = await fetch(`/Dashboard/EditReviewModal?id=${bookId}`);
+                        const html = await response.text();
+                        const container = document.getElementById('editReviewModalContent');
+                        if (container) {
+                            container.innerHTML = html;
+                            new bootstrap.Modal(document.getElementById('editReviewModal')).show();
+                        }
+                    } catch (err) {
+                        console.error('Failed to load edit review modal:', err);
+                    }
+                }
+            });
+
+            // ⭐ Handle form submission for both add/edit
+            document.body.addEventListener('submit', async function (e) {
+                const form = e.target;
+                const isAdd = form.id === 'addReviewForm';
+                const isEdit = form.id === 'editReviewForm';
+
+                if (isAdd || isEdit) {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    if (token) formData.append('__RequestVerificationToken', token);
+
+                    const url = isAdd ? '/Dashboard/CreateReview' : '/Dashboard/EditReview';
+                    const modalContentId = isAdd ? 'addReviewModalContent' : 'editReviewModalContent';
+
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const container = document.getElementById(modalContentId);
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.success) {
+                                location.reload();
+                            } else {
+                                const errorHtml = await response.text();
+                                if (container) container.innerHTML = errorHtml;
+                            }
+                        } else {
+                            const errorHtml = await response.text();
+                            if (container) container.innerHTML = errorHtml;
+                        }
+                    } catch (err) {
+                        console.error('Submit failed:', err);
+                    }
+                }
+            });
+        });
+    </script>
 }
 
 

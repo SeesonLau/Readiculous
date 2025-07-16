@@ -1,5 +1,5 @@
 ﻿function addToFavorites(bookId, title, coverImageUrl) {
-    fetch('/Dashboard/AddToFavorites', {
+    fetch('/Dashboard/AddToFavoritesBook', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
