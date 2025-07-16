@@ -175,6 +175,7 @@ namespace Readiculous.WebApp.Controllers
 
             return View(topBooks);
         }
+
         public IActionResult GenreScreen(List<string> selectedGenres)
         {
             selectedGenres ??= new List<string>();
@@ -213,31 +214,31 @@ namespace Readiculous.WebApp.Controllers
         }
 
 
-        [HttpPost]
-        public IActionResult LoadBooksByGenres([FromBody] List<string> genres)
-        {
-            genres ??= new List<string>();
+        //[HttpPost]
+        //public IActionResult LoadBooksByGenres([FromBody] List<string> genres)
+        //{
+        //    genres ??= new List<string>();
 
-            // Lookup all genres
-            var allGenreItems = _genreService.GetAllGenreSelectListItems(null);
+        //    // Lookup all genres
+        //    var allGenreItems = _genreService.GetAllGenreSelectListItems(null);
 
-            var selectedGenreIds = allGenreItems
-                .Where(g => genres.Contains(g.Text))
-                .Select(g => g.Value)
-                .ToList();
+        //    var selectedGenreIds = allGenreItems
+        //        .Where(g => genres.Contains(g.Text))
+        //        .Select(g => g.Value)
+        //        .ToList();
 
-            var genreViewModels = selectedGenreIds
-                .Select(id => new GenreViewModel { GenreId = id })
-                .ToList();
+        //    var genreViewModels = selectedGenreIds
+        //        .Select(id => new GenreViewModel { GenreId = id })
+        //        .ToList();
 
-            var books = _bookService.GetBookList(
-                searchString: null,
-                genres: genreViewModels,
-                userID: null
-            );
+        //    var books = _bookService.GetBookList(
+        //        searchString: null,
+        //        genres: genreViewModels,
+        //        userID: null
+        //    );
 
-            return PartialView("_BookGridPartial", books);
-        }
+        //    return PartialView("_BookGridPartial", books);
+        //}
 
 
 
