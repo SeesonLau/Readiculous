@@ -5,6 +5,12 @@
 </div>
 <form id="editBookForm" asp-action="Edit" enctype="multipart/form-data">
     <div class="modal-body">
+
+        <input type="hidden" asp-for="BookId" />
+        <input type="hidden" asp-for="CreatedBy" />
+        <input type="hidden" asp-for="CreatedTime" />
+        <input type="hidden" asp-for="UpdatedBy" />
+        <input type="hidden" asp-for="UpdatedTime" />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <!-- Left Column - Cover Image Section -->
