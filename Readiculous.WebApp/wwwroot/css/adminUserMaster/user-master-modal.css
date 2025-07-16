@@ -200,19 +200,10 @@
     display: block;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 576px) {
-    .user-modal .modal-body {
-        padding: 1rem;
-    }
+/* ======================
+   User View Modal Styles 
+   ====================== */
 
-    .profile-picture-preview {
-        width: 80px;
-        height: 80px;
-    }
-}
-
-/* User View Modal */
 .user-view-container {
     padding: 1.5rem;
     background-color: var(--color-modal);
@@ -232,6 +223,7 @@
     margin: 1rem 0;
 }
 
+/* Profile Section */
 .user-view-profile-section {
     display: flex;
     flex-direction: row;
@@ -275,6 +267,7 @@
         text-align: center;
     }
 
+/* Details Section */
 .user-view-details {
     flex: 1;
 }
@@ -303,6 +296,7 @@
     word-break: break-word;
 }
 
+/* Meta Grid Section */
 .user-view-meta-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -310,7 +304,8 @@
     margin-top: 1.5rem;
 }
 
-.user-view-meta-group, .user-view-activity-group {
+.user-view-meta-group,
+.user-view-activity-group {
     flex: 1;
 }
 
@@ -345,6 +340,7 @@
     word-break: break-word;
 }
 
+/* Activity Stats */
 .user-view-activity-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -352,26 +348,101 @@
 }
 
 .activity-stat {
-    background-color: var(--color-highlight);
-    border-radius: 8px;
-    padding: 1rem;
+    background-color: var(--color-modal);
+    border-radius: 12px;
+    padding: 1.25rem;
     text-align: center;
     border: 1px solid var(--color-border);
+    box-shadow: 0 2px 8px rgba(139, 94, 131, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
 }
 
+    .activity-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 94, 131, 0.15);
+    }
+
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 600;
     color: var(--color-secondary);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-secondary);
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
 }
 
 .stat-label {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--color-text);
-    opacity: 0.8;
+    opacity: 0.9;
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
 }
 
+.stat-icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    color: var(--color-highlight);
+    font-size: 1.25rem;
+    opacity: 0.7;
+}
+
+/* Badges */
+.genre-badge {
+    display: inline-block;
+    background-color: var(--color-secondary);
+    color: var(--color-modal);
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0.1rem;
+    font-family: var(--font-ui);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.no-genre {
+    font-style: italic;
+    color: var(--color-accent);
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+    .role-badge.admin {
+        background-color: #8B5E83;
+        color: #F8ECE9;
+    }
+
+    .role-badge.user {
+        background-color: #D4A5A5;
+        color: #2C2133;
+    }
+
+    .role-badge.moderator {
+        background-color: #B089A5;
+        color: #F8ECE9;
+    }
+
+/* Footer */
 .user-view-footer {
     display: flex;
     justify-content: flex-end;
@@ -381,7 +452,29 @@
     border-top: 1px solid var(--color-border);
 }
 
-/* Responsive Adjustments */
+    .user-view-footer .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        font-weight: 500;
+        border: none;
+    }
+
+    .user-view-footer .btn-secondary {
+        background-color: var(--color-accent);
+        color: var(--color-text);
+    }
+
+    .user-view-footer .btn-primary {
+        background-color: var(--color-secondary);
+        color: var(--color-modal);
+    }
+
+/* ======================
+   Responsive Adjustments 
+   ====================== */
+
 @media (max-width: 992px) {
     .user-view-meta-grid {
         grid-template-columns: 1fr;
@@ -410,10 +503,22 @@
     .user-view-activity-stats {
         grid-template-columns: 1fr;
     }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .activity-stat {
+        padding: 1rem;
+    }
 }
 
 @media (max-width: 576px) {
     .user-view-container {
+        padding: 1rem;
+    }
+
+    .user-modal .modal-body {
         padding: 1rem;
     }
 
@@ -423,10 +528,28 @@
         height: 120px;
     }
 
+    .profile-picture-preview {
+        width: 80px;
+        height: 80px;
+    }
+
     .user-view-footer {
         padding: 1rem;
     }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .genre-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+    }
 }
+
+/* ======================
+   Browser Overrides 
+   ====================== */
 
 /* Hide browser's native password toggle */
 input[type="password"]::-ms-reveal,

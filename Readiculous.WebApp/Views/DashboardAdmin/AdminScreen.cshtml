@@ -1,4 +1,4 @@
-﻿@model Readiculous.Services.ServiceModels.AdminDashboardViewModel;
+﻿@* @model Readiculous.Services.ServiceModels.AdminDashboardViewModel;
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -98,50 +98,150 @@
         </div>
     </div>
 </div>
+ *@
 
-@* 
-<!-- Top 5 Reviewers -->
-<div class="col-12 col-lg-4">
-    <div class="reviewer-container h-100">
-        <h5 class="section-title text-center">Top 5 Reviewers</h5>
-        <!-- Reviewer cards -->
-        @if (Model.TopReviewers != null && Model.TopReviewers.Any())
-        {
-            var rank = 1;
-            foreach (var reviewer in Model.TopReviewers)
-            {
-                <div class="reviewer-card d-flex align-items-center">
-                    <div class="rank-number">@rank</div>
-                    <div class="user-avatar">@GetInitials(reviewer.DisplayName)</div>
-                    <div class="flex-grow-1">
-                        <div>@reviewer.DisplayName</div>
-                        <div class="d-flex align-items-center gap-2 small">
-                            <span><i class="bi bi-star-fill text-warning"></i> @reviewer.AverageRating.ToString("0.0")</span>
-                            <span>|</span>
-                            <span>@reviewer.TotalReviews Reviews</span>
-                        </div>
+@model Readiculous.Services.ServiceModels.AdminDashboardViewModel;
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<link rel="stylesheet" href="~/css/adminDashboard/admin-screen.css" />
+
+<div class="container-fluid px-4 py-4 admin-dashboard">
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-4">
+            <div class="summary-card">
+                <div class="d-flex align-items-center">
+                    <div class="summary-icon me-3" style="background-color: var(--color-secondary);">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <div>
+                        <h5>Total Users</h5>
+                        <h2>@Model.UserCount</h2>
                     </div>
                 </div>
-                rank++;
-            }
-        }
-        else
-        {
-            <div class="text-center py-3">No reviewers found</div>
-        }
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="summary-card">
+                <div class="d-flex align-items-center">
+                    <div class="summary-icon me-3" style="background-color: var(--color-accent);">
+                        <i class="fas fa-book text-white"></i>
+                    </div>
+                    <div>
+                        <h5>Total Books</h5>
+                        <h2>@Model.BookCount</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="summary-card">
+                <div class="d-flex align-items-center">
+                    <div class="summary-icon me-3" style="background-color: var(--color-btn);">
+                        <i class="fas fa-tags text-white"></i>
+                    </div>
+                    <div>
+                        <h5>Total Genres</h5>
+                        <h2>@Model.GenreCount</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="row g-4">
+        <!-- Most Used Genre -->
+        <div class="col-12 col-lg-8">
+            <div class="chart-container h-100">
+                <h5 class="section-title"><i class="fas fa-chart-bar me-2"></i>Most Used Genres</h5>
+                <div class="bar-chart">
+                    @if (Model.MostUsedGenres != null && Model.MostUsedGenres.Any())
+                    {
+                        var maxCount = Model.MostUsedGenres.Max(g => g.Value);
+
+                        foreach (var genre in Model.MostUsedGenres)
+                        {
+                            var percentage = maxCount > 0 ? (genre.Value * 100) / maxCount : 0;
+                            var randomHue = (genre.Key.Name.GetHashCode() % 360);
+                            var barColor = $"hsl({randomHue}, 70%, 50%)";
+
+                            <div class="bar-item">
+                                <div class="bar-label">
+                                    <span class="genre-name"><i class="fas fa-tag me-2" style="color: @barColor"></i>@genre.Key.Name</span>
+                                    <span class="genre-count">@genre.Value books</span>
+                                </div>
+                                <div class="bar-bg">
+                                    <div class="bar-fill" style="width: @percentage%; background-color: @barColor"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-book-open fa-3x" style="color: var(--color-subtle-text);"></i>
+                            <p style="color: var(--color-subtle-text);">No genre data available</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 Reviewers -->
+        <div class="col-12 col-lg-4">
+            <div class="reviewer-container h-100">
+                <h5 class="section-title"><i class="fas fa-crown me-2"></i>Top 5 Reviewers</h5>
+
+                @if (Model.TopReviewers.Any())
+                {
+                    <div class="reviewer-list">
+                        @foreach (var reviewer in Model.TopReviewers.OrderByDescending(r => r.UserReviewModels.Count).Take(5))
+                        {
+                            var rank = Model.TopReviewers.IndexOf(reviewer) + 1;
+                            var rankColor = rank == 1 ? "linear-gradient(135deg, #FFD700, #FFA500)" :
+                            rank == 2 ? "linear-gradient(135deg, #C0C0C0, #A9A9A9)" :
+                            rank == 3 ? "linear-gradient(135deg, #CD7F32, #A0522D)" :
+                            "var(--color-secondary)";
+
+                            <div class="reviewer-card">
+                                <div class="rank-number" style="background: @rankColor">@rank</div>
+                                <div class="user-avatar">
+                                    @if (!string.IsNullOrEmpty(reviewer.ProfileImageUrl))
+                                    {
+                                        <img src="@reviewer.ProfileImageUrl" alt="Profile Picture" class="rounded-circle" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle d-flex justify-content-center align-items-center" style="background-color: var(--color-secondary);">
+                                            <span class="text-white">@reviewer.UserName.Substring(0, 1).ToUpper()</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">@reviewer.UserName</div>
+                                    <div class="d-flex align-items-center gap-2 small">
+                                        <span><i class="fas fa-star" style="color: var(--color-accent);"></i> @reviewer.AverageRating.ToString("0.0")</span>
+                                        <span style="color: var(--color-subtle-text);">|</span>
+                                        <span>@reviewer.UserReviewModels.Count Reviews</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-edit fa-3x" style="color: var(--color-subtle-text);"></i>
+                        <p style="color: var(--color-subtle-text);">No reviewer data available</p>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
-@functions {
-    string GetInitials(string displayName)
-    {
-        if (string.IsNullOrEmpty(displayName))
-            return "NA";
-
-        var names = displayName.Split(' ');
-        if (names.Length == 1)
-            return names[0].Length >= 2 ? names[0].Substring(0, 2).ToUpper() : names[0].ToUpper();
-
-        return $"{names[0][0]}{names[1][0]}".ToUpper();
-    }
-} *@

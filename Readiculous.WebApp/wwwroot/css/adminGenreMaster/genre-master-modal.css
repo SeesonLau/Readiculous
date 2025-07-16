@@ -41,8 +41,11 @@
 
 .genre-modal-actions {
     margin-top: 1.5rem;
-    padding-top: 1rem;
+    padding: 1rem 1.5rem;
     border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }
 
 .genre-modal .btn {

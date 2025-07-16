@@ -7,11 +7,21 @@
     --color-rank-bg: var(--color-secondary);
     --color-rank-text: var(--color-text-light);
     --color-section-title: var(--color-secondary);
-    --base-font-size: 1rem;
 }
+/*:root {
+    --color-card-bg: rgba(248, 236, 233, 0.9);
+    --color-card-text: var(--color-text);
+    --color-chart-bg: var(--color-card-bg);
+    --color-bar-primary: var(--color-secondary);
+    --color-bar-secondary: var(--color-accent);
+    --color-rank-bg: var(--color-secondary);
+    --color-rank-text: var(--color-text-light);
+    --color-section-title: var(--color-secondary);
+    --base-font-size: 1rem;
+}*/
 
 /* Base Styles */
-.summary-card {
+/*.summary-card {
     background-color: var(--color-card-bg);
     color: var(--color-card-text);
     border-radius: 10px;
@@ -130,10 +140,10 @@
     font-weight: 600;
     margin-bottom: 20px;
     font-size: 1.4rem;
-}
+}*/
 
 /* Responsive Adjustments */
-@media (max-width: 1200px) {
+/*@media (max-width: 1200px) {
 
     .summary-card h2 {
         font-size: 2rem;
@@ -245,12 +255,436 @@
 }
 
 .genre-name {
-    flex: 1; /* Allow genre name to take more space */
-    min-width: 150px; /* Minimum width for genre names */
-}
+    flex: 1;*/ /* Allow genre name to take more space */
+    /*min-width: 150px;*/ /* Minimum width for genre names */
+/*}
 
 .genre-count {
-    margin-left: 1rem; /* Space between name and count */
+    margin-left: 1rem;*/ /* Space between name and count */
+/*}*/
+
+/* Admin Dashboard - Enlarged Styles */
+.admin-dashboard {
+    min-height: calc(100vh - 60px);
+    background-color: var(--color-background);
+    padding: 2.5rem !important;
 }
 
+/* Summary Cards */
+.summary-card {
+    background-color: var(--color-modal);
+    color: var(--color-text);
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 2.25rem;
+    height: 100%;
+    border-left: 6px solid var(--color-secondary);
+    margin-bottom: 1.5rem;
+}
 
+    .summary-card:nth-child(2) {
+        border-left-color: var(--color-accent);
+    }
+
+    .summary-card:nth-child(3) {
+        border-left-color: var(--color-btn);
+    }
+
+    .summary-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .summary-card h5 {
+        color: var(--color-text);
+        font-weight: 600;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .summary-card h2 {
+        font-size: 2.75rem;
+        font-weight: 700;
+        color: var(--color-text-dark);
+    }
+
+.summary-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-right: 1.5rem !important;
+}
+
+/* Chart Containers */
+.chart-container, .reviewer-container {
+    background-color: var(--color-modal);
+    border-radius: 12px;
+    padding: 2.25rem;
+    height: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--color-border);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    color: var(--color-secondary);
+    font-weight: 700;
+    margin-bottom: 2.25rem;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+}
+
+    .section-title i {
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+/* Bar Chart Styles */
+.bar-chart {
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.bar-item {
+    margin-bottom: 1.75rem;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 1.3rem;
+    align-items: center;
+}
+
+.bar-bg {
+    height: 22px;
+    background-color: var(--color-subtle-bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 1s ease-out;
+}
+
+.genre-name {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+}
+
+    .genre-name i {
+        font-size: 1.4rem;
+        margin-right: 1rem;
+    }
+
+.genre-count {
+    margin-left: 1.5rem;
+    color: var(--color-secondary);
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+/* Reviewer Styles */
+.reviewer-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-top: 0.5rem;
+}
+
+.reviewer-card {
+    background-color: #F4EBF2;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid var(--color-secondary);
+    transition: all 0.2s ease;
+}
+
+    .reviewer-card:hover {
+        transform: translateX(3px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+
+.rank-number {
+    color: var(--color-text-light);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.75rem;
+    margin-right: 1.5rem !important;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.75rem;
+    margin-right: 1.5rem !important;
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: var(--color-secondary);
+}
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.reviewer-details {
+    flex-grow: 1;
+}
+
+    .reviewer-details .fw-bold {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+.reviewer-stats {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 1.1rem;
+}
+
+    .reviewer-stats i {
+        margin-right: 0.5rem;
+    }
+
+    .reviewer-stats .fa-star {
+        color: var(--color-accent);
+    }
+
+/* Empty State Styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--color-subtle-text);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state p {
+        font-size: 1.3rem;
+        color: var(--color-subtle-text);
+    }
+
+/* Scrollbar Styling */
+.reviewer-list::-webkit-scrollbar {
+    width: 10px;
+}
+
+.reviewer-list::-webkit-scrollbar-track {
+    background: var(--color-subtle-bg);
+    border-radius: 12px;
+}
+
+.reviewer-list::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 12px;
+}
+
+    .reviewer-list::-webkit-scrollbar-thumb:hover {
+        background: var(--color-secondary);
+    }
+
+/* Responsive Adjustments */
+@media (max-width: 1400px) {
+    .summary-card h2 {
+        font-size: 2.5rem;
+    }
+
+    .summary-icon {
+        width: 65px;
+        height: 65px;
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .admin-dashboard {
+        padding: 2rem !important;
+    }
+
+    .summary-card {
+        padding: 2rem;
+    }
+
+        .summary-card h2 {
+            font-size: 2.25rem;
+        }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .bar-label {
+        font-size: 1.2rem;
+    }
+
+    .user-avatar {
+        width: 55px;
+        height: 55px;
+    }
+}
+
+@media (max-width: 992px) {
+    .container-fluid {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+
+    .summary-card {
+        padding: 1.75rem;
+    }
+
+        .summary-card h5 {
+            font-size: 1.3rem;
+        }
+
+        .summary-card h2 {
+            font-size: 2rem;
+        }
+
+    .summary-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .chart-container, .reviewer-container {
+        padding: 1.75rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .bar-bg {
+        height: 20px;
+    }
+
+    .reviewer-card {
+        padding: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 1.5rem !important;
+    }
+
+    .summary-card {
+        padding: 1.5rem;
+    }
+
+        .summary-card h5 {
+            font-size: 1.2rem;
+        }
+
+        .summary-card h2 {
+            font-size: 1.8rem;
+        }
+
+    .summary-icon {
+        width: 55px;
+        height: 55px;
+        font-size: 1.4rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+    }
+
+    .bar-label {
+        font-size: 1.1rem;
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+
+    .rank-number {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-dashboard {
+        padding: 1.25rem !important;
+    }
+
+    .summary-card {
+        padding: 1.25rem;
+    }
+
+        .summary-card h2 {
+            font-size: 1.6rem;
+        }
+
+    .summary-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+        margin-right: 1rem !important;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+    }
+
+    .bar-bg {
+        height: 18px;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        margin-right: 1rem;
+    }
+
+    .rank-number {
+        width: 32px;
+        height: 32px;
+        margin-right: 1rem;
+    }
+
+    .reviewer-card {
+        font-size: 1.1rem;
+    }
+}

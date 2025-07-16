@@ -5,86 +5,87 @@
 </div>
 <form id="editBookForm" asp-action="Edit" enctype="multipart/form-data">
     <div class="modal-body">
+
         <input type="hidden" asp-for="BookId" />
         <input type="hidden" asp-for="CreatedBy" />
         <input type="hidden" asp-for="CreatedTime" />
         <input type="hidden" asp-for="UpdatedBy" />
         <input type="hidden" asp-for="UpdatedTime" />
-
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+        <!-- Left Column - Cover Image Section -->
         <div class="row">
-            <!-- Left Column - Cover Image Section -->
-            <div class="col-lg-4">
+            <div class="col-md-4 mb-3">
                 <div class="book-cover-section">
                     <div class="image-preview-container">
                         @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
                         {
-                            <img src="@Model.CoverImageUrl" class="image-preview" alt="Current Cover" />
+                            <img id="imagePreview" class="image-preview" src="@Model.CoverImageUrl" alt="Book Cover" />
+                            <div class="cover-image-placeholder d-none">
+                                <i class="fas fa-book-open"></i>
+                            </div>
                         }
                         else
                         {
+                            <img id="imagePreview" class="image-preview d-none" src="#" alt="Preview" />
                             <div class="cover-image-placeholder">
                                 <i class="fas fa-book-open"></i>
                             </div>
                         }
                     </div>
-
                     <div class="cover-upload-section">
+                        <label asp-for="CoverImage" class="form-label">Cover Image</label>
                         <label class="file-input-label">
-                            <span>Click to upload new cover</span>
+                            <span>Click to upload</span>
                             <input asp-for="CoverImage" type="file" class="d-none" accept="image/*" />
                         </label>
-                        <div class="image-preview-container mt-2 d-none" id="imagePreviewContainer">
-                            <img id="imagePreview" class="image-preview" src="#" alt="Preview" />
-                        </div>
                         <span asp-validation-for="CoverImage" class="text-danger"></span>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column - Book Details Form -->
-            <div class="col-lg-8">
+            <div class="col-md-8">
                 <div class="book-details-form">
                     <div class="mb-3">
                         <label asp-for="Title" class="form-label">Title</label>
-                        <input asp-for="Title" class="form-control" />
+                        <input asp-for="Title" class="form-control" placeholder="Enter book title" />
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="Author" class="form-label">Author</label>
-                            <input asp-for="Author" class="form-control" />
+                            <input asp-for="Author" class="form-control" placeholder="Enter author name" />
                             <span asp-validation-for="Author" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="ISBN" class="form-label">ISBN</label>
-                            <input asp-for="ISBN" class="form-control" />
+                            <input asp-for="ISBN" class="form-control" placeholder="Enter ISBN number" />
                             <span asp-validation-for="ISBN" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Description" class="form-label">Description</label>
-                        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter book description"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label asp-for="SeriesNumber" class="form-label">Series Number</label>
-                            <input asp-for="SeriesNumber" class="form-control" />
+                            <input asp-for="SeriesNumber" class="form-control" placeholder="e.g. 1, 2, 3" />
                             <span asp-validation-for="SeriesNumber" class="text-danger"></span>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label asp-for="PublicationYear" class="form-label">Publication Year</label>
-                            <input asp-for="PublicationYear" class="form-control" />
+                            <input asp-for="PublicationYear" class="form-control" placeholder="e.g. 2023" />
                             <span asp-validation-for="PublicationYear" class="text-danger"></span>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label asp-for="Publisher" class="form-label">Publisher</label>
-                            <input asp-for="Publisher" class="form-control" />
+                            <input asp-for="Publisher" class="form-control" placeholder="Enter publisher name" />
                             <span asp-validation-for="Publisher" class="text-danger"></span>
                         </div>
                     </div>
@@ -92,20 +93,11 @@
             </div>
         </div>
 
-        <!-- Divider Line -->
-        <div class="genre-divider">
-            <div class="divider-line"></div>
-            <div class="divider-icon">
-                <i class="fas fa-tags"></i>
-            </div>
-        </div>
-
-        <!-- Genres Section (Full Width) -->
-        <div class="genre-section">
+        <!-- Genre Section -->
+        <div class="genre-section mt-3">
             <div class="section-header">
-                <h5>Book Genres</h5>   
+                <h5>Genres*</h5>
             </div>
-
             @if (Model.AllAvailableGenres != null && Model.AllAvailableGenres.Any())
             {
                 <div class="genre-checkbox-grid">
@@ -117,7 +109,7 @@
                                    name="SelectedGenres"
                                    value="@genre.GenreId"
                                    id="genre-@genre.GenreId"
-                                   @(Model.SelectedGenres != null && Model.SelectedGenres.Contains(genre.GenreId) ? "checked" : "") />
+                                   @(Model.SelectedGenres.Contains(genre.GenreId) ? "checked" : "") />
                             <label class="form-check-label" for="genre-@genre.GenreId">@genre.Name</label>
                         </div>
                     }
@@ -136,4 +128,63 @@
     </div>
 </form>
 
-<script src="~/js/adminBookMaster/bookmasterModal.js" asp-append-version="true"></script>
+<script>
+        function setupImagePreview(inputId) {
+        const fileInput = document.getElementById(inputId);
+        if (!fileInput) return;
+
+        fileInput.addEventListener('change', function (event) {
+            const previewContainer = this.closest('.book-cover-section').querySelector('.image-preview-container');
+            const preview = previewContainer.querySelector('#imagePreview');
+            const placeholder = previewContainer.querySelector('.cover-image-placeholder');
+
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                }
+
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                // If no file selected but there's an existing image (edit mode)
+                if (preview.src && preview.src !== '#') {
+                    preview.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                } else {
+                    preview.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+                }
+            }
+        });
+    }
+
+        document.getElementById('CoverImage').addEventListener('change', function (event) {
+        const previewContainer = document.querySelector('.image-preview-container');
+        const preview = document.getElementById('imagePreview');
+        const placeholder = document.querySelector('.cover-image-placeholder');
+
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            }
+
+            reader.readAsDataURL(this.files[0]);
+        } else {
+            preview.classList.add('d-none');
+            placeholder.classList.remove('d-none');
+        }
+    });
+
+
+    // Initialize for both modals
+    document.addEventListener('DOMContentLoaded', function() {
+        setupImagePreview('CoverImage'); // For BookAddModal
+    });
+</script>
