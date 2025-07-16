@@ -107,6 +107,15 @@ namespace Readiculous.Data.Interfaces
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        (IQueryable<Book>, int) GetPaginatedFavoriteBooks(string userId, int pageNumber, int pageSize);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Book GetBookById(string id);

@@ -257,6 +257,38 @@ namespace Readiculous.Data.Repositories
             return (data, dataCount);
         }
 
+        public (IQueryable<Book>, int) GetPaginatedFavoriteBooks(string userId, int pageNumber, int pageSize)
+        {
+            var favoritedBooks = this.GetDbSet<Book>()
+                .Where(b => b.DeletedTime == null &&
+                            b.FavoritedbyUsers.Any(fb => fb.UserId == userId))
+                .OrderByDescending(x => x.UpdatedTime);
+
+            var dataCount = favoritedBooks.Count();
+
+            IQueryable<Book> data;
+            if (pageNumber == 0)
+            {
+                data = favoritedBooks
+                    .Include(b => b.BookReviews)
+                    .Include(b => b.CreatedByUser)
+                    .Include(b => b.UpdatedByUser)
+                    .AsNoTracking();
+            }
+            else
+            {
+                data = favoritedBooks
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(b => b.BookReviews)
+                    .Include(b => b.CreatedByUser)
+                    .Include(b => b.UpdatedByUser)
+                    .AsNoTracking();
+            }
+
+            return (data, dataCount);
+        }
+
         public Book GetBookById(string id)
         {
             return this.GetDbSet<Book>()

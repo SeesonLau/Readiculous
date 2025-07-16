@@ -32,15 +32,15 @@ namespace Readiculous.Services.Services
 
             IQueryable<Book> newBooks;
             IQueryable<Book> topBooks;
-            IQueryable<FavoriteBook> favoriteBooks;
+            IQueryable<Book> favoriteBooks;
 
             (newBooks, _) = _bookRepository.GetPaginatedNewBooks(1, 5);
             (topBooks, _) = _bookRepository.GetPaginatedTopBooks(1, 5);
-            (favoriteBooks, _) = _favoriteBookRepository.GetPaginatedFavoriteBooksByUserId(userId, 1, 5);
+            (favoriteBooks, _) = _bookRepository.GetPaginatedFavoriteBooks(userId, 1, 5);
 
             userDashboardViewModel.NewBooks = _mapper.Map<List<BookListItemViewModel>>(newBooks);
             userDashboardViewModel.TopBooks = _mapper.Map<List<BookListItemViewModel>>(topBooks);
-            userDashboardViewModel.FavoriteBooks = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
+            userDashboardViewModel.FavoriteBooks = _mapper.Map<List<BookListItemViewModel>>(favoriteBooks);
 
 
 
@@ -56,6 +56,17 @@ namespace Readiculous.Services.Services
             }
 
             foreach (var model in userDashboardViewModel.TopBooks)
+            {
+                var book = topBooks.FirstOrDefault(b => b.BookId == model.BookId);
+                if (book != null)
+                {
+                    var validReviews = book.BookReviews.Where(r => r.DeletedTime == null).ToList();
+                    model.AverageRating = validReviews.Any() ? (decimal)validReviews.Average(r => r.Rating) : 0;
+                    model.TotalReviews = validReviews.Count;
+                }
+            }
+
+            foreach (var model in userDashboardViewModel.FavoriteBooks)
             {
                 var book = topBooks.FirstOrDefault(b => b.BookId == model.BookId);
                 if (book != null)

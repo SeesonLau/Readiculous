@@ -124,7 +124,42 @@
             <div class="favorite-books position-relative p-3 bg-white border">
                 <h5 class="text-center mt-2 mb-3">Your Favorite Books</h5>
                 <div class="favorite-book-list">
-                    <p class="text-center text-muted">You have no favorite books yet.</p>
+                    @if(Model.FavoriteBooks.Any())
+                    {
+                        foreach (var book in Model.FavoriteBooks)
+                        {
+                            <div class="">
+                                <div class="book-card h-0 text-center">
+                                    <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
+                                        <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                             class="book-image mb-3" alt="@book.Title" />
+                                        <h6 class="book-title mb-1">@book.Title</h6>
+                                        <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                        <div class="book-rating mb-0">
+                                            @{
+                                                int filledStars = (int)Math.Floor((double)book.AverageRating);
+                                                bool hasRating = book.AverageRating > 0.0m;
+                                            }
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <span class="star-icon @(i <= filledStars && hasRating ? "star-filled" : "star-empty")">☆</span>
+                                            }
+                                            <span class="rating-value d-block @(hasRating ? "text-warning" : "text-secondary")">
+                                                (@book.AverageRating.ToString("0.0"))
+                                            </span>
+                                            <span class="review-count small text-muted d-block">
+                                                (@(book.TotalReviews) review@(book.TotalReviews == 1 ? "" : "s"))
+                                            </span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted">You have no favorite books yet.</p>
+                    }
                 </div>
             </div>
         </div>

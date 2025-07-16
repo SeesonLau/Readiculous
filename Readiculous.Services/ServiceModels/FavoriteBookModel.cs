@@ -14,6 +14,7 @@ namespace Readiculous.Services.ServiceModels
         public string Description { get; set; }
         public List<string> BookGenres { get; set; } = [];
         public string Author { get; set; }
+        public decimal AverageRating { get; set; }
         public string CoverImageUrl { get; set; }
         public string PublicationYear { get; set; }
         public DateTime CreatedTime { get; set; }
