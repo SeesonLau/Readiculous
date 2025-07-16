@@ -14,15 +14,13 @@ namespace Readiculous.Services.Services
         private readonly IUserRepository _userRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IGenreRepository _genreRepository;
-        private readonly IFavoriteBookRepository _favoriteBookRepository;
         private readonly IMapper _mapper;
 
-        public DashboardService(IUserRepository userRepository, IBookRepository bookRepository, IGenreRepository genreRepository, IFavoriteBookRepository favoriteBookRepository, IMapper mapper)
+        public DashboardService(IUserRepository userRepository, IBookRepository bookRepository, IGenreRepository genreRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _bookRepository = bookRepository;
             _genreRepository = genreRepository;
-            _favoriteBookRepository = favoriteBookRepository;
             _mapper = mapper;
         }
 
@@ -89,7 +87,6 @@ namespace Readiculous.Services.Services
                 GenreCount = _genreRepository.GetActiveGenreCount()
             };
 
-            // Get top 5 reviewers with their reviews and favorite books
             var topReviewers = _userRepository.GetTopReviewers(5).ToList();
 
             adminDashboardViewModel.TopReviewers = topReviewers.Select(reviewer =>
@@ -97,15 +94,12 @@ namespace Readiculous.Services.Services
                 var userDetails = new UserDetailsViewModel();
                 _mapper.Map(reviewer, userDetails);
 
-                // Map reviews and favorite books
                 userDetails.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewer.UserReviews);
                 userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(reviewer.UserFavoriteBooks);
 
-                // Get top genres from favorite books
                 var bookIds = userDetails.FavoriteBookModels.Select(x => x.BookId).ToList();
                 userDetails.TopGenres = _genreRepository.GetTopGenresFromBookIds(bookIds);
 
-                // Calculate average rating
                 userDetails.AverageRating = userDetails.UserReviewModels.Count > 0
                     ? Math.Round(userDetails.UserReviewModels.Average(r => r.Rating), 2)
                     : 0;
