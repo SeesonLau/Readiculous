@@ -71,35 +71,36 @@ namespace Readiculous.Services.Services
 
         public AdminDashboardViewModel GetAdminDashboardViewModel()
         {
-            var adminDashboardViewModel = new AdminDashboardViewModel();
-
-            adminDashboardViewModel.UserCount = _userRepository.GetActiveUserCount();
-            adminDashboardViewModel.BookCount = _bookRepository.GetActiveBookCount();
-            adminDashboardViewModel.GenreCount = _genreRepository.GetActiveGenreCount();
-
-            var queryableTopReviewers = _userRepository.GetTopReviewers(5);
-            var listTopReviewers = queryableTopReviewers.ToList();
-
-            List<UserDetailsViewModel> topReviewerDetails = new();
-            foreach(var reviewer in listTopReviewers)
+            var adminDashboardViewModel = new AdminDashboardViewModel
             {
-                UserDetailsViewModel userDetails = new();
+                UserCount = _userRepository.GetActiveUserCount(),
+                BookCount = _bookRepository.GetActiveBookCount(),
+                GenreCount = _genreRepository.GetActiveGenreCount()
+            };
+
+            // Get top 5 reviewers with their reviews and favorite books
+            var topReviewers = _userRepository.GetTopReviewers(5).ToList();
+
+            adminDashboardViewModel.TopReviewers = topReviewers.Select(reviewer =>
+            {
+                var userDetails = new UserDetailsViewModel();
                 _mapper.Map(reviewer, userDetails);
 
-                userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(reviewer.UserFavoriteBooks);
+                // Map reviews and favorite books
                 userDetails.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewer.UserReviews);
+                userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(reviewer.UserFavoriteBooks);
 
-                var bookIds = userDetails.FavoriteBookModels
-                    .Select(x => x.BookId)
-                    .ToList();
+                // Get top genres from favorite books
+                var bookIds = userDetails.FavoriteBookModels.Select(x => x.BookId).ToList();
                 userDetails.TopGenres = _genreRepository.GetTopGenresFromBookIds(bookIds);
 
+                // Calculate average rating
                 userDetails.AverageRating = userDetails.UserReviewModels.Count > 0
                     ? Math.Round(userDetails.UserReviewModels.Average(r => r.Rating), 2)
                     : 0;
 
-                topReviewerDetails.Add(userDetails);
-            }
+                return userDetails;
+            }).ToList();
 
             adminDashboardViewModel.TopReviewers = topReviewerDetails;
 

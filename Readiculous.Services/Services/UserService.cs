@@ -262,13 +262,13 @@ namespace Readiculous.Services.Services
             {
                 return GetAllPaginatedActiveUsers(pageNumber, pageSize);
             }
-            else if(string.IsNullOrEmpty(username))
-            {
-                return GetPaginatedUsersByRoleAndUsername(role.Value, string.Empty, pageNumber, pageSize, sortType);
-            }
-            else if(!role.HasValue)
+            else if (!role.HasValue)
             {
                 return GetPaginatedUsersByUsername(username, pageNumber, pageSize, sortType);
+            }
+            else if (string.IsNullOrEmpty(username))
+            {
+                return GetPaginatedUsersByRoleAndUsername(role.Value, string.Empty, pageNumber, pageSize, sortType);
             }
             else
             {

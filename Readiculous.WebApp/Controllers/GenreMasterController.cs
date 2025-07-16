@@ -37,20 +37,13 @@ namespace Readiculous.WebApp.Controllers
 
             ViewBag.GenreSortTypes = _genreService.GetGenreSortTypes(sortOrder);
 
-            var allGenres = _genreService.GetGenreList(
-                searchString,
-                sortType : sortOrder);
+            var genres = _genreService.GetPaginatedGenreList(
+                genreName: searchString,
+                sortType: sortOrder,
+                pageNumber: page,
+                pageSize: pageSize);
 
-            var totalItems = allGenres.Count;
-            var paginatedGenres = allGenres
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            ViewBag.PaginationModel = new PaginationModel(totalItems, page, pageSize);
-            ViewBag.PageSize = pageSize;
-
-            return View(paginatedGenres);
+            return View(genres);
         }
 
 

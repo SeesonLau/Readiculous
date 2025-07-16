@@ -2,6 +2,7 @@
 using Readiculous.Services.ServiceModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using X.PagedList;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Interfaces
@@ -24,5 +25,6 @@ namespace Readiculous.Services.Interfaces
         List<SelectListItem> GetAllGenreSelectListItems(string? genreFilter);
         List<GenreViewModel> ConvertGenreListItemViewModelToGenreViewModel(List<GenreListItemViewModel> genreListItemViewModels);
         List<BookListItemViewModel> GetBooksByGenreId(string genreId);
+        public IPagedList<GenreListItemViewModel> GetPaginatedGenreList(string genreName, int pageNumber, int pageSize = 10, GenreSortType sortType = GenreSortType.Latest);
     }
 }

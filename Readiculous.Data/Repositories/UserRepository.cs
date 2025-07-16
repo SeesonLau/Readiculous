@@ -69,18 +69,38 @@ namespace Readiculous.Data.Repositories
         }
         public (IQueryable<User>, int) GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize, UserSortType sortType)
         {
-            var data = this.GetDbSet<User>()
+            // Handle null username case
+            if (string.IsNullOrEmpty(username))
+            {
+                // Return all users or empty set based on your requirements
+                var allData = this.GetDbSet<User>()
+                    .Where(u => u.DeletedTime == null);
+
+                var count = allData.Count();
+                var data = allData
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(u => u.CreatedByUser)
+                    .Include(u => u.UpdatedByUser)
+                    .AsNoTracking();
+
+                return (data, count);
+            }
+
+            // Original logic for non-null username
+            var filteredData = this.GetDbSet<User>()
                 .Where(u => u.DeletedTime == null &&
-                            u.Username.ToLower().Contains(username.ToLower()));
-            var dataCount = data.Count();
-            data = SortUsers(data, sortType)
+                           u.Username.ToLower().Contains(username.ToLower()));
+
+            var filteredCount = filteredData.Count();
+            var pagedData = filteredData
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(u => u.CreatedByUser)
                 .Include(u => u.UpdatedByUser)
                 .AsNoTracking();
 
-            return (data, dataCount);
+            return (pagedData, filteredCount);
         }
 
         public IQueryable<User> GetUsersByRoleAndUsername(RoleType role, string username)
@@ -153,12 +173,14 @@ namespace Readiculous.Data.Repositories
         public IQueryable<User> GetTopReviewers(int numberOfUsers)
         {
             return this.GetDbSet<User>()
-                .Where(u => u.DeletedTime == null)
-                .OrderByDescending(u => u.UserReviews.Count())
-                .Include(u => u.UserFavoriteBooks)
-                .Include(u => u.UserReviews)
-                .Take(numberOfUsers)
-                .AsNoTracking();
+                 .Where(u => u.DeletedTime == null)
+                 .Include(u => u.UserReviews)  // Include reviews for counting
+                 .OrderByDescending(u => u.UserReviews.Count)  // Changed to Descending
+                 .Take(numberOfUsers)
+                 .Include(u => u.UserFavoriteBooks)  // Include after ordering to avoid performance impact
+                 .Include(u => u.CreatedByUser)
+                 .Include(u => u.UpdatedByUser)
+                 .AsNoTracking();
         }
 
         private IQueryable<User> SortUsers(IQueryable<User> users, UserSortType sortType)
