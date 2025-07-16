@@ -563,21 +563,13 @@
     align-items: center;
     padding: 0.5rem 1rem;
     border-radius: 6px;
-    transition: all 0.2s ease;
+
     width: 150px; 
     justify-content: flex-start;
 }
-
-    .genre-checkbox-item:hover {
-        background: var(--color-highlight);
-        transform: translateY(-2px);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
     .genre-checkbox-item .form-check-input {
         margin-right: 0.75rem;
     }
-
     .genre-checkbox-item .form-check-label {
         font-family: var(--font-primary);
         color: var(--color-text);
