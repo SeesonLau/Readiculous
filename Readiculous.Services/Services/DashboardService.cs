@@ -4,6 +4,7 @@ using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
+using Supabase.Gotrue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,23 +77,44 @@ namespace Readiculous.Services.Services
 
         public AdminDashboardViewModel GetAdminDashboardViewModel()
         {
-            var adminDashboardViewModel = new AdminDashboardViewModel();
+            var adminDashboardViewModel = new AdminDashboardViewModel
+            {
+                UserCount = _userRepository.GetActiveUserCount(),
+                BookCount = _bookRepository.GetActiveBookCount(),
+                GenreCount = _genreRepository.GetActiveGenreCount()
+            };
 
-            adminDashboardViewModel.UserCount = _userRepository.GetActiveUserCount();
-            adminDashboardViewModel.BookCount = _bookRepository.GetActiveBookCount();
-            adminDashboardViewModel.GenreCount = _genreRepository.GetActiveGenreCount();
+            // Get top 5 reviewers with their reviews and favorite books
+            var topReviewers = _userRepository.GetTopReviewers(5).ToList();
 
-            var queryableTopReviewers = _userRepository.GetTopReviewers(5);
-            var listTopReviewers = queryableTopReviewers.ToList();
-            adminDashboardViewModel.TopReviewers = _mapper.Map<List<UserListItemViewModel>>(listTopReviewers);
+            adminDashboardViewModel.TopReviewers = topReviewers.Select(reviewer =>
+            {
+                var userDetails = new UserDetailsViewModel();
+                _mapper.Map(reviewer, userDetails);
 
-            var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5);
-            var listMostUsedGenres = queryableMostUsedGenres.ToList();
-            adminDashboardViewModel.MostUsedGenres = listMostUsedGenres
-            .ToDictionary(
-                kvp => _mapper.Map<GenreListItemViewModel>(kvp.Key),
-                kvp => kvp.Value
-            );
+                // Map reviews and favorite books
+                userDetails.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewer.UserReviews);
+                userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(reviewer.UserFavoriteBooks);
+
+                // Get top genres from favorite books
+                var bookIds = userDetails.FavoriteBookModels.Select(x => x.BookId).ToList();
+                userDetails.TopGenres = _genreRepository.GetTopGenresFromBookIds(bookIds);
+
+                // Calculate average rating
+                userDetails.AverageRating = userDetails.UserReviewModels.Count > 0
+                    ? Math.Round(userDetails.UserReviewModels.Average(r => r.Rating), 2)
+                    : 0;
+
+                return userDetails;
+            }).ToList();
+
+            // Get most used genres
+            var mostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5).ToList();
+            adminDashboardViewModel.MostUsedGenres = mostUsedGenres
+                .ToDictionary(
+                    kvp => _mapper.Map<GenreListItemViewModel>(kvp.Key),
+                    kvp => kvp.Value
+                );
 
             return adminDashboardViewModel;
         }

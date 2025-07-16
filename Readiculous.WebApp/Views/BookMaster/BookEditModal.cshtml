@@ -13,51 +13,99 @@
 
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <div class="mb-3">
-            <label asp-for="Title" class="form-label">Title*</label>
-            <input asp-for="Title" class="form-control" />
-            <span asp-validation-for="Title" class="text-danger"></span>
-        </div>
-
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <label asp-for="Author" class="form-label">Author*</label>
-                <input asp-for="Author" class="form-control" />
-                <span asp-validation-for="Author" class="text-danger"></span>
+            <!-- Left Column - Cover Image Section -->
+            <div class="col-lg-4">
+                <div class="book-cover-section">
+                    <div class="image-preview-container">
+                        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+                        {
+                            <img src="@Model.CoverImageUrl" class="image-preview" alt="Current Cover" />
+                        }
+                        else
+                        {
+                            <div class="cover-image-placeholder">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="cover-upload-section">
+                        <label class="file-input-label">
+                            <span>Click to upload new cover</span>
+                            <input asp-for="CoverImage" type="file" class="d-none" accept="image/*" />
+                        </label>
+                        <div class="image-preview-container mt-2 d-none" id="imagePreviewContainer">
+                            <img id="imagePreview" class="image-preview" src="#" alt="Preview" />
+                        </div>
+                        <span asp-validation-for="CoverImage" class="text-danger"></span>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="ISBN" class="form-label">ISBN</label>
-                <input asp-for="ISBN" class="form-control" />
-                <span asp-validation-for="ISBN" class="text-danger"></span>
+
+            <!-- Right Column - Book Details Form -->
+            <div class="col-lg-8">
+                <div class="book-details-form">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Title</label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Author" class="form-label">Author</label>
+                            <input asp-for="Author" class="form-control" />
+                            <span asp-validation-for="Author" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ISBN" class="form-label">ISBN</label>
+                            <input asp-for="ISBN" class="form-control" />
+                            <span asp-validation-for="ISBN" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="SeriesNumber" class="form-label">Series Number</label>
+                            <input asp-for="SeriesNumber" class="form-control" />
+                            <span asp-validation-for="SeriesNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="PublicationYear" class="form-label">Publication Year</label>
+                            <input asp-for="PublicationYear" class="form-control" />
+                            <span asp-validation-for="PublicationYear" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Publisher" class="form-label">Publisher</label>
+                            <input asp-for="Publisher" class="form-control" />
+                            <span asp-validation-for="Publisher" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="mb-3">
-            <label asp-for="Description" class="form-label">Description</label>
-            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-            <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
-
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label asp-for="SeriesNumber" class="form-label">Series Number</label>
-                <input asp-for="SeriesNumber" class="form-control" />
-                <span asp-validation-for="SeriesNumber" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label asp-for="PublicationYear" class="form-label">Publication Year</label>
-                <input asp-for="PublicationYear" class="form-control" />
-                <span asp-validation-for="PublicationYear" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label asp-for="Publisher" class="form-label">Publisher</label>
-                <input asp-for="Publisher" class="form-control" />
-                <span asp-validation-for="Publisher" class="text-danger"></span>
+        <!-- Divider Line -->
+        <div class="genre-divider">
+            <div class="divider-line"></div>
+            <div class="divider-icon">
+                <i class="fas fa-tags"></i>
             </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold">Genres*</label>
+        <!-- Genres Section (Full Width) -->
+        <div class="genre-section">
+            <div class="section-header">
+                <h5>Book Genres</h5>   
+            </div>
+
             @if (Model.AllAvailableGenres != null && Model.AllAvailableGenres.Any())
             {
                 <div class="genre-checkbox-grid">
@@ -80,36 +128,6 @@
                 <p class="text-danger">No genres available.</p>
             }
             <span asp-validation-for="SelectedGenres" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Current Cover Image</label>
-            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
-            {
-                <div class="image-preview-container">
-                    <img src="@Model.CoverImageUrl" class="image-preview" alt="Current Cover" />
-                </div>
-            }
-            else
-            {
-                <div class="image-preview-container">
-                    <div class="cover-image-placeholder">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="CoverImage" class="form-label">Replace Cover Image</label>
-            <label class="file-input-label">
-                <span>Click to upload</span>
-                <input asp-for="CoverImage" type="file" class="d-none" accept="image/*" />
-            </label>
-            <div class="image-preview-container mt-2 d-none" id="imagePreviewContainer">
-                <img id="imagePreview" class="image-preview" src="#" alt="Preview" />
-            </div>
-            <span asp-validation-for="CoverImage" class="text-danger"></span>
         </div>
     </div>
     <div class="modal-footer">
