@@ -65,7 +65,7 @@ namespace Readiculous.Data.Interfaces
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize = 10);
+        (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize, BookSortType sortType);
         IQueryable<Book> GetBooksByGenreList(List<Genre> genres); // TO BE DELETED
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Readiculous.Data.Interfaces
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        (IQueryable<Book>, int) GetPaginatedBooksByGenreList(List<Genre> genres, int pageNumber, int pageSize = 10);
+        (IQueryable<Book>, int) GetPaginatedBooksByGenreList(List<Genre> genres, int pageNumber, int pageSize, BookSortType sortType);
         IQueryable<Book> GetBooksByTitleAndGenres(string bookTitle, List<Genre> genres); // TO BE DELETED
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Readiculous.Data.Interfaces
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        (IQueryable<Book>, int) GetPaginatedBooksByTitleAndGenres(string bookTitle, List<Genre> genres, int pageNumber, int pageSize = 10);
+        (IQueryable<Book>, int) GetPaginatedBooksByTitleAndGenres(string bookTitle, List<Genre> genres, int pageNumber, int pageSize, BookSortType sortType);
 
         /// <summary>
         /// 

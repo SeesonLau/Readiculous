@@ -1,17 +1,11 @@
 ﻿using AutoMapper;
-using NetTopologySuite.Index.HPRtree;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.ServiceModels;
-using Supabase.Gotrue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using X.PagedList;
-using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
 {
@@ -108,13 +102,15 @@ namespace Readiculous.Services.Services
                 return userDetails;
             }).ToList();
 
-            // Get most used genres
-            var mostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5).ToList();
-            adminDashboardViewModel.MostUsedGenres = mostUsedGenres
-                .ToDictionary(
-                    kvp => _mapper.Map<GenreListItemViewModel>(kvp.Key),
-                    kvp => kvp.Value
-                );
+            adminDashboardViewModel.TopReviewers = topReviewerDetails;
+
+            var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5);
+            var listMostUsedGenres = queryableMostUsedGenres.ToList();
+            adminDashboardViewModel.MostUsedGenres = listMostUsedGenres
+            .ToDictionary(
+                kvp => _mapper.Map<GenreListItemViewModel>(kvp.Key),
+                kvp => kvp.Value
+            );
 
             return adminDashboardViewModel;
         }
