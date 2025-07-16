@@ -39,7 +39,7 @@
                 <h3 class="genre-list-title">Browse Genres</h3>
                 <div class="genre-list-container">
                     <ul class="genre-list">
-                        @foreach (var genre in Model.AllGenres)
+                        @foreach (var genre in Model.AllGenres.OrderBy(g => g.Name))
                         {
                             <li class="genre-list-item">
                                 <a href="@Url.Action("GenreViewPage", "GenreMaster", new { id = genre.GenreId })"

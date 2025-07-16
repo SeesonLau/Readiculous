@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('auth-container');
     if (!container) return;
 
-    // Utility to enable/disable all buttons and anchors inside a form
     function toggleFormButtons(form, disable) {
         const buttons = form.querySelectorAll('button, a');
         buttons.forEach(btn => {
@@ -13,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Helper to load a partial via AJAX
     function loadPartial(url, data = null, method = 'GET') {
         const options = { method };
         if (data) {
@@ -28,9 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // Initial load: login
     loadPartial('/Account/AuthPartial?view=login');
-
     const submittingForms = new Set();
 
     function bindEvents() {
@@ -181,6 +177,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 otpForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     updateHiddenOtp();
+                    toggleFormButtons(otpForm, true);
+                    const submitBtn = otpForm.querySelector('button[type="submit"]');
+                    let originalText = '';
+                    if (submitBtn) {
+                        originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Verifying';
+                    }
                     const formData = new FormData(otpForm);
                     const email = formData.get('Email');
                     let url, onSuccess;
@@ -204,8 +207,16 @@ document.addEventListener('DOMContentLoaded', function () {
                                 toastr.success('OTP verified!');
                             } else {
                                 toastr.error(data.message || 'Invalid OTP. Please try again.');
+                                toggleFormButtons(otpForm, false);
+                                if (submitBtn) submitBtn.innerHTML = originalText;
                             }
-                        });
+                        })
+                        .catch(() => {
+                            toastr.error('An error occurred.');
+                            toggleFormButtons(otpForm, false);
+                            if (submitBtn) submitBtn.innerHTML = originalText;
+                        })
+                        .finally(() => { submittingForms.delete(otpForm); });
                 });
             }
             document.getElementById('show-login')?.addEventListener('click', function (e) {
@@ -213,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 loadPartial('/Account/AuthPartial?view=login');
             });
         }
+
 
         const resetPasswordForm = document.getElementById('resetPasswordForm');
         if (resetPasswordForm) {
