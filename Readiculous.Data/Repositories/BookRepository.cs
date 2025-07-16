@@ -5,6 +5,7 @@ using Readiculous.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Data.Repositories
 {
@@ -81,7 +82,7 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
-        public (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize)
+        public (IQueryable<Book>, int) GetPaginatedBooksByTitle(string bookTitle, int pageNumber, int pageSize, BookSortType sortType)
         {
 
             var data = this.GetDbSet<Book>()
@@ -89,7 +90,7 @@ namespace Readiculous.Data.Repositories
                             b.Title.ToLower().Contains(bookTitle.ToLower()));
             var dataCount = data.Count();
 
-            data = data
+            data = SortBooks(data, sortType)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(book => book.CreatedByUser)
@@ -118,14 +119,12 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
-        public (IQueryable<Book>, int) GetPaginatedBooksByGenreList(List<Genre> genres, int pageNumber, int pageSize = 10)
+        public (IQueryable<Book>, int) GetPaginatedBooksByGenreList(List<Genre> genres, int pageNumber, int pageSize, BookSortType sortType)
         {
             IQueryable<Book> data;
-            int dataCount;
             if(genres == null || !genres.Any())
             {
                 data = GetAllActiveBooks();
-                dataCount = data.Count();
             }
             else
             {
@@ -134,16 +133,16 @@ namespace Readiculous.Data.Repositories
                                 b.GenreAssociations
                                     .Any(ga => genres
                                         .Any(g => g.GenreId == ga.GenreId)));
-
-                dataCount = data.Count();
-
-                data = data
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .Include(b => b.CreatedByUser)
-                    .Include(b => b.UpdatedByUser)
-                    .AsNoTracking();
             }
+
+            var dataCount = data.Count();
+
+            data = SortBooks(data, sortType)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(b => b.CreatedByUser)
+                .Include(b => b.UpdatedByUser)
+                .AsNoTracking();
 
             return (data, dataCount);
         }
@@ -174,7 +173,7 @@ namespace Readiculous.Data.Repositories
 
             return books;
         }
-        public (IQueryable<Book>, int) GetPaginatedBooksByTitleAndGenres(string bookTitle, List<Genre> genres, int pageNumber, int pageSize = 10)
+        public (IQueryable<Book>, int) GetPaginatedBooksByTitleAndGenres(string bookTitle, List<Genre> genres, int pageNumber, int pageSize, BookSortType sortType)
         {
             IQueryable<Book> data;
             int dataCount;
@@ -200,7 +199,7 @@ namespace Readiculous.Data.Repositories
                                     .Any(ga => genres
                                         .Any(g => g.GenreId == ga.GenreId)));
                 dataCount = data.Count();
-                data = data
+                data = SortBooks(data, sortType)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .Include(b => b.CreatedByUser)
@@ -239,7 +238,7 @@ namespace Readiculous.Data.Repositories
                     AverageRating = b.BookReviews
                         .Where(r => r.DeletedTime == null)
                         .Select(r => (double?)r.Rating)
-                        .DefaultIfEmpty() // No need to pass 0; EF handles nulls
+                        .DefaultIfEmpty() 
                         .Average()
                 })
                 .OrderByDescending(x => x.AverageRating);
@@ -281,6 +280,31 @@ namespace Readiculous.Data.Repositories
         {
             return this.GetDbSet<Book>()
                 .Count(b => b.DeletedTime == null);
+        }
+
+        private IQueryable<Book> SortBooks(IQueryable<Book> books, BookSortType sortType)
+        {
+            DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
+            return sortType switch
+            {
+
+                BookSortType.TitleAscending => books.OrderBy(b => b.Title),
+                BookSortType.TitleDescending => books.OrderByDescending(b => b.Title),
+                BookSortType.AuthorAscending => books.OrderBy(b => b.Author),
+                BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
+                BookSortType.RatingAscending => books.OrderByDescending(b => b.BookReviews.Any() ? b.BookReviews.Average(r => r.Rating) : 0),
+                BookSortType.RatingDescending => books.OrderBy(b => b.BookReviews.Any() ? b.BookReviews.Average(r => r.Rating) : 0),
+                BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
+                BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
+                BookSortType.NewBooksAscending => books
+                    .Where(b => b.CreatedTime >= twoWeeksAgo)
+                    .OrderBy(b => b.CreatedTime),
+                BookSortType.NewBooksDescending => books
+                    .Where(b => b.CreatedTime >= twoWeeksAgo)
+                    .OrderByDescending(b => b.CreatedTime),
+                _ => books, // Default case
+
+            };
         }
     }
 }
