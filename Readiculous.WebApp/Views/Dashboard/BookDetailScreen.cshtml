@@ -254,6 +254,33 @@
                 alert("Something went wrong. Please try again.");
             }
         }
+
+        function setupRatingStars(modalId) {
+            const ratingInputs = document.querySelectorAll(`#${modalId} input[name="Rating"]`);
+            const updateStars = (selected) => {
+                for (let i = 1; i <= 5; i++) {
+                    const icon = document.querySelector(`#${modalId} #icon-star-${i}`);
+                    if (icon) {
+                        if (i <= selected) {
+                            icon.classList.remove("bi-star", "text-muted");
+                            icon.classList.add("bi-star-fill", "text-warning");
+                        } else {
+                            icon.classList.remove("bi-star-fill", "text-warning");
+                            icon.classList.add("bi-star", "text-muted");
+                        }
+                    }
+                }
+            };
+
+            ratingInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    updateStars(parseInt(this.value));
+                });
+            });
+
+            const checked = document.querySelector(`#${modalId} input[name="Rating"]:checked`);
+            if (checked) updateStars(parseInt(checked.value));
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -268,6 +295,7 @@
                         const container = document.getElementById('addReviewModalContent');
                         if (container) {
                             container.innerHTML = html;
+                            setupRatingStars("addReviewModalContent");
                             new bootstrap.Modal(document.getElementById('addReviewModal')).show();
                         }
                     } catch (err) {
@@ -286,6 +314,7 @@
                         const container = document.getElementById('editReviewModalContent');
                         if (container) {
                             container.innerHTML = html;
+                            setupRatingStars("addReviewModalContent");
                             new bootstrap.Modal(document.getElementById('editReviewModal')).show();
                         }
                     } catch (err) {

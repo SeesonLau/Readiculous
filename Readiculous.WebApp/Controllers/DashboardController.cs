@@ -127,53 +127,22 @@ namespace Readiculous.WebApp.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ViewNewBooks(string keyword = "")
+        public IActionResult ViewNewBooks(string keyword = "", int page = 1, int pageSize = 10, BookSortType sortOrder = BookSortType.Latest)
         {
-            var allBooks = _bookService.GetBookList(
-                "", // leave search string blank — we’ll filter it ourselves
-                new List<GenreViewModel>(),
-                "",
-                BookSortType.Latest
-            );
-
-            List<BookListItemViewModel> filteredBooks;
-
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                // ONLY search by keyword — DO NOT filter by CreatedTime
-                filteredBooks = allBooks
-                    .Where(b => !string.IsNullOrWhiteSpace(b.Title)
-                        && b.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-            else
-            {
-                // If no keyword, show books from the last 2 weeks only
-                filteredBooks = allBooks
-                    .Where(b => b.CreatedTime >= DateTime.UtcNow.AddDays(-14))
-                    .ToList();
-            }
+            var newBooks = _bookService.GetPaginatedBookList(keyword, null, this.UserId, page, pageSize, sortOrder);
 
             ViewBag.Keyword = keyword;
-            return View("ViewNewBooks", filteredBooks);
+            return View("ViewNewBooks", newBooks);
         }
-
-
-
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ViewTopBooks()
+        public IActionResult ViewTopBooks(string keyword = "", int page = 1, int pageSize = 10, BookSortType sortOrder = BookSortType.RatingDescending)
         {
-            var topBooks = _bookService.GetBookList(
-                searchString: "",
-                genres: new List<GenreViewModel>(),
-                userID: null,
-                sortType: BookSortType.RatingDescending
-            ).OrderByDescending(b => b.AverageRating)
-             .ToList();
+            var topBooks = _bookService.GetPaginatedBookList(keyword, null, this.UserId, page, pageSize, sortOrder);
 
-            return View(topBooks);
+            ViewBag.Keyword = keyword;
+            return View("ViewTopBooks", topBooks);
         }
 
         [HttpGet]

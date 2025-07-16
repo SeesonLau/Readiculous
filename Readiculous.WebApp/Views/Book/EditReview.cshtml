@@ -30,18 +30,24 @@
                 <input asp-for="Email" class="form-control" readonly />
             </div>
 
-            <!-- Rating -->
+            <!-- Rating Stars -->
             <div class="form-group mt-3">
-                <label asp-for="Rating" class="form-label">Rating (1 to 5)</label>
-                <select asp-for="Rating" class="form-control">
+                <label class="form-label d-block">Rating</label>
+                <div class="rating-stars" style="font-size: 1.5rem;">
                     @for (int i = 1; i <= 5; i++)
                     {
-                        <option value="@i" selected="@(Model.Rating == i)">
-                            @i
-                        </option>
+                        <input type="radio"
+                               name="Rating"
+                               id="star-@i"
+                               value="@i"
+                               class="d-none"
+                               @(Model.Rating == i ? "checked" : "") />
+                        <label for="star-@i" class="me-1" style="cursor:pointer;">
+                            <i class="bi @(i <= Model.Rating ? "bi-star-fill text-warning" : "bi-star text-muted")"></i>
+                        </label>
                     }
-                </select>
-                <span asp-validation-for="Rating" class="text-danger"></span>
+                </div>
+                <span asp-validation-for="Rating" class="text-danger d-block mt-1"></span>
             </div>
 
             <!-- Comment -->

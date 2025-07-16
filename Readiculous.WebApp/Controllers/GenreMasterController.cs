@@ -39,9 +39,9 @@ namespace Readiculous.WebApp.Controllers
 
             var genres = _genreService.GetPaginatedGenreList(
                 genreName: searchString,
-                sortType: sortOrder,
                 pageNumber: page,
-                pageSize: pageSize);
+                pageSize: pageSize,
+                sortType: sortOrder);
 
             return View(genres);
         }

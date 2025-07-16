@@ -102,8 +102,6 @@ namespace Readiculous.Services.Services
                 return userDetails;
             }).ToList();
 
-            adminDashboardViewModel.TopReviewers = topReviewerDetails;
-
             var queryableMostUsedGenres = _genreRepository.GetMostUsedGenresWithCount(5);
             var listMostUsedGenres = queryableMostUsedGenres.ToList();
             adminDashboardViewModel.MostUsedGenres = listMostUsedGenres
