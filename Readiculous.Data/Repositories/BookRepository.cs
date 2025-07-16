@@ -292,8 +292,8 @@ namespace Readiculous.Data.Repositories
                 BookSortType.TitleDescending => books.OrderByDescending(b => b.Title),
                 BookSortType.AuthorAscending => books.OrderBy(b => b.Author),
                 BookSortType.AuthorDescending => books.OrderByDescending(b => b.Author),
-                BookSortType.RatingAscending => books.OrderByDescending(b => b.BookReviews.Any() ? b.BookReviews.Average(r => r.Rating) : 0),
-                BookSortType.RatingDescending => books.OrderBy(b => b.BookReviews.Any() ? b.BookReviews.Average(r => r.Rating) : 0),
+                BookSortType.RatingAscending => books.OrderBy(b => b.BookReviews.Any() ? b.BookReviews.Average(r => r.Rating) : 0),
+                BookSortType.RatingDescending => books.OrderByDescending(b => b.BookReviews.Any() ? b.BookReviews.Average(r => r.Rating) : 0),
                 BookSortType.Oldest => books.OrderBy(b => b.UpdatedTime),
                 BookSortType.Latest => books.OrderByDescending(b => b.UpdatedTime),
                 BookSortType.NewBooksAscending => books
