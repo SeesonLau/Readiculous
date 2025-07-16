@@ -6,26 +6,29 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
             @foreach (var book in Model)
             {
+                var filledStars = (int)Math.Floor((double)book.AverageRating);
+                bool hasReview = book.AverageRating > 0;
+
                 <div class="col">
                     <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })"
                        class="text-decoration-none text-reset">
                         <div class="book-card h-100 text-center">
                             <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
                                  class="book-image mb-3 img-fluid"
+                                 alt="@book.Title"
                                  style="height: 220px; object-fit: contain;" />
                             <h6 class="book-title mb-1">@book.Title</h6>
                             <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
                             <div class="book-rating mb-0">
                                 @for (int i = 1; i <= 5; i++)
                                 {
-                                    var filled = i <= (int)Math.Floor(book.AverageRating);
-                                    <span class="star-icon @(filled ? "star-filled" : "star-empty")">☆</span>
+                                    <span class="star-icon @(i <= filledStars && hasReview ? "star-filled" : "star-empty")">☆</span>
                                 }
-                                <span class="rating-value d-block text-warning">
+                                <span class="rating-value d-block @(hasReview ? "text-warning" : "text-secondary")">
                                     (@book.AverageRating.ToString("0.0"))
                                 </span>
                                 <span class="review-count small text-muted d-block">
-                                    (@book.TotalReviews review@(book.TotalReviews == 1 ? "" : "s"))
+                                    (@(book.TotalReviews) review@(book.TotalReviews == 1 ? "" : "s"))
                                 </span>
                             </div>
                         </div>

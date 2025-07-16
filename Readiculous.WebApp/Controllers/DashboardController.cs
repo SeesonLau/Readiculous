@@ -175,65 +175,71 @@ namespace Readiculous.WebApp.Controllers
 
             return View(topBooks);
         }
-
-        [HttpGet]
-        public IActionResult GenreScreen()
+        public IActionResult GenreScreen(List<string> selectedGenres)
         {
-            try
-            {
-                var allGenres = _genreService.GetAllGenreSelectListItems(null)
-                    .Select(g => g.Text)
-                    .ToList();
+            selectedGenres ??= new List<string>();
 
-                // Get initial books (first 20 by default)
-                var books = _bookService.GetBookList(
-                    searchString: "",
-                    genres: new List<GenreViewModel>(),
-                    userID: "",
-                    sortType: BookSortType.Latest
-                ).Take(20).ToList();
+            // Lookup all genres from your genre service
+            var allGenreItems = _genreService.GetAllGenreSelectListItems(null);
 
-                ViewBag.AllGenres = allGenres;
-                return View(books);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading genre screen");
-                return View("Error");
-            }
+            // Convert names to IDs
+            var selectedGenreIds = allGenreItems
+                .Where(g => selectedGenres.Contains(g.Text))
+                .Select(g => g.Value)
+                .ToList();
+
+            // Create GenreViewModels with both ID and Name
+            var genreViewModels = selectedGenreIds
+                .Select(id => new GenreViewModel { GenreId = id })
+                .ToList();
+
+            var books = _bookService.GetBookList(
+                searchString: null,
+                genres: genreViewModels,
+                userID: null
+            );
+
+            // Get all genre names
+            var allGenres = allGenreItems
+                .Select(g => g.Text)
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
+
+            ViewBag.AllGenres = allGenres;
+            ViewBag.SelectedGenres = selectedGenres;
+
+            return View(books);
         }
 
 
-        [HttpGet]
-        public IActionResult GenreBooksPartial(string selectedGenres = "")
+        [HttpPost]
+        public IActionResult LoadBooksByGenres([FromBody] List<string> genres)
         {
-            try
-            {
-                var selectedGenreNames = selectedGenres?
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(g => g.Trim())
-                    .ToList() ?? new List<string>();
+            genres ??= new List<string>();
 
-                var matchingGenres = _genreService.GetGenreList("")
-                    .Where(g => selectedGenreNames.Contains(g.Name, StringComparer.OrdinalIgnoreCase))
-                    .Select(g => new GenreViewModel { GenreId = g.GenreId, Name = g.Name })
-                    .ToList();
+            // Lookup all genres
+            var allGenreItems = _genreService.GetAllGenreSelectListItems(null);
 
-                var books = _bookService.GetBookList(
-                    searchString: "",
-                    genres: matchingGenres,
-                    userID: "",
-                    sortType: BookSortType.Latest
-                );
+            var selectedGenreIds = allGenreItems
+                .Where(g => genres.Contains(g.Text))
+                .Select(g => g.Value)
+                .ToList();
 
-                return PartialView("_GenreBookListPartial", books);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading genre books partial");
-                return PartialView("_ErrorPartial", "Error loading books");
-            }
+            var genreViewModels = selectedGenreIds
+                .Select(id => new GenreViewModel { GenreId = id })
+                .ToList();
+
+            var books = _bookService.GetBookList(
+                searchString: null,
+                genres: genreViewModels,
+                userID: null
+            );
+
+            return PartialView("_BookGridPartial", books);
         }
+
+
 
         [HttpGet("Dashboard/BookDetailScreen/{id}")]
         [AllowAnonymous]
