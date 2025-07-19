@@ -16,6 +16,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Timers;
+using X.PagedList;
+using X.PagedList.Extensions;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -115,7 +118,8 @@ namespace Readiculous.Services.Services
 
             if (model.CoverImage != null && model.CoverImage.Length > 0)
             {
-                await DeleteCoverImage(book.CoverImageUrl);
+                if(!string.IsNullOrEmpty(book.CoverImageUrl))
+                    await DeleteCoverImage(book.CoverImageUrl);
 
                 book.CoverImageUrl = await UploadCoverImage(model.CoverImage, book.BookId);
             }
@@ -191,7 +195,26 @@ namespace Readiculous.Services.Services
             else
             {
                 return ListBooksByTitleAndGenres(bookTitle: searchString, genreViewModels: genres, userID: userID, sortType: sortType, genreFilter: genreFilter);
+            }
+        }
 
+        public IPagedList<BookListItemViewModel> GetPaginatedBookList(string searchString, List<GenreViewModel> genres, string userId, int pageNumber, int pageSize = 10, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        {
+            if (string.IsNullOrEmpty(searchString) && (genres == null || !genres.Any()) && sortType == BookSortType.Latest)
+            {
+                return ListAllPaginatedActiveBooks(userId, pageNumber, pageSize);
+            }
+            else if (string.IsNullOrEmpty(searchString))
+            {
+                return ListPaginatedBooksByGenreList(genreViewModels: genres, userId: userId, pageNumber: pageNumber, pageSize: pageSize, sortType: sortType, genreFilter: genreFilter);
+            }
+            else if (genres == null || !genres.Any())
+            {
+                return ListPaginatedBooksByTitle(bookTitle: searchString, userId: userId, pageNumber, pageSize, sortType: sortType, genreFilter: genreFilter);
+            }
+            else
+            {
+                return ListPaginatedBooksByTitleAndGenres(bookTitle: searchString, genreViewModels: genres, userId: userId, pageNumber, pageSize, sortType: sortType, genreFilter: genreFilter);
             }
         }
 
@@ -266,14 +289,71 @@ namespace Readiculous.Services.Services
             return book.Title;
         }
 
+        // Favorite Book Methods
+        public void AddBookToFavorites(string bookId, string userId)
+        {
+            if (!_bookRepository.BookIdExists(bookId))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.BookNotExists);
+            }
+            if (_favoriteBookRepository.FavoriteBookExists(bookId, userId))
+            {
+                throw new DuplicateNameException(Resources.Messages.Errors.FavoriteBookExists);
+            }
+
+            var favoriteBook = new FavoriteBook
+            {
+                BookId = bookId,
+                UserId = userId,
+                CreatedTime = DateTime.UtcNow
+            };
+
+            _favoriteBookRepository.AddFavoriteBook(favoriteBook);
+        }
+        public void RemoveBookFromFavorites(string bookId, string userId)
+        {
+            if (!_bookRepository.BookIdExists(bookId))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.BookNotExists);
+            }
+            if (!_favoriteBookRepository.FavoriteBookExists(bookId, userId))
+            {
+                throw new KeyNotFoundException(Resources.Messages.Errors.FavoritedBookNotExists);
+            }
+
+            var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
+
+            _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
+        }
+
+        // Dashboard Book Retrieval Functions
+        public UserDashboardViewModel GetDashboardViewModel()
+        {
+            UserDashboardViewModel dashboardViewModel = new();
+            DateTime twoWeeksAgo = DateTime.UtcNow.AddDays(-14);
+
+            var allBooks = _bookRepository.GetAllActiveBooks();
+            var booksMapModels = _mapper.Map<List<BookListItemViewModel>>(allBooks);
+
+            dashboardViewModel.TopBooks = booksMapModels
+                .Where(b => b.CreatedTime >= twoWeeksAgo)
+                .OrderByDescending(b => b.CreatedTime)
+                .Take(5)
+                .ToList();
+            dashboardViewModel.NewBooks = booksMapModels
+                .OrderByDescending(b => b.AverageRating)
+                .Take(5)
+                .ToList();
+
+            return dashboardViewModel;
+        }
+
         // Private Helper Methods for Book Listing
         private List<BookListItemViewModel> ListAllActiveBooks(string userID)
         {
             var allActiveBooks = _bookRepository.GetAllActiveBooks();
             var bookIds = allActiveBooks.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
-            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
-            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(allActiveBooks);
@@ -284,10 +364,6 @@ namespace Readiculous.Services.Services
                     .Where(s => s.BookId == model.BookId)
                     .Select(s=>s.Genre.Name)
                     .ToList();
-                model.IsFavorite = favoriteBooksByUser
-                    .Any(a => a.BookId == model.BookId);
-                model.IsReviewed = reviewsByUser
-                    .Any(a => a.BookId == model.BookId);
 
                 var bookReviews = allReviews
                     .Where(r =>  r.BookId == model.BookId)
@@ -297,14 +373,37 @@ namespace Readiculous.Services.Services
                     : 0);
             }
 
-            var result = bookMapModels.OrderByDescending(o => o.CreatedTime).ToList(); 
+            var result = bookMapModels.OrderByDescending(o => o.UpdatedTime).ToList();
             return result;
         }
-        private List<BookListItemViewModel> ListBooksByTitle(string bookTitle, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        private IPagedList<BookListItemViewModel> ListAllPaginatedActiveBooks(string userId, int pageNumber, int pageSize)
+        {
+            IQueryable<Book> queryableBookListItems;
+            int bookCount;
+
+            (queryableBookListItems, bookCount) = _bookRepository.GetAllPaginatedBooks(pageNumber, pageSize);
+            var listBookListItems = queryableBookListItems.ToList();
+            var bookIds = listBookListItems.Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
+            var allReviews = _reviewRepository.GetAllReviews();
+
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
+            PopulateListItem(bookMapModels, genres, allReviews);
+
+            var result = bookMapModels
+                .OrderByDescending(o => o.CreatedTime);
+            return new StaticPagedList<BookListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                bookCount
+                );
+        }
+        private List<BookListItemViewModel> ListBooksByTitle(string bookTitle, string userID, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
             var booksByTitle = _bookRepository.GetBooksByTitle(bookTitle);
             var bookIds = booksByTitle.Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -316,11 +415,6 @@ namespace Readiculous.Services.Services
                     .Where(s => s.BookId == model.BookId)
                     .Select(s => s.Genre.Name)
                     .ToList();
-                model.IsFavorite = favoriteBooksByUser
-                    .Any(a => a.BookId == model.BookId);
-                model.IsReviewed = reviewsByUser
-                    .Any(a => a.BookId == model.BookId);
-
 
                 var bookReviews = allReviews
                     .Where(r => r.BookId == model.BookId)
@@ -330,17 +424,41 @@ namespace Readiculous.Services.Services
                     : 0);
             }
             return SortBook(bookMapModels, sortType, genreFilter)
-
                 .ToList();
         }
-        private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+
+        private IPagedList<BookListItemViewModel> ListPaginatedBooksByTitle(string bookTitle, string userId, int pageNumber, int pageSize = 10, BookSortType sortType = BookSortType.Latest, string?  genreFilter = null)
+        {
+            IQueryable<Book> queryableBookListItems;
+            int bookCount;
+
+            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitle(bookTitle, pageNumber, pageSize, sortType);
+            var listBookListItems = queryableBookListItems.ToList();
+            var bookIds = listBookListItems.Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
+            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userId);
+            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
+            var allReviews = _reviewRepository.GetAllReviews();
+
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
+            PopulateListItem(bookMapModels, genres, allReviews);
+
+            return new StaticPagedList<BookListItemViewModel>(
+                bookMapModels.ToList(),
+                pageNumber,
+                pageSize,
+                bookCount
+                );
+        }
+        
+        private List<BookListItemViewModel> ListBooksByGenreList(List<GenreViewModel> genreViewModels, string userID, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
             var bookGenres = _mapper.Map<List<Genre>>(genreViewModels);
 
             var booksByGenre = _bookRepository.GetBooksByGenreList(bookGenres);
             var bookIds = booksByGenre
                 .Select(s => s.BookId).ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
             var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
             var allReviews = _reviewRepository.GetAllReviews();
@@ -353,11 +471,6 @@ namespace Readiculous.Services.Services
                     .Where(s => s.BookId == model.BookId)
                     .Select(s => s.Genre.Name)
                     .ToList();
-                model.IsFavorite = favoriteBooksByUser
-                    .Any(a => a.BookId == model.BookId);
-                model.IsReviewed = allReviews
-                    .Where(r => r.UserId == userID)
-                    .Any(r => r.BookId == model.BookId);
 
                 var bookReviews = allReviews
                     .Where(r => r.BookId == model.BookId)
@@ -371,7 +484,30 @@ namespace Readiculous.Services.Services
 
                 .ToList();
         }
-        private List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, string userID, BookSearchType searchType = BookSearchType.AllBooks, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+
+        private IPagedList<BookListItemViewModel> ListPaginatedBooksByGenreList(List<GenreViewModel> genreViewModels, string userId, int pageNumber, int pageSize = 10, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        {
+            var bookGenres = _mapper.Map<List<Genre>>(genreViewModels);
+            IQueryable<Book> queryableBookListItems;
+            int bookCount;
+
+            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByGenreList(bookGenres, pageNumber, pageSize, sortType);
+            var listBookListItems = queryableBookListItems.ToList();
+            var bookIds = listBookListItems.Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
+            var allReviews = _reviewRepository.GetAllReviews();
+
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
+            PopulateListItem(bookMapModels, genres, allReviews);
+            
+            return new StaticPagedList<BookListItemViewModel>(
+                bookMapModels.ToList(),
+                pageNumber,
+                pageSize,
+                bookCount
+                );
+        }
+        private List<BookListItemViewModel> ListBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, string userID, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
             var bookGenres = _mapper.Map<List<Genre>>(genreViewModels);
             
@@ -379,9 +515,7 @@ namespace Readiculous.Services.Services
             var bookIds = booksByTitleAndGenre
                 .Select(book => book.BookId)
                 .ToList();
-            var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
-            var favoriteBooksByUser = _favoriteBookRepository.GetFavoriteBooksByUserId(userID);
-            var reviewsByUser = _reviewRepository.GetReviewsByUserId(userID);
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
             var allReviews = _reviewRepository.GetAllReviews();
 
             var bookViewModels = _mapper.Map<List<BookListItemViewModel>>(booksByTitleAndGenre);
@@ -392,10 +526,6 @@ namespace Readiculous.Services.Services
                     .Where(s => s.BookId == model.BookId)
                     .Select(s => s.Genre.Name)
                     .ToList();
-                model.IsFavorite = favoriteBooksByUser
-                    .Any(a => a.BookId == model.BookId);
-                model.IsReviewed = reviewsByUser
-                    .Any(a => a.BookId == model.BookId);
 
                 var bookReviews = allReviews
                     .Where(r => r.BookId == model.BookId)
@@ -409,9 +539,32 @@ namespace Readiculous.Services.Services
 
                 .ToList();
         }
+        private IPagedList<BookListItemViewModel> ListPaginatedBooksByTitleAndGenres(string bookTitle, List<GenreViewModel> genreViewModels, string userId, int pageNumber, int pageSize, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
+        {
+
+            var bookGenres = _mapper.Map<List<Genre>>(genreViewModels);
+            IQueryable<Book> queryableBookListItems;
+            int bookCount;
+
+            (queryableBookListItems, bookCount) = _bookRepository.GetPaginatedBooksByTitleAndGenres(bookTitle, bookGenres, pageNumber, pageSize, sortType);
+            var listBookListItems = queryableBookListItems.ToList();
+            var bookIds = listBookListItems.Select(s => s.BookId).ToList();
+            var genres = _genreRepository.GetAllGenreAssignmentsByBookIds(bookIds);
+            var allReviews = _reviewRepository.GetAllReviews();
+
+            var bookMapModels = _mapper.Map<List<BookListItemViewModel>>(listBookListItems);
+            PopulateListItem(bookMapModels, genres, allReviews);
+
+            return new StaticPagedList<BookListItemViewModel>(
+                bookMapModels.ToList(),
+                pageNumber,
+                pageSize,
+                bookCount
+                );
+        }
 
         // Search And Sort Book Helper Function
-        private IEnumerable<BookListItemViewModel> SortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType, string? genreFilter)
+        private IEnumerable<BookListItemViewModel> SortBook(IEnumerable<BookListItemViewModel> bookViewModels, BookSortType sortType = BookSortType.Latest, string? genreFilter = null)
         {
             if (!string.IsNullOrWhiteSpace(genreFilter))
             {
@@ -441,42 +594,7 @@ namespace Readiculous.Services.Services
             };
         }
 
-        // Favorite Book Methods
-        public void AddBookToFavorites(string bookId, string userId)
-        {
-            if (!_bookRepository.BookIdExists(bookId))
-            {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
-            }
-            if (_favoriteBookRepository.FavoriteBookExists(bookId, userId))
-            {
-                throw new InvalidOperationException(Resources.Messages.Errors.FavoriteBookExists);
-            }
-
-            var favoriteBook = new FavoriteBook
-            {
-                BookId = bookId,
-                UserId = userId,
-                CreatedTime = DateTime.UtcNow
-            };
-
-            _favoriteBookRepository.AddFavoriteBook(favoriteBook);
-        }
-        public void RemoveBookFromFavorites(string bookId, string userId)
-        {
-            if (!_bookRepository.BookIdExists(bookId))
-            {
-                throw new InvalidOperationException(Resources.Messages.Errors.BookNotExists);
-            }
-            if (!_favoriteBookRepository.FavoriteBookExists(bookId, userId))
-            {
-                throw new InvalidOperationException(Resources.Messages.Errors.FavoritedBookNotExists);
-            }
-
-            var favoriteBook = _favoriteBookRepository.GetFavoriteBookByBookIdAndUserId(bookId, userId);
-
-            _favoriteBookRepository.RemoveFavoriteBook(favoriteBook);
-        }
+        // Upload and Delete CoverImage Helper Functions
         private async Task DeleteCoverImage(string pictureUrl)
         {
             var uri = new Uri(pictureUrl);
@@ -520,6 +638,22 @@ namespace Readiculous.Services.Services
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
 
+        private void PopulateListItem(List<BookListItemViewModel> bookMapModels, IQueryable<BookGenreAssignment> genres, IQueryable<Review> allReviews)
+        {
+            foreach (var model in bookMapModels)
+            {
+                model.Genres = genres
+                    .Where(s => s.BookId == model.BookId)
+                    .Select(s => s.Genre.Name)
+                    .ToList();
 
+                var bookReviews = allReviews
+                    .Where(r => r.BookId == model.BookId)
+                    .ToList();
+                model.AverageRating = (decimal)(bookReviews.Count > 0
+                    ? bookReviews.Average(r => r.Rating)
+                    : 0);
+            }
+        }
     }
 }

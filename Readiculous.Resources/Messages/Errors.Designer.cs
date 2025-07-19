@@ -88,6 +88,15 @@ namespace Readiculous.Resources.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot change role of signed-in user!.
+        /// </summary>
+        public static string CannotChangeRole {
+            get {
+                return ResourceManager.GetString("CannotChangeRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email already exists!.
         /// </summary>
         public static string EmailExists {

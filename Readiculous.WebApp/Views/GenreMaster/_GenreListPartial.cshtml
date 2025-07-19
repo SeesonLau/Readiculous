@@ -6,12 +6,8 @@
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Name)</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Description)</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().BookCount)</th>
-            <th colspan="2" class="text-center align-middle">Modified</th>
+            <th rowspan="2" class="text-center align-middle">Latest Update</th>
             <th rowspan="2" class="text-center align-middle">Actions</th>
-        </tr>
-        <tr class="text-center">
-            <th class="text-center">Date</th>
-            <th class="text-center">Time</th>
         </tr>
     </thead>
     <tbody>
@@ -25,8 +21,7 @@
                     <td class="text-center align-middle">
                         <span class="badge bg-secondary">@item.BookCount</span>
                     </td>
-                    <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
-                    <td class="text-center align-middle">@item.UpdatedTime.ToString("h:mm tt")</td>
+                    <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MM dd") | @item.UpdatedTime.ToString("h:mm tt")</td>
                     <td class="text-center align-middle">
                         <div class="action-buttons">
                             <a asp-action="GenreViewPage" asp-route-id="@item.GenreId"

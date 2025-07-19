@@ -27,7 +27,7 @@ namespace Readiculous.WebApp.Controllers
             _userService = userService;
         }
 
-        public IActionResult Index(string searchString, RoleType? roleType, UserSortType searchType = UserSortType.Latest)
+        public IActionResult Index(string searchString, RoleType? roleType, int pageNumber = 1, int pageSize = 10, UserSortType searchType = UserSortType.Latest)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentRoleType"] = roleType.HasValue ? roleType.Value : string.Empty;
@@ -36,9 +36,9 @@ namespace Readiculous.WebApp.Controllers
             ViewBag.RoleTypes = _userService.GetUserRoles();
             ViewBag.UserSearchTypes = _userService.GetUserSortTypes(searchType);
 
-            List<UserListItemViewModel> users = _userService.GetUserList(role: roleType, username: searchString, sortType: searchType);
+            var pagedUsers = _userService.GetPaginatedUserList(role: roleType, username: searchString, pageNumber: pageNumber, pageSize: pageSize, sortType: searchType);
 
-            return View(users);
+            return View(pagedUsers);
         }
 
         [HttpGet]

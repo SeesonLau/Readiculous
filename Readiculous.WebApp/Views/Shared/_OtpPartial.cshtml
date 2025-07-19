@@ -1,0 +1,20 @@
+@model Readiculous.Services.ServiceModels.OtpVerificationModel
+<div>
+    <div class="login-title">Enter OTP</div>
+    <div class="mb-3">We sent a code to <span>@Model.Email</span></div>
+    <form method="post" id="otpForm" data-flow="@ViewBag.OtpFlow">
+        @Html.AntiForgeryToken()
+        <div class="otp-inputs mb-3" style="display:flex;gap:0.7rem;justify-content:center;">
+            @for (int i = 0; i < 6; i++)
+            {
+                <input type="password" maxlength="1" class="otp-input" name="OtpBox" inputmode="numeric" pattern="[0-9]*" autocomplete="off" style="width:44px;height:54px;border-radius:10px;border:none;background:#f7e6f7;text-align:center;font-size:2rem;color:#39243b;font-weight:700;outline:none;box-shadow:0 1px 2px rgba(0,0,0,0.04);" />
+            }
+        </div>
+        <input type="hidden" asp-for="Email" />
+        <input type="hidden" asp-for="Otp" id="OtpHidden" />
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 0.4rem;">
+            <button class="btn login-btn" type="submit">Continue</button>
+            <a href="/" class="btn login-btn signup-btn" id="show-login" style="font-weight: bold; background: #fff; color: #b089a5; border: 2px solid #b089a5;">Back</a>
+        </div>
+    </form>
+</div> 

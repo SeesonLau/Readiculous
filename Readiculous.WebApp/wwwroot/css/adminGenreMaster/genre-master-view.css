@@ -100,12 +100,16 @@
 }
 
 .genre-list-container {
-    max-height: 340px;
+    max-height: 380px;
     overflow-y: auto;
     padding-right: 0.25rem;
     scrollbar-width: thin;
     scrollbar-color: var(--color-secondary) var(--color-background);
-
+    background: var(--color-modal);
+    border-radius: 0.75rem;
+    padding: 0.5rem; /* Adds internal spacing all around */
+    padding-right: 0.25rem; /* Keeps your original custom scrollbar spacing */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .genre-list {
@@ -265,6 +269,7 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    background-color: var(--color-background-gradient);
 }
 
 .books-grid {

@@ -2,7 +2,7 @@
 @using System;
 
 <div class="user-view-container">
-    <h4 class="user-view-title">Profile</h4>
+    <h4 class="user-view-title">User Profile</h4>
     <hr class="user-view-divider" />
 
     <div class="user-view-profile-section">
@@ -23,11 +23,6 @@
         <div class="user-view-details">
             <dl class="user-view-details-list">
                 <div class="user-view-detail-item">
-                    <dt>User ID</dt>
-                    <dd>@Html.DisplayFor(model => model.UserId)</dd>
-                </div>
-
-                <div class="user-view-detail-item">
                     <dt>Username</dt>
                     <dd>@Html.DisplayFor(model => model.UserName)</dd>
                 </div>
@@ -39,7 +34,9 @@
 
                 <div class="user-view-detail-item">
                     <dt>User Role</dt>
-                    <dd>@Html.DisplayFor(model => model.Role)</dd>
+                    <dd>
+                        <span class="role-badge @Model.Role.ToLower()">@Html.DisplayFor(model => model.Role)</span>
+                    </dd>
                 </div>
             </dl>
         </div>
@@ -65,42 +62,63 @@
                     <dt>Last Modified On</dt>
                     <dd>@Html.DisplayFor(model => model.UpdatedTime)</dd>
                 </div>
-     
             </dl>
         </div>
 
-        <!-- Placeholder -->
         <div class="user-view-activity-group">
-            <h5 class="user-view-meta-title">Activity Summary</h5>
+            <h5 class="user-view-meta-title">Reading Activity</h5>
             <div class="user-view-activity-stats">
                 <div class="activity-stat">
                     <div class="stat-value">@Model.UserReviewModels.Count</div>
-                    <div class="stat-label">Reviews Written</div>
+                    <div class="stat-label">Total Reviews</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
                 </div>
                 <div class="activity-stat">
                     <div class="stat-value">@Model.FavoriteBookModels.Count</div>
-                    <div class="stat-label">Book Favorites</div>
+                    <div class="stat-label">Favorites</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
                 </div>
                 <div class="activity-stat">
                     <div class="stat-value">@Model.AverageRating</div>
-                    <div class="stat-label">Average Rating</div>
+                    <div class="stat-label">Avg Rating</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
                 </div>
-
-
                 <div class="activity-stat">
-                    <div class="stat-value">@string.Join(", ", Model.TopGenres)</div>
-                    <div class="stat-label">Top Genre</div>
+                    <div class="stat-value">
+                        @if (Model.TopGenres.Any())
+                        {
+                            foreach (var genre in Model.TopGenres)
+                            {
+                                <span class="genre-badge">@genre</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="no-genre">None</span>
+                        }
+                    </div>
+                    <div class="stat-label">Preferred Genres</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
 <div class="user-view-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="fas fa-times"></i> Close
+    </button>
     <button type="button" class="btn btn-primary edit-user" data-userid="@Model.UserId">
-        <i class="fas fa-pen"></i> Edit
+        <i class="fas fa-user-edit"></i> Edit Profile
     </button>
 </div>
 

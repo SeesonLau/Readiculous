@@ -16,22 +16,11 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Password" class="form-label">Password</label>
-        <input asp-for="Password"
-               class="form-control input-greyed-out"
-               type="text"
-               placeholder="A temporary password will be sent to the user’s email address."
-               id="addPassword"
-               readonly />
-        
-    </div>
-
-    <div class="form-group">
         <label asp-for="Role" class="form-label">Role</label>
         <select asp-for="Role" class="form-select" required>
             <option value="" selected disabled>-- Select Role --</option>
-            <option value="0">Admin</option>
-            <option value="1">Reviewer</option>
+            <option value="0">Reviewer</option>
+            <option value="1">Admin</option>
         </select>
         <span asp-validation-for="Role" class="text-danger"></span>
     </div>
@@ -45,9 +34,12 @@
     </div>
 
     <div class="modal-footer">
+        <div class="text-muted small mt-2">A temporary password will be sent to the user's email address.</div>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-primary">Save</button>
     </div>
 </form>
+
+
 
 <script src="~/js/adminUserMaster/usermasterModal.js" asp-append-version="true"></script>

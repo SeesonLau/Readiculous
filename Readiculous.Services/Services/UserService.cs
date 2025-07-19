@@ -2,11 +2,10 @@
 using AutoMapper.Configuration.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Readiculous.Resources.Messages;
 using Readiculous.Data.Interfaces;
 using Readiculous.Data.Models;
-using Readiculous.Data.Repositories;
 using Readiculous.Resources.Constants;
+using Readiculous.Resources.Messages;
 using Readiculous.Services.Interfaces;
 using Readiculous.Services.Manager;
 using Readiculous.Services.ServiceModels;
@@ -19,6 +18,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using X.PagedList;
+using ZXing;
 using static Readiculous.Resources.Constants.Enums;
 
 namespace Readiculous.Services.Services
@@ -106,18 +107,8 @@ namespace Readiculous.Services.Services
                 user.ProfilePictureUrl = await UploadProfilePicture(model.ProfilePicture, user.UserId);
             }
 
-            // If the creator is not the same as the new user (admin creation), generate a temp password
-            /*bool isAdminCreated = creatorId != model.UserId;
-            string tempPassword = null;
-            if (isAdminCreated)
-            {
-                tempPassword = OtpManager.GenerateTempPassword();
-                user.Password = PasswordManager.EncryptPassword(tempPassword);
-            }
-            else
-            {
-                user.Password = PasswordManager.EncryptPassword(model.Password);
-            }*/
+            // Encrypt the password before saving
+            user.Password = PasswordManager.EncryptPassword(model.Password);
 
             //Add User
             _userRepository.AddUser(user, creatorId);
@@ -146,6 +137,11 @@ namespace Readiculous.Services.Services
             }    
 
             var user = _userRepository.GetUserById(model.UserId);
+
+            if(user.Role != model.Role)
+            {
+                throw new InvalidOperationException(Errors.CannotChangeRole);
+            }
 
             // Map properties for Updated Time, and UpdatedBy
 
@@ -201,6 +197,7 @@ namespace Readiculous.Services.Services
             var userViewModel = new UserViewModel();
 
             _mapper.Map(editProfileViewModel, userViewModel);
+            userViewModel.AccessStatus = user.AccessStatus;
             if (string.IsNullOrEmpty(editProfileViewModel.NewPassword))
             {
                 userViewModel.Password = PasswordManager.DecryptPassword(user.Password);
@@ -259,6 +256,25 @@ namespace Readiculous.Services.Services
             return userViewModels;
 
         }
+        public IPagedList<UserListItemViewModel> GetPaginatedUserList(RoleType? role, string username, int pageNumber, int pageSize = 10, UserSortType sortType = UserSortType.Latest)
+        {
+            if (!role.HasValue && string.IsNullOrEmpty(username) && sortType == UserSortType.Latest)
+            {
+                return GetAllPaginatedActiveUsers(pageNumber, pageSize);
+            }
+            else if (!role.HasValue)
+            {
+                return GetPaginatedUsersByUsername(username, pageNumber, pageSize, sortType);
+            }
+            else if (string.IsNullOrEmpty(username))
+            {
+                return GetPaginatedUsersByRoleAndUsername(role.Value, string.Empty, pageNumber, pageSize, sortType);
+            }
+            else
+            {
+                return GetPaginatedUsersByRoleAndUsername(role.Value, username, pageNumber, pageSize, sortType);
+            }
+        }
 
         // Single User Retrieval Methods
         public UserViewModel GetUserEditById(string userId)
@@ -297,50 +313,25 @@ namespace Readiculous.Services.Services
         public UserDetailsViewModel GetUserDetailsById(string userId)
         {
             User user = _userRepository.GetUserWithNavigationPropertiesById(userId);
-
-            if (user != null)
-            {
-                UserDetailsViewModel userViewModel = new();
-
-                _mapper.Map(user, userViewModel);
-
-                var favoriteBooks = _favoriteBookRepository.GetFavoriteBooksByUserId(userId).ToList();
-
-                var bookIds = favoriteBooks
-                    .Select(fb => fb.BookId)
-                    .ToList();
-                var genres = _genreRepository.GetAllGenreAssignmentsByBookId(bookIds);
-                var favoriteBookMapModels = _mapper.Map<List<FavoriteBookModel>>(favoriteBooks);
-                foreach(var model in favoriteBookMapModels)
-                {
-                    model.BookGenres = genres
-                        .Where(g => g.BookId == model.BookId)
-                        .Select(g => g.Genre.Name)
-                        .ToList();
-                }
-
-                var reviewsByUser = _reviewRepository.GetReviewsByUserId(userId);
-                userViewModel.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(reviewsByUser);
-
-                userViewModel.TopGenres = userViewModel.FavoriteBookModels
-                    .SelectMany(b => b.BookGenres)
-                    .GroupBy(genre => genre)
-                    .Select(g => new { Genre = g.Key, Count = g.Count() })
-                    .GroupBy(g => g.Count)
-                    .OrderByDescending(g => g.Key)
-                    .FirstOrDefault()?
-                    .Select(g => g.Genre)
-                    .ToList() ?? new List<string>() { "No genres available" };
-
-                userViewModel.AverageRating = userViewModel.UserReviewModels.Count > 0 ? Math.Round((decimal)userViewModel.UserReviewModels.Select(u => u.Rating).Average(), 2): 0;
-
-
-                return userViewModel;
-            }
-            else
-            {
+            if (user == null)
                 throw new KeyNotFoundException(Errors.UserNotFound);
-            }
+
+            UserDetailsViewModel userDetails = new();
+            _mapper.Map(user, userDetails);
+
+            userDetails.FavoriteBookModels = _mapper.Map<List<FavoriteBookModel>>(user.UserFavoriteBooks);
+            userDetails.UserReviewModels = _mapper.Map<List<ReviewListItemViewModel>>(user.UserReviews);
+
+            var bookIds = userDetails.FavoriteBookModels
+                .Select(x => x.BookId)
+                .ToList();
+            userDetails.TopGenres = _genreRepository.GetTopGenresFromBookIds(bookIds);
+
+            userDetails.AverageRating = userDetails.UserReviewModels.Count > 0
+                ? Math.Round(userDetails.UserReviewModels.Average(r => r.Rating), 2)
+                : 0;
+
+            return userDetails;
         }
         public User GetUserById(string userId)
         {
@@ -401,6 +392,25 @@ namespace Readiculous.Services.Services
 
             return result;
         }
+        private IPagedList<UserListItemViewModel> GetAllPaginatedActiveUsers(int pageNumber, int pageSize, UserSortType sortType = UserSortType.Latest)
+        {
+            IQueryable<User> queryableUserListItems;
+            int userCount;
+
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(string.Empty, pageNumber, pageSize, sortType);
+            var listUserListItems = queryableUserListItems.ToList();
+
+            var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
+            var result = userMapModels
+                .OrderByDescending(u => u.UpdatedTime);
+
+            return new StaticPagedList<UserListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                userCount);
+        }
+
         private List<UserListItemViewModel> GetUsersByUsername(string username, UserSortType sortType)
         {
             var usersByUsername = _userRepository.GetUsersByUsername(username.Trim());
@@ -415,6 +425,25 @@ namespace Readiculous.Services.Services
                 _ => result.OrderByDescending(u => u.UpdatedTime).ToList()
             };
         }
+
+        private IPagedList<UserListItemViewModel> GetPaginatedUsersByUsername(string username, int pageNumber, int pageSize, UserSortType sortType = UserSortType.Latest)
+        {
+            IQueryable<User> queryableUserListItems;
+            int userCount;
+
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByUsername(username, pageNumber, pageSize, sortType);
+            var listUserListItems = queryableUserListItems.ToList();
+
+            var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
+            var result = SortUsers(userMapModels, sortType);
+
+            return new StaticPagedList<UserListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                userCount);
+        }
+
         private List<UserListItemViewModel> GetUsersByRoleAndUsername(RoleType role, string username, UserSortType searchType)
         {
             var usersByRoleAndUsername = _userRepository.GetUsersByRoleAndUsername(role, username.Trim());
@@ -429,6 +458,25 @@ namespace Readiculous.Services.Services
                 _ => result.OrderByDescending(u => u.UpdatedTime).ToList(),
             };
         }
+
+        private IPagedList<UserListItemViewModel> GetPaginatedUsersByRoleAndUsername(RoleType role, string username, int pageNumber, int pageSize = 10, UserSortType sortType = UserSortType.Latest)
+        {
+            IQueryable<User> queryableUserListItems;
+            int userCount;
+
+            (queryableUserListItems, userCount) = _userRepository.GetPaginatedUsersByRoleAndUsername(role, username, pageNumber, pageSize, sortType);
+            var listUserListItems = queryableUserListItems.ToList();
+
+            var userMapModels = _mapper.Map<List<UserListItemViewModel>>(listUserListItems);
+            var result = SortUsers(userMapModels, sortType);
+
+            return new StaticPagedList<UserListItemViewModel>(
+                result.ToList(),
+                pageNumber,
+                pageSize,
+                userCount);
+        }
+
         // Helper methods for profile picture management
         private async Task DeleteProfilePicture(string pictureUrl)
         {
@@ -472,6 +520,18 @@ namespace Readiculous.Services.Services
 
             throw new InvalidOperationException(Resources.Messages.Errors.ImageFailedToUpload);
         }
+        private IEnumerable<UserListItemViewModel> SortUsers(IEnumerable<UserListItemViewModel> userViewModels, UserSortType sortType)
+        {
+            return sortType switch
+            {
+                UserSortType.UsernameAscending => userViewModels.OrderBy(u => u.UserName),
+                UserSortType.UsernameDescending => userViewModels.OrderByDescending(u => u.UserName),
+                UserSortType.Oldest => userViewModels.OrderBy(u => u.UpdatedTime),
+                UserSortType.Latest => userViewModels.OrderByDescending(u => u.UpdatedTime),
+                _ => userViewModels.OrderByDescending(u => u.UpdatedTime)
+            };
+        }
+
         // OTP Methods
         public async Task<bool> SendOtpForRegistrationAsync(string email)
         {
@@ -480,7 +540,6 @@ namespace Readiculous.Services.Services
                 // Check if email already exists
                 if (_userRepository.EmailExists(email.Trim(), string.Empty))
                 {
-                    return false;
                     return false;
                 }
 
@@ -608,6 +667,11 @@ namespace Readiculous.Services.Services
             {
                 return false;
             }
+        }
+
+        public bool EmailExists(string email)
+        {
+            return _userRepository.EmailExists(email.Trim(), string.Empty);
         }
 
     }

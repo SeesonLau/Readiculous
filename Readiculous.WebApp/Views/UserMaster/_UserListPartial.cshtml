@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Readiculous.Services.ServiceModels.UserListItemViewModel>
+﻿@using X.PagedList
+@model X.PagedList.IPagedList<Readiculous.Services.ServiceModels.UserListItemViewModel>
 
 <table class="user-table">
     <thead>
@@ -7,13 +8,10 @@
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().UserName)</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Email)</th>
             <th rowspan="2" class="text-center align-middle">@Html.DisplayNameFor(model => model.First().Role)</th>
-            <th colspan="2" class="text-center align-middle">Modified</th>
+            <th rowspan="2" class="text-center align-middle">Latest Update</th>
             <th rowspan="2" class="text-center align-middle">Actions</th>
         </tr>
-        <tr class="text-center">
-            <th class="text-center">Date</th>
-            <th class="text-center">Time</th>
-        </tr>
+        
     </thead>
     <tbody>
         @if (Model.Any())
@@ -28,14 +26,16 @@
                         }
                         else
                         {
-                            <div class="profile-picture-placeholder">No Image</div>
+                            <div class="profile-picture-placeholder">
+                                <i class="bi bi-person-fill"></i> 
+                            </div>
                         }
                     </td>
                     <td class="align-middle">@item.UserName</td>
                     <td class="align-middle">@item.Email</td>
                     <td class="text-center align-middle">@item.Role</td>
-                    <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MMMM dd")</td>
-                    <td class="text-center align-middle">@item.UpdatedTime.ToString("h:mm tt")</td>
+                    <td class="text-center align-middle">@item.UpdatedTime.ToString("yyyy MM dd") | @item.UpdatedTime.ToString("h:mm tt")</td>
+         
                     <td class="text-center align-middle">
                         <div class="action-buttons">
                             <button type="button" class="btn-action btn-view view-user" data-userid="@item.UserId">

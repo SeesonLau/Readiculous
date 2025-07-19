@@ -1,0 +1,73 @@
+﻿@using Readiculous.Services.ServiceModels
+@model List<BookListItemViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Genres";
+    ViewBag.ShowReviewerNav = true;
+    var allGenres = ViewBag.AllGenres as List<string> ?? new List<string>();
+    var selectedGenres = ViewBag.SelectedGenres as List<string> ?? new List<string>();
+    var sortOptions = ViewBag.SortOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+    var title = selectedGenres.Count == 1 ? $"{selectedGenres[0]} Books" :
+                 selectedGenres.Count > 1 ? string.Join(", ", selectedGenres) + " Books" : "All Books";
+}
+
+<section class="container py-4 genre-main-container">
+    <div class="section-header d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title section-title-border mb-0">Explore by Genre</h2>
+    </div>
+
+    <form id="genreForm">
+        <input type="hidden" name="selectedGenres" id="selectedGenresInput" value="@string.Join(",", selectedGenres)" />
+
+        <div class="border rounded p-3 bg-light shadow-sm mb-4">
+            <div class="row align-items-center">
+                <!-- Genres Dropdown -->
+                <div class="col-md-6">
+                    <label class="fw-bold mb-2">Genres</label>
+                    <div class="position-relative">
+                        <button type="button" class="form-select" id="genreToggle">Select genres…</button>
+                        <div class="dropdown-menu p-3 mt-1 w-100" id="genreMenu">
+                            <div class="row">
+                                @foreach (var genre in allGenres)
+                                {
+                                    var isChecked = selectedGenres.Contains(genre);
+                                    <div class="col-6 col-sm-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input genre-checkbox" type="checkbox"
+                                                   id="chk_@genre" value="@genre" @(isChecked ? "checked" : "") />
+                                            <label class="form-check-label" for="chk_@genre">@genre</label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="col-md-4">
+                    <label class="fw-bold mb-2">Sort By</label>
+                    <select class="form-select" id="sortTypeSelect" name="sortType">
+                        @foreach (var opt in sortOptions)
+                        {
+                            <option value=@(opt.Selected ? "selected" : "")>@opt.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div id="bookResults">
+        @await Html.PartialAsync("_BookGridPartial", Model)
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/genre-screen.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/genre-screen.js" asp-append-version="true"></script>
+}

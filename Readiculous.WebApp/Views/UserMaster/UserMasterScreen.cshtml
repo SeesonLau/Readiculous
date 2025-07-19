@@ -1,4 +1,8 @@
-﻿@model UserMasterViewModel
+﻿@using X.PagedList
+@model IPagedList<Readiculous.Services.ServiceModels.UserListItemViewModel>
+
+
+
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using static Readiculous.Resources.Constants.Enums
 
@@ -56,17 +60,24 @@
     <div class="row mx-0">
         <div class="col px-0">
             <div id="userListContainer" class="user-table-container">
-                @await Html.PartialAsync("_UserListPartial", Model.Users)
+                @await Html.PartialAsync("_UserListPartial", Model)
             </div>
         </div>
     </div>
 
-    <div class="pagination-controls row mb-4 mx-0 align-items-center">
+    <div class="pagination-controls row mb-4 mx-0 justify-content-center">
         <div class="col-md-6 px-0">
-            @await Component.InvokeAsync("Pagination", Model.Pagination)
-        </div>
-        <div class="col-md-6 px-0 text-md-end">
-            @await Component.InvokeAsync("PageSize", new { currentPageSize = Model.Pagination.PageSize })
+            @await Component.InvokeAsync("Pagination", new {
+            currentPage = Model.PageNumber,
+                        totalPages = Model.PageCount,
+                        pageSize = Model.PageSize,
+                        totalItems = Model.TotalItemCount,
+                        action = ViewContext.RouteData.Values["action"]?.ToString(),
+                        controller = ViewContext.RouteData.Values["controller"]?.ToString(),
+                        searchString = ViewData["CurrentFilter"],
+                        roleType = ViewData["CurrentRoleType"],
+                        sortOrder = ViewData["CurrentSortOrder"]
+                        })
         </div>
     </div>
 </div>

@@ -211,6 +211,7 @@ const CommonMaster = (function () {
                 if (response.success) {
                     modal.modal('hide');
                     loadFilteredResults(); 
+                    toastr.success(response.message || 'Operation successful!');
                 } else {
                     const modalBody = form.closest('.modal-body').attr('id');
                     $(`#${modalBody}`).html(response);
@@ -238,7 +239,7 @@ const CommonMaster = (function () {
         `);
 
         $.post(settings.deleteUrl, { id: itemId })
-            .done(function () {
+            .done(function (response) {
                 window.location.reload();
             })
             .fail(function () {

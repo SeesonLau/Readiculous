@@ -1,8 +1,17 @@
-﻿@model IEnumerable<Readiculous.Services.ServiceModels.BookListItemViewModel>
+﻿@using X.PagedList
+@model X.PagedList.IPagedList<Readiculous.Services.ServiceModels.BookListItemViewModel>
 
 @{
     ViewData["Title"] = "Book Management";
     var selectedGenres = ViewBag.Genres as List<Readiculous.Services.ServiceModels.GenreViewModel>;
+
+    var queryParams = new
+    {
+        searchString = ViewData["CurrentFilter"],
+        sortOrder = ViewData["CurrentSortOrder"],
+        searchType = ViewData["CurrentSearchType"],
+        selectedGenreIds = ViewBag.SelectedGenreIds,
+    };
 }
 
 @section Styles {
@@ -73,7 +82,6 @@
             </div>
         </div>
     }
-
 </form>
 
 <!-- Books Table -->
@@ -81,11 +89,11 @@
     <thead class="table-dark">
         <tr>
             <th>Cover</th>
-            <th>@Html.DisplayNameFor(model => model.First().Title)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Author)</th>
+            <th>Title</th>
+            <th>Author</th>
             <th>Genres</th>
-            <th>@Html.DisplayNameFor(model => model.First().PublicationYear)</th>
-            <th>@Html.DisplayNameFor(model => model.First().AverageRating)</th>
+            <th>Publication Year</th>
+            <th>Rating</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -103,8 +111,8 @@
                         <span class="text-muted">No Image</span>
                     }
                 </td>
-                <td>@Html.DisplayFor(modelItem => item.Title)</td>
-                <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                <td>@item.Title</td>
+                <td>@item.Author</td>
                 <td>
                     @if (item.Genres.Any())
                     {
@@ -115,30 +123,12 @@
                         <span class="text-muted">No genres</span>
                     }
                 </td>
-                <td>@Html.DisplayFor(modelItem => item.PublicationYear)</td>
+                <td>@item.PublicationYear</td>
                 <td>@item.AverageRating.ToString("0.0")</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-info">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.BookId" class="btn btn-sm btn-info">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger">Delete</a>
-                    @if (item.IsFavorite)
-                    {
-                        <a asp-action="RemoveFromFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-outline-warning">Remove from Favorites</a>
-                    }
-                    else
-                    {
-                        <a asp-action="AddToFavorites" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Add to Favorites</a>
-                    }
-                    @if (!item.IsReviewed)
-                    {
-                        <a href="javascript:void(0)" class="btn btn-sm btn-warning"
-                            onclick="openAddReviewModal('@item.BookId', '@item.Title')">Add Review</a >
-                    }
-                    else
-                    {
-                        <a href="javascript:void(0)" class="btn btn-sm btn-warning"
-                           onclick="openEditReviewModal('@item.BookId')">Edit Review</a>
-                    }
                 </td>
             </tr>
         }
@@ -151,6 +141,36 @@
         }
     </tbody>
 </table>
+
+<!-- Pagination -->
+@if(Model.Count > 0)
+{
+    <div style="text-align: center;">
+        <div class="pagination" style="display: inline-block; margin-bottom:20px">
+                @if (Model.HasPreviousPage)
+                {
+                    <a href="@Url.Action("Index", new { searchString = ViewData["CurrentSearchString"], genres = ViewBag.SelectedGenreIds, sortOrder = ViewData["CurrentSortOrder"], pageNumber = Model.PageNumber - 1 })" style="text-decoration: none; margin: 0 5px;">&lt; Prev</a>
+                }
+                else
+                {
+                    <span class="disabled" style="margin: 0 5px; color: #ccc;">&lt; Prev</span>
+                }
+
+                <span style="margin: 0 5px;">Page @Model.PageNumber of @Model.PageCount</span>
+
+                @if (Model.HasNextPage)
+                {
+                    string type = ViewBag.Type;
+                <a href="@Url.Action("Index", new { searchString = ViewBag.SearchString, genres = ViewBag.SelectedGenreIds, sortOrder = ViewBag.BookSortTypes, pageNumber = Model.PageNumber + 1 })" style="text-decoration: none; margin: 0 5px;">Next &gt;</a>
+                }
+                else
+                {
+                    <span class="disabled" style="margin: 0 5px; color: #ccc;">Next &gt;</span>
+                }
+
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script src="~/js/review/review.js"></script>

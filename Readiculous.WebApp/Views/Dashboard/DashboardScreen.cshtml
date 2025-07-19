@@ -1,0 +1,140 @@
+﻿@model Readiculous.Services.ServiceModels.UserDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Dashboard";
+
+    var sortedNewBooks = Model.NewBooks?
+        .OrderByDescending(b => b.CreatedTime)
+        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+
+    var sortedTopBooks = Model.TopBooks?
+        .OrderByDescending(b => b.AverageRating)
+        .ToList() ?? new List<Readiculous.Services.ServiceModels.BookListItemViewModel>();
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <section class="mb-5">
+                <div class="section-header d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="section-title mb-0">NEW BOOKS</h2>
+                    <a class="view-more-link"
+                       href="@Url.Action("ViewNewBooks", "Dashboard")">View More</a>
+                </div>
+
+                <div class="section-box p-3">
+                    <div class="row g-4 justify-content-center">
+                        @if (sortedNewBooks.Any())
+                        {
+                            foreach (var book in sortedNewBooks)
+                            {
+                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                    
+                                    <div class="book-card h-100 text-center">
+                                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
+                                            <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                                 class="book-image mb-3" alt="@book.Title" />
+                                            <h6 class="book-title mb-1">@book.Title</h6>
+                                            <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                            <div class="book-rating mb-0">
+                                                @{
+                                                    int filledStars = (int)Math.Floor((double)book.AverageRating);
+                                                    bool hasRating = book.AverageRating > 0.0m;
+                                                }
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <span class="star-icon @(i <= filledStars && hasRating ? "star-filled" : "star-empty")">☆</span>
+                                                }
+                                                <span class="rating-value d-block @(hasRating ? "text-warning" : "text-secondary")">
+                                                    (@book.AverageRating.ToString("0.0"))
+                                                </span>
+                                                <span class="review-count small text-muted d-block">
+                                                    (@(book.TotalReviews) review@(book.TotalReviews == 1 ? "" : "s"))
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-center text-muted">No new books available.</p>
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <div class="section-header d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="section-title mb-0">TOP BOOKS</h2>
+                    <a class="view-more-link" href="@Url.Action("ViewTopBooks", "Dashboard")">View More</a>
+                </div>
+
+                <div class="section-box p-4">
+                    <div class="row g-4 justify-content-center">
+                        @if (sortedTopBooks.Any())
+                        {
+                            foreach (var book in sortedTopBooks)
+                            {
+                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                    <div class="book-card h-100 text-center">
+                                        <a href="@Url.Action("BookDetailScreen", "Dashboard", new { id = book.BookId })" class="text-decoration-none">
+                                            <img src="@(string.IsNullOrEmpty(book.CoverImageUrl) ? "/img/placeholder.png" : book.CoverImageUrl)"
+                                                 class="book-image mb-3" alt="@book.Title" />
+                                            <h6 class="book-title mb-1">@book.Title</h6>
+                                            <p class="book-author mb-1 small">@book.Author, @book.PublicationYear</p>
+                                            <div class="book-rating mb-0">
+                                                @{
+                                                    int filledStars = (int)Math.Floor((double)book.AverageRating);
+                                                    bool hasRating = book.AverageRating > 0.0m;
+                                                }
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <span class="star-icon @(i <= filledStars && hasRating ? "star-filled" : "star-empty")">☆</span>
+                                                }
+                                                <span class="rating-value d-block @(hasRating ? "text-warning" : "text-secondary")">
+                                                    (@book.AverageRating.ToString("0.0"))
+                                                </span>
+                                                <span class="review-count small text-muted d-block">
+                                                    (@(book.TotalReviews) review@(book.TotalReviews == 1 ? "" : "s"))
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-center text-muted">No top-rated books available.</p>
+                        }
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-3">
+            <div class="favorite-cat-icon text-center">
+                <img src="~/img/cats.png" alt="Cat Icon" />
+            </div>
+            <div class="favorite-books position-relative p-3 bg-white border">
+                <h5 class="text-center mt-2 mb-3">Your Favorite Books</h5>
+                <div class="favorite-book-list">
+                    <p class="text-center text-muted">You have no favorite books yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard-screen.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/headerSearch.js"></script>
+}
